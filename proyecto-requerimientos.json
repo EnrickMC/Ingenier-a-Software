@@ -1232,7 +1232,7 @@
                   "id": "RF-7",
                   "tipo": "RF",
                   "titulo": "Modificar productos del carrito de compra",
-                  "descripcion": "El sistema debe permitir al usuario modificar las especificaciones de personalización de los productos alojados dentro del carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario poder modificar cantidades de productos agregadas al carrito de compras",
                   "comentarios": "Recalcula de inmediato el subtotal del pedido.",
                   "dependencias": [
                     "RF-5"
@@ -1877,8 +1877,8 @@
                   "id": "RF-16",
                   "tipo": "RF",
                   "titulo": "Eliminación de Categorías",
-                  "descripcion": "El sistema debe de permitir el borrado de categorías de producto existentes. Verificando que no haya productos activos pertenecientes a la categoría.",
-                  "comentarios": "Solo la administradora debe de tener acceso a esta característica.",
+                  "descripcion": "El sistema debe de permitir el borrado de categorías de producto existentes.",
+                  "comentarios": "Elimina todos los productos asociados a la categoría automáticamente. Agregar advertencia antes de eliminar.",
                   "dependencias": [
                     "RF-13"
                   ],
@@ -2099,8 +2099,8 @@
                   "id": "RF-18",
                   "tipo": "RF",
                   "titulo": "Registro de producto",
-                  "descripcion": "El sistema debe de permitir dar de alta un producto como un pastel y sus características.",
-                  "comentarios": "Las características que deben de poder dar de alta son: tipo de pastel, sabor de pastel, relleno de pastel, decoraciones, tamaño y pisos. Además de agregar un nombre, una descripción y una imagen. Solo la administradora debe de tener acceso a esta característica.",
+                  "descripcion": "El sistema debe de permitir dar de alta un producto y sus características.",
+                  "comentarios": "Algunas de las características que se pueden de poder dar de alta son: tipo, sabor, relleno, decoraciones, tamaño, pisos, etc. Además de agregar un nombre, una descripción y una imagen. Las características de un producto no son las mismas en todos y se pueden añadir nuevas que no existían anteriormente.",
                   "dependencias": [
                     "RF-17"
                   ],
