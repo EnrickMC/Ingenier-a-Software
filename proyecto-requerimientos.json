@@ -359,7 +359,7 @@
               "tipo": "RF",
               "titulo": "Selección de plantilla personalizada",
               "descripcion": "El sistema debe permitir al usuario seleccionar una plantilla predefinida de diseño/temática para el postre como base para su personalización.",
-              "comentarios": "",
+              "comentarios": "La plantilla es predefinida por la administradora y permite al cliente seleccionarla para a partir de ella comenzar a personalizar su postre que pedirá.",
               "dependencias": [
                 "RF-1"
               ],
