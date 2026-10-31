@@ -17,13 +17,23 @@
             "titulo": "Información para la Visualización del Catálogo Público y Plantillas",
             "descripcion": "El sistema deberá consultar y exponer (modo lectura/visualización) la información del catálogo de productos, sus categorías, ingredientes, especificaciones de tamaño y plantillas de diseño interactivo para la navegación pública del cliente.",
             "datos_especificos": [
-              "Nombre y descripción comercial de la categoría",
-              "Imagen o ícono representativo",
-              "Nombre comercial, descripción y precio base del postre",
-              "Dimensiones, porciones sugeridas y tamaño",
-              "Sabores, coberturas, rellenos e ingredientes detallados (incluyendo alérgenos)",
-              "Fotografía/galería referencial de alta resolución",
-              "Catálogo de plantillas de diseño seleccionables"
+              "Nombre de cliente",
+              "teléfono de cliente",
+              "correo del cliente",
+              "colonia de entrega",
+              "calle de entrega",
+              "numero interior de entrega",
+              "numero exterior de entrega",
+              "código postal de entrega",
+              "estado del pedido",
+              "modalidad de pago",
+              "monto total",
+              "modalidad de entrega",
+              "fecha de solicitud",
+              "folio",
+              "fecha de entrega esperada",
+              "anticipo requerido",
+              "postres que conforman el pedido"
             ],
             "intervalo_temporal": "Presente (lectura de datos activos)",
             "comentarios": "Corresponde al Módulo 1 (Catálogo Público y Selección de Productos). Es una vista pública orientada a la experiencia de usuario que consume la información maestra administrada en el backend."
@@ -231,8 +241,8 @@
               "id": "RF-3",
               "tipo": "RF",
               "titulo": "Registro de pedido personalizado",
-              "descripcion": "El sistema debe permitir al usuario especificar características personalizadas para un postre, tales como sabor de pan, relleno, cobertura, tamaño, dedicatoria o especificaciones de diseño, entre otros.",
-              "comentarios": "Los elementos seleccionables dependen de la disponibilidad en el catálogo.",
+              "descripcion": "El sistema debe de permitir el registro de pedidos. Los pedidos deben de tener el nombre del cliente, el telefono del cliente, el correo del cliente, la direccion del cliente contando con su colonia, calle, numero interior, numero exterior, codigo postal, el estado del pedido, Modalidad de pago, monto total, modalidad de entrega, fecha de solicitud (es la fecha en la que se inicio el pedido), folio, fecha de entrega esperada y el anticipo requerido para iniciar la produccion del pedido. postres que conforman el pedidos. Tambien deben de tener los productos que encapsula el pedido como lo son cantidad, dedicatorio y comentario.\nLos pedidos de los clientes inician en el estado de \"pendiente de aprobación\".",
+              "comentarios": "El sistema debe de permitir el registro de pedidos segun la disponibilidad del catalogo.",
               "dependencias": [],
               "relaciones": [
                 "RF-17",
@@ -1472,14 +1482,31 @@
             "titulo": "Información de Administración del Catálogo, Categorías e Ingredientes",
             "descripcion": "El sistema deberá almacenar la información técnica y administrativa estructurada sobre el catálogo maestro, categorías, opciones de personalización e ingredientes de los postres.",
             "datos_especificos": [
-              "Identificador único, nombre y descripción",
-              "Estado operativo (Activa / Inactiva)",
-              "Identificador de producto y categoría asociada",
-              "Nombre comercial, descripción detallada y precio base",
-              "Especificaciones de tamaño, dimensiones y porciones recomendadas",
-              "Opciones de sabor, coberturas, rellenos e ingredientes disponibles",
-              "Plantillas de productos predefinidas o editables vinculadas",
-              "Fotografía referencial del producto"
+              "Nombre de categoría",
+              "descripción de categoría",
+              "estado de categoría",
+              "selección multiple de una característica",
+              "si es obligatoria una característica",
+              "disponibilidad de una característica",
+              "presupuesto de selección características",
+              "Orden de muestra en el programa",
+              "descripción de la característica",
+              "estado de la característica",
+              "nombre de la característica",
+              "Nombre de opción de característica",
+              "descripción de opción de característica",
+              "multiplicador de ingredientes de opción de característica",
+              "multiplicador de costo de opción de característica",
+              "escalabilidad de la opción de característica",
+              "disponibilidad de opción de característica",
+              "costo por selección de opción de característica",
+              "multiplicador de presupuesto de opciones de característica",
+              "Estado de exclusion",
+              "motivo de exclusion",
+              "nombre de postre",
+              "descripción de postre",
+              "visibilidad en catalogo publico de postre",
+              "link de fotografía de postre"
             ],
             "intervalo_temporal": "Pasado y presente",
             "comentarios": "Corresponde al Módulo 3 (Catálogo de Personalización de Postres - Administración)."
@@ -2030,7 +2057,7 @@
                   "tipo": "RF",
                   "titulo": "Registro caracteristica",
                   "descripcion": "Permite agregar una característica nueva a una categoría de producto.",
-                  "comentarios": "cada característica debe de tener tipo de selección (si se pueden elegir una o multiples veces, por ejemplo, un sabor de un pastel solo se puede elegir una vez, en cambio una decoración se puede elegir multiples veces), si es obligatoria la característica, si esta disponible, presupuesto de selección de características opciones activadas al mismo tiempo que puede tener esa característica, orden para mostrar el programa (por ejemplo, el sabor se debe de mostrar antes del tamaño en la categoría de pastel), descripción de característica, estado característica, nombre de característica.\nFinalmente cada característica es propia de cada categoría, la característica de sabor para pastel no es la misma que sabor para gelatina por ejemplo.\nSolo la administradora debe de tener acceso.",
+                  "comentarios": "Cada característica debe de tener si se pueden elegir una o multiples veces (por ejemplo, un sabor de un pastel solo se puede elegir una vez, en cambio una decoración se puede elegir multiples veces), si es obligatoria la característica, si esta disponible, presupuesto de selección de características (opciones activadas al mismo tiempo que puede tener esa característica), orden para mostrar el programa (por ejemplo, el sabor se debe de mostrar antes del tamaño en la categoría de pastel), descripción de característica, estado característica, nombre de característica.\nFinalmente cada característica es propia de cada categoría, la característica de sabor para pastel no es la misma que sabor para gelatina por ejemplo.\nSolo la administradora debe de tener acceso.",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
@@ -2163,7 +2190,7 @@
                   "tipo": "RF",
                   "titulo": "Exclusiones",
                   "descripcion": "Algunas caracteristicas no deben de poder seleccionarse al mismo tiempo al realizar un pastel",
-                  "comentarios": "Por ejemplo, un tipo de pastel especifico con un sabor de pastel especifico no son compatibles",
+                  "comentarios": "Por ejemplo, un tipo de pastel especifico con un sabor de pastel especifico no son compatibles. debe contener motivo de exclusion y estado de la exclusion.",
                   "dependencias": [
                     "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
@@ -2756,10 +2783,6 @@
                 "x": 0,
                 "y": 500
               },
-              "47e12009-1a1c-4582-8a1d-fa0fd9661227": {
-                "x": 95,
-                "y": 655
-              },
               "8c118596-8d5a-4977-b2f8-da4a0451f211": {
                 "x": 515,
                 "y": 355
@@ -2884,22 +2907,6 @@
                     "frecuencia_esperada": "30 veces/día",
                     "comentarios": "Se realiza antes de la aprobación, ya que primero se revisa la solicitud y después se aprueba o se cancela."
                   }
-                },
-                {
-                  "id": "47e12009-1a1c-4582-8a1d-fa0fd9661227",
-                  "tipo": "RF",
-                  "titulo": "Registro de pedido",
-                  "descripcion": "El sistema debe de permitir el registro de pedidos. ",
-                  "comentarios": "Los pedidos deben de tener el nombre del cliente, el telefono del cliente, el correo del cliente, la direccion del cliente contando con su colonia, calle, numero interior, numero exterior, codigo postal, el estado del pedido, Modalidad de pago, monto total, modalidad de entrega, fecha de solicitud (es la fecha en la que se inicio el pedido), folio, fecha de entrega esperada y el anticipo requerido para iniciar la produccion del pedido. de los pedidos tambien se debe de llevar un seguimiento de los pedidos. Tambien deben de tener los productos que encapsula el pedido como lo son cantidad, dedicatorio y comentario.\nLos pedidos de los clientes inician en el estado de \"pendiente de aprobación\".",
-                  "dependencias": [
-                    "RF-23"
-                  ],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "Administrador, Personal",
-                  "prioridad": "Alta",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
                 },
                 {
                   "id": "8c118596-8d5a-4977-b2f8-da4a0451f211",
@@ -3643,8 +3650,8 @@
               "id": "RF-28",
               "tipo": "RF",
               "titulo": "Validación de pagos",
-              "descripcion": "El administrador debe verificar los comprobantes de anticipo o liquidación y registrarlos como válidos.",
-              "comentarios": "Actualiza el registro financiero asociado al pedido.",
+              "descripcion": "El administrador debe verificar los comprobantes de anticipo o liquidación y registrarlos como válidos. de cada pago realizado se registra monto de pago, estado de validacion, referencia, link de comporbante (en caso de que haga falta), metodo de pago, fecha de pago y motivo de rechazo (en caso de que haga falta).",
+              "comentarios": "Actualiza el registro financiero asociado al pedido. cada pago validado",
               "dependencias": [
                 "RF-23"
               ],
@@ -3804,7 +3811,7 @@
               "tipo": "RF",
               "titulo": "Seguimiento de saldos y pagos de pedidos",
               "descripcion": "El sistema debe llevar el control de los montos cubiertos y los saldos pendientes por liquidar de cada pedido registrado.",
-              "comentarios": "Muestra desgloses de anticipo abonado.",
+              "comentarios": "Muestra desgloses de anticipo abonado. ",
               "dependencias": [],
               "relaciones": [
                 "RF-28"
@@ -4218,7 +4225,7 @@
               "tipo": "RF",
               "titulo": "Notificaciones por WhatsApp y correo electrónico",
               "descripcion": "El sistema debe enviar mensajes automáticos en caso de un cambio de estado del pedido al cliente a través de correo electrónico o WhatsApp.",
-              "comentarios": "Mantiene informado al cliente de forma transparente.",
+              "comentarios": "Mantiene informado al cliente de forma transparente. ",
               "dependencias": [
                 "RF-27"
               ],
