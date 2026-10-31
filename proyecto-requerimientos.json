@@ -2032,7 +2032,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2048,7 +2048,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2064,7 +2064,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2080,7 +2080,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador, Personal",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2101,7 +2101,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2117,7 +2117,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2133,7 +2133,7 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
+                  "rol": "Administrador",
                   "prioridad": "",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
@@ -2146,6 +2146,22 @@
                   "comentarios": "Es necesario para que toda las opciones de carcterisitcas funcione de manera correcta",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "Administrador, Personal",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "061be3c0-d1b0-4403-b059-777fc8c07c25",
+                  "tipo": "RF",
+                  "titulo": "Exclusiones",
+                  "descripcion": "Algunas caracteristicas no deben de poder seleccionarse al mismo tiempo al realizar un pastel",
+                  "comentarios": "Por ejemplo, un tipo de pastel especifico con un sabor de pastel especifico no son compatibles",
+                  "dependencias": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
                   "relaciones": [],
                   "extiende": [],
