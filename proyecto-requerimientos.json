@@ -1682,7 +1682,7 @@
                   "tipo": "RF",
                   "titulo": "Registro de Categorías",
                   "descripcion": "El sistema debe permitir agregar nuevas categorías de productos (pastel, gelatinas etc.)",
-                  "comentarios": "Las dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
+                  "comentarios": "Cada categoria debe de tener un nombre de categoria, descripcion de categoria y estado de categoria.\nLas dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
                     "RF-13"
                   ],
