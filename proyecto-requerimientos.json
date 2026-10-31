@@ -6702,11 +6702,12 @@
             "titulo": "Información de gestión de usuarios",
             "descripcion": "El sistema deberá de almacenar la información de usuarios con sus distintos permisos.",
             "datos_especificos": [
-              "Id usuario",
-              "Nombre de usuario",
-              "Contraseña de usuario",
-              "Id de permiso",
-              "Nombre permiso"
+              "Nombre de usuarios",
+              "contraseña de usuarios",
+              "permisos del usuario",
+              "estado del usuario",
+              "intentos fallidos de inicio de sesión del usuario",
+              "ultimo acceso del usuario."
             ],
             "intervalo_temporal": "Pasado, presente y futuro",
             "comentarios": "La estructura de los datos consolidados depende de las reglas de cálculo contable elegidas."
