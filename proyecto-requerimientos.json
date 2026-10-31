@@ -1499,28 +1499,28 @@
                 "y": 655
               },
               "RF-14": {
-                "x": 555,
-                "y": 95
+                "x": 215,
+                "y": 75
               },
               "RF-15": {
-                "x": 555,
-                "y": 235
+                "x": 495,
+                "y": 115
               },
               "RF-16": {
-                "x": 555,
-                "y": 375
+                "x": 535,
+                "y": 255
               },
               "RF-18": {
-                "x": 555,
-                "y": 515
+                "x": 575,
+                "y": 715
               },
               "RF-19": {
-                "x": 555,
-                "y": 655
+                "x": 455,
+                "y": 835
               },
               "RF-20": {
-                "x": 555,
-                "y": 795
+                "x": 195,
+                "y": 915
               },
               "actor:Administrador": {
                 "x": 80,
@@ -1529,6 +1529,38 @@
               "actor:Personal": {
                 "x": 80,
                 "y": 660
+              },
+              "ad3d4338-06eb-4485-963b-81dd8c95656a": {
+                "x": 515,
+                "y": 455
+              },
+              "347f80cb-6938-4898-b006-fe57bd7cbf78": {
+                "x": 1215,
+                "y": 475
+              },
+              "cbb7de10-a499-45a3-9d7b-ba856695c761": {
+                "x": 955,
+                "y": 815
+              },
+              "254030b2-7101-428d-ac7d-296237a8d7a8": {
+                "x": 1215,
+                "y": 695
+              },
+              "6ccf6098-a538-4bdb-8550-56ecd5648bbb": {
+                "x": 855,
+                "y": 515
+              },
+              "0e8da2f1-a24a-49ad-93c6-7a87d607fc38": {
+                "x": 995,
+                "y": 355
+              },
+              "dee3c676-dd64-403e-a3bb-9d7e6e5c3b6f": {
+                "x": 1015,
+                "y": 215
+              },
+              "6a61d173-f57e-4c54-a225-d9eccc644b0e": {
+                "x": 875,
+                "y": 95
               }
             }
           },
@@ -1994,8 +2026,10 @@
                   "tipo": "RF",
                   "titulo": "Registro caracteristica",
                   "descripcion": "Permite agregar una característica nueva a una categoría de producto.",
-                  "comentarios": "",
-                  "dependencias": [],
+                  "comentarios": "cada característica debe de tener tipo de selección (si se pueden elegir una o multiples veces, por ejemplo, un sabor de un pastel solo se puede elegir una vez, en cambio una decoración se puede elegir multiples veces), si es obligatoria la característica, si esta disponible, presupuesto de selección de características opciones activadas al mismo tiempo que puede tener esa característica, orden para mostrar el programa (por ejemplo, el sabor se debe de mostrar antes del tamaño en la categoría de pastel), descripción de característica, estado característica, nombre de característica.\nFinalmente cada característica es propia de cada categoría, la característica de sabor para pastel no es la misma que sabor para gelatina por ejemplo.\nSolo la administradora debe de tener acceso.",
+                  "dependencias": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2009,7 +2043,9 @@
                   "titulo": "Modificar caractersitica",
                   "descripcion": "Permite el modificar una característica.",
                   "comentarios": "Solo la administradora debe de tener acceso",
-                  "dependencias": [],
+                  "dependencias": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2023,7 +2059,9 @@
                   "titulo": "Eliminar caracteristica",
                   "descripcion": "Permite eliminar una característica.",
                   "comentarios": "Solo la administradora debe de tener acceso",
-                  "dependencias": [],
+                  "dependencias": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2037,7 +2075,9 @@
                   "titulo": "Visualizar caracteristica",
                   "descripcion": "Permite visualizar una característica.",
                   "comentarios": "Es necesario para poder realizar los demas pasos de crud de caracteristicas",
-                  "dependencias": [],
+                  "dependencias": [
+                    "RF-13"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2054,9 +2094,11 @@
                   "id": "347f80cb-6938-4898-b006-fe57bd7cbf78",
                   "tipo": "RF",
                   "titulo": "Registro de opción de caracteristica",
-                  "descripcion": "cada opción de característica debe de tener nombre, descripción, un multiplicador de ingredientes (por ejemplo una característica de un pastel seria su tamaño y una opción de característica seria grande o pequeño en este caso puede aumentar los ingredientes que usa), multiplicador de costo (de la misma manera una caracteristica del pastel seria un glaseado, entonces si una caracteristica es muy compleja de realizar se le puede agregar un extra de costo ademas de los ingredientes como puede ser un glaseado especial), si se escala (en este caso si es afectado por el crecimiento de ingredientes de otras caracteristicas, por ejemplo una caracteristica de pastel tamaño puede afectar al costo de ingredientes del glaseado, en cambio unas velas no aumentaran sin importar que tanto crezca el pastel), Si se encuentra disponible, punto seleccion (puntos que gasta del presupuesto de la caracteristica , por ejemplo, el uso de un moño puede gastar 1 punto de la caracteristica decoracion y un liston gasta 2, si se le asigna 3 puntos al presupuesto de seleccion de caracteristica, entonces se puede hacer combinaciones como usar un maximo de tres moños, o un listo y un moño), finalmente un multiplicador de presupuesto de opciones (por ejemplo, si se selecciona un tamaño grande este aplicara un multiplciador de presupuesto de la caracteristica, permitiendo colocar más decoraciones o otras cosas que son afectadas por este presupuesto).\t",
+                  "descripcion": "Cada opción de característica debe de tener nombre, descripción, un multiplicador de ingredientes (por ejemplo una característica de un pastel seria su tamaño y una opción de característica seria grande o pequeño en este caso puede aumentar los ingredientes que usa), multiplicador de costo (de la misma manera una caracteristica del pastel seria un glaseado, entonces si una caracteristica es muy compleja de realizar se le puede agregar un extra de costo ademas de los ingredientes como puede ser un glaseado especial), si se escala (en este caso si es afectado por el crecimiento de ingredientes de otras caracteristicas, por ejemplo una caracteristica de pastel tamaño puede afectar al costo de ingredientes del glaseado, en cambio unas velas no aumentaran sin importar que tanto crezca el pastel), Si se encuentra disponible, punto seleccion (puntos que gasta del presupuesto de la caracteristica , por ejemplo, el uso de un moño puede gastar 1 punto de la caracteristica decoracion y un liston gasta 2, si se le asigna 3 puntos al presupuesto de seleccion de caracteristica, entonces se puede hacer combinaciones como usar un maximo de tres moños, o un listo y un moño), finalmente un multiplicador de presupuesto de opciones (por ejemplo, si se selecciona un tamaño grande este aplicara un multiplciador de presupuesto de la caracteristica, permitiendo colocar más decoraciones o otras cosas que son afectadas por este presupuesto).\t",
                   "comentarios": "Solo la administradora tiene acceso",
-                  "dependencias": [],
+                  "dependencias": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2070,7 +2112,9 @@
                   "titulo": "Eliminar opción de caracterisitca",
                   "descripcion": "permite eliminar una opcion de caracteristica",
                   "comentarios": "Solo la administradora tiene acceso",
-                  "dependencias": [],
+                  "dependencias": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2084,7 +2128,9 @@
                   "titulo": "Modificar opción de caracterisitca",
                   "descripcion": "Permite modificar una opcion de caracteristica",
                   "comentarios": "Solo la administradora tiene acceso",
-                  "dependencias": [],
+                  "dependencias": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2098,7 +2144,9 @@
                   "titulo": "Visualizar opción de caracteristica",
                   "descripcion": "permite visualizar una opcion de caracteristica ",
                   "comentarios": "Es necesario para que toda las opciones de carcterisitcas funcione de manera correcta",
-                  "dependencias": [],
+                  "dependencias": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
                   "relaciones": [],
                   "extiende": [],
                   "rol": "",
@@ -2118,7 +2166,9 @@
                   "descripcion": "El sistema debe de permitir consultar una lista de los productos que existen y su categoría.",
                   "comentarios": "Este requerimiento es necesario para llevar control de productos y ver los productos que se pueden realizar.",
                   "dependencias": [
-                    "RF-13"
+                    "RF-13",
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
                   "relaciones": [
                     "RF-13"
