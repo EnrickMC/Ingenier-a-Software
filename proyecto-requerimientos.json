@@ -1987,6 +1987,128 @@
               ]
             },
             {
+              "crud": "Caracteristicas",
+              "requerimientos": [
+                {
+                  "id": "6a61d173-f57e-4c54-a225-d9eccc644b0e",
+                  "tipo": "RF",
+                  "titulo": "Registro caracteristica",
+                  "descripcion": "Permite agregar una característica nueva a una categoría de producto.",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "dee3c676-dd64-403e-a3bb-9d7e6e5c3b6f",
+                  "tipo": "RF",
+                  "titulo": "Modificar caractersitica",
+                  "descripcion": "Permite el modificar una característica.",
+                  "comentarios": "Solo la administradora debe de tener acceso",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
+                  "tipo": "RF",
+                  "titulo": "Eliminar caracteristica",
+                  "descripcion": "Permite eliminar una característica.",
+                  "comentarios": "Solo la administradora debe de tener acceso",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "ad3d4338-06eb-4485-963b-81dd8c95656a",
+                  "tipo": "RF",
+                  "titulo": "Visualizar caracteristica",
+                  "descripcion": "Permite visualizar una característica.",
+                  "comentarios": "Es necesario para poder realizar los demas pasos de crud de caracteristicas",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                }
+              ]
+            },
+            {
+              "crud": "Opcion de caracteristica",
+              "requerimientos": [
+                {
+                  "id": "347f80cb-6938-4898-b006-fe57bd7cbf78",
+                  "tipo": "RF",
+                  "titulo": "Nuevo requerimiento",
+                  "descripcion": "",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "cbb7de10-a499-45a3-9d7b-ba856695c761",
+                  "tipo": "RF",
+                  "titulo": "Nuevo requerimiento",
+                  "descripcion": "",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "254030b2-7101-428d-ac7d-296237a8d7a8",
+                  "tipo": "RF",
+                  "titulo": "Nuevo requerimiento",
+                  "descripcion": "",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                  "tipo": "RF",
+                  "titulo": "Nuevo requerimiento",
+                  "descripcion": "",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                }
+              ]
+            },
+            {
               "crud": "Productos",
               "requerimientos": [
                 {
@@ -2469,67 +2591,6 @@
                     "frecuencia_esperada": "1 vez/mes",
                     "comentarios": "Se prioriza la inhabilitación sobre el borrado definitivo para conservar el historial de ventas y los reportes. Si un cliente tiene el producto en su carrito, lo verá marcado como \"No disponible\" al consultar su carrito. Solo la administradora tiene acceso a esta función."
                   }
-                }
-              ]
-            },
-            {
-              "crud": "Caracteristicas",
-              "requerimientos": [
-                {
-                  "id": "6a61d173-f57e-4c54-a225-d9eccc644b0e",
-                  "tipo": "RF",
-                  "titulo": "Registro caracteristica",
-                  "descripcion": "Permite agregar una característica nueva a una categoría de producto.",
-                  "comentarios": "cada característica debe de tener tipo de selección (si se pueden elegir una o multiples veces, por ejemplo, un sabor de un pastel solo se puede elegir una vez, en cambio una decoración se puede elegir multiples veces),  si es obligatoria la característica, si esta disponible, máximo de veces que se puede seleccionar, orden para mostrar el programa (por ejemplo, el sabor se debe de mostrar antes del tamaño en la categoría de pastel), \ndescripción de característica, estado característica, nombre de característica, multiplicador de costo al agregar la característica, multiplicador de ingredientes. si es escala (si es afectado por el multiplicador de ingredientes, por ejemplo, la cantidad de harina necesaria para hacer el recubrimiento de un pastel mediano a uno grande si cambia, en cambio el numero de velas se mantiene igual). \nFinalmente cada característica es propia de cada categoría, la característica de sabor chocolate no es la misma para un pastel que para una gelatina por temas de ingredientes que se ocupan. \nSolo la administradora debe de tener acceso",
-                  "dependencias": [],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
-                },
-                {
-                  "id": "dee3c676-dd64-403e-a3bb-9d7e6e5c3b6f",
-                  "tipo": "RF",
-                  "titulo": "Modificar caractersitica",
-                  "descripcion": "Permite el modificar una característica.",
-                  "comentarios": "Solo la administradora debe de tener acceso",
-                  "dependencias": [],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
-                },
-                {
-                  "id": "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
-                  "tipo": "RF",
-                  "titulo": "Eliminar caracteristica",
-                  "descripcion": "Permite eliminar una característica.",
-                  "comentarios": "Solo la administradora debe de tener acceso",
-                  "dependencias": [],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
-                },
-                {
-                  "id": "ad3d4338-06eb-4485-963b-81dd8c95656a",
-                  "tipo": "RF",
-                  "titulo": "Visualizar caracteristica",
-                  "descripcion": "Permite visualizar una característica.",
-                  "comentarios": "Es necesario para poder realizar los demas pasos de crud de caracteristicas",
-                  "dependencias": [],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
                 }
               ]
             }
