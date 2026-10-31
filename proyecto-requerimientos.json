@@ -2809,7 +2809,7 @@
                   "tipo": "RF",
                   "titulo": "Eliminación de pedidos",
                   "descripcion": "El sistema debe de permitir dar de baja un pedido",
-                  "comentarios": "",
+                  "comentarios": "Opcion solo accesible para la administradora",
                   "dependencias": [],
                   "relaciones": [],
                   "extiende": [],
@@ -3378,7 +3378,7 @@
               "id": "RF-26",
               "tipo": "RF",
               "titulo": "Estados de pedidos",
-              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente.",
+              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente ",
               "comentarios": "Define el flujo de estados por el que avanza cada pedido, del 1 al 6.",
               "dependencias": [
                 "RF-27"
