@@ -1682,7 +1682,7 @@
                   "tipo": "RF",
                   "titulo": "Registro de Categorías",
                   "descripcion": "El sistema debe permitir agregar nuevas categorías de productos (pastel, gelatinas etc.)",
-                  "comentarios": "Cada categoria debe de tener un nombre de categoria, descripcion de categoria y estado de categoria.\nLas dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
+                  "comentarios": "Cada categoria debe de tener un nombre de categoria, descripcion de categoria y estado de categoria.\t\nLas dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
                     "RF-13"
                   ],
@@ -2759,6 +2759,67 @@
             }
           },
           "elementos": [
+            {
+              "crud": "Nuevo CRUD",
+              "requerimientos": [
+                {
+                  "id": "5b4add89-7b69-4dc4-b332-aed47f957660",
+                  "tipo": "RF",
+                  "titulo": "Visualización de pedidos",
+                  "descripcion": "Permite visualizar los pedidos",
+                  "comentarios": "Es escencial para que todo el apartado de pedidos funcione de manera correcta",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "47e12009-1a1c-4582-8a1d-fa0fd9661227",
+                  "tipo": "RF",
+                  "titulo": "Registro de pedido",
+                  "descripcion": "El sistema debe de permitir el registro de pedidos. ",
+                  "comentarios": "Los pedidos deben de tener el nombre del cliente, el telefono del cliente, el correo del cliente, la direccion del cliente contando con su colonia, calle, numero interior, numero exterior, codigo postal, el estado del pedido, Modalidad de pago, monto total, modalidad de entrega, fecha de solicitud (es la fecha en la que se inicio el pedido), folio, fecha de entrega esperada y el anticipo requerido para iniciar la produccion del pedido. de los pedidos tambien se debe de llevar un seguimiento de los pedidos.\nLos pedidos de los clientes inician en el estado de \"pendiente de aprobación\".",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "8c118596-8d5a-4977-b2f8-da4a0451f211",
+                  "tipo": "RF",
+                  "titulo": "Modificacion de pedido",
+                  "descripcion": "El sistema debe de permitir el modificar un pedido\t",
+                  "comentarios": "solo la administradora tiene acceso a esta funcion.",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                },
+                {
+                  "id": "9e92ac26-5791-4020-9dd0-b4d68ce01874",
+                  "tipo": "RF",
+                  "titulo": "Eliminación de pedidos",
+                  "descripcion": "El sistema debe de permitir dar de baja un pedido",
+                  "comentarios": "",
+                  "dependencias": [],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "",
+                  "prioridad": "",
+                  "metodo_verificacion": "",
+                  "descripcion_resumida": ""
+                }
+              ]
+            },
             {
               "id": "RF-21",
               "tipo": "RF",
