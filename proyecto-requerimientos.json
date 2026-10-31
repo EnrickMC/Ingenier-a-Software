@@ -2697,12 +2697,12 @@
             ],
             "posiciones": {
               "RF-30": {
-                "x": 215,
-                "y": 95
+                "x": 575,
+                "y": 115
               },
               "RF-21": {
-                "x": 215,
-                "y": 295
+                "x": 475,
+                "y": 375
               },
               "RF-23": {
                 "x": 215,
@@ -2717,12 +2717,12 @@
                 "y": 895
               },
               "RF-31": {
-                "x": 555,
-                "y": 95
+                "x": 895,
+                "y": 75
               },
               "RF-22": {
-                "x": 555,
-                "y": 295
+                "x": 855,
+                "y": 315
               },
               "RF-28": {
                 "x": 555,
@@ -2755,26 +2755,135 @@
               "actor:Personal": {
                 "x": 80,
                 "y": 500
+              },
+              "47e12009-1a1c-4582-8a1d-fa0fd9661227": {
+                "x": 195,
+                "y": 115
+              },
+              "8c118596-8d5a-4977-b2f8-da4a0451f211": {
+                "x": 575,
+                "y": 275
+              },
+              "9e92ac26-5791-4020-9dd0-b4d68ce01874": {
+                "x": 175,
+                "y": 275
               }
             }
           },
           "elementos": [
             {
-              "crud": "Nuevo CRUD",
+              "crud": "Pedidos",
               "requerimientos": [
                 {
-                  "id": "5b4add89-7b69-4dc4-b332-aed47f957660",
+                  "id": "RF-23",
                   "tipo": "RF",
-                  "titulo": "Visualización de pedidos",
-                  "descripcion": "Permite visualizar los pedidos",
-                  "comentarios": "Es escencial para que todo el apartado de pedidos funcione de manera correcta",
-                  "dependencias": [],
-                  "relaciones": [],
+                  "titulo": "visualizacion de pedidos",
+                  "descripcion": "El sistema debe ofrecer al administrador una vista detallada del pedido recibido, incluyendo especificaciones del postre, datos de entrega e imágenes de referencia.",
+                  "comentarios": "Permite verificar la viabilidad técnica y disponibilidad del pedido antes de aceptarlo.",
+                  "dependencias": [
+                    "RF-11",
+                    "RF-21"
+                  ],
+                  "relaciones": [
+                    "RF-11",
+                    "RF-12"
+                  ],
                   "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "rol": "Administrador, Personal",
+                  "prioridad": "Alta",
+                  "metodo_verificacion": "Prueba de Inspección / UI",
+                  "descripcion_resumida": "Permite examinar el detalle técnico, fotos de referencia y factibilidad de una solicitud.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora revisar el detalle de una solicitud nueva (productos, personalización, entrega y pago) para decidir si la aprueba o la cancela.",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Consulta las solicitudes «En proceso de aceptación», busca o filtra y selecciona una para revisarla"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el pedido exista, no esté cancelado y siga «En proceso de aceptación»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Recupera el detalle: cliente, productos con especificaciones e imágenes, entrega, pago y total"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que el pedido tenga productos, teléfono de contacto y fecha de entrega"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que la fecha de entrega sea futura y consulta la carga de la agenda de ese día"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra la ficha del pedido con la carga del día y los botones «Aprobar», «Cancelar» e «Imprimir ticket»"
+                      }
+                    ],
+                    "postcondicion": "La administradora tiene en pantalla toda la información necesaria para aprobar o cancelar la solicitud. El pedido no ha cambiado.",
+                    "excepciones": [
+                      {
+                        "paso": 1,
+                        "pregunta": "¿Hay solicitudes pendientes que coincidan?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No hay solicitudes pendientes de revisión» con la lista vacía",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y mantiene la lista sin abrir el detalle",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Pedido no encontrado» y recarga la lista de solicitudes",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido sigue «En proceso de aceptación»?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Este pedido ya fue atendido (estado actual)» y recarga la lista",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿El pedido tiene todos sus datos obligatorios?",
+                        "respuesta": "No",
+                        "accion": "Muestra la ficha con el aviso «Datos incompletos» y deshabilita «Aprobar»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La fecha de entrega sigue siendo futura?",
+                        "respuesta": "No",
+                        "accion": "Muestra la ficha con el aviso «La fecha de entrega ya venció» y deshabilita «Aprobar»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La agenda de ese día supera la capacidad diaria?",
+                        "respuesta": "Sí",
+                        "accion": "Agrega el aviso «Agenda saturada para esa fecha» sin bloquear la aprobación",
+                        "despues": "continua"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 a 6",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "30 veces/día",
+                    "comentarios": "Se realiza antes de la aprobación, ya que primero se revisa la solicitud y después se aprueba o se cancela."
+                  }
                 },
                 {
                   "id": "47e12009-1a1c-4582-8a1d-fa0fd9661227",
@@ -2785,8 +2894,8 @@
                   "dependencias": [],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
+                  "rol": "Administrador, Personal",
+                  "prioridad": "Alta",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2799,8 +2908,8 @@
                   "dependencias": [],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
+                  "rol": "Administrador, Personal",
+                  "prioridad": "Media",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2813,8 +2922,8 @@
                   "dependencias": [],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
+                  "rol": "Administrador, Personal",
+                  "prioridad": "Baja",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 }
@@ -2995,117 +3104,6 @@
                 ],
                 "frecuencia_esperada": "40 veces/día",
                 "comentarios": "Los pedidos cancelados no forman parte de los 6 estados: se consultan con la opción \"Cancelados\" y conservan el último estado que alcanzaron."
-              }
-            },
-            {
-              "id": "RF-23",
-              "tipo": "RF",
-              "titulo": "Revisión de solicitud de pedidos",
-              "descripcion": "El sistema debe ofrecer al administrador una vista detallada del pedido recibido, incluyendo especificaciones del postre, datos de entrega e imágenes de referencia.",
-              "comentarios": "Permite verificar la viabilidad técnica y disponibilidad del pedido antes de aceptarlo.",
-              "dependencias": [
-                "RF-11",
-                "RF-21"
-              ],
-              "relaciones": [
-                "RF-11",
-                "RF-12"
-              ],
-              "extiende": [],
-              "rol": "Administrador, Personal",
-              "prioridad": "Alta",
-              "metodo_verificacion": "Prueba de Inspección / UI",
-              "descripcion_resumida": "Permite examinar el detalle técnico, fotos de referencia y factibilidad de una solicitud.",
-              "plantilla_caso_de_uso": {
-                "descripcion": "Permite a la administradora revisar el detalle de una solicitud nueva (productos, personalización, entrega y pago) para decidir si la aprueba o la cancela.",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
-                "actor": "Administradora",
-                "secuencia_normal": [
-                  {
-                    "carril": "Actor",
-                    "accion": "Consulta las solicitudes «En proceso de aceptación», busca o filtra y selecciona una para revisarla"
-                  },
-                  {
-                    "carril": "Sistema",
-                    "accion": "Valida en la BD que el pedido exista, no esté cancelado y siga «En proceso de aceptación»"
-                  },
-                  {
-                    "carril": "Sistema",
-                    "accion": "Recupera el detalle: cliente, productos con especificaciones e imágenes, entrega, pago y total"
-                  },
-                  {
-                    "carril": "Sistema",
-                    "accion": "Valida que el pedido tenga productos, teléfono de contacto y fecha de entrega"
-                  },
-                  {
-                    "carril": "Sistema",
-                    "accion": "Valida que la fecha de entrega sea futura y consulta la carga de la agenda de ese día"
-                  },
-                  {
-                    "carril": "Sistema",
-                    "accion": "Muestra la ficha del pedido con la carga del día y los botones «Aprobar», «Cancelar» e «Imprimir ticket»"
-                  }
-                ],
-                "postcondicion": "La administradora tiene en pantalla toda la información necesaria para aprobar o cancelar la solicitud. El pedido no ha cambiado.",
-                "excepciones": [
-                  {
-                    "paso": 1,
-                    "pregunta": "¿Hay solicitudes pendientes que coincidan?",
-                    "respuesta": "No",
-                    "accion": "Muestra «No hay solicitudes pendientes de revisión» con la lista vacía",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 2,
-                    "pregunta": "¿Hay conexión con la base de datos?",
-                    "respuesta": "No",
-                    "accion": "Muestra «Error de conexión» y mantiene la lista sin abrir el detalle",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 2,
-                    "pregunta": "¿El pedido existe en la base de datos?",
-                    "respuesta": "No",
-                    "accion": "Muestra «Pedido no encontrado» y recarga la lista de solicitudes",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 2,
-                    "pregunta": "¿El pedido sigue «En proceso de aceptación»?",
-                    "respuesta": "No",
-                    "accion": "Muestra «Este pedido ya fue atendido (estado actual)» y recarga la lista",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 4,
-                    "pregunta": "¿El pedido tiene todos sus datos obligatorios?",
-                    "respuesta": "No",
-                    "accion": "Muestra la ficha con el aviso «Datos incompletos» y deshabilita «Aprobar»",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 5,
-                    "pregunta": "¿La fecha de entrega sigue siendo futura?",
-                    "respuesta": "No",
-                    "accion": "Muestra la ficha con el aviso «La fecha de entrega ya venció» y deshabilita «Aprobar»",
-                    "despues": "fin"
-                  },
-                  {
-                    "paso": 5,
-                    "pregunta": "¿La agenda de ese día supera la capacidad diaria?",
-                    "respuesta": "Sí",
-                    "accion": "Agrega el aviso «Agenda saturada para esa fecha» sin bloquear la aprobación",
-                    "despues": "continua"
-                  }
-                ],
-                "rendimiento": [
-                  {
-                    "paso": "2 a 6",
-                    "cota_de_tiempo": "2 segundos"
-                  }
-                ],
-                "frecuencia_esperada": "30 veces/día",
-                "comentarios": "Se realiza antes de la aprobación, ya que primero se revisa la solicitud y después se aprueba o se cancela."
               }
             },
             {
@@ -3378,8 +3376,8 @@
               "id": "RF-26",
               "tipo": "RF",
               "titulo": "Estados de pedidos",
-              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente ",
-              "comentarios": "Define el flujo de estados por el que avanza cada pedido, del 1 al 6.",
+              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente; (7) pedido cancelado, cuando el pedido es cancelado.",
+              "comentarios": "Define el flujo de estados por el que avanza cada pedido, del 1 al 6, ademas de la excepcion cuando es cancelado.",
               "dependencias": [
                 "RF-27"
               ],
@@ -3459,7 +3457,7 @@
               "id": "RF-27",
               "tipo": "RF",
               "titulo": "Modificación de estado del pedido",
-              "descripcion": "El sistema debe permitir al administrador actualizar manualmente la fase del pedido dentro de la línea de producción (aprobado, listo, entregado, cancelado)",
+              "descripcion": "El sistema debe permitir al administrador actualizar manualmente la fase del pedido dentro de la línea de producción o actualizarse automáticamente cuando las circunstancias lo permitan, por ejemplo, en el caso de pagado cuando el administrador registre que un pedido ha sido pagado exitosamente no necesitara su intervención para avanzar al siguiente estado.",
               "comentarios": "Para que el cliente consulte el estado de su pedido",
               "dependencias": [
                 "RF-24",
