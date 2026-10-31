@@ -1515,8 +1515,8 @@
                 "y": 715
               },
               "RF-19": {
-                "x": 455,
-                "y": 835
+                "x": 515,
+                "y": 855
               },
               "RF-20": {
                 "x": 195,
@@ -1535,16 +1535,16 @@
                 "y": 455
               },
               "347f80cb-6938-4898-b006-fe57bd7cbf78": {
-                "x": 1215,
+                "x": 1195,
                 "y": 475
               },
               "cbb7de10-a499-45a3-9d7b-ba856695c761": {
-                "x": 955,
+                "x": 1155,
                 "y": 815
               },
               "254030b2-7101-428d-ac7d-296237a8d7a8": {
                 "x": 1215,
-                "y": 695
+                "y": 615
               },
               "6ccf6098-a538-4bdb-8550-56ecd5648bbb": {
                 "x": 855,
@@ -1561,6 +1561,10 @@
               "6a61d173-f57e-4c54-a225-d9eccc644b0e": {
                 "x": 875,
                 "y": 95
+              },
+              "061be3c0-d1b0-4403-b059-777fc8c07c25": {
+                "x": 835,
+                "y": 815
               }
             }
           },
@@ -1677,7 +1681,7 @@
                   "id": "RF-14",
                   "tipo": "RF",
                   "titulo": "Registro de Categorías",
-                  "descripcion": "El sistema debe permitir agregar nuevas categorías de productos (Como pasteles de 3 Leches, de queso, etc.)",
+                  "descripcion": "El sistema debe permitir agregar nuevas categorías de productos (pastel, gelatinas etc.)",
                   "comentarios": "Las dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
                     "RF-13"
@@ -2033,7 +2037,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Media",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2049,7 +2053,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Media",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2065,7 +2069,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Baja",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2081,7 +2085,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador, Personal",
-                  "prioridad": "",
+                  "prioridad": "Alta",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 }
@@ -2102,7 +2106,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Media",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2118,7 +2122,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Alta",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2134,7 +2138,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "",
+                  "prioridad": "Media",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2150,7 +2154,7 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Administrador, Personal",
-                  "prioridad": "",
+                  "prioridad": "Alta",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 },
@@ -2165,8 +2169,8 @@
                   ],
                   "relaciones": [],
                   "extiende": [],
-                  "rol": "",
-                  "prioridad": "",
+                  "rol": "Administrador, Personal",
+                  "prioridad": "Baja",
                   "metodo_verificacion": "",
                   "descripcion_resumida": ""
                 }
@@ -2288,7 +2292,7 @@
                   "tipo": "RF",
                   "titulo": "Registro de producto",
                   "descripcion": "El sistema debe de permitir dar de alta un producto y sus características.",
-                  "comentarios": "Al dar de alta un producto se debe de poder agregar las características propias de su categoría de producto.",
+                  "comentarios": "Al dar de alta un producto se debe de poder agregar las características propias de su categoría de producto, puede tener un nombre de postre, una descripcion de postre, se tiene que poder elegir entre mostrarlo en el catalogo publico, tiene que poder estar la opcion de agregar un link de fotografia en caso de que se muestre en el catalogo publico.",
                   "dependencias": [
                     "RF-17"
                   ],
