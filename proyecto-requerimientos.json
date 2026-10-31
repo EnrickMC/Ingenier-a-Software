@@ -5164,7 +5164,7 @@
                   "id": "RF-34",
                   "tipo": "RF",
                   "titulo": "Registro de datos de insumos",
-                  "descripcion": "El sistema debe permitir dar de alta nuevos insumos en el inventario, especificando nombre, categoría, unidad de medida (gramos, litros, piezas), stock mínimo y costo unitario.",
+                  "descripcion": "El sistema debe permitir dar de alta nuevos insumos en el inventario, especificando nombre, categoría, unidad de medida (gramos, litros, piezas), stock mínimo, costo unitario, categoría del insumo, si es perecedero, estado del insumo y existencia total.",
                   "comentarios": "Base para el control de stock y costeo de recetas.",
                   "dependencias": [
                     "RF-33"
@@ -5268,7 +5268,7 @@
                   "id": "RF-35",
                   "tipo": "RF",
                   "titulo": "Modificación de datos de insumos",
-                  "descripcion": "El sistema debe permitir editar la información técnica, nombres, límites de stock mínimo o costos de un insumo previamente registrado.",
+                  "descripcion": "El sistema debe permitir editar la información de un insumo",
                   "comentarios": "Mantiene actualizada la ficha técnica de las materias primas.",
                   "dependencias": [
                     "RF-33"
@@ -5394,8 +5394,8 @@
                   "id": "RF-36",
                   "tipo": "RF",
                   "titulo": "Eliminación de Insumo del Inventario",
-                  "descripcion": "El sistema debe permitir dar de baja o inhabilitar insumos que ya no se utilicen en la elaboración de los productos.",
-                  "comentarios": "Si está asociado a una receta activa, el sistema debe solicitar confirmación.",
+                  "descripcion": "El sistema debe de permitir dar de baja o inhabilitar insumos.",
+                  "comentarios": "Si esta asociado a una receta activa, el sistema pregunta solicita confirmación para eliminar el insumo. no afecta a las recetas.",
                   "dependencias": [
                     "RF-33"
                   ],
