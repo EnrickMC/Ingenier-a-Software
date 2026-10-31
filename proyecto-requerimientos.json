@@ -4225,7 +4225,7 @@
               "tipo": "RF",
               "titulo": "Notificaciones por WhatsApp y correo electrónico",
               "descripcion": "El sistema debe enviar mensajes automáticos en caso de un cambio de estado del pedido al cliente a través de correo electrónico o WhatsApp.",
-              "comentarios": "Mantiene informado al cliente de forma transparente. ",
+              "comentarios": "Mantiene informado al cliente de forma transparente. de cada notificacion se guarda el mensaje, canal, fecha de hora de envio, resultado de envio, tipo de evento y destino",
               "dependencias": [
                 "RF-27"
               ],
