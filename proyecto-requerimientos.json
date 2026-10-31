@@ -5164,7 +5164,7 @@
                   "id": "RF-34",
                   "tipo": "RF",
                   "titulo": "Registro de datos de insumos",
-                  "descripcion": "El sistema debe permitir dar de alta nuevos insumos en el inventario, especificando nombre, categoría, unidad de medida (gramos, litros, piezas), stock mínimo, costo unitario, categoría del insumo, si es perecedero, estado del insumo y existencia total.",
+                  "descripcion": "El sistema debe permitir dar de alta nuevos insumos en el inventario, especificando nombre, unidad de medida (gramos, litros, piezas), stock mínimo, costo unitario, categoría del insumo, si es perecedero, estado del insumo y existencia total.",
                   "comentarios": "Base para el control de stock y costeo de recetas.",
                   "dependencias": [
                     "RF-33"
@@ -5518,7 +5518,7 @@
                   "id": "RF-41",
                   "tipo": "RF",
                   "titulo": "Visualización de Recetas",
-                  "descripcion": "El sistema debe permitir consultar las fórmulas estandarizadas (recetas) de cada postre o producto base, mostrando ingredientes, cantidades exactas y pasos de preparación.",
+                  "descripcion": "El sistema debe permitir consultar la información de las recetas.",
                   "comentarios": "Sirve como guía de preparación para el personal de cocina.",
                   "dependencias": [
                     "RF-18"
@@ -5620,7 +5620,7 @@
                   "id": "RF-42",
                   "tipo": "RF",
                   "titulo": "Registro de Nueva Receta",
-                  "descripcion": "El sistema debe permitir asociar a un producto o componente una receta estandarizada, especificando la lista de insumos requeridos con sus proporciones y rendimiento total.",
+                  "descripcion": "El sistema debe permitir registrar una receta de asociada a una opcion de caracteristica especifica, cada receta debe tener nombre, pasos preparacion, tiempo de elaboracion, estado de receta, ingredientes necesarios para elaboracion.",
                   "comentarios": "Vincula los productos del catálogo con la lista de materias primas.",
                   "dependencias": [
                     "RF-18"
@@ -5754,7 +5754,7 @@
                   "id": "RF-43",
                   "tipo": "RF",
                   "titulo": "Modificación de Receta",
-                  "descripcion": "El sistema debe permitir actualizar las proporciones de ingredientes, agregar o retirar insumos, y modificar los procedimientos de una receta existente.",
+                  "descripcion": "El sistema debe permitir actualizar los datos de una receta",
                   "comentarios": "Recalcula de forma automática el costo de preparación del producto.",
                   "dependencias": [],
                   "relaciones": [
@@ -5886,7 +5886,7 @@
                   "id": "RF-44",
                   "tipo": "RF",
                   "titulo": "Eliminación de receta",
-                  "descripcion": "El sistema debe permitir desvincular o deshabilitar la fórmula asociada a un producto que ha sido discontinuado o modificado sustancialmente.",
+                  "descripcion": "El sistema debe permitir dar de baja una receta, ya sea eliminandola o deshabilitandola.",
                   "comentarios": "Impide el descuento automatizado de insumos obsoletos.",
                   "dependencias": [],
                   "relaciones": [
@@ -6938,7 +6938,7 @@
                   "id": "RNF-11",
                   "tipo": "RNF",
                   "titulo": "Registro de usuarios",
-                  "descripcion": "El sistema debe permitir al administrador registrar nuevos usuarios del personal asignando su nombre completo, credenciales de acceso (correo/usuario, contraseña) y permisos específicos de acceso.",
+                  "descripcion": "El sistema debe permitir al administrador registrar nuevos usuarios del personal. Cada usuario contara con su nombre completo, Contraseña , permisos de acceso, estado del usuario, intentos fallidos y ultimo acceso.",
                   "comentarios": "Es la base para el control y gestión del personal dentro de la plataforma.",
                   "dependencias": [
                     "RNF-13"
