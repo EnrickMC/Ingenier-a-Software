@@ -17,23 +17,16 @@
             "titulo": "Información para la Visualización del Catálogo Público y Plantillas",
             "descripcion": "El sistema deberá consultar y exponer (modo lectura/visualización) la información del catálogo de productos, sus categorías, ingredientes, especificaciones de tamaño y plantillas de diseño interactivo para la navegación pública del cliente.",
             "datos_especificos": [
-              "Nombre de cliente",
-              "teléfono de cliente",
-              "correo del cliente",
-              "colonia de entrega",
-              "calle de entrega",
-              "numero interior de entrega",
-              "numero exterior de entrega",
-              "código postal de entrega",
-              "estado del pedido",
-              "modalidad de pago",
-              "monto total",
-              "modalidad de entrega",
-              "fecha de solicitud",
-              "folio",
-              "fecha de entrega esperada",
-              "anticipo requerido",
-              "postres que conforman el pedido"
+              "Nombre de postre",
+              "descripción de postre",
+              "categoría del postre",
+              "precio base del postre",
+              "link de fotografía de postre",
+              "ingredientes del postre",
+              "características y opciones disponibles del postre",
+              "tamaños disponibles del postre",
+              "plantillas de diseño disponibles",
+              "visibilidad en catálogo público de postre"
             ],
             "intervalo_temporal": "Presente (lectura de datos activos)",
             "comentarios": "Corresponde al Módulo 1 (Catálogo Público y Selección de Productos). Es una vista pública orientada a la experiencia de usuario que consume la información maestra administrada en el backend."
@@ -2177,7 +2170,7 @@
                   ],
                   "extiende": [],
                   "rol": "Administrador",
-                  "prioridad": "Alta",
+                  "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
                   "descripcion_resumida": "Permite a la administradora dar de baja una opción de característica que ya no se ofrece."
                 },
@@ -2234,7 +2227,7 @@
                     "RNF-6"
                   ],
                   "extiende": [],
-                  "rol": "Administrador, Personal",
+                  "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
                   "descripcion_resumida": "Evita combinaciones incompatibles de opciones (por ejemplo, un tipo de pastel con un sabor no compatible)."
@@ -2759,7 +2752,23 @@
               "fecha de envió de notificación",
               "resultado de envió de notificación",
               "tipo de evento que se informo la notificación",
-              "destino de la notificación"
+              "destino de la notificación",
+              "Nombre de cliente",
+              "teléfono de cliente",
+              "correo del cliente",
+              "colonia de entrega",
+              "calle de entrega",
+              "numero interior de entrega",
+              "numero exterior de entrega",
+              "código postal de entrega",
+              "modalidad de pago",
+              "monto total",
+              "modalidad de entrega",
+              "fecha de solicitud",
+              "folio",
+              "fecha de entrega esperada",
+              "anticipo requerido",
+              "postres que conforman el pedido"
             ],
             "intervalo_temporal": "Pasado, presente y futuro",
             "comentarios": "Corresponde al Módulo 3 (Gestor de Pedidos y Producción)."
@@ -4981,7 +4990,7 @@
               "id": "RF-45",
               "tipo": "RF",
               "titulo": "Descuento automático de insumos en inventario",
-              "descripcion": "El sistema debe rebajar de forma automática las cantidades de materia prima del inventario según la recetas asociadas a los productos cuando el pedido al que pertenecen cambie a estado \"Aprobado\".",
+              "descripcion": "El sistema debe rebajar de forma automática las cantidades de materia prima del inventario según la recetas asociadas a los productos cuando el pedido al que pertenecen cambie a estado \"En preparación\".",
               "comentarios": "Garantiza un control preciso de existencias sin intervención manual reiterada.",
               "dependencias": [
                 "RF-27",
@@ -7152,7 +7161,7 @@
                     "RNF-13"
                   ],
                   "relaciones": [
-                    "RF-3"
+                    "RNF-15"
                   ],
                   "extiende": [],
                   "rol": "Administrador",
@@ -7263,7 +7272,7 @@
                   "comentarios": "Excluye la visualización de la contraseña en texto plano por motivos de seguridad.",
                   "dependencias": [],
                   "relaciones": [
-                    "RF-3"
+                    "RNF-15"
                   ],
                   "extiende": [],
                   "rol": "Administrador",
@@ -7376,8 +7385,7 @@
                     "RNF-13"
                   ],
                   "relaciones": [
-                    "RF-3",
-                    "RF-6"
+                    "RNF-15"
                   ],
                   "extiende": [],
                   "rol": "Administrador",
