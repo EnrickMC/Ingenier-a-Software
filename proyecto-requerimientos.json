@@ -165,7 +165,7 @@
               "metodo_verificacion": "Prueba de Inspección / UI",
               "descripcion_resumida": "Presenta la ficha técnica, ingredientes y alérgenos de un postre seleccionado.",
               "plantilla_caso_de_uso": {
-                "descripcion": "Permite al cliente ver la ficha completa de un postre: descripción, ingredientes, porciones, precios y opciones disponibles.",
+                "descripcion": "Permite al cliente ver la ficha completa de un postre: descripción, ingredientes, porciones, precio y las características que puede personalizar con sus opciones disponibles.",
                 "precondicion": "El cliente se encuentra navegando en el catálogo de productos.",
                 "actor": "Cliente",
                 "secuencia_normal": [
@@ -179,11 +179,11 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Recupera la ficha: descripción, ingredientes, tamaños, precios y opciones"
+                    "accion": "Recupera la ficha: descripción, ingredientes, precio base y las características de su categoría con sus opciones disponibles"
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida que el producto tenga al menos un tamaño con precio"
+                    "accion": "Valida que cada característica obligatoria tenga al menos una opción disponible"
                   },
                   {
                     "carril": "Sistema",
@@ -215,7 +215,7 @@
                   },
                   {
                     "paso": 4,
-                    "pregunta": "¿Tiene al menos un tamaño con precio registrado?",
+                    "pregunta": "¿Cada característica obligatoria tiene al menos una opción disponible?",
                     "respuesta": "No",
                     "accion": "Muestra la ficha en modo informativo y deshabilita «Personalizar pedido»",
                     "despues": "fin"
@@ -258,9 +258,10 @@
                   "Portal de Pedidos"
                 ],
                 "requisitos_de_informacion_de_otros_modulos": [
-                  "Portal de Pedidos"
+                  "Portal de Pedidos",
+                  "Catálogo de Personalización"
                 ],
-                "descripcion": "Permite al cliente armar su postre a la medida (tamaño, sabor, relleno, cobertura y dedicatoria) y ver el precio actualizado con cada elección.",
+                "descripcion": "Permite al cliente armar su postre a la medida eligiendo las opciones de cada característica de su categoría (por ejemplo, tamaño, sabor, relleno, cobertura y decoración) y la dedicatoria, y ver el precio actualizado con cada elección.",
                 "precondicion": "El cliente se encuentra en la ficha detallada del producto.",
                 "actor": "Cliente",
                 "secuencia_normal": [
@@ -270,15 +271,15 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida en la BD que el producto siga activo y consulta sus opciones de personalización"
+                    "accion": "Valida en la BD que el producto siga activo y consulta las características de su categoría, sus opciones disponibles y las exclusiones activas"
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Despliega el formulario de personalización con tamaño, sabor, relleno, cobertura, dedicatoria, cantidad y precio"
+                    "accion": "Despliega el formulario de personalización con las características en su orden de muestra, la dedicatoria, la cantidad y el precio"
                   },
                   {
                     "carril": "Actor",
-                    "accion": "Selecciona las opciones deseadas (el precio se recalcula con cada cambio)"
+                    "accion": "Selecciona las opciones deseadas (con cada cambio se recalcula el precio, se actualizan los puntos disponibles de cada característica y se deshabilitan las opciones excluidas)"
                   },
                   {
                     "carril": "Actor",
@@ -286,11 +287,11 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida los campos obligatorios, la cantidad y la dedicatoria"
+                    "accion": "Valida que cada característica obligatoria tenga opción, que no se exceda el presupuesto de selección, la cantidad y la dedicatoria"
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida en la BD que el producto y las opciones sigan disponibles y que el precio sea el vigente"
+                    "accion": "Valida en la BD que el producto y las opciones sigan disponibles, que no haya opciones excluidas entre sí y que el precio sea el vigente"
                   },
                   {
                     "carril": "Sistema",
@@ -322,9 +323,16 @@
                   },
                   {
                     "paso": 6,
-                    "pregunta": "¿Tamaño y relleno elegidos y cantidad válida?",
+                    "pregunta": "¿Todas las características obligatorias tienen opción y la cantidad es válida?",
                     "respuesta": "No",
                     "accion": "Resalta los campos con error y conserva las demás selecciones",
+                    "despues": "4"
+                  },
+                  {
+                    "paso": 6,
+                    "pregunta": "¿Las opciones elegidas respetan el presupuesto de selección de cada característica?",
+                    "respuesta": "No",
+                    "accion": "Indica la característica excedida y los puntos disponibles, y conserva las demás selecciones",
                     "despues": "4"
                   },
                   {
@@ -339,6 +347,13 @@
                     "pregunta": "¿Todas las opciones elegidas siguen disponibles?",
                     "respuesta": "No",
                     "accion": "Muestra «La opción seleccionada ya no está disponible», la retira y recalcula el precio",
+                    "despues": "4"
+                  },
+                  {
+                    "paso": 7,
+                    "pregunta": "¿Hay opciones elegidas que se excluyen entre sí?",
+                    "respuesta": "Sí",
+                    "accion": "Muestra el motivo de la exclusión y pide cambiar una de las dos opciones",
                     "despues": "4"
                   },
                   {
@@ -360,7 +375,7 @@
                   }
                 ],
                 "frecuencia_esperada": "50 veces/día",
-                "comentarios": "Las opciones que puede elegir el cliente dependen de las que la administradora registró para el producto. Pertenece al catálogo público, pero también genera los datos de la solicitud del pedido; por eso se asocia a ambos objetivos."
+                "comentarios": "Las características y opciones que puede elegir el cliente son las que la administradora registró para la categoría del producto, y las exclusiones activas impiden combinaciones incompatibles. El precio se calcula con el precio base y los multiplicadores de costo de las opciones elegidas. Pertenece al catálogo público, pero también genera los datos de la solicitud del pedido; por eso se asocia a ambos objetivos."
               }
             },
             {
@@ -1003,6 +1018,13 @@
                     "respuesta": "Sí",
                     "accion": "Muestra «Pedido cancelado» con motivo y fecha, con la barra detenida en el último estado",
                     "despues": "fin"
+                  },
+                  {
+                    "paso": 7,
+                    "pregunta": "¿La solicitud fue dada de baja por la pastelería?",
+                    "respuesta": "Sí",
+                    "accion": "Muestra «Esta solicitud fue dada de baja» con el motivo y la fecha",
+                    "despues": "fin"
                   }
                 ],
                 "rendimiento": [
@@ -1103,7 +1125,7 @@
                       },
                       {
                         "paso": 4,
-                        "pregunta": "¿Las opciones de personalización siguen disponibles?",
+                        "pregunta": "¿Las opciones de personalización siguen disponibles y compatibles entre sí?",
                         "respuesta": "No",
                         "accion": "Marca «Requiere actualizar personalización», ofrece modificarlo y deshabilita «Continuar»",
                         "despues": "continua"
@@ -1982,14 +2004,14 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Registra la baja: inhabilita la categoría si tiene historial o la elimina si no tiene relaciones"
+                        "accion": "Registra la baja: inhabilita la categoría (y sus características y opciones) si tiene historial o la elimina si no tiene relaciones"
                       },
                       {
                         "carril": "Sistema",
                         "accion": "Informa el éxito, actualiza el listado y retira la categoría del catálogo público"
                       }
                     ],
-                    "postcondicion": "La categoría queda inhabilitada o eliminada de la base de datos y ya no está disponible en el catálogo público ni para asociar productos.",
+                    "postcondicion": "La categoría queda inhabilitada o eliminada junto con sus características y opciones de la base de datos y ya no está disponible en el catálogo público ni para asociar productos.",
                     "excepciones": [
                       {
                         "paso": 1,
@@ -2070,7 +2092,106 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite a la administradora agregar una característica personalizable a una categoría de producto."
+                  "descripcion_resumida": "Permite a la administradora agregar una característica personalizable a una categoría de producto.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora agregar una característica personalizable a una categoría de postres, indicando cómo la elegirá el cliente.",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita registrar una nueva característica («+ Nueva característica»)"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la categoría siga existiendo y activa"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Despliega el formulario: nombre, descripción, selección única o múltiple, obligatoria, presupuesto de selección, orden de muestra, disponibilidad y estado"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Captura los datos y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios y que el presupuesto de selección y el orden de muestra sean números enteros mayores a cero"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Consulta en la BD si la categoría ya tiene una característica con ese nombre o en ese orden de muestra"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Almacena la característica asociada a la categoría e informa el éxito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Cierra el formulario y actualiza el listado de características"
+                      }
+                    ],
+                    "postcondicion": "La característica queda registrada en la categoría. Se mostrará al cliente en el formulario de personalización cuando esté disponible y tenga al menos una opción disponible.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y no abre el formulario",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La categoría sigue existiendo y activa?",
+                        "respuesta": "No",
+                        "accion": "Muestra «La categoría ya no está disponible» y recarga el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los datos, cierra el formulario y muestra el listado sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Los campos están completos y con valores válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta en rojo los campos con error y conserva los datos capturados",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Ya existe una característica con ese nombre en la categoría?",
+                        "respuesta": "Sí",
+                        "accion": "Muestra «La característica ya existe en esta categoría» y mantiene el formulario abierto",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿El orden de muestra ya está ocupado por otra característica?",
+                        "respuesta": "Sí",
+                        "accion": "Avisa y recorre una posición las características siguientes",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La característica se almacenó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación, muestra «No fue posible guardar la característica» y conserva el formulario",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "5 a 7",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "2 veces/mes",
+                    "comentarios": "Ejemplos: «Sabor» (selección única y obligatoria) y «Decoración» (selección múltiple con presupuesto de 3 puntos). En una característica de selección única el presupuesto de selección es 1. Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "dee3c676-dd64-403e-a3bb-9d7e6e5c3b6f",
@@ -2089,7 +2210,121 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una característica existente."
+                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una característica existente.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora actualizar la configuración de una característica (nombre, descripción, tipo de selección, obligatoriedad, presupuesto, orden de muestra, disponibilidad o estado).",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una característica y solicita «Editar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la característica exista y recupera sus datos y sus opciones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra el formulario con los datos actuales de la característica"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Modifica los datos y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios, el presupuesto de selección y el orden de muestra"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el nombre no se repita en la categoría y que el presupuesto no sea menor que los puntos de selección de sus opciones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Si la característica pasa a obligatoria o cambia de selección múltiple a única, informa que los carritos con productos de esa categoría deberán actualizar su personalización y solicita confirmación"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza la característica en la BD e informa el éxito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el listado y la personalización del catálogo público"
+                      }
+                    ],
+                    "postcondicion": "La característica queda actualizada y el cambio se refleja en el formulario de personalización del catálogo público. Los pedidos ya enviados conservan las opciones que eligió el cliente.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión», no abre el formulario y mantiene el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La característica existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Característica no encontrada», no abre el formulario y recarga el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los cambios y cierra el formulario; la característica conserva sus datos",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Los datos capturados son válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta los campos con error y no guarda los cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿El nombre está disponible en la categoría?",
+                        "respuesta": "No",
+                        "accion": "Muestra «La característica ya existe en esta categoría» y no guarda los cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿El presupuesto alcanza para los puntos de todas sus opciones?",
+                        "respuesta": "No",
+                        "accion": "Muestra las opciones que ya no podrían elegirse y no guarda los cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La administradora confirmó el cambio?",
+                        "respuesta": "No",
+                        "accion": "Regresa al formulario conservando los datos sin guardarlos",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 8,
+                        "pregunta": "¿La actualización se realizó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible actualizar la característica»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "5 a 8",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "3 veces/mes",
+                    "comentarios": "Los carritos afectados se marcan con «Requiere actualizar personalización» cuando el cliente los consulta. Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
@@ -2109,7 +2344,92 @@
                   "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
-                  "descripcion_resumida": "Permite a la administradora dar de baja una característica que ya no se ofrece."
+                  "descripcion_resumida": "Permite a la administradora dar de baja una característica que ya no se ofrece.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora dar de baja una característica que ya no se ofrece, junto con sus opciones y exclusiones, siempre que no forme parte de pedidos en curso.",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una característica y solicita darla de baja"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la característica exista y recupera sus opciones, exclusiones y pedidos asociados"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica si la característica forma parte de pedidos vigentes"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra la confirmación doble con las opciones y exclusiones que también se darán de baja"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Confirma o cancela la baja en la ventana de confirmación"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Registra la baja: inhabilita la característica, sus opciones y sus exclusiones si tienen historial, o las elimina si no tienen relaciones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Informa el éxito, actualiza el listado y retira la característica de la personalización del catálogo público"
+                      }
+                    ],
+                    "postcondicion": "La característica, sus opciones y sus exclusiones quedan inhabilitadas o eliminadas y ya no se ofrecen al cliente al personalizar un postre.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y mantiene el listado sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La característica existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Característica no encontrada» y recarga el listado sin realizar la baja",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿La característica forma parte de pedidos vigentes?",
+                        "respuesta": "Sí",
+                        "accion": "Bloquea la baja y muestra «La característica está en pedidos en curso» con sus folios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La administradora confirmó la baja?",
+                        "respuesta": "No",
+                        "accion": "Cierra la ventana; la característica permanece sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿La baja se registró sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible dar de baja la característica»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 y 3",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "6 y 7",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "1 vez cada 3 meses",
+                    "comentarios": "Se prioriza la inhabilitación sobre el borrado definitivo para conservar el historial de pedidos. Los carritos que tengan esa característica se marcan con «Requiere actualizar personalización». Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "ad3d4338-06eb-4485-963b-81dd8c95656a",
@@ -2128,7 +2448,102 @@
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba de Inspección / UI",
-                  "descripcion_resumida": "Muestra las características personalizables de cada categoría de producto."
+                  "descripcion_resumida": "Muestra las características personalizables de cada categoría de producto.",
+                  "plantilla_caso_de_uso": {
+                    "requisitos_de_informacion_de_otros_modulos": [
+                      "Catálogo Público"
+                    ],
+                    "descripcion": "Permite a la administradora y al personal consultar las características de una categoría de postres (por ejemplo, Sabor, Tamaño o Decoración) con su configuración y el número de opciones de cada una.",
+                    "precondicion": "El usuario inició sesión en el panel administrativo con permiso sobre el módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora / Personal",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita consultar las características y elige la categoría de producto"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que la sesión siga activa y que tenga permiso sobre el módulo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica la conexión con la BD y valida que la categoría exista"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Consulta las características de la categoría ordenadas por su orden de muestra"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Despliega el listado con nombre, selección única o múltiple, obligatoria, presupuesto de selección, disponibilidad, estado y número de opciones"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una característica para ver su detalle"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la característica exista y muestra su detalle con sus opciones"
+                      }
+                    ],
+                    "postcondicion": "El listado de características de la categoría se muestra en pantalla. La información de las características no ha cambiado.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La sesión está activa y tiene permiso?",
+                        "respuesta": "No",
+                        "accion": "Bloquea el acceso, muestra «Acceso denegado» y redirige al inicio de sesión",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y habilita «Reintentar»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿La categoría elegida existe?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Categoría no encontrada» y recarga la lista de categorías",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La categoría tiene características registradas?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Esta categoría no tiene características registradas» y habilita «+ Nueva característica»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿El usuario seleccionó una característica?",
+                        "respuesta": "No",
+                        "accion": "",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La característica existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Característica no encontrada» y recarga el listado",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "3 a 5",
+                        "cota_de_tiempo": "2 segundos"
+                      },
+                      {
+                        "paso": "7",
+                        "cota_de_tiempo": "1 segundo"
+                      }
+                    ],
+                    "frecuencia_esperada": "10 veces/día",
+                    "comentarios": "Es el punto de partida para registrar, modificar o dar de baja características. Cada característica es propia de su categoría: el sabor de los pasteles no es el mismo que el sabor de las gelatinas. El personal solo puede consultar; registrar, modificar y eliminar es exclusivo de la administradora."
+                  }
                 }
               ]
             },
@@ -2152,7 +2567,106 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite a la administradora agregar opciones (por ejemplo, tamaños o sabores) a una característica, con sus multiplicadores y puntos de selección."
+                  "descripcion_resumida": "Permite a la administradora agregar opciones (por ejemplo, tamaños o sabores) a una característica, con sus multiplicadores y puntos de selección.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora agregar una opción a una característica (por ejemplo, «Grande» en Tamaño o «Moño» en Decoración), con los valores que afectan los ingredientes, el costo y el presupuesto.",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita registrar una nueva opción («+ Nueva opción»)"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la característica siga existiendo y activa"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Despliega el formulario: nombre, descripción, multiplicador de ingredientes, multiplicador de costo, si escala, puntos de selección, multiplicador de presupuesto y disponibilidad"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Captura los datos y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios, que los multiplicadores sean mayores a cero y que los puntos de selección no sean negativos"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el nombre no se repita en la característica y que los puntos de selección no superen su presupuesto"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Almacena la opción asociada a la característica e informa el éxito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Cierra el formulario y actualiza el listado de opciones"
+                      }
+                    ],
+                    "postcondicion": "La opción queda registrada en la característica. Si está disponible, el cliente puede elegirla al personalizar los productos de esa categoría.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y no abre el formulario",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La característica sigue existiendo y activa?",
+                        "respuesta": "No",
+                        "accion": "Muestra «La característica ya no está disponible» y recarga el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los datos, cierra el formulario y muestra el listado sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Los campos están completos y con valores válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta en rojo los campos con error y conserva los datos capturados",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Ya existe una opción con ese nombre en la característica?",
+                        "respuesta": "Sí",
+                        "accion": "Muestra «La opción ya existe en esta característica» y mantiene el formulario abierto",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Los puntos de selección caben en el presupuesto de la característica?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Los puntos superan el presupuesto de la característica» con el presupuesto actual",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La opción se almacenó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación, muestra «No fue posible guardar la opción» y conserva el formulario",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "5 a 7",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "4 veces/mes",
+                    "comentarios": "Un multiplicador igual a 1 no cambia nada. Ejemplo: en Tamaño, «Grande» puede tener multiplicador de ingredientes 1.5 y multiplicador de presupuesto 2 (permite más decoraciones); en Decoración, un moño gasta 1 punto y un listón 2. Las opciones que no escalan (por ejemplo, las velas) no cambian aunque crezca el pastel. Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "cbb7de10-a499-45a3-9d7b-ba856695c761",
@@ -2172,7 +2686,103 @@
                   "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
-                  "descripcion_resumida": "Permite a la administradora dar de baja una opción de característica que ya no se ofrece."
+                  "descripcion_resumida": "Permite a la administradora dar de baja una opción de característica que ya no se ofrece.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora dar de baja una opción que ya no se ofrece, junto con sus exclusiones, siempre que no forme parte de pedidos en curso.",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una opción y solicita darla de baja"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la opción exista y recupera sus exclusiones y pedidos asociados"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica si la opción forma parte de pedidos vigentes"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica si es la última opción disponible de una característica obligatoria"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra la confirmación doble con las exclusiones que también se darán de baja"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Confirma o cancela la baja en la ventana de confirmación"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Registra la baja: inhabilita la opción y sus exclusiones si tienen historial, o las elimina si no tienen relaciones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Informa el éxito, actualiza el listado y retira la opción de la personalización del catálogo público"
+                      }
+                    ],
+                    "postcondicion": "La opción y sus exclusiones quedan inhabilitadas o eliminadas y ya no se ofrecen al cliente.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y mantiene el listado sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La opción existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Opción no encontrada» y recarga el listado sin realizar la baja",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿La opción forma parte de pedidos vigentes?",
+                        "respuesta": "Sí",
+                        "accion": "Bloquea la baja y muestra «La opción está en pedidos en curso» con sus folios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿Es la última opción disponible de una característica obligatoria?",
+                        "respuesta": "Sí",
+                        "accion": "Agrega a la confirmación el aviso de que los productos de esa categoría no podrán personalizarse hasta registrar otra opción",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿La administradora confirmó la baja?",
+                        "respuesta": "No",
+                        "accion": "Cierra la ventana; la opción permanece sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La baja se registró sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible dar de baja la opción»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 a 4",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "7 y 8",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "2 veces/mes",
+                    "comentarios": "Se prioriza la inhabilitación sobre el borrado definitivo para conservar el historial de pedidos. Los carritos que tengan esa opción se marcan con «Requiere actualizar personalización». Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "254030b2-7101-428d-ac7d-296237a8d7a8",
@@ -2191,7 +2801,114 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una opción de característica existente."
+                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una opción de característica existente.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora actualizar los datos de una opción de característica (nombre, descripción, multiplicadores, escalabilidad, puntos de selección o disponibilidad).",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una opción y solicita «Editar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la opción exista y recupera sus datos"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra el formulario con los datos actuales de la opción"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Modifica los datos y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios, los multiplicadores y los puntos de selección"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el nombre no se repita en la característica y que los puntos no superen su presupuesto"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Si cambió el multiplicador de costo o la disponibilidad, informa que los pedidos ya enviados conservan su precio y que los carritos se recalcularán, y solicita confirmación"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza la opción en la BD e informa el éxito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el listado y la personalización del catálogo público"
+                      }
+                    ],
+                    "postcondicion": "La opción queda actualizada y el cambio se refleja en el formulario de personalización. Los pedidos ya enviados conservan su precio y sus opciones originales.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión», no abre el formulario y mantiene el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La opción existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Opción no encontrada», no abre el formulario y recarga el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los cambios y cierra el formulario; la opción conserva sus datos",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Los datos capturados son válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta los campos con error y no guarda los cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿El nombre está disponible y los puntos caben en el presupuesto?",
+                        "respuesta": "No",
+                        "accion": "Muestra la alerta correspondiente y no guarda los cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La administradora confirmó el cambio?",
+                        "respuesta": "No",
+                        "accion": "Regresa al formulario conservando los datos sin guardarlos",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 8,
+                        "pregunta": "¿La actualización se realizó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible actualizar la opción»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "5 a 8",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "4 veces/mes",
+                    "comentarios": "Permite ajustar costos y existencias de las opciones (por ejemplo, desactivar un sabor de temporada). Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
@@ -2210,7 +2927,105 @@
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba de Inspección / UI",
-                  "descripcion_resumida": "Muestra las opciones disponibles de cada característica y sus parámetros."
+                  "descripcion_resumida": "Muestra las opciones disponibles de cada característica y sus parámetros.",
+                  "plantilla_caso_de_uso": {
+                    "requisitos_de_informacion_de_otros_modulos": [
+                      "Catálogo Público"
+                    ],
+                    "descripcion": "Permite a la administradora y al personal consultar las opciones de una característica (por ejemplo, Chico, Mediano y Grande en Tamaño) con sus multiplicadores, puntos de selección y exclusiones.",
+                    "precondicion": "El usuario se encuentra en el detalle de una característica del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora / Personal",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita ver las opciones de la característica y, si lo desea, escribe un criterio de búsqueda"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que la sesión siga activa y que la característica siga existiendo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica la conexión con la BD y consulta las opciones de la característica"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que existan opciones y que sus datos estén completos"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Despliega el listado con nombre, descripción, multiplicadores de ingredientes, de costo y de presupuesto, si escala, puntos de selección, disponibilidad y exclusiones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el listado mostrando solo las opciones que coinciden con el criterio"
+                      }
+                    ],
+                    "postcondicion": "El listado de opciones de la característica se muestra en pantalla. La información de las opciones no ha cambiado.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La sesión está activa y tiene permiso?",
+                        "respuesta": "No",
+                        "accion": "Bloquea el acceso, muestra «Acceso denegado» y redirige al inicio de sesión",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La característica existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Característica no encontrada» y regresa al listado de características",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y habilita «Reintentar»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La característica tiene opciones registradas?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Esta característica no tiene opciones registradas» y habilita «+ Nueva opción»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿Los datos de todas las opciones están completos?",
+                        "respuesta": "No",
+                        "accion": "Excluye los registros incompletos y avisa «Algunas opciones no pudieron cargarse»",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿El usuario escribió un criterio de búsqueda?",
+                        "respuesta": "No",
+                        "accion": "",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Alguna opción coincide con el criterio?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Sin resultados para el criterio ingresado» y habilita «Limpiar filtro»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "3 a 5",
+                        "cota_de_tiempo": "2 segundos"
+                      },
+                      {
+                        "paso": "6",
+                        "cota_de_tiempo": "1 segundo"
+                      }
+                    ],
+                    "frecuencia_esperada": "10 veces/día",
+                    "comentarios": "Es el punto de partida para registrar, modificar o dar de baja opciones y para administrar las exclusiones. El personal solo puede consultar."
+                  }
                 },
                 {
                   "id": "061be3c0-d1b0-4403-b059-777fc8c07c25",
@@ -2230,7 +3045,99 @@
                   "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
-                  "descripcion_resumida": "Evita combinaciones incompatibles de opciones (por ejemplo, un tipo de pastel con un sabor no compatible)."
+                  "descripcion_resumida": "Evita combinaciones incompatibles de opciones (por ejemplo, un tipo de pastel con un sabor no compatible).",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora registrar las combinaciones de opciones que no pueden elegirse juntas al personalizar un postre (por ejemplo, un tipo de pastel con un sabor que no es compatible) y activarlas o desactivarlas.",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona una opción y solicita administrar sus exclusiones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que la opción exista y recupera sus exclusiones registradas"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra las exclusiones actuales (opción excluida, motivo y estado) y las opciones de las demás características de la misma categoría"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Elige la opción incompatible y captura el motivo y el estado (o cambia el estado de una exclusión) y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que la opción elegida sea de otra característica de la misma categoría y que se haya indicado el motivo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Consulta en la BD si esa exclusión ya existe, en cualquiera de los dos sentidos"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Almacena la exclusión o su nuevo estado e informa el éxito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el listado; las exclusiones activas se aplican de inmediato en la personalización del catálogo público"
+                      }
+                    ],
+                    "postcondicion": "La exclusión queda registrada con su motivo y estado. Mientras esté activa, el cliente no puede elegir juntas las dos opciones.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y no abre la ventana de exclusiones",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La opción existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Opción no encontrada» y recarga el listado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los datos y cierra la ventana; las exclusiones no cambian",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La opción elegida es de otra característica de la misma categoría y hay motivo?",
+                        "respuesta": "No",
+                        "accion": "Resalta los campos con error y conserva los datos capturados",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿La exclusión ya existe?",
+                        "respuesta": "Sí",
+                        "accion": "Muestra «Esta exclusión ya está registrada» con su estado actual",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La exclusión se almacenó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible guardar la exclusión»",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "5 a 7",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "2 veces/mes",
+                    "comentarios": "Para dejar de aplicar una exclusión se cambia su estado a inactiva en lugar de borrarla, así se conserva el motivo. Los pedidos ya enviados no se modifican. Solo la administradora tiene acceso a esta función."
+                  }
                 }
               ]
             },
@@ -2260,7 +3167,7 @@
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo Público"
                     ],
-                    "descripcion": "Permite a la administradora buscar los productos registrados y revisar sus características: precio, tamaños, sabores, rellenos, fotografía y si se muestran en la tienda web.",
+                    "descripcion": "Permite a la administradora buscar los productos registrados y revisar sus datos: precio base, fotografía, si se muestran en la tienda web y las características de su categoría con sus opciones (tamaños, sabores, rellenos, etc.).",
                     "precondicion": "La administradora se encuentra en el módulo \"Catálogo y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
@@ -2290,7 +3197,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Muestra la ficha completa del producto: SKU, precios, tamaños, opciones y fotografía"
+                        "accion": "Muestra la ficha completa del producto: SKU, precio base, fotografía y las características de su categoría con sus opciones disponibles"
                       }
                     ],
                     "postcondicion": "Las características del producto se muestran en pantalla. La información de los productos no ha cambiado.",
@@ -2342,7 +3249,7 @@
                       }
                     ],
                     "frecuencia_esperada": "15 veces/día",
-                    "comentarios": "Permite verificar las opciones de personalización configuradas para cada postre antes de modificarlo o darlo de baja."
+                    "comentarios": "Permite verificar las características y opciones de personalización que aplican a cada postre antes de modificarlo o darlo de baja."
                   }
                 },
                 {
@@ -2364,7 +3271,7 @@
                   "metodo_verificacion": "Prueba Funcional",
                   "descripcion_resumida": "Permite dar de alta nuevos productos asociándolos a categorías y características.",
                   "plantilla_caso_de_uso": {
-                    "descripcion": "Permite a la administradora agregar un nuevo postre al catálogo con su precio, fotografía y las opciones que el cliente podrá personalizar.",
+                    "descripcion": "Permite a la administradora agregar un nuevo postre al catálogo con su precio base y fotografía. Las opciones que el cliente podrá personalizar son las características registradas para su categoría.",
                     "precondicion": "La administradora se encuentra en el módulo \"Catálogo y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
@@ -2467,7 +3374,7 @@
                       }
                     ],
                     "frecuencia_esperada": "3 veces/mes",
-                    "comentarios": "Al registrarse, el producto aún no tiene receta; esta se registra después en la sección de recetas para que sus insumos se descuenten automáticamente del inventario cuando se prepare. Solo la administradora tiene acceso a esta función."
+                    "comentarios": "Al registrarse, el producto aún no tiene receta; esta se registra después en la sección de recetas para que sus insumos se descuenten automáticamente del inventario cuando se prepare. Las características y opciones de personalización no se capturan aquí: el producto usa las de su categoría, que se administran en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
@@ -2488,7 +3395,7 @@
                   "metodo_verificacion": "Prueba Funcional",
                   "descripcion_resumida": "Permite editar precios base, fotos, insumos y especificaciones de un producto.",
                   "plantilla_caso_de_uso": {
-                    "descripcion": "Permite a la administradora actualizar los datos de un postre (precio, descripción, fotografía u opciones). Los pedidos ya solicitados conservan su precio original.",
+                    "descripcion": "Permite a la administradora actualizar los datos de un postre (precio base, descripción, categoría o fotografía). Los pedidos ya solicitados conservan su precio original.",
                     "precondicion": "La administradora se encuentra en el listado de productos del módulo \"Catálogo y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
@@ -2606,7 +3513,7 @@
                       }
                     ],
                     "frecuencia_esperada": "5 veces/mes",
-                    "comentarios": "Permite el ajuste de precios y opciones de personalización. Solo la administradora tiene acceso a esta función."
+                    "comentarios": "Permite el ajuste de precios y datos del postre; las opciones de personalización se ajustan en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
@@ -2768,7 +3675,11 @@
               "folio",
               "fecha de entrega esperada",
               "anticipo requerido",
-              "postres que conforman el pedido"
+              "postres que conforman el pedido",
+              "datos modificados del pedido",
+              "fecha y hora de modificación del pedido",
+              "motivo de baja del pedido",
+              "fecha y hora de baja del pedido"
             ],
             "intervalo_temporal": "Pasado, presente y futuro",
             "comentarios": "Corresponde al Módulo 3 (Gestor de Pedidos y Producción)."
@@ -2874,7 +3785,7 @@
                   "metodo_verificacion": "Prueba de Inspección / UI",
                   "descripcion_resumida": "Permite examinar el detalle técnico, fotos de referencia y factibilidad de una solicitud.",
                   "plantilla_caso_de_uso": {
-                    "descripcion": "Permite a la administradora revisar el detalle de una solicitud nueva (productos, personalización, entrega y pago) para decidir si la aprueba o la cancela.",
+                    "descripcion": "Permite a la administradora revisar el detalle de una solicitud nueva (productos, personalización, entrega y pago) para decidir si la aprueba, la corrige, la cancela o la da de baja.",
                     "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
@@ -2900,10 +3811,10 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Muestra la ficha del pedido con la carga del día y los botones «Aprobar», «Cancelar» e «Imprimir ticket»"
+                        "accion": "Muestra la ficha del pedido con la carga del día y los botones «Aprobar», «Modificar», «Cancelar», «Dar de baja» e «Imprimir ticket»"
                       }
                     ],
-                    "postcondicion": "La administradora tiene en pantalla toda la información necesaria para aprobar o cancelar la solicitud. El pedido no ha cambiado.",
+                    "postcondicion": "La administradora tiene en pantalla toda la información necesaria para aprobar, modificar, cancelar o dar de baja la solicitud. El pedido no ha cambiado.",
                     "excepciones": [
                       {
                         "paso": 1,
@@ -2982,7 +3893,168 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite a la administradora corregir o actualizar los datos de un pedido."
+                  "descripcion_resumida": "Permite a la administradora corregir o actualizar los datos de un pedido.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora corregir los datos de un pedido (productos, personalización, cantidades, datos de entrega o fecha de entrega) antes de que entre a preparación.",
+                    "precondicion": "La administradora consultó el pedido en el módulo \"Gestión de Pedidos\" o en el historial de pedidos.",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona el pedido y solicita «Modificar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el pedido exista, no esté cancelado ni dado de baja y que su estado sea anterior a «En preparación»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra el formulario con los productos, la personalización, los datos de entrega y la fecha de entrega actuales"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Modifica los datos y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios, que la fecha de entrega sea futura y el formato del teléfono y el correo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que las opciones elegidas sigan disponibles, respeten las exclusiones y el presupuesto de cada característica"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Recalcula el total y, si el pedido tiene pagos validados, el saldo pendiente, y muestra la diferencia"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Confirma o cancela los cambios"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Guarda los cambios y registra en el historial del pedido qué cambió, la fecha, la hora y el usuario"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza la agenda si cambió la fecha de entrega y notifica al cliente los cambios por WhatsApp y correo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Informa el éxito y actualiza la vista del pedido"
+                      }
+                    ],
+                    "postcondicion": "El pedido queda actualizado con su nuevo total y saldo, el cambio queda registrado en su historial, la agenda está al día y el cliente fue notificado. El estado del pedido no cambia.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y no abre el formulario",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Pedido no encontrado» y recarga la lista sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido está cancelado o dado de baja?",
+                        "respuesta": "Sí",
+                        "accion": "Muestra «Este pedido ya no admite cambios»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido ya entró a producción («En preparación» o posterior)?",
+                        "respuesta": "Sí",
+                        "accion": "Bloquea la modificación y muestra «El pedido ya entró a producción y no puede modificarse»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿La administradora eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Descarta los cambios y cierra el formulario; el pedido no cambia",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Los datos capturados son válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta los campos con error y conserva los datos capturados",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Las opciones siguen disponibles y son compatibles entre sí?",
+                        "respuesta": "No",
+                        "accion": "Marca las opciones con conflicto y muestra el motivo",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿El nuevo total es menor que lo ya pagado?",
+                        "respuesta": "Sí",
+                        "accion": "Avisa que al confirmar se registrará un reembolso pendiente por la diferencia",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿Lo pagado sigue cubriendo el anticipo del nuevo total?",
+                        "respuesta": "No",
+                        "accion": "Avisa que el pedido no podrá pasar a «En preparación» hasta cubrir el anticipo",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 8,
+                        "pregunta": "¿La administradora confirmó los cambios?",
+                        "respuesta": "No",
+                        "accion": "Regresa al formulario conservando los datos sin guardarlos",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 9,
+                        "pregunta": "¿El pedido fue cambiado desde otra sesión?",
+                        "respuesta": "Sí",
+                        "accion": "No aplica los cambios, muestra «El pedido fue actualizado por otro usuario» y recarga",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 9,
+                        "pregunta": "¿Los cambios se guardaron sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible modificar el pedido»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 10,
+                        "pregunta": "¿La notificación se envió correctamente?",
+                        "respuesta": "No",
+                        "accion": "Mantiene los cambios y reintenta el envío en segundo plano",
+                        "despues": "continua"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "6 y 7",
+                        "cota_de_tiempo": "2 segundos"
+                      },
+                      {
+                        "paso": "9 a 11",
+                        "cota_de_tiempo": "3 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "5 veces/semana",
+                    "comentarios": "Solo se permite antes de «En preparación», porque en ese momento los insumos ya se descontaron del inventario (la misma regla que la cancelación). Modificar no cambia el estado del pedido. Solo la administradora tiene acceso a esta función."
+                  }
                 },
                 {
                   "id": "9e92ac26-5791-4020-9dd0-b4d68ce01874",
@@ -3002,7 +4074,121 @@
                   "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
-                  "descripcion_resumida": "Permite a la administradora dar de baja un pedido sin perder su historial."
+                  "descripcion_resumida": "Permite a la administradora dar de baja un pedido sin perder su historial.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite a la administradora dar de baja una solicitud registrada por error (duplicada, de prueba o con datos falsos) antes de aprobarla, sin borrarla del historial.",
+                    "precondicion": "La administradora se encuentra revisando una solicitud «En proceso de aceptación» en el módulo \"Gestión de Pedidos\".",
+                    "actor": "Administradora",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona la solicitud y solicita «Dar de baja»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el pedido exista y que no esté dado de baja"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica que el pedido siga «En proceso de aceptación»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra la confirmación doble y solicita el motivo de la baja"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Indica el motivo y confirma, o elige «No dar de baja»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que se haya indicado el motivo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Marca el pedido como dado de baja con motivo, fecha, hora y usuario, y lo retira de las listas de trabajo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Notifica al cliente por WhatsApp y correo que su solicitud fue dada de baja"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Informa el éxito y actualiza la lista de solicitudes"
+                      }
+                    ],
+                    "postcondicion": "El pedido queda marcado como dado de baja: ya no aparece en las listas de trabajo, la agenda ni los reportes, pero se conserva en el historial con su motivo.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Error de conexión» y mantiene la lista sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido existe en la base de datos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Pedido no encontrado» y recarga la lista sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El pedido ya estaba dado de baja?",
+                        "respuesta": "Sí",
+                        "accion": "Muestra «Esta solicitud ya fue dada de baja el [fecha]» con el motivo registrado",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿El pedido sigue «En proceso de aceptación»?",
+                        "respuesta": "No",
+                        "accion": "Bloquea la baja y muestra «Solo se pueden dar de baja solicitudes no aprobadas; use la cancelación»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La administradora confirmó la baja?",
+                        "respuesta": "No",
+                        "accion": "Cierra la ventana; la solicitud permanece sin cambios",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Se indicó un motivo?",
+                        "respuesta": "No",
+                        "accion": "Resalta el campo y muestra «Indica el motivo de la baja»",
+                        "despues": "5"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿La baja se registró sin errores?",
+                        "respuesta": "No",
+                        "accion": "Deshace la operación y muestra «No fue posible dar de baja la solicitud»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 8,
+                        "pregunta": "¿La notificación se envió correctamente?",
+                        "respuesta": "No",
+                        "accion": "Mantiene la baja y reintenta el envío en segundo plano",
+                        "despues": "continua"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 y 3",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "6 a 9",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "2 veces/mes",
+                    "comentarios": "La baja no es un estado ni sustituye a la cancelación: la cancelación es para pedidos reales que no se van a producir y se le informa el motivo al cliente; la baja es para solicitudes registradas por error que todavía no se aprueban (por eso no tienen pagos). Los pedidos dados de baja solo se consultan en el historial con la opción «Dados de baja». Solo la administradora tiene acceso a esta función."
+                  }
                 }
               ]
             },
@@ -3031,7 +4217,7 @@
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
-                    "accion": "Solicita consultar el historial de pedidos e indica criterios opcionales (folio, cliente, fechas, cancelados)"
+                    "accion": "Solicita consultar el historial de pedidos e indica criterios opcionales (folio, cliente, fechas, cancelados, dados de baja)"
                   },
                   {
                     "carril": "Sistema",
@@ -3047,7 +4233,7 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Muestra la lista del más reciente al más antiguo con folio, cliente, fechas, total, estado y marca «Cancelado»"
+                    "accion": "Muestra la lista del más reciente al más antiguo con folio, cliente, fechas, total, estado y marca «Cancelado» o «Dado de baja»"
                   },
                   {
                     "carril": "Sistema",
@@ -3110,7 +4296,7 @@
                   }
                 ],
                 "frecuencia_esperada": "30 veces/día",
-                "comentarios": "El historial es de solo consulta; los cambios sobre un pedido se hacen al aprobarlo, cancelarlo, registrar sus pagos o cambiar su estado. Sobre esta lista se aplica el filtro por estados."
+                "comentarios": "El historial es de solo consulta; los cambios sobre un pedido se hacen al aprobarlo, modificarlo, cancelarlo, darlo de baja, registrar sus pagos o cambiar su estado. Sobre esta lista se aplica el filtro por estados."
               }
             },
             {
@@ -3137,7 +4323,7 @@
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
-                    "accion": "Selecciona un estado en el filtro (o «Cancelados») y solicita aplicarlo"
+                    "accion": "Selecciona un estado en el filtro (o «Cancelados» o «Dados de baja») y solicita aplicarlo"
                   },
                   {
                     "carril": "Sistema",
@@ -3179,7 +4365,7 @@
                   }
                 ],
                 "frecuencia_esperada": "40 veces/día",
-                "comentarios": "Los pedidos cancelados no forman parte de los 6 estados: se consultan con la opción \"Cancelados\" y conservan el último estado que alcanzaron."
+                "comentarios": "Los pedidos cancelados no forman parte de los 6 estados: se consultan con la opción \"Cancelados\" y conservan el último estado que alcanzaron. Lo mismo pasa con los pedidos dados de baja (opción «Dados de baja»)."
               }
             },
             {
@@ -4309,7 +5495,7 @@
               "descripcion_resumida": "Dispara mensajes automáticos al cliente tras cambios clave de estado o aprobación de pagos.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Envía automáticamente avisos al cliente por WhatsApp y correo electrónico cada vez que su pedido cambia, sin detener el trabajo en el sistema.",
-                "precondicion": "Ocurre un evento sobre un pedido: registro de la solicitud, aprobación, cancelación, validación o rechazo de un pago, o cambio de estado.",
+                "precondicion": "Ocurre un evento sobre un pedido: registro de la solicitud, aprobación, modificación, cancelación, baja de la solicitud, validación o rechazo de un pago, o cambio de estado.",
                 "secuencia_normal": [
                   {
                     "carril": "Sistema",
@@ -5001,9 +6187,7 @@
                 "RF-33",
                 "RF-42"
               ],
-              "extiende": [
-                "RF-41"
-              ],
+              "extiende": [],
               "rol": "Sistema / Automatización",
               "prioridad": "Alta",
               "metodo_verificacion": "Prueba de Integración",
@@ -5029,7 +6213,7 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Calcula el total de cada insumo según las recetas y las unidades pedidas"
+                    "accion": "Calcula el total de cada insumo según las recetas, las unidades pedidas y los multiplicadores de ingredientes de las opciones elegidas (aplicados solo a lo que escala)"
                   },
                   {
                     "carril": "Sistema",
