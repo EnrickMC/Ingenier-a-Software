@@ -58,7 +58,8 @@
               "descripcion": "El sistema debe permitir a los usuarios visualizar el catálogo general de postres y productos disponibles, organizados por categorías e incluyendo imágenes, nombres y precios base.",
               "comentarios": "El catálogo debe de ser la primera cosa en ver por un cliente al entrar en la página web. Este tendrá sistema de orden y filtrado de búsqueda.",
               "dependencias": [
-                "RF-13"
+                "RF-13",
+                "RF-18"
               ],
               "relaciones": [
                 "RF-13",
@@ -243,11 +244,16 @@
               "titulo": "Registro de pedido personalizado",
               "descripcion": "El sistema debe de permitir el registro de pedidos. Los pedidos deben de tener el nombre del cliente, el telefono del cliente, el correo del cliente, la direccion del cliente contando con su colonia, calle, numero interior, numero exterior, codigo postal, el estado del pedido, Modalidad de pago, monto total, modalidad de entrega, fecha de solicitud (es la fecha en la que se inicio el pedido), folio, fecha de entrega esperada y el anticipo requerido para iniciar la produccion del pedido. postres que conforman el pedidos. Tambien deben de tener los productos que encapsula el pedido como lo son cantidad, dedicatorio y comentario.\nLos pedidos de los clientes inician en el estado de \"pendiente de aprobación\".",
               "comentarios": "El sistema debe de permitir el registro de pedidos segun la disponibilidad del catalogo.",
-              "dependencias": [],
+              "dependencias": [
+                "RF-2",
+                "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                "061be3c0-d1b0-4403-b059-777fc8c07c25"
+              ],
               "relaciones": [
                 "RF-17",
                 "RF-2",
-                "RNF-6"
+                "RNF-6",
+                "061be3c0-d1b0-4403-b059-777fc8c07c25"
               ],
               "extiende": [],
               "rol": "Cliente Público",
@@ -913,7 +919,9 @@
               "titulo": "Visualización de pedidos realizados",
               "descripcion": "El sistema debe permitir al cliente consultar el historial y estado actual de sus solicitudes enviadas (En espera de confirmación, confirmado, pagado o adelanto pagado, en preparación, preparado y entregado).",
               "comentarios": "Permite el seguimiento mediante algún dato de contacto",
-              "dependencias": [],
+              "dependencias": [
+                "RF-11"
+              ],
               "relaciones": [
                 "RF-11"
               ],
@@ -1030,8 +1038,8 @@
                   "relaciones": [],
                   "extiende": [],
                   "rol": "Cliente Público",
-                  "prioridad": "",
-                  "metodo_verificacion": "",
+                  "prioridad": "Alta",
+                  "metodo_verificacion": "Prueba Funcional / UI",
                   "descripcion_resumida": "Permite al cliente ver los productos que ha agregado a su carrito de compras.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite al cliente revisar los productos de su carrito con su personalización, cantidad y subtotal, y el total a pagar.",
@@ -1474,7 +1482,7 @@
           "nombre": "Catálogo de Personalización",
           "objetivo": {
             "titulo": "Gestionar el catálogo de productos y personalización",
-            "descripcion": "El sistema deberá permitir la administración completa de las categorías, productos, características e ingredientes de los postres disponibles para su personalización y venta.",
+            "descripcion": "El sistema deberá permitir la administración completa de las categorías, productos, características, opciones de características, exclusiones e ingredientes de los postres disponibles para su personalización y venta.",
             "estabilidad": "Alta",
             "comentarios": "Corresponde al Módulo 1 (Catálogo de Personalización de Postres)."
           },
@@ -2050,156 +2058,186 @@
               ]
             },
             {
-              "crud": "Caracteristicas",
+              "crud": "Características",
               "requerimientos": [
                 {
                   "id": "6a61d173-f57e-4c54-a225-d9eccc644b0e",
                   "tipo": "RF",
-                  "titulo": "Registro caracteristica",
-                  "descripcion": "Permite agregar una característica nueva a una categoría de producto.",
+                  "titulo": "Registro de característica",
+                  "descripcion": "El sistema debe permitir registrar una nueva característica dentro de una categoría de producto (por ejemplo, sabor, tamaño o decoración), indicando su nombre, descripción, si es de selección única o múltiple, si es obligatoria, su disponibilidad, su presupuesto de selección, su orden de muestra y su estado.",
                   "comentarios": "Cada característica debe de tener si se pueden elegir una o multiples veces (por ejemplo, un sabor de un pastel solo se puede elegir una vez, en cambio una decoración se puede elegir multiples veces), si es obligatoria la característica, si esta disponible, presupuesto de selección de características (opciones activadas al mismo tiempo que puede tener esa característica), orden para mostrar el programa (por ejemplo, el sabor se debe de mostrar antes del tamaño en la categoría de pastel), descripción de característica, estado característica, nombre de característica.\nFinalmente cada característica es propia de cada categoría, la característica de sabor para pastel no es la misma que sabor para gelatina por ejemplo.\nSolo la administradora debe de tener acceso.",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a",
+                    "RF-13"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Media",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite a la administradora agregar una característica personalizable a una categoría de producto."
                 },
                 {
                   "id": "dee3c676-dd64-403e-a3bb-9d7e6e5c3b6f",
                   "tipo": "RF",
-                  "titulo": "Modificar caractersitica",
-                  "descripcion": "Permite el modificar una característica.",
+                  "titulo": "Modificación de característica",
+                  "descripcion": "El sistema debe permitir modificar los datos de una característica registrada (nombre, descripción, tipo de selección, obligatoriedad, disponibilidad, presupuesto de selección, orden de muestra y estado).",
                   "comentarios": "Solo la administradora debe de tener acceso",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a",
+                    "6a61d173-f57e-4c54-a225-d9eccc644b0e"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Media",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una característica existente."
                 },
                 {
                   "id": "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
                   "tipo": "RF",
-                  "titulo": "Eliminar caracteristica",
-                  "descripcion": "Permite eliminar una característica.",
+                  "titulo": "Eliminación de característica",
+                  "descripcion": "El sistema debe permitir eliminar una característica de una categoría de producto, solicitando confirmación antes de realizar la eliminación.",
                   "comentarios": "Solo la administradora debe de tener acceso",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a",
+                    "6a61d173-f57e-4c54-a225-d9eccc644b0e",
+                    "RNF-5"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Baja",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
+                  "descripcion_resumida": "Permite a la administradora dar de baja una característica que ya no se ofrece."
                 },
                 {
                   "id": "ad3d4338-06eb-4485-963b-81dd8c95656a",
                   "tipo": "RF",
-                  "titulo": "Visualizar caracteristica",
-                  "descripcion": "Permite visualizar una característica.",
+                  "titulo": "Visualización de características",
+                  "descripcion": "El sistema debe permitir consultar las características registradas de cada categoría de producto, con su tipo de selección, obligatoriedad, disponibilidad, presupuesto de selección, orden de muestra y estado.",
                   "comentarios": "Es necesario para poder realizar los demas pasos de crud de caracteristicas",
                   "dependencias": [
                     "RF-13"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "RF-13",
+                    "RF-17"
+                  ],
                   "extiende": [],
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba de Inspección / UI",
+                  "descripcion_resumida": "Muestra las características personalizables de cada categoría de producto."
                 }
               ]
             },
             {
-              "crud": "Opcion de caracteristica",
+              "crud": "Opción de característica",
               "requerimientos": [
                 {
                   "id": "347f80cb-6938-4898-b006-fe57bd7cbf78",
                   "tipo": "RF",
-                  "titulo": "Registro de opción de caracteristica",
-                  "descripcion": "Cada opción de característica debe de tener nombre, descripción, un multiplicador de ingredientes (por ejemplo una característica de un pastel seria su tamaño y una opción de característica seria grande o pequeño en este caso puede aumentar los ingredientes que usa), multiplicador de costo (de la misma manera una caracteristica del pastel seria un glaseado, entonces si una caracteristica es muy compleja de realizar se le puede agregar un extra de costo ademas de los ingredientes como puede ser un glaseado especial), si se escala (en este caso si es afectado por el crecimiento de ingredientes de otras caracteristicas, por ejemplo una caracteristica de pastel tamaño puede afectar al costo de ingredientes del glaseado, en cambio unas velas no aumentaran sin importar que tanto crezca el pastel), Si se encuentra disponible, punto seleccion (puntos que gasta del presupuesto de la caracteristica , por ejemplo, el uso de un moño puede gastar 1 punto de la caracteristica decoracion y un liston gasta 2, si se le asigna 3 puntos al presupuesto de seleccion de caracteristica, entonces se puede hacer combinaciones como usar un maximo de tres moños, o un listo y un moño), finalmente un multiplicador de presupuesto de opciones (por ejemplo, si se selecciona un tamaño grande este aplicara un multiplciador de presupuesto de la caracteristica, permitiendo colocar más decoraciones o otras cosas que son afectadas por este presupuesto).\t",
+                  "titulo": "Registro de opción de característica",
+                  "descripcion": "El sistema debe permitir registrar una opción dentro de una característica. Cada opción de característica debe de tener nombre, descripción, un multiplicador de ingredientes (por ejemplo una característica de un pastel seria su tamaño y una opción de característica seria grande o pequeño en este caso puede aumentar los ingredientes que usa), multiplicador de costo (de la misma manera una caracteristica del pastel seria un glaseado, entonces si una caracteristica es muy compleja de realizar se le puede agregar un extra de costo ademas de los ingredientes como puede ser un glaseado especial), si se escala (en este caso si es afectado por el crecimiento de ingredientes de otras caracteristicas, por ejemplo una caracteristica de pastel tamaño puede afectar al costo de ingredientes del glaseado, en cambio unas velas no aumentaran sin importar que tanto crezca el pastel), Si se encuentra disponible, punto seleccion (puntos que gasta del presupuesto de la caracteristica , por ejemplo, el uso de un moño puede gastar 1 punto de la caracteristica decoracion y un liston gasta 2, si se le asigna 3 puntos al presupuesto de seleccion de caracteristica, entonces se puede hacer combinaciones como usar un maximo de tres moños, o un listo y un moño), finalmente un multiplicador de presupuesto de opciones (por ejemplo, si se selecciona un tamaño grande este aplicara un multiplciador de presupuesto de la caracteristica, permitiendo colocar más decoraciones o otras cosas que son afectadas por este presupuesto).",
                   "comentarios": "Solo la administradora tiene acceso",
                   "dependencias": [
                     "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Media",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite a la administradora agregar opciones (por ejemplo, tamaños o sabores) a una característica, con sus multiplicadores y puntos de selección."
                 },
                 {
                   "id": "cbb7de10-a499-45a3-9d7b-ba856695c761",
                   "tipo": "RF",
-                  "titulo": "Eliminar opción de caracterisitca",
-                  "descripcion": "permite eliminar una opcion de caracteristica",
+                  "titulo": "Eliminación de opción de característica",
+                  "descripcion": "El sistema debe permitir eliminar una opción de característica, solicitando confirmación antes de realizar la eliminación.",
                   "comentarios": "Solo la administradora tiene acceso",
                   "dependencias": [
                     "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                    "347f80cb-6938-4898-b006-fe57bd7cbf78",
+                    "RNF-5"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Alta",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
+                  "descripcion_resumida": "Permite a la administradora dar de baja una opción de característica que ya no se ofrece."
                 },
                 {
                   "id": "254030b2-7101-428d-ac7d-296237a8d7a8",
                   "tipo": "RF",
-                  "titulo": "Modificar opción de caracterisitca",
-                  "descripcion": "Permite modificar una opcion de caracteristica",
+                  "titulo": "Modificación de opción de característica",
+                  "descripcion": "El sistema debe permitir modificar los datos de una opción de característica (nombre, descripción, multiplicadores de ingredientes, de costo y de presupuesto, escalabilidad, disponibilidad y puntos de selección).",
                   "comentarios": "Solo la administradora tiene acceso",
                   "dependencias": [
                     "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                    "347f80cb-6938-4898-b006-fe57bd7cbf78"
+                  ],
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Media",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite a la administradora actualizar los datos de una opción de característica existente."
                 },
                 {
                   "id": "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
                   "tipo": "RF",
-                  "titulo": "Visualizar opción de caracteristica",
-                  "descripcion": "permite visualizar una opcion de caracteristica ",
+                  "titulo": "Visualización de opciones de característica",
+                  "descripcion": "El sistema debe permitir consultar las opciones registradas de cada característica, con sus multiplicadores, escalabilidad, disponibilidad y puntos de selección.",
                   "comentarios": "Es necesario para que toda las opciones de carcterisitcas funcione de manera correcta",
                   "dependencias": [
                     "ad3d4338-06eb-4485-963b-81dd8c95656a"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "ad3d4338-06eb-4485-963b-81dd8c95656a",
+                    "RF-17"
+                  ],
                   "extiende": [],
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba de Inspección / UI",
+                  "descripcion_resumida": "Muestra las opciones disponibles de cada característica y sus parámetros."
                 },
                 {
                   "id": "061be3c0-d1b0-4403-b059-777fc8c07c25",
                   "tipo": "RF",
-                  "titulo": "Exclusiones",
-                  "descripcion": "Algunas caracteristicas no deben de poder seleccionarse al mismo tiempo al realizar un pastel",
+                  "titulo": "Exclusiones entre opciones de características",
+                  "descripcion": "El sistema debe permitir registrar exclusiones entre opciones de características que no pueden seleccionarse al mismo tiempo al personalizar un postre, indicando el motivo y el estado de la exclusión.",
                   "comentarios": "Por ejemplo, un tipo de pastel especifico con un sabor de pastel especifico no son compatibles. debe contener motivo de exclusion y estado de la exclusion.",
                   "dependencias": [
                     "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
+                    "RF-3",
+                    "RNF-6"
+                  ],
                   "extiende": [],
                   "rol": "Administrador, Personal",
                   "prioridad": "Baja",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
+                  "descripcion_resumida": "Evita combinaciones incompatibles de opciones (por ejemplo, un tipo de pastel con un sabor no compatible)."
                 }
               ]
             },
@@ -2697,7 +2735,7 @@
           "nombre": "Gestor de Pedidos y Producción",
           "objetivo": {
             "titulo": "Controlar el flujo de pedidos, pagos y agenda de producción",
-            "descripcion": "El sistema deberá gestionar el ciclo de vida de los pedidos (aprobación, cancelación, seguimiento de saldos y bloqueo de preparación sin pago), organizar la agenda de producción y enviar notificaciones por WhatsApp y correo electrónico.",
+            "descripcion": "El sistema deberá gestionar el ciclo de vida de los pedidos (consulta, modificación, eliminación, aprobación, cancelación, seguimiento de saldos y bloqueo de preparación sin pago), organizar la agenda de producción y enviar notificaciones por WhatsApp y correo electrónico.",
             "estabilidad": "Alta",
             "comentarios": "Corresponde al Módulo 3 (Gestor de Pedidos y Producción)."
           },
@@ -2921,34 +2959,41 @@
                 {
                   "id": "8c118596-8d5a-4977-b2f8-da4a0451f211",
                   "tipo": "RF",
-                  "titulo": "Modificacion de pedido",
-                  "descripcion": "El sistema debe de permitir el modificar un pedido\t",
+                  "titulo": "Modificación de pedidos",
+                  "descripcion": "El sistema debe permitir a la administradora modificar los datos de un pedido registrado (productos, personalización, datos de entrega y fecha de entrega).",
                   "comentarios": "solo la administradora tiene acceso a esta funcion.",
                   "dependencias": [
                     "RF-23"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "RF-23",
+                    "RF-27"
+                  ],
                   "extiende": [],
-                  "rol": "Administrador, Personal",
+                  "rol": "Administrador",
                   "prioridad": "Media",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite a la administradora corregir o actualizar los datos de un pedido."
                 },
                 {
                   "id": "9e92ac26-5791-4020-9dd0-b4d68ce01874",
                   "tipo": "RF",
                   "titulo": "Eliminación de pedidos",
-                  "descripcion": "El sistema debe de permitir dar de baja un pedido",
+                  "descripcion": "El sistema debe permitir a la administradora dar de baja un pedido, solicitando confirmación antes de realizar la baja y conservando su registro en el historial.",
                   "comentarios": "Opcion solo accesible para la administradora",
                   "dependencias": [
                     "RF-23"
                   ],
-                  "relaciones": [],
+                  "relaciones": [
+                    "RF-23",
+                    "RF-25",
+                    "RNF-5"
+                  ],
                   "extiende": [],
-                  "rol": "Administrador, Personal",
+                  "rol": "Administrador",
                   "prioridad": "Baja",
-                  "metodo_verificacion": "",
-                  "descripcion_resumida": ""
+                  "metodo_verificacion": "Prueba Funcional / Integridad de Datos",
+                  "descripcion_resumida": "Permite a la administradora dar de baja un pedido sin perder su historial."
                 }
               ]
             },
@@ -2959,9 +3004,7 @@
               "descripcion": "El sistema debe permitir visualizar un listado centralizado con el registro histórico de todas las solicitudes y pedidos procesados en la plataforma.",
               "comentarios": "En el historial se verá el estatus de los pedidos, cliente, fecha de solicitud y monto, siendo solo visible para la administradora.",
               "dependencias": [
-                "RF-11",
-                "RF-30",
-                "RF-23"
+                "RF-11"
               ],
               "relaciones": [
                 "RF-11",
@@ -3137,7 +3180,7 @@
               "descripcion": "El sistema debe permitir al administrador evaluar las solicitudes recibidas y aprobar formalmente un pedido para su posterior procesamiento.",
               "comentarios": "La aprobación autoriza el avance del pedido dentro del flujo de trabajo.",
               "dependencias": [
-                "RF-28"
+                "RF-23"
               ],
               "relaciones": [
                 "RF-23",
@@ -3402,14 +3445,12 @@
               "titulo": "Estados de pedidos",
               "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente; (7) pedido cancelado, cuando el pedido es cancelado.",
               "comentarios": "Define el flujo de estados por el que avanza cada pedido, del 1 al 6, ademas de la excepcion cuando es cancelado.",
-              "dependencias": [
-                "RF-27"
-              ],
+              "dependencias": [],
               "relaciones": [],
               "extiende": [],
               "rol": "Sistema",
-              "prioridad": "",
-              "metodo_verificacion": "",
+              "prioridad": "Alta",
+              "metodo_verificacion": "Prueba Funcional",
               "descripcion_resumida": "Gestiona las etapas del pedido: en espera, confirmado, pagado, en preparación, preparado y entregado.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Define la secuencia oficial de estados por la que avanza cada pedido y permite al sistema validar que un cambio de estado respete esa secuencia.",
@@ -3485,7 +3526,8 @@
               "comentarios": "Para que el cliente consulte el estado de su pedido. Cuando se realiza un cambio se guarda el estado en el que estaba, el estado al que paso y la fecha de cambio.",
               "dependencias": [
                 "RF-24",
-                "RF-25"
+                "RF-25",
+                "RF-26"
               ],
               "relaciones": [
                 "RF-24"
@@ -3663,7 +3705,8 @@
               "descripcion": "El administrador debe verificar los comprobantes de anticipo o liquidación y registrarlos como válidos. de cada pago realizado se registra monto de pago, estado de validacion, referencia, link de comporbante (en caso de que haga falta), metodo de pago, fecha de pago y motivo de rechazo (en caso de que haga falta).",
               "comentarios": "Actualiza el registro financiero asociado al pedido. cada pago validado",
               "dependencias": [
-                "RF-23"
+                "RF-23",
+                "RF-24"
               ],
               "relaciones": [
                 "RF-23"
@@ -3938,7 +3981,9 @@
               "titulo": "Bloqueo de preparación sin pago confirmado",
               "descripcion": "El sistema debe impedir que un pedido pase a preparación mientras no tenga confirmado el pago del anticipo o del total.",
               "comentarios": "Evita producir pedidos que no han sido pagados.",
-              "dependencias": [],
+              "dependencias": [
+                "RF-28"
+              ],
               "relaciones": [],
               "extiende": [
                 "RF-27"
@@ -4015,7 +4060,9 @@
               "titulo": "Visualización de agenda de producción",
               "descripcion": "El sistema debe presentar un calendario u horaria de trabajo donde se programen los pedidos aprobados en función de su fecha y hora límite de entrega.",
               "comentarios": "Permite organizar la carga de trabajo.",
-              "dependencias": [],
+              "dependencias": [
+                "RF-24"
+              ],
               "relaciones": [
                 "RF-24"
               ],
@@ -4244,7 +4291,7 @@
                 "RF-28",
                 "RF-27",
                 "RNF-3",
-                "RNF-4"
+                "RNF-2"
               ],
               "extiende": [],
               "rol": "Sistema / Notificaciones",
@@ -4455,7 +4502,9 @@
               "titulo": "Registro de Entrada de Insumos",
               "descripcion": "El sistema debe permitir registrar el ingreso de nuevos lotes de materia prima, actualizando el stock disponible, la fecha de ingreso, fecha de caducidad y costo de adquisición.",
               "comentarios": "Incrementa automáticamente la cantidad disponible en el inventario.",
-              "dependencias": [],
+              "dependencias": [
+                "RF-34"
+              ],
               "relaciones": [
                 "RF-33",
                 "RF-34"
@@ -4589,7 +4638,9 @@
               "titulo": "Registro de Salida de Insumos",
               "descripcion": "El sistema debe permitir registrar bajas manuales de insumos justificadas por desperdicio, caducidad, daño, etc.",
               "comentarios": "Descuenta la cantidad especificada e impacta los reportes de pérdidas. debe de guardar fecha de salida, cantidad de salida, motivo, fecha de movimiento, costo de movimiento",
-              "dependencias": [],
+              "dependencias": [
+                "RF-37"
+              ],
               "relaciones": [
                 "RF-33",
                 "RF-34",
@@ -4933,7 +4984,8 @@
               "descripcion": "El sistema debe rebajar de forma automática las cantidades de materia prima del inventario según la recetas asociadas a los productos cuando el pedido al que pertenecen cambie a estado \"Aprobado\".",
               "comentarios": "Garantiza un control preciso de existencias sin intervención manual reiterada.",
               "dependencias": [
-                "RF-27"
+                "RF-27",
+                "RF-42"
               ],
               "relaciones": [
                 "RF-27",
@@ -5653,7 +5705,8 @@
                   "descripcion": "El sistema debe permitir registrar una receta de asociada a una opcion de caracteristica especifica, cada receta debe tener nombre, pasos preparacion, tiempo de elaboracion, estado de receta, ingredientes necesarios para elaboracion.",
                   "comentarios": "Vincula los productos del catálogo con la lista de materias primas.",
                   "dependencias": [
-                    "RF-18"
+                    "RF-18",
+                    "RF-34"
                   ],
                   "relaciones": [
                     "RF-18",
@@ -6514,7 +6567,7 @@
           "descripcion": "El sistema debe tener conexión estable con la API de negocio de WhatsApp para lograr el envío de mensajes",
           "comentarios": "Esta herramienta a petición del cliente permitirá comunicar de manera eficaz con los clientes finales.",
           "dependencias": [
-            "RF-31"
+            "RF-32"
           ],
           "relaciones": [
             "RF-32"
@@ -6532,7 +6585,7 @@
           "descripcion": "El sistema debe ser capaz de enviar correos electrónicos de manera automatizada a los clientes finales para dar seguimiento del estado de un pedido.",
           "comentarios": "Entrega a correo electrónico de comprobantes de pago, actualizaciones de estado de pedido y enlaces de recuperación de contraseñas.",
           "dependencias": [
-            "RF-31"
+            "RF-32"
           ],
           "relaciones": [
             "RF-32"
@@ -6573,9 +6626,12 @@
             "RF-8",
             "RF-16",
             "RF-20",
-            "RF-22",
-            "RF-35",
-            "RF-43"
+            "RF-25",
+            "RF-36",
+            "RF-44",
+            "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
+            "cbb7de10-a499-45a3-9d7b-ba856695c761",
+            "9e92ac26-5791-4020-9dd0-b4d68ce01874"
           ],
           "relaciones": [
             "RF-16",
@@ -6583,7 +6639,10 @@
             "RF-8",
             "RF-25",
             "RF-36",
-            "RF-44"
+            "RF-44",
+            "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
+            "cbb7de10-a499-45a3-9d7b-ba856695c761",
+            "9e92ac26-5791-4020-9dd0-b4d68ce01874"
           ],
           "extiende": [],
           "rol": "Usabilidad",
@@ -6641,7 +6700,7 @@
           "descripcion": "El sistema debe incluir un método que permitan al administrador ejecutar y exportar respaldos de información para garantizar la integridad de los datos almacenados.",
           "comentarios": "Es de suma importancia tener la posibilidad de recuperar la información de todo lo que engloba el sistema como el registro de los clientes, de pedidos, o ganancias generadas.",
           "dependencias": [
-            "RNF-2"
+            "RNF-1"
           ],
           "relaciones": [
             "RNF-1"
@@ -6659,7 +6718,7 @@
           "descripcion": "El sistema debe generar los reportes financieros en un formato de lectura compatibles con hojas de cálculo en Excel o similares.",
           "comentarios": "Facilita la administración de datos financieros o contables.",
           "dependencias": [
-            "RF-47"
+            "RF-48"
           ],
           "relaciones": [
             "RF-48"
