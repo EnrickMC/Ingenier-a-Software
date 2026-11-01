@@ -179,7 +179,7 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Recupera la ficha: descripción, ingredientes, precio base y las características de su categoría con sus opciones disponibles"
+                    "accion": "Recupera la ficha: descripción, ingredientes (según las recetas de sus opciones), precio base y las características de su categoría que aplican al producto con sus opciones disponibles"
                   },
                   {
                     "carril": "Sistema",
@@ -235,7 +235,7 @@
               "id": "RF-3",
               "tipo": "RF",
               "titulo": "Registro de pedido personalizado",
-              "descripcion": "El sistema debe de permitir el registro de pedidos. Los pedidos deben de tener el nombre del cliente, el telefono del cliente, el correo del cliente, la direccion del cliente contando con su colonia, calle, numero interior, numero exterior, codigo postal, el estado del pedido, Modalidad de pago, monto total, modalidad de entrega, fecha de solicitud (es la fecha en la que se inicio el pedido), folio, fecha de entrega esperada y el anticipo requerido para iniciar la produccion del pedido. postres que conforman el pedidos. Tambien deben de tener los productos que encapsula el pedido como lo son cantidad, dedicatorio y comentario.\nLos pedidos de los clientes inician en el estado de \"pendiente de aprobación\".",
+              "descripcion": "El sistema debe permitir al cliente personalizar un producto del catálogo eligiendo las opciones de cada característica que aplica al producto (por ejemplo, tamaño, sabor, relleno y decoración), respetando las características obligatorias, el presupuesto de selección y las exclusiones, y calcular su precio. Cada producto personalizado guarda su cantidad, dedicatoria, comentario y las opciones elegidas.",
               "comentarios": "El sistema debe de permitir el registro de pedidos segun la disponibilidad del catalogo.",
               "dependencias": [
                 "RF-2",
@@ -271,7 +271,7 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida en la BD que el producto siga activo y consulta las características de su categoría, sus opciones disponibles y las exclusiones activas"
+                    "accion": "Valida en la BD que el producto siga activo y consulta las características de su categoría que aplican al producto, sus opciones disponibles y las exclusiones activas"
                   },
                   {
                     "carril": "Sistema",
@@ -789,7 +789,7 @@
               "tipo": "RF",
               "titulo": "Confirmación y envío de solicitud del pedido",
               "descripcion": "El sistema debe procesar el pedido final, generar el desglose total (productos) y enviar la solicitud formal de cotización/pedido a la base de datos y al administrador.",
-              "comentarios": "Genera un folio único de seguimiento para el cliente.",
+              "comentarios": "Genera un folio único de seguimiento para el cliente. El pedido registrado guarda: nombre, teléfono y correo del cliente; dirección de entrega (colonia, calle, número interior, número exterior y código postal); estado del pedido; modalidad de pago; monto total; modalidad de entrega; fecha de solicitud; folio; fecha de entrega esperada; anticipo requerido y los productos que lo forman (cantidad, dedicatoria y comentario). Los pedidos inician en el estado \"En proceso de aceptación\".",
               "dependencias": [
                 "RF-10"
               ],
@@ -845,7 +845,7 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Muestra el pedido en «Gestión de Pedidos» y notifica al cliente por WhatsApp y correo"
+                    "accion": "Muestra el pedido en «Gestor de Pedidos y Producción» y notifica al cliente por WhatsApp y correo"
                   }
                 ],
                 "postcondicion": "El pedido queda registrado con folio único en estado \"En proceso de aceptación\", visible para la administradora, y el carrito del cliente queda vacío.",
@@ -925,7 +925,7 @@
               "id": "RF-12",
               "tipo": "RF",
               "titulo": "Visualización de pedidos realizados",
-              "descripcion": "El sistema debe permitir al cliente consultar el historial y estado actual de sus solicitudes enviadas (En espera de confirmación, confirmado, pagado o adelanto pagado, en preparación, preparado y entregado).",
+              "descripcion": "El sistema debe permitir al cliente consultar el historial y estado actual de sus solicitudes enviadas (En proceso de aceptación, Aprobado, Pagado, En preparación, Pedido terminado y Entregado).",
               "comentarios": "Permite el seguimiento mediante algún dato de contacto",
               "dependencias": [
                 "RF-11"
@@ -1044,7 +1044,7 @@
                   "id": "RF-5",
                   "tipo": "RF",
                   "titulo": "Visualización de producto en el carrito de compras",
-                  "descripcion": "El sistema debe permitir al usuario su carrito de compras permitiendo ver cuales productos han sido agregados.",
+                  "descripcion": "El sistema debe permitir al usuario visualizar su carrito de compras con los productos que ha agregado, su personalización, cantidad y subtotal.",
                   "comentarios": "Mantiene la sesión del carrito activa durante la navegación.",
                   "dependencias": [
                     "RF-1",
@@ -1264,8 +1264,8 @@
                 {
                   "id": "RF-7",
                   "tipo": "RF",
-                  "titulo": "Modificar productos del carrito de compra",
-                  "descripcion": "El sistema debe permitir al usuario poder modificar cantidades de productos agregadas al carrito de compras",
+                  "titulo": "Modificación de productos del carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario modificar la cantidad o la personalización de los productos agregados al carrito de compras.",
                   "comentarios": "Recalcula de inmediato el subtotal del pedido.",
                   "dependencias": [
                     "RF-5"
@@ -1392,7 +1392,7 @@
                 {
                   "id": "RF-8",
                   "tipo": "RF",
-                  "titulo": "Eliminar productos del carrito de compra",
+                  "titulo": "Eliminación de productos del carrito de compras",
                   "descripcion": "El sistema debe permitir al usuario remover ítems individuales o vaciar por completo los productos agregados al carrito de compras.",
                   "comentarios": "Requiere confirmación por parte del usuario.",
                   "dependencias": [
@@ -1497,13 +1497,13 @@
           "nombre": "Catálogo de Personalización",
           "objetivo": {
             "titulo": "Gestionar el catálogo de productos y personalización",
-            "descripcion": "El sistema deberá permitir la administración completa de las categorías, productos, características, opciones de características, exclusiones e ingredientes de los postres disponibles para su personalización y venta.",
+            "descripcion": "El sistema deberá permitir la administración completa de las categorías, productos, características, opciones de características y exclusiones de los postres disponibles para su personalización y venta.",
             "estabilidad": "Alta",
-            "comentarios": "Corresponde al Módulo 1 (Catálogo de Personalización de Postres)."
+            "comentarios": "Corresponde al Módulo 3 (Catálogo de Personalización de Postres)."
           },
           "requisito_informacion": {
-            "titulo": "Información de Administración del Catálogo, Categorías e Ingredientes",
-            "descripcion": "El sistema deberá almacenar la información técnica y administrativa estructurada sobre el catálogo maestro, categorías, opciones de personalización e ingredientes de los postres.",
+            "titulo": "Información de Administración del Catálogo, Categorías, Características y Productos",
+            "descripcion": "El sistema deberá almacenar la información técnica y administrativa estructurada sobre el catálogo maestro, categorías, características, opciones de personalización y exclusiones de los postres.",
             "datos_especificos": [
               "Nombre de categoría",
               "descripción de categoría",
@@ -1522,14 +1522,17 @@
               "multiplicador de costo de opción de característica",
               "escalabilidad de la opción de característica",
               "disponibilidad de opción de característica",
-              "costo por selección de opción de característica",
+              "puntos de selección de opción de característica",
               "multiplicador de presupuesto de opciones de característica",
               "Estado de exclusion",
               "motivo de exclusion",
               "nombre de postre",
               "descripción de postre",
               "visibilidad en catalogo publico de postre",
-              "link de fotografía de postre"
+              "link de fotografía de postre",
+              "precio base de postre",
+              "categoría del postre",
+              "características que aplican al postre"
             ],
             "intervalo_temporal": "Pasado y presente",
             "comentarios": "Corresponde al Módulo 3 (Catálogo de Personalización de Postres - Administración)."
@@ -1625,7 +1628,7 @@
                 {
                   "id": "RF-13",
                   "tipo": "RF",
-                  "titulo": "Visualización de Categorías",
+                  "titulo": "Visualización de categorías",
                   "descripcion": "El sistema debe de poder permitir la visualización de las categorías registradas.",
                   "comentarios": "Permite organizar el catálogo de productos agrupando en categorías.",
                   "dependencias": [],
@@ -1639,13 +1642,13 @@
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo Público"
                     ],
-                    "descripcion": "Permite a la administradora ver la lista de categorías de postres (por ejemplo, Pasteles Clásicos o Gelatinas de Leche), con su estado y cuántos productos tiene cada una.",
-                    "precondicion": "La administradora inició sesión en el panel administrativo con un usuario que tiene permiso de acceso al módulo \"Catálogo y Recetas\".",
-                    "actor": "Administradora",
+                    "descripcion": "Permite a la administradora ver la lista de categorías de postres (por ejemplo, Pasteles o Gelatinas), con su estado y cuántos productos tiene cada una.",
+                    "precondicion": "La administradora inició sesión en el panel administrativo con un usuario que tiene permiso de acceso al módulo \"Catálogo de Personalización\".",
+                    "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
-                        "accion": "Solicita ingresar a «Catálogo y Recetas» y consultar las categorías"
+                        "accion": "Solicita ingresar a «Catálogo de Personalización» y consultar las categorías"
                       },
                       {
                         "carril": "Sistema",
@@ -1730,7 +1733,7 @@
                 {
                   "id": "RF-14",
                   "tipo": "RF",
-                  "titulo": "Registro de Categorías",
+                  "titulo": "Registro de categorías",
                   "descripcion": "El sistema debe permitir agregar nuevas categorías de productos (pastel, gelatinas etc.)",
                   "comentarios": "Cada categoria debe de tener un nombre de categoria, descripcion de categoria y estado de categoria.\t\nLas dos categorías que se tienen actualmente son el pastel y gelatinas. Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
@@ -1746,7 +1749,7 @@
                   "descripcion_resumida": "Permite crear nuevas categorías clasificatorias de postres en el sistema.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora crear una nueva categoría para agrupar postres en el catálogo, sin que se repitan nombres.",
-                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -1823,13 +1826,13 @@
                       }
                     ],
                     "frecuencia_esperada": "2 veces/mes",
-                    "comentarios": "Actualmente se manejan las categorías: Pasteles Clásicos, Gelatinas de Leche, Gelatinas de Agua, Postres Individuales y Temporada. Solo la administradora tiene acceso a esta función."
+                    "comentarios": "Actualmente se manejan dos categorías: pasteles y gelatinas. Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
                   "id": "RF-15",
                   "tipo": "RF",
-                  "titulo": "Modificación de Categorías",
+                  "titulo": "Modificación de categorías",
                   "descripcion": "El sistema debe de poder permitir la modificación de las categorías existentes.",
                   "comentarios": "Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
@@ -1843,10 +1846,10 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite actualizar nombre y descripción de categorías existentes.",
+                  "descripcion_resumida": "Permite actualizar el nombre, la descripción y el estado de categorías existentes.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora cambiar el nombre, la descripción o el estado de una categoría. Si la desactiva, sus productos dejan de verse en la tienda web.",
-                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -1962,9 +1965,9 @@
                 {
                   "id": "RF-16",
                   "tipo": "RF",
-                  "titulo": "Eliminación de Categorías",
-                  "descripcion": "El sistema debe de permitir el borrado de categorías de producto existentes.",
-                  "comentarios": "Elimina todos los productos asociados a la categoría automáticamente. Agregar advertencia antes de eliminar.",
+                  "titulo": "Eliminación de categorías",
+                  "descripcion": "El sistema debe permitir dar de baja (eliminar o inhabilitar) categorías de producto existentes.",
+                  "comentarios": "No se puede dar de baja una categoría que tenga productos activos; si tiene historial se inhabilita en lugar de borrarse. Debe mostrar una advertencia antes de eliminar.",
                   "dependencias": [
                     "RF-13"
                   ],
@@ -1979,7 +1982,7 @@
                   "descripcion_resumida": "Permite eliminar o inhabilitar categorías del sistema.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de baja una categoría que ya no se usa, siempre que no tenga productos activos.",
-                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de categorías del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2095,7 +2098,7 @@
                   "descripcion_resumida": "Permite a la administradora agregar una característica personalizable a una categoría de producto.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora agregar una característica personalizable a una categoría de postres, indicando cómo la elegirá el cliente.",
-                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2213,7 +2216,7 @@
                   "descripcion_resumida": "Permite a la administradora actualizar los datos de una característica existente.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora actualizar la configuración de una característica (nombre, descripción, tipo de selección, obligatoriedad, presupuesto, orden de muestra, disponibilidad o estado).",
-                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2347,7 +2350,7 @@
                   "descripcion_resumida": "Permite a la administradora dar de baja una característica que ya no se ofrece.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de baja una característica que ya no se ofrece, junto con sus opciones y exclusiones, siempre que no forme parte de pedidos en curso.",
-                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de características de una categoría del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2372,7 +2375,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Registra la baja: inhabilita la característica, sus opciones y sus exclusiones si tienen historial, o las elimina si no tienen relaciones"
+                        "accion": "Registra la baja: inhabilita la característica, sus opciones (con sus recetas) y sus exclusiones si tienen historial, o las elimina si no tienen relaciones"
                       },
                       {
                         "carril": "Sistema",
@@ -2454,7 +2457,7 @@
                       "Catálogo Público"
                     ],
                     "descripcion": "Permite a la administradora y al personal consultar las características de una categoría de postres (por ejemplo, Sabor, Tamaño o Decoración) con su configuración y el número de opciones de cada una.",
-                    "precondicion": "El usuario inició sesión en el panel administrativo con permiso sobre el módulo \"Catálogo y Recetas\".",
+                    "precondicion": "El usuario inició sesión en el panel administrativo con permiso sobre el módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
@@ -2570,7 +2573,7 @@
                   "descripcion_resumida": "Permite a la administradora agregar opciones (por ejemplo, tamaños o sabores) a una característica, con sus multiplicadores y puntos de selección.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora agregar una opción a una característica (por ejemplo, «Grande» en Tamaño o «Moño» en Decoración), con los valores que afectan los ingredientes, el costo y el presupuesto.",
-                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2665,7 +2668,7 @@
                       }
                     ],
                     "frecuencia_esperada": "4 veces/mes",
-                    "comentarios": "Un multiplicador igual a 1 no cambia nada. Ejemplo: en Tamaño, «Grande» puede tener multiplicador de ingredientes 1.5 y multiplicador de presupuesto 2 (permite más decoraciones); en Decoración, un moño gasta 1 punto y un listón 2. Las opciones que no escalan (por ejemplo, las velas) no cambian aunque crezca el pastel. Solo la administradora tiene acceso a esta función."
+                    "comentarios": "Un multiplicador igual a 1 no cambia nada. Ejemplo: en Tamaño, «Grande» puede tener multiplicador de ingredientes 1.5 y multiplicador de presupuesto 2 (permite más decoraciones); en Decoración, un moño gasta 1 punto y un listón 2. Las opciones que no escalan (por ejemplo, las velas) no cambian aunque crezca el pastel. Si la opción lleva insumos, después se registra su receta en el módulo de inventario. Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
@@ -2689,7 +2692,7 @@
                   "descripcion_resumida": "Permite a la administradora dar de baja una opción de característica que ya no se ofrece.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de baja una opción que ya no se ofrece, junto con sus exclusiones, siempre que no forme parte de pedidos en curso.",
-                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2718,7 +2721,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Registra la baja: inhabilita la opción y sus exclusiones si tienen historial, o las elimina si no tienen relaciones"
+                        "accion": "Registra la baja: inhabilita la opción, sus exclusiones y su receta si tienen historial, o las elimina si no tienen relaciones"
                       },
                       {
                         "carril": "Sistema",
@@ -2804,7 +2807,7 @@
                   "descripcion_resumida": "Permite a la administradora actualizar los datos de una opción de característica existente.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora actualizar los datos de una opción de característica (nombre, descripción, multiplicadores, escalabilidad, puntos de selección o disponibilidad).",
-                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -2933,7 +2936,7 @@
                       "Catálogo Público"
                     ],
                     "descripcion": "Permite a la administradora y al personal consultar las opciones de una característica (por ejemplo, Chico, Mediano y Grande en Tamaño) con sus multiplicadores, puntos de selección y exclusiones.",
-                    "precondicion": "El usuario se encuentra en el detalle de una característica del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "El usuario se encuentra en el detalle de una característica del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
@@ -3048,7 +3051,7 @@
                   "descripcion_resumida": "Evita combinaciones incompatibles de opciones (por ejemplo, un tipo de pastel con un sabor no compatible).",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora registrar las combinaciones de opciones que no pueden elegirse juntas al personalizar un postre (por ejemplo, un tipo de pastel con un sabor que no es compatible) y activarlas o desactivarlas.",
-                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de opciones de una característica del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -3147,8 +3150,8 @@
                 {
                   "id": "RF-17",
                   "tipo": "RF",
-                  "titulo": "Visualizar características de productos",
-                  "descripcion": "El sistema debe de permitir consultar una lista de los productos que existen y su categoría.",
+                  "titulo": "Visualización de productos",
+                  "descripcion": "El sistema debe permitir consultar la lista de los productos que existen con su categoría, precio base, estado en la tienda web y las características que aplican a cada uno.",
                   "comentarios": "Este requerimiento es necesario para llevar control de productos y ver los productos que se pueden realizar.",
                   "dependencias": [
                     "RF-13",
@@ -3162,14 +3165,14 @@
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba de Inspección / UI",
-                  "descripcion_resumida": "Muestra los atributos parametrizables (sabores, tamaños, rellenos) de cada producto base.",
+                  "descripcion_resumida": "Muestra los productos registrados con su categoría, precio base y las características de personalización que aplican.",
                   "plantilla_caso_de_uso": {
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo Público"
                     ],
-                    "descripcion": "Permite a la administradora buscar los productos registrados y revisar sus datos: precio base, fotografía, si se muestran en la tienda web y las características de su categoría con sus opciones (tamaños, sabores, rellenos, etc.).",
-                    "precondicion": "La administradora se encuentra en el módulo \"Catálogo y Recetas\".",
-                    "actor": "Administradora",
+                    "descripcion": "Permite a la administradora buscar los productos registrados y revisar sus datos: precio base, fotografía, si se muestran en la tienda web y las características de su categoría que aplican al producto con sus opciones (tamaños, sabores, rellenos, etc.).",
+                    "precondicion": "La administradora se encuentra en el módulo \"Catálogo de Personalización\".",
+                    "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
@@ -3197,7 +3200,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Muestra la ficha completa del producto: SKU, precio base, fotografía y las características de su categoría con sus opciones disponibles"
+                        "accion": "Muestra la ficha completa del producto: SKU, precio base, fotografía y las características de su categoría que aplican al producto con sus opciones disponibles"
                       }
                     ],
                     "postcondicion": "Las características del producto se muestran en pantalla. La información de los productos no ha cambiado.",
@@ -3272,7 +3275,7 @@
                   "descripcion_resumida": "Permite dar de alta nuevos productos asociándolos a categorías y características.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora agregar un nuevo postre al catálogo con su precio base y fotografía. Las opciones que el cliente podrá personalizar son las características registradas para su categoría.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -3289,7 +3292,7 @@
                       },
                       {
                         "carril": "Actor",
-                        "accion": "Captura los datos del producto y elige «Guardar» o «Cancelar»"
+                        "accion": "Captura los datos del producto, marca las características de su categoría que le aplican y elige «Guardar» o «Cancelar»"
                       },
                       {
                         "carril": "Sistema",
@@ -3374,14 +3377,14 @@
                       }
                     ],
                     "frecuencia_esperada": "3 veces/mes",
-                    "comentarios": "Al registrarse, el producto aún no tiene receta; esta se registra después en la sección de recetas para que sus insumos se descuenten automáticamente del inventario cuando se prepare. Las características y opciones de personalización no se capturan aquí: el producto usa las de su categoría, que se administran en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
+                    "comentarios": "El producto no tiene receta propia: sus insumos se descuentan según las recetas de las opciones que elija el cliente. Aquí solo se marcan cuáles características de la categoría aplican al producto; las características y sus opciones se administran en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
                   "id": "RF-19",
                   "tipo": "RF",
-                  "titulo": "Modificar datos del producto",
-                  "descripcion": "El sistema debe de poder permitir la actualización de características de un producto ya registrado.",
+                  "titulo": "Modificación de producto",
+                  "descripcion": "El sistema debe permitir actualizar los datos de un producto ya registrado (precio base, descripción, categoría, fotografía y características que le aplican).",
                   "comentarios": "Solo la administradora debe de tener acceso a esta característica.",
                   "dependencias": [
                     "RF-17"
@@ -3393,10 +3396,10 @@
                   "rol": "Administrador",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite editar precios base, fotos, insumos y especificaciones de un producto.",
+                  "descripcion_resumida": "Permite editar el precio base, la descripción, la fotografía y las características que aplican a un producto.",
                   "plantilla_caso_de_uso": {
-                    "descripcion": "Permite a la administradora actualizar los datos de un postre (precio base, descripción, categoría o fotografía). Los pedidos ya solicitados conservan su precio original.",
-                    "precondicion": "La administradora se encuentra en el listado de productos del módulo \"Catálogo y Recetas\".",
+                    "descripcion": "Permite a la administradora actualizar los datos de un postre (precio base, descripción, categoría, fotografía o las características que le aplican). Los pedidos ya solicitados conservan su precio original.",
+                    "precondicion": "La administradora se encuentra en el listado de productos del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -3513,7 +3516,7 @@
                       }
                     ],
                     "frecuencia_esperada": "5 veces/mes",
-                    "comentarios": "Permite el ajuste de precios y datos del postre; las opciones de personalización se ajustan en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
+                    "comentarios": "Permite el ajuste de precios y datos del postre; las características y opciones en sí se ajustan en «Características» y «Opción de característica». Solo la administradora tiene acceso a esta función."
                   }
                 },
                 {
@@ -3536,7 +3539,7 @@
                   "descripcion_resumida": "Permite dar de baja un producto del catálogo del sistema.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora retirar un postre del catálogo cuando ya no se venderá, siempre que no forme parte de pedidos en curso.",
-                    "precondicion": "La administradora se encuentra en el listado de productos del módulo \"Catálogo y Recetas\".",
+                    "precondicion": "La administradora se encuentra en el listado de productos del módulo \"Catálogo de Personalización\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -3545,7 +3548,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Valida en la BD que el producto exista y recupera sus pedidos y receta"
+                        "accion": "Valida en la BD que el producto exista y recupera sus pedidos"
                       },
                       {
                         "carril": "Sistema",
@@ -3637,7 +3640,7 @@
             "titulo": "Controlar el flujo de pedidos, pagos y agenda de producción",
             "descripcion": "El sistema deberá gestionar el ciclo de vida de los pedidos (consulta, modificación, eliminación, aprobación, cancelación, seguimiento de saldos y bloqueo de preparación sin pago), organizar la agenda de producción y enviar notificaciones por WhatsApp y correo electrónico.",
             "estabilidad": "Alta",
-            "comentarios": "Corresponde al Módulo 3 (Gestor de Pedidos y Producción)."
+            "comentarios": "Corresponde al Módulo 4 (Gestor de Pedidos y Producción)."
           },
           "requisito_informacion": {
             "titulo": "Información de Gestión de Pedidos, Pagos y Agenda de Producción",
@@ -3682,7 +3685,7 @@
               "fecha y hora de baja del pedido"
             ],
             "intervalo_temporal": "Pasado, presente y futuro",
-            "comentarios": "Corresponde al Módulo 3 (Gestor de Pedidos y Producción)."
+            "comentarios": "Corresponde al Módulo 4 (Gestor de Pedidos y Producción)."
           },
           "diagrama": {
             "casos_con_actor": [
@@ -3768,7 +3771,7 @@
                 {
                   "id": "RF-23",
                   "tipo": "RF",
-                  "titulo": "visualizacion de pedidos",
+                  "titulo": "Visualización de pedidos",
                   "descripcion": "El sistema debe ofrecer al administrador una vista detallada del pedido recibido, incluyendo especificaciones del postre, datos de entrega e imágenes de referencia.",
                   "comentarios": "Permite verificar la viabilidad técnica y disponibilidad del pedido antes de aceptarlo.",
                   "dependencias": [
@@ -3786,8 +3789,8 @@
                   "descripcion_resumida": "Permite examinar el detalle técnico, fotos de referencia y factibilidad de una solicitud.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora revisar el detalle de una solicitud nueva (productos, personalización, entrega y pago) para decidir si la aprueba, la corrige, la cancela o la da de baja.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
-                    "actor": "Administradora",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\".",
+                    "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
@@ -3896,7 +3899,7 @@
                   "descripcion_resumida": "Permite a la administradora corregir o actualizar los datos de un pedido.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora corregir los datos de un pedido (productos, personalización, cantidades, datos de entrega o fecha de entrega) antes de que entre a preparación.",
-                    "precondicion": "La administradora consultó el pedido en el módulo \"Gestión de Pedidos\" o en el historial de pedidos.",
+                    "precondicion": "La administradora consultó el pedido en el módulo \"Gestor de Pedidos y Producción\" o en el historial de pedidos.",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -4077,7 +4080,7 @@
                   "descripcion_resumida": "Permite a la administradora dar de baja un pedido sin perder su historial.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de baja una solicitud registrada por error (duplicada, de prueba o con datos falsos) antes de aprobarla, sin borrarla del historial.",
-                    "precondicion": "La administradora se encuentra revisando una solicitud «En proceso de aceptación» en el módulo \"Gestión de Pedidos\".",
+                    "precondicion": "La administradora se encuentra revisando una solicitud «En proceso de aceptación» en el módulo \"Gestor de Pedidos y Producción\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -4206,13 +4209,13 @@
                 "RNF-10"
               ],
               "extiende": [],
-              "rol": "Administrador, Personal",
+              "rol": "Administrador",
               "prioridad": "Alta",
               "metodo_verificacion": "Prueba Funcional / UI",
               "descripcion_resumida": "Muestra al personal el listado centralizado de todas las solicitudes históricas.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora consultar la lista de todos los pedidos registrados y buscarlos por folio, cliente o fechas.",
-                "precondicion": "La administradora inició sesión en el panel administrativo con permiso sobre el módulo \"Gestión de Pedidos\".",
+                "precondicion": "La administradora inició sesión en el panel administrativo con permiso sobre el módulo \"Gestor de Pedidos y Producción\".",
                 "actor": "Administradora",
                 "secuencia_normal": [
                   {
@@ -4303,7 +4306,7 @@
               "id": "RF-22",
               "tipo": "RF",
               "titulo": "Filtrar pedidos por estados",
-              "descripcion": "El sistema debe permitir al usuario administrador filtrar el listado de pedidos según su estado actual (pendiente, aprobado, listo, entregado, cancelado).",
+              "descripcion": "El sistema debe permitir al usuario administrador filtrar el listado de pedidos según su estado actual (en proceso de aceptación, aprobado, pagado, en preparación, pedido terminado o entregado) o mostrar solo los cancelados.",
               "comentarios": "Facilita la localización rápida y organización de solicitudes.",
               "dependencias": [],
               "relaciones": [
@@ -4315,11 +4318,11 @@
               "rol": "Administrador, Personal",
               "prioridad": "Media",
               "metodo_verificacion": "Prueba Funcional",
-              "descripcion_resumida": "Permite clasificar las solicitudes por estado (pendiente, aprobado, en producción, entregado).",
+              "descripcion_resumida": "Permite clasificar las solicitudes por estado (en proceso de aceptación, aprobado, pagado, en preparación, pedido terminado, entregado o cancelado).",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora ver solo los pedidos que están en una etapa específica, por ejemplo los que están \"En preparación\".",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\" o en el historial de pedidos.",
-                "actor": "Administradora",
+                "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\" o en el historial de pedidos.",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -4389,7 +4392,7 @@
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora aceptar una solicitud revisada. El pedido pasa a \"Aprobado\" y el cliente recibe las instrucciones para pagar el anticipo.",
                 "precondicion": "La administradora está revisando el detalle de una solicitud de pedido.",
-                "actor": "Administradora",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -4499,7 +4502,7 @@
               "tipo": "RF",
               "titulo": "Cancelación de pedidos",
               "descripcion": "El sistema debe permitir al administrador anular o rechazar una solicitud de pedido indicando el motivo de la cancelación.",
-              "comentarios": "Cambia el estado del pedido a \"Cancelado\" y detiene su flujo en producción.",
+              "comentarios": "Marca el pedido como cancelado (no es un estado más) y detiene su flujo en el último estado alcanzado.",
               "dependencias": [
                 "RF-23"
               ],
@@ -4514,8 +4517,8 @@
               "descripcion_resumida": "Permite anular una solicitud de pedido registrando la justificación del rechazo.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora cancelar un pedido que no se va a producir, registrando el motivo. Solo es posible antes de que entre a preparación.",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
-                "actor": "Administradora",
+                "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\".",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -4638,7 +4641,7 @@
               "id": "RF-26",
               "tipo": "RF",
               "titulo": "Estados de pedidos",
-              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) en espera de confirmación, cuando el cliente realiza el pedido; (2) confirmado, cuando el administrador revisa el pedido y acepta prepararlo; (3) pagado o adelanto pagado, cuando el pedido ya fue confirmado y se ha pagado como mínimo el 50% del precio; (4) en preparación, generalmente 2 días antes de la fecha de entrega; (5) preparado, cuando el pedido está terminado y listo para entregarse; (6) entregado, cuando el pedido ya fue entregado al cliente; (7) pedido cancelado, cuando el pedido es cancelado.",
+              "descripcion": "El sistema debe manejar los estados de un pedido para describir cada etapa de su preparación: (1) En proceso de aceptación, cuando el cliente envía el pedido; (2) Aprobado, cuando la administradora revisa el pedido y acepta prepararlo; (3) Pagado, cuando el pedido ya fue aprobado y se ha pagado como mínimo el 50% del precio (anticipo) o el total; (4) En preparación, generalmente 2 días antes de la fecha de entrega; (5) Pedido terminado, cuando el pedido está listo para entregarse; (6) Entregado, cuando el pedido ya fue entregado al cliente. Además, un pedido puede marcarse como cancelado, lo que detiene su flujo en el último estado alcanzado.",
               "comentarios": "Define el flujo de estados por el que avanza cada pedido, del 1 al 6, ademas de la excepcion cuando es cancelado.",
               "dependencias": [],
               "relaciones": [],
@@ -4646,7 +4649,7 @@
               "rol": "Sistema",
               "prioridad": "Alta",
               "metodo_verificacion": "Prueba Funcional",
-              "descripcion_resumida": "Gestiona las etapas del pedido: en espera, confirmado, pagado, en preparación, preparado y entregado.",
+              "descripcion_resumida": "Gestiona las etapas del pedido: en proceso de aceptación, aprobado, pagado, en preparación, pedido terminado y entregado.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Define la secuencia oficial de estados por la que avanza cada pedido y permite al sistema validar que un cambio de estado respete esa secuencia.",
                 "precondicion": "Existe al menos un pedido registrado en el sistema, y otro caso de uso (aprobación, validación de pagos, cancelación o modificación de estado) solicita conocer o cambiar su estado.",
@@ -4734,8 +4737,8 @@
               "descripcion_resumida": "Permite avanzar manualmente el estado operativo del pedido (p. ej., a \"En preparación\").",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora avanzar un pedido a su siguiente etapa (de \"Pagado\" a \"En preparación\", a \"Pedido terminado\" y a \"Entregado\"), un paso a la vez y sin retroceder.",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\" o en la agenda de producción.",
-                "actor": "Administradora",
+                "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\" o en la agenda de producción.",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -4890,15 +4893,15 @@
                   }
                 ],
                 "frecuencia_esperada": "60 veces/día",
-                "comentarios": "Secuencia oficial: En proceso de aceptación → Aprobado (al aprobar el pedido) → Pagado (al validar el anticipo) → En preparación → Pedido terminado → Entregado. La regla de bloqueo de preparación sin pago confirmado está integrada en el paso 6 y no se maneja como caso de uso independiente."
+                "comentarios": "Secuencia oficial: En proceso de aceptación → Aprobado (al aprobar el pedido) → Pagado (al validar el anticipo) → En preparación → Pedido terminado → Entregado. La regla de bloqueo de preparación sin pago confirmado (RF-41) se aplica en el paso 6."
               }
             },
             {
               "id": "RF-28",
               "tipo": "RF",
               "titulo": "Validación de pagos",
-              "descripcion": "El administrador debe verificar los comprobantes de anticipo o liquidación y registrarlos como válidos. de cada pago realizado se registra monto de pago, estado de validacion, referencia, link de comporbante (en caso de que haga falta), metodo de pago, fecha de pago y motivo de rechazo (en caso de que haga falta).",
-              "comentarios": "Actualiza el registro financiero asociado al pedido. cada pago validado",
+              "descripcion": "El sistema debe permitir al administrador verificar los comprobantes de anticipo o liquidación y registrarlos como válidos. De cada pago realizado se registra monto de pago, estado de validación, referencia, link de comprobante (en caso de que haga falta), método de pago, fecha de pago y motivo de rechazo (en caso de que haga falta).",
+              "comentarios": "Actualiza el registro financiero asociado al pedido con cada pago validado.",
               "dependencias": [
                 "RF-23",
                 "RF-24"
@@ -4913,8 +4916,8 @@
               "descripcion_resumida": "Permite verificar y registrar la recepción de anticipos o liquidaciones de pago.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora registrar y validar los pagos del cliente. Cuando se cubre el anticipo, el pedido pasa automáticamente a \"Pagado\".",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\" y el cliente realizó un pago (transferencia, depósito o pago en sucursal).",
-                "actor": "Administradora",
+                "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\" y el cliente realizó un pago (transferencia, depósito o pago en sucursal).",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -5069,12 +5072,12 @@
               ],
               "rol": "Administrador, Personal",
               "prioridad": "Alta",
-              "metodo_verificacion": "Prueba Análisis",
+              "metodo_verificacion": "Prueba de Análisis",
               "descripcion_resumida": "Calcula el monto acumulado pagado y la resta pendiente por cobrar al momento de la entrega.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora consultar cuánto ha pagado el cliente por un pedido y cuánto le falta por pagar.",
-                "precondicion": "La administradora se encuentra en el módulo \"Gestión de Pedidos\".",
-                "actor": "Administradora",
+                "precondicion": "La administradora se encuentra en el módulo \"Gestor de Pedidos y Producción\".",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -5241,19 +5244,19 @@
                 ],
                 "rendimiento": [
                   {
-                    "paso": "2 a 5",
+                    "paso": "2 y 3",
                     "cota_de_tiempo": "1 segundo"
                   }
                 ],
                 "frecuencia_esperada": "30 veces/día",
-                "comentarios": "Extiende a Modificación de estado del pedido (paso 6 de esa plantilla). Plantilla creada porque no venía en el documento original; el documento manejaba esta regla dentro de Modificación de estado del pedido."
+                "comentarios": "Extiende a Modificación de estado del pedido (paso 6 de esa plantilla)."
               }
             },
             {
               "id": "RF-30",
               "tipo": "RF",
               "titulo": "Visualización de agenda de producción",
-              "descripcion": "El sistema debe presentar un calendario u horaria de trabajo donde se programen los pedidos aprobados en función de su fecha y hora límite de entrega.",
+              "descripcion": "El sistema debe presentar un calendario u horario de trabajo donde se programen los pedidos aprobados en función de su fecha y hora límite de entrega.",
               "comentarios": "Permite organizar la carga de trabajo.",
               "dependencias": [
                 "RF-24"
@@ -5390,7 +5393,7 @@
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora cambiar el periodo que muestra la agenda: un día, una semana, un mes o un rango de fechas.",
                 "precondicion": "La administradora se encuentra en la \"Agenda de Producción\" con el calendario cargado.",
-                "actor": "Administradora",
+                "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
                     "carril": "Actor",
@@ -5476,7 +5479,7 @@
               "id": "RF-32",
               "tipo": "RF",
               "titulo": "Notificaciones por WhatsApp y correo electrónico",
-              "descripcion": "El sistema debe enviar mensajes automáticos en caso de un cambio de estado del pedido al cliente a través de correo electrónico o WhatsApp.",
+              "descripcion": "El sistema debe enviar mensajes automáticos al cliente por correo electrónico y WhatsApp cuando ocurre un evento en su pedido (registro, aprobación, modificación, cancelación, baja, validación o rechazo de un pago y cambio de estado).",
               "comentarios": "Mantiene informado al cliente de forma transparente. de cada notificacion se guarda el mensaje, canal, fecha de hora de envio, resultado de envio, tipo de evento y destino",
               "dependencias": [
                 "RF-27"
@@ -5589,36 +5592,38 @@
             "titulo": "Administrar el inventario de insumos y recetas",
             "descripcion": "El sistema deberá controlar el stock de insumos (entradas, mermas, alertas de caducidad y existencias bajas), gestionar las recetas del catálogo y realizar el descuento automático de insumos en el inventario.",
             "estabilidad": "Alta",
-            "comentarios": "Corresponde al Módulo 4 (Gestor de Inventario y Recetas)."
+            "comentarios": "Corresponde al Módulo 5 (Gestor de Inventario y Recetas)."
           },
           "requisito_informacion": {
             "titulo": "Información de Inventario de Insumos y Recetas",
-            "descripcion": "El sistema deberá almacenar la información técnica de las materias primas, la formulación de recetas asociadas a los postres, el control de existencias, los movimientos de stock (compras y mermas), las alertas asociadas y la bitácora de deducciones automáticas por producción.",
+            "descripcion": "El sistema deberá almacenar la información técnica de las materias primas, la formulación de recetas asociadas a las opciones de características, el control de existencias, los movimientos de stock (compras y mermas), las alertas asociadas y la bitácora de deducciones automáticas por producción.",
             "datos_especificos": [
               "stock disponible de un lote",
               "fecha de ingreso del lote",
               "fecha de caducidad del lote",
               "costo de adquisición del lote",
-              "fecha de salida de insumos",
               "cantidad de salida de insumos",
               "motivo de salida de insumos",
               "fecha de salida de insumos",
-              "casto de movimiento de insumos.",
+              "costo de movimiento de insumos",
               "Nombre de insumo",
               "Unidad de medida de insumo",
               "costo unitario de insumo",
+              "stock mínimo del insumo",
               "categoría del insumo",
               "si tiene fecha de caducidad el insumo",
               "estado del insumo",
               "existencia total del insumo",
               "nombre de receta",
+              "opción de característica de la receta",
               "pasos de preparación de receta",
               "tiempo de elaboración de receta",
+              "rendimiento de receta",
               "estado de receta",
               "ingredientes necesario para elaborar la receta"
             ],
             "intervalo_temporal": "Pasado y presente",
-            "comentarios": "Unifica la gestión completa del Módulo 5 (Gestor de Inventario y Recetas). Vincula directamente la formulación de los postres con el stock físico de materias primas para la deducción automática y la activación de alertas."
+            "comentarios": "Unifica la gestión completa del Módulo 5 (Gestor de Inventario y Recetas). Vincula directamente las recetas de las opciones de características con el stock físico de materias primas para la deducción automática y la activación de alertas."
           },
           "diagrama": {
             "casos_con_actor": [
@@ -5694,7 +5699,7 @@
             {
               "id": "RF-37",
               "tipo": "RF",
-              "titulo": "Registro de Entrada de Insumos",
+              "titulo": "Registro de entrada de insumos",
               "descripcion": "El sistema debe permitir registrar el ingreso de nuevos lotes de materia prima, actualizando el stock disponible, la fecha de ingreso, fecha de caducidad y costo de adquisición.",
               "comentarios": "Incrementa automáticamente la cantidad disponible en el inventario.",
               "dependencias": [
@@ -5711,7 +5716,7 @@
               "descripcion_resumida": "Registra el ingreso de nuevos lotes de materia prima, actualizando existencias, costo y fecha de caducidad.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite registrar la compra o llegada de un insumo, con su cantidad, costo y fecha de caducidad, para sumarlo a las existencias del inventario.",
-                "precondicion": "La administradora o el personal autorizado se encuentra en el módulo \"Inventario de Insumos\".",
+                "precondicion": "La administradora o el personal autorizado se encuentra en el módulo \"Gestor de Inventario y Recetas\".",
                 "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
@@ -5830,7 +5835,7 @@
             {
               "id": "RF-38",
               "tipo": "RF",
-              "titulo": "Registro de Salida de Insumos",
+              "titulo": "Registro de salida de insumos",
               "descripcion": "El sistema debe permitir registrar bajas manuales de insumos justificadas por desperdicio, caducidad, daño, etc.",
               "comentarios": "Descuenta la cantidad especificada e impacta los reportes de pérdidas. debe de guardar fecha de salida, cantidad de salida, motivo, fecha de movimiento, costo de movimiento",
               "dependencias": [
@@ -5848,7 +5853,7 @@
               "descripcion_resumida": "Registra bajas manuales de insumos justificadas por desperdicio, daño, caducidad o pruebas técnicas.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite registrar insumos que se pierden por caducidad, daño o desperdicio, descontándolos del inventario y guardando el motivo.",
-                "precondicion": "La administradora o el personal autorizado se encuentra en el módulo \"Inventario de Insumos\".",
+                "precondicion": "La administradora o el personal autorizado se encuentra en el módulo \"Gestor de Inventario y Recetas\".",
                 "actor": "Administradora / Personal",
                 "secuencia_normal": [
                   {
@@ -5967,7 +5972,7 @@
             {
               "id": "RF-39",
               "tipo": "RF",
-              "titulo": "Alerta de Existencias Bajas de Insumos",
+              "titulo": "Alerta de existencias bajas de insumos",
               "descripcion": "El sistema debe generar alertas visuales o notificaciones cuando la cantidad de un insumo caiga por debajo del umbral de stock mínimo configurado.",
               "comentarios": "Previene la falta de insumos durante la producción programada.",
               "dependencias": [],
@@ -6073,7 +6078,7 @@
             {
               "id": "RF-40",
               "tipo": "RF",
-              "titulo": "Alerta de Caducidad Próxima de Insumos",
+              "titulo": "Alerta de caducidad próxima de insumos",
               "descripcion": "El sistema debe notificar al administrador sobre aquellos lotes de insumos cuyas fechas de caducidad estén próximas a vencer.",
               "comentarios": "Ayuda a optimizar el uso de materia prima según la metodología FIFO/PEPS.",
               "dependencias": [],
@@ -6176,7 +6181,7 @@
               "id": "RF-45",
               "tipo": "RF",
               "titulo": "Descuento automático de insumos en inventario",
-              "descripcion": "El sistema debe rebajar de forma automática las cantidades de materia prima del inventario según la recetas asociadas a los productos cuando el pedido al que pertenecen cambie a estado \"En preparación\".",
+              "descripcion": "El sistema debe rebajar de forma automática las cantidades de materia prima del inventario según las recetas de las opciones de características elegidas en los productos del pedido cuando este cambie a estado \"En preparación\".",
               "comentarios": "Garantiza un control preciso de existencias sin intervención manual reiterada.",
               "dependencias": [
                 "RF-27",
@@ -6191,12 +6196,13 @@
               "rol": "Sistema / Automatización",
               "prioridad": "Alta",
               "metodo_verificacion": "Prueba de Integración",
-              "descripcion_resumida": "Rebaja en automático del inventario la materia prima según la receta al cambiar un pedido a \"En preparación\".",
+              "descripcion_resumida": "Rebaja en automático del inventario la materia prima según las recetas de las opciones elegidas al cambiar un pedido a \"En preparación\".",
               "plantilla_caso_de_uso": {
                 "requisitos_de_informacion_de_otros_modulos": [
-                  "Gestor de Pedidos y Producción"
+                  "Gestor de Pedidos y Producción",
+                  "Catálogo de Personalización"
                 ],
-                "descripcion": "Cuando un pedido pasa a \"En preparación\", el sistema descuenta automáticamente del inventario los insumos que indica la receta de cada producto del pedido.",
+                "descripcion": "Cuando un pedido pasa a \"En preparación\", el sistema descuenta automáticamente del inventario los insumos que indican las recetas de las opciones elegidas en cada producto del pedido.",
                 "precondicion": "La administradora confirmó el cambio de un pedido del estado \"Pagado\" al estado \"En preparación\".",
                 "secuencia_normal": [
                   {
@@ -6209,11 +6215,11 @@
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Valida que cada producto del pedido tenga receta activa y recupera sus insumos"
+                    "accion": "Recupera las opciones elegidas en cada producto del pedido, valida que las que llevan receta la tengan activa y recupera sus insumos"
                   },
                   {
                     "carril": "Sistema",
-                    "accion": "Calcula el total de cada insumo según las recetas, las unidades pedidas y los multiplicadores de ingredientes de las opciones elegidas (aplicados solo a lo que escala)"
+                    "accion": "Calcula el total de cada insumo según las recetas de las opciones elegidas, las unidades pedidas y los multiplicadores de ingredientes (aplicados solo a las opciones que escalan)"
                   },
                   {
                     "carril": "Sistema",
@@ -6268,14 +6274,14 @@
                   },
                   {
                     "paso": 3,
-                    "pregunta": "¿Todos los productos tienen receta activa?",
+                    "pregunta": "¿Todas las opciones elegidas que llevan receta la tienen activa?",
                     "respuesta": "No",
-                    "accion": "Muestra «El producto [nombre] no tiene receta registrada»",
+                    "accion": "Muestra «La opción [nombre] no tiene receta activa»",
                     "despues": "continua"
                   },
                   {
                     "paso": 3,
-                    "pregunta": "¿La administradora decide continuar sin descontar ese producto?",
+                    "pregunta": "¿La administradora decide continuar sin descontar esa opción?",
                     "respuesta": "No",
                     "accion": "Cancela el cambio de estado; el pedido permanece en «Pagado»",
                     "despues": "fin"
@@ -6330,12 +6336,12 @@
                   "descripcion_resumida": "Presenta un listado actualizado del stock disponible, unidades de medida y ubicación de la materia prima.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora y al personal consultar los insumos registrados, con su existencia actual, stock mínimo y alertas de stock bajo o de caducidad próxima.",
-                    "precondicion": "El usuario inició sesión en el panel administrativo con permiso sobre el módulo \"Inventario de Insumos\".",
+                    "precondicion": "El usuario inició sesión en el panel administrativo con permiso sobre el módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
-                        "accion": "Ingresa a «Inventario de Insumos» y, si lo desea, busca o filtra insumos"
+                        "accion": "Ingresa a «Gestor de Inventario y Recetas» y, si lo desea, busca o filtra insumos"
                       },
                       {
                         "carril": "Sistema",
@@ -6448,11 +6454,11 @@
                   "extiende": [],
                   "rol": "Administrador",
                   "prioridad": "Alta",
-                  "metodo_verificacion": "Prueba de Inspección / UI",
+                  "metodo_verificacion": "Prueba Funcional",
                   "descripcion_resumida": "Permite dar de alta nuevos insumos definiendo nombre, unidad de medida, costo unitario y stock mínimo.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de alta un nuevo insumo (por ejemplo, harina o fresa) con su categoría, unidad de medida, costo y stock mínimo.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Inventario de Insumos\".",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -6556,7 +6562,7 @@
                   "descripcion_resumida": "Permite actualizar la información, costos o umbrales de alerta de insumos existentes.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora corregir los datos de un insumo, como su nombre, categoría, costo o stock mínimo. Las existencias no se cambian aquí.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Inventario de Insumos\".",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -6668,9 +6674,9 @@
                 {
                   "id": "RF-36",
                   "tipo": "RF",
-                  "titulo": "Eliminación de Insumo del Inventario",
+                  "titulo": "Eliminación de insumo del inventario",
                   "descripcion": "El sistema debe de permitir dar de baja o inhabilitar insumos.",
-                  "comentarios": "Si esta asociado a una receta activa, el sistema pregunta solicita confirmación para eliminar el insumo. no afecta a las recetas.",
+                  "comentarios": "Si está asociado a una receta activa, el sistema lo avisa y solicita confirmación antes de darlo de baja; las recetas no se modifican, pero quedan marcadas para revisión.",
                   "dependencias": [
                     "RF-33"
                   ],
@@ -6685,8 +6691,8 @@
                   "metodo_verificacion": "Prueba Funcional",
                   "descripcion_resumida": "Permite dar de baja o inhabilitar insumos que ya no se utilicen en la elaboración de postres.",
                   "plantilla_caso_de_uso": {
-                    "descripcion": "Permite a la administradora dar de baja un insumo que ya no se utiliza, siempre que no forme parte de ninguna receta activa.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Inventario de Insumos\".",
+                    "descripcion": "Permite a la administradora dar de baja un insumo que ya no se utiliza, avisando si forma parte de alguna receta activa.",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -6699,7 +6705,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Verifica que el insumo no forme parte de ninguna receta activa"
+                        "accion": "Verifica si el insumo forma parte de alguna receta activa"
                       },
                       {
                         "carril": "Sistema",
@@ -6715,7 +6721,7 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Informa el éxito y actualiza la tabla; el insumo ya no aparece en compras, mermas ni recetas"
+                        "accion": "Informa el éxito y actualiza la tabla; el insumo ya no aparece en compras, mermas ni en nuevas recetas"
                       }
                     ],
                     "postcondicion": "El insumo queda inhabilitado o eliminado y ya no está disponible para nuevas operaciones del inventario.",
@@ -6752,8 +6758,8 @@
                         "paso": 3,
                         "pregunta": "¿El insumo se usa en alguna receta activa?",
                         "respuesta": "Sí",
-                        "accion": "Bloquea la baja y muestra la lista de recetas que usan el insumo",
-                        "despues": "fin"
+                        "accion": "Agrega a la confirmación la lista de recetas que lo usan y el aviso de que quedarán marcadas «Esta receta requiere revisión»",
+                        "despues": "continua"
                       },
                       {
                         "paso": 5,
@@ -6781,7 +6787,7 @@
                       }
                     ],
                     "frecuencia_esperada": "1 vez/mes",
-                    "comentarios": "Para dar de baja un insumo que se usa en recetas, primero debe quitarse de esas recetas. Se prioriza la inhabilitación para no afectar los reportes de gastos anteriores."
+                    "comentarios": "Si el insumo se usa en recetas, estas no se modifican: al consultarlas se marcan con «Insumo dado de baja» para revisarlas. Se prioriza la inhabilitación para no afectar los reportes de gastos anteriores."
                   }
                 }
               ]
@@ -6792,26 +6798,26 @@
                 {
                   "id": "RF-41",
                   "tipo": "RF",
-                  "titulo": "Visualización de Recetas",
+                  "titulo": "Visualización de recetas",
                   "descripcion": "El sistema debe permitir consultar la información de las recetas.",
                   "comentarios": "Sirve como guía de preparación para el personal de cocina.",
                   "dependencias": [
-                    "RF-18"
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
                   "relaciones": [
-                    "RF-18"
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb"
                   ],
                   "extiende": [],
                   "rol": "Administrador, Personal",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba de Inspección / UI",
-                  "descripcion_resumida": "Despliega las fórmulas estandarizadas de cada postre indicando proporciones y pasos de preparación.",
+                  "descripcion_resumida": "Despliega la receta de cada opción de característica indicando insumos, proporciones y pasos de preparación.",
                   "plantilla_caso_de_uso": {
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo de Personalización"
                     ],
-                    "descripcion": "Permite a la administradora y al personal consultar la receta de un postre: insumos, cantidades, pasos de preparación y rendimiento. Solo se muestran los productos que ya tienen receta.",
-                    "precondicion": "El usuario inició sesión con permiso sobre el módulo \"Catálogo y Recetas\".",
+                    "descripcion": "Permite a la administradora y al personal consultar la receta de una opción de característica (por ejemplo, el sabor «Chocolate»): insumos, cantidades, pasos de preparación y rendimiento. Solo se muestran las opciones que ya tienen receta.",
+                    "precondicion": "El usuario inició sesión con permiso sobre el módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora / Personal",
                     "secuencia_normal": [
                       {
@@ -6820,26 +6826,26 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Verifica la conexión y filtra únicamente los productos que ya tienen receta registrada"
+                        "accion": "Verifica la conexión y filtra únicamente las opciones de característica que ya tienen receta registrada"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Despliega la lista de productos con receta (nombre, categoría y rendimiento) y un buscador"
+                        "accion": "Despliega la lista de opciones con receta (opción, característica, categoría y rendimiento) y un buscador"
                       },
                       {
                         "carril": "Actor",
-                        "accion": "Busca y selecciona el producto cuya receta desea consultar"
+                        "accion": "Busca y selecciona la opción cuya receta desea consultar"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Valida en la BD que el producto y su receta sigan existiendo y activos"
+                        "accion": "Valida en la BD que la opción y su receta sigan existiendo y activas"
                       },
                       {
                         "carril": "Sistema",
                         "accion": "Muestra la receta: insumos, cantidades, pasos, tiempo, rendimiento y costo estimado"
                       }
                     ],
-                    "postcondicion": "El usuario visualiza la receta del producto seleccionado. La información de las recetas no ha cambiado.",
+                    "postcondicion": "El usuario visualiza la receta de la opción seleccionada. La información de las recetas no ha cambiado.",
                     "excepciones": [
                       {
                         "paso": 2,
@@ -6850,7 +6856,7 @@
                       },
                       {
                         "paso": 2,
-                        "pregunta": "¿Existe al menos un producto con receta?",
+                        "pregunta": "¿Existe al menos una opción con receta?",
                         "respuesta": "No",
                         "accion": "Muestra «Aún no hay recetas registradas» (y «+ Nueva receta» para la administradora)",
                         "despues": "fin"
@@ -6888,21 +6894,21 @@
                       }
                     ],
                     "frecuencia_esperada": "15 veces/día",
-                    "comentarios": "Sirve como guía de preparación para el personal de cocina. Mostrar solo los productos con receta evita que se seleccione un producto que no tiene una."
+                    "comentarios": "Sirve como guía de preparación para el personal de cocina. Mostrar solo las opciones con receta evita que se seleccione una que no tiene."
                   }
                 },
                 {
                   "id": "RF-42",
                   "tipo": "RF",
-                  "titulo": "Registro de Nueva Receta",
-                  "descripcion": "El sistema debe permitir registrar una receta de asociada a una opcion de caracteristica especifica, cada receta debe tener nombre, pasos preparacion, tiempo de elaboracion, estado de receta, ingredientes necesarios para elaboracion.",
-                  "comentarios": "Vincula los productos del catálogo con la lista de materias primas.",
+                  "titulo": "Registro de nueva receta",
+                  "descripcion": "El sistema debe permitir registrar una receta asociada a una opción de característica específica (por ejemplo, el sabor «Chocolate» o el glaseado «Fondant»). Cada receta debe tener nombre, pasos de preparación, tiempo de elaboración, estado de receta e ingredientes (insumos) necesarios para su elaboración.",
+                  "comentarios": "Vincula las opciones de características del catálogo con la lista de materias primas.",
                   "dependencias": [
-                    "RF-18",
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
                     "RF-34"
                   ],
                   "relaciones": [
-                    "RF-18",
+                    "6ccf6098-a538-4bdb-8550-56ecd5648bbb",
                     "RF-34"
                   ],
                   "extiende": [
@@ -6911,13 +6917,13 @@
                   "rol": "Administrador",
                   "prioridad": "Alta",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite asociar una lista de insumos con sus cantidades exactas a un producto base del catálogo.",
+                  "descripcion_resumida": "Permite asociar a una opción de característica la lista de insumos con sus cantidades exactas.",
                   "plantilla_caso_de_uso": {
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo de Personalización"
                     ],
-                    "descripcion": "Permite a la administradora registrar la receta de un postre: qué insumos lleva, en qué cantidad, sus pasos de preparación y su rendimiento.",
-                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Catálogo y Recetas\".",
+                    "descripcion": "Permite a la administradora registrar la receta de una opción de característica: qué insumos lleva, en qué cantidad, sus pasos de preparación, su tiempo y su rendimiento.",
+                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -6926,15 +6932,15 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Consulta en la BD los productos activos que todavía no tienen receta"
+                        "accion": "Consulta en la BD las opciones de característica activas que todavía no tienen receta"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Muestra el formulario: producto, rendimiento, tiempo, pasos de preparación e insumos"
+                        "accion": "Muestra el formulario: opción de característica, nombre, rendimiento, tiempo, pasos de preparación, estado e insumos"
                       },
                       {
                         "carril": "Actor",
-                        "accion": "Selecciona el producto, agrega insumos y cantidades, captura los datos y elige «Guardar» o «Cancelar»"
+                        "accion": "Selecciona la opción, agrega insumos y cantidades, captura los datos y elige «Guardar» o «Cancelar»"
                       },
                       {
                         "carril": "Sistema",
@@ -6942,18 +6948,18 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Valida en la BD el producto elegido y que los insumos sigan activos"
+                        "accion": "Valida en la BD la opción elegida y que los insumos sigan activos"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Almacena la receta vinculada al producto y calcula su costo estimado"
+                        "accion": "Almacena la receta vinculada a la opción y calcula su costo estimado"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Informa el éxito; el producto aparece en la lista de recetas"
+                        "accion": "Informa el éxito; la opción aparece en la lista de recetas"
                       }
                     ],
-                    "postcondicion": "La receta queda registrada y vinculada al producto, lista para usarse en el descuento automático de insumos.",
+                    "postcondicion": "La receta queda registrada y vinculada a la opción de característica, lista para usarse en el descuento automático de insumos.",
                     "excepciones": [
                       {
                         "paso": 2,
@@ -6964,9 +6970,9 @@
                       },
                       {
                         "paso": 2,
-                        "pregunta": "¿Hay productos activos sin receta?",
+                        "pregunta": "¿Hay opciones de característica activas sin receta?",
                         "respuesta": "No",
-                        "accion": "Muestra «No hay productos pendientes de receta» y no abre el formulario",
+                        "accion": "Muestra «No hay opciones pendientes de receta» y no abre el formulario",
                         "despues": "fin"
                       },
                       {
@@ -6985,16 +6991,16 @@
                       },
                       {
                         "paso": 6,
-                        "pregunta": "¿El producto elegido sigue activo?",
+                        "pregunta": "¿La opción elegida sigue activa?",
                         "respuesta": "No",
-                        "accion": "Muestra «El producto ya no está disponible» y actualiza la lista",
+                        "accion": "Muestra «La opción ya no está disponible» y actualiza la lista",
                         "despues": "4"
                       },
                       {
                         "paso": 6,
-                        "pregunta": "¿El producto ya tiene una receta registrada?",
+                        "pregunta": "¿La opción ya tiene una receta registrada?",
                         "respuesta": "Sí",
-                        "accion": "No guarda, muestra «Este producto ya tiene una receta registrada» y ofrece consultarla",
+                        "accion": "No guarda, muestra «Esta opción ya tiene una receta registrada» y ofrece consultarla",
                         "despues": "fin"
                       },
                       {
@@ -7023,15 +7029,15 @@
                       }
                     ],
                     "frecuencia_esperada": "3 veces/mes",
-                    "comentarios": "Con la receta registrada, el sistema puede descontar automáticamente los insumos del inventario cuando un pedido de ese producto entra a preparación."
+                    "comentarios": "Con la receta registrada, el sistema descuenta automáticamente los insumos del inventario cuando un pedido que incluye esa opción entra a preparación. Las opciones que no llevan insumos no necesitan receta."
                   }
                 },
                 {
                   "id": "RF-43",
                   "tipo": "RF",
-                  "titulo": "Modificación de Receta",
+                  "titulo": "Modificación de receta",
                   "descripcion": "El sistema debe permitir actualizar los datos de una receta",
-                  "comentarios": "Recalcula de forma automática el costo de preparación del producto.",
+                  "comentarios": "Recalcula de forma automática el costo estimado de la receta.",
                   "dependencias": [],
                   "relaciones": [
                     "RF-41",
@@ -7043,22 +7049,22 @@
                   "rol": "Administrador",
                   "prioridad": "Media",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite ajustar proporciones de ingredientes o modificar procedimientos de una fórmula registrada.",
+                  "descripcion_resumida": "Permite ajustar proporciones de ingredientes o modificar procedimientos de la receta de una opción de característica.",
                   "plantilla_caso_de_uso": {
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo de Personalización"
                     ],
-                    "descripcion": "Permite a la administradora ajustar la receta de un postre: agregar o quitar insumos, cambiar cantidades, pasos o rendimiento.",
-                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Catálogo y Recetas\".",
+                    "descripcion": "Permite a la administradora ajustar la receta de una opción de característica: agregar o quitar insumos, cambiar cantidades, pasos o rendimiento.",
+                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
-                        "accion": "Busca y selecciona en la lista (filtrada solo con productos con receta) el producto y solicita «Editar receta»"
+                        "accion": "Busca y selecciona en la lista (filtrada solo con opciones con receta) la opción y solicita «Editar receta»"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Valida en la BD que el producto exista y que su receta siga activa, y recupera sus datos"
+                        "accion": "Valida en la BD que la opción exista y que su receta siga activa, y recupera sus datos"
                       },
                       {
                         "carril": "Sistema",
@@ -7103,7 +7109,7 @@
                       },
                       {
                         "paso": 2,
-                        "pregunta": "¿La receta y el producto siguen existiendo?",
+                        "pregunta": "¿La receta y la opción siguen existiendo?",
                         "respuesta": "No",
                         "accion": "Muestra «La receta ya no está disponible» y recarga la lista",
                         "despues": "fin"
@@ -7176,30 +7182,30 @@
                   "rol": "Administrador",
                   "prioridad": "Baja",
                   "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Inhabilita o desvincula la fórmula de preparación asociada a un producto del catálogo.",
+                  "descripcion_resumida": "Inhabilita o desvincula la receta asociada a una opción de característica.",
                   "plantilla_caso_de_uso": {
                     "requisitos_de_informacion_de_otros_modulos": [
                       "Catálogo de Personalización"
                     ],
-                    "descripcion": "Permite a la administradora dar de baja la receta de un postre que se dejó de vender o que cambió por completo.",
-                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Catálogo y Recetas\".",
+                    "descripcion": "Permite a la administradora dar de baja la receta de una opción de característica que se dejó de ofrecer o que cambió por completo.",
+                    "precondicion": "La administradora se encuentra en la sección de recetas del módulo \"Gestor de Inventario y Recetas\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
                         "carril": "Actor",
-                        "accion": "Busca y selecciona en la lista (filtrada solo con productos con receta) el producto y solicita dar de baja su receta"
+                        "accion": "Busca y selecciona en la lista (filtrada solo con opciones con receta) la opción y solicita dar de baja su receta"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Valida en la BD que el producto exista y que su receta siga activa"
+                        "accion": "Valida en la BD que la opción exista y que su receta siga activa"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Verifica que el producto no esté en pedidos vigentes que aún no entran a preparación"
+                        "accion": "Verifica que la opción no esté en pedidos vigentes que aún no entran a preparación"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Muestra la confirmación advirtiendo que el producto ya no descontará insumos"
+                        "accion": "Muestra la confirmación advirtiendo que la opción ya no descontará insumos"
                       },
                       {
                         "carril": "Actor",
@@ -7207,14 +7213,14 @@
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Inhabilita la receta conservando su historial y la desvincula del producto"
+                        "accion": "Inhabilita la receta conservando su historial y la desvincula de la opción"
                       },
                       {
                         "carril": "Sistema",
-                        "accion": "Informa el éxito; el producto deja de aparecer en la lista de recetas"
+                        "accion": "Informa el éxito; la opción deja de aparecer en la lista de recetas"
                       }
                     ],
-                    "postcondicion": "La receta queda inhabilitada y el producto ya no descuenta insumos del inventario.",
+                    "postcondicion": "La receta queda inhabilitada y la opción ya no descuenta insumos del inventario.",
                     "excepciones": [
                       {
                         "paso": 1,
@@ -7232,21 +7238,21 @@
                       },
                       {
                         "paso": 2,
-                        "pregunta": "¿La receta y el producto siguen existiendo?",
+                        "pregunta": "¿La receta y la opción siguen existiendo?",
                         "respuesta": "No",
                         "accion": "Muestra «La receta ya no está disponible» y recarga la lista",
                         "despues": "fin"
                       },
                       {
                         "paso": 3,
-                        "pregunta": "¿Hay pedidos pendientes de preparar con ese producto?",
+                        "pregunta": "¿Hay pedidos pendientes de preparar con esa opción?",
                         "respuesta": "Sí",
                         "accion": "Bloquea la baja y muestra «La receta se necesita para pedidos en curso» con los folios",
                         "despues": "fin"
                       },
                       {
                         "paso": 4,
-                        "pregunta": "¿El producto sigue a la venta en la tienda web?",
+                        "pregunta": "¿La opción sigue disponible para los clientes?",
                         "respuesta": "Sí",
                         "accion": "Agrega el aviso de que sus próximos pedidos no descontarán insumos",
                         "despues": "continua"
@@ -7277,7 +7283,7 @@
                       }
                     ],
                     "frecuencia_esperada": "1 vez/mes",
-                    "comentarios": "Se recomienda dar de baja una receta solo cuando el producto también se retire del catálogo o cuando se vaya a registrar una receta nueva."
+                    "comentarios": "Se recomienda dar de baja una receta solo cuando la opción también se dé de baja o cuando se vaya a registrar una receta nueva."
                   }
                 }
               ]
@@ -7290,7 +7296,7 @@
             "titulo": "Generar reportes financieros y analíticos",
             "descripcion": "El sistema deberá consolidar la información para generar reportes de ingresos, gastos y productos más vendidos, permitiendo su exportación a formato Excel.",
             "estabilidad": "Media",
-            "comentarios": "Corresponde al Módulo 5 (Reportes Financieros)."
+            "comentarios": "Corresponde al Módulo 6 (Reportes Financieros)."
           },
           "requisito_informacion": {
             "titulo": "Información de Reportes Financieros",
@@ -7654,7 +7660,7 @@
               "rol": "Administrador",
               "prioridad": "Media",
               "metodo_verificacion": "Prueba Funcional / Archivo",
-              "descripcion_resumida": "Permite descargar la información de reportes en archivos editables como formato CSV.",
+              "descripcion_resumida": "Permite descargar la información de reportes en archivos editables en formato XLSX (Excel) o CSV.",
               "plantilla_caso_de_uso": {
                 "descripcion": "Permite a la administradora descargar en un archivo de Excel el reporte que está viendo en pantalla, para guardarlo o analizarlo fuera del sistema.",
                 "precondicion": "La administradora generó un reporte de ingresos y gastos o de productos más vendidos y lo tiene en pantalla.",
@@ -7742,7 +7748,7 @@
         {
           "id": "RNF-1",
           "tipo": "RNF",
-          "titulo": "Alojamiento del sistema en la nube.",
+          "titulo": "Alojamiento del sistema en la nube",
           "descripcion": "El sistema debe estar desplegado y alojado en una infraestructura en la nube.",
           "comentarios": "Al estar alojado en la nube, los clientes finales podrán consultar el catálogo de productos en todo momento.",
           "dependencias": [],
@@ -7756,7 +7762,7 @@
         {
           "id": "RNF-2",
           "tipo": "RNF",
-          "titulo": "Integración con API de WhatsApp.",
+          "titulo": "Integración con API de WhatsApp",
           "descripcion": "El sistema debe tener conexión estable con la API de negocio de WhatsApp para lograr el envío de mensajes",
           "comentarios": "Esta herramienta a petición del cliente permitirá comunicar de manera eficaz con los clientes finales.",
           "dependencias": [
@@ -7774,7 +7780,7 @@
         {
           "id": "RNF-3",
           "tipo": "RNF",
-          "titulo": "Integración con API de correo electrónico.",
+          "titulo": "Integración con API de correo electrónico",
           "descripcion": "El sistema debe ser capaz de enviar correos electrónicos de manera automatizada a los clientes finales para dar seguimiento del estado de un pedido.",
           "comentarios": "Entrega a correo electrónico de comprobantes de pago, actualizaciones de estado de pedido y enlaces de recuperación de contraseñas.",
           "dependencias": [
@@ -7806,14 +7812,14 @@
           "extiende": [],
           "rol": "Usabilidad / UI",
           "prioridad": "Alta",
-          "metodo_verificacion": "Prueba de Integración",
+          "metodo_verificacion": "Prueba de Compatibilidad / UI",
           "descripcion_resumida": "Asegura que la interfaz gráfica se adapte fluidamente a navegadores de dispositivos móviles y PC."
         },
         {
           "id": "RNF-5",
           "tipo": "RNF",
           "titulo": "Prevención de errores mediante confirmación doble",
-          "descripcion": "El sistema debe tener múltiples alertas de confirmación antes de realizar cualquier acción critica, como solicitar pedido, cancelar pedido en clientes, o acciones de administrador como borrar categorías, productos e inventario.",
+          "descripcion": "El sistema debe tener alertas de confirmación antes de realizar cualquier acción crítica, como enviar la solicitud de pedido o eliminar productos del carrito en el portal del cliente, o acciones de administrador como cancelar o dar de baja pedidos y borrar categorías, características, opciones, productos, insumos y recetas.",
           "comentarios": "Así se protege de borrar datos importantes por accidente y previene que el cliente final envié solicitudes de pedido equivocadas.",
           "dependencias": [
             "RF-8",
@@ -7824,7 +7830,8 @@
             "RF-44",
             "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
             "cbb7de10-a499-45a3-9d7b-ba856695c761",
-            "9e92ac26-5791-4020-9dd0-b4d68ce01874"
+            "9e92ac26-5791-4020-9dd0-b4d68ce01874",
+            "RF-11"
           ],
           "relaciones": [
             "RF-16",
@@ -7835,7 +7842,8 @@
             "RF-44",
             "0e8da2f1-a24a-49ad-93c6-7a87d607fc38",
             "cbb7de10-a499-45a3-9d7b-ba856695c761",
-            "9e92ac26-5791-4020-9dd0-b4d68ce01874"
+            "9e92ac26-5791-4020-9dd0-b4d68ce01874",
+            "RF-11"
           ],
           "extiende": [],
           "rol": "Usabilidad",
@@ -7847,7 +7855,7 @@
           "id": "RNF-6",
           "tipo": "RNF",
           "titulo": "Validar datos seleccionados de un pedido",
-          "descripcion": "El sistema debe realizar la validación de datos consistentes, campos requeridos y restricciones (ej. Forma del pastel, cantidad de pisos, etc.) antes de procesar el pedido.",
+          "descripcion": "El sistema debe realizar la validación de datos consistentes, campos requeridos y restricciones (ej. características obligatorias, presupuesto de selección y exclusiones entre opciones) antes de procesar el pedido.",
           "comentarios": "Muestra alertas claras al usuario en caso de ingresar datos inválidos o incompletos.",
           "dependencias": [
             "RF-3",
@@ -7890,7 +7898,7 @@
           "id": "RNF-8",
           "tipo": "RNF",
           "titulo": "Generación de copias de seguridad",
-          "descripcion": "El sistema debe incluir un método que permitan al administrador ejecutar y exportar respaldos de información para garantizar la integridad de los datos almacenados.",
+          "descripcion": "El sistema debe incluir un método que permita al administrador ejecutar y exportar respaldos de información, además de copias automáticas diarias, para garantizar la integridad de los datos almacenados.",
           "comentarios": "Es de suma importancia tener la posibilidad de recuperar la información de todo lo que engloba el sistema como el registro de los clientes, de pedidos, o ganancias generadas.",
           "dependencias": [
             "RNF-1"
@@ -7902,7 +7910,7 @@
           "rol": "Mantenibilidad",
           "prioridad": "Alta",
           "metodo_verificacion": "Prueba de Recuperación",
-          "descripcion_resumida": "Programa ejecuciones automáticas diarias de copias de seguridad de la base de datos almacenadas en la nube."
+          "descripcion_resumida": "Permite ejecutar y exportar respaldos de la base de datos y realiza copias de seguridad automáticas diarias en la nube."
         },
         {
           "id": "RNF-9",
@@ -7928,9 +7936,7 @@
           "titulo": "Paleta visual de las interfaces",
           "descripcion": "La interfaz gráfica de todos los módulos del sistema debe aplicar estrictamente la identidad corporativa del negocio, utilizando de manera obligatoria una paleta de colores en tonos pastel para mantener la consistencia estética requerida por el cliente.",
           "comentarios": "Aplica tanto para el portal público del cliente como para el panel de administración.",
-          "dependencias": [
-            "RNF-5"
-          ],
+          "dependencias": [],
           "relaciones": [
             "RNF-4"
           ],
@@ -7962,7 +7968,7 @@
               "ultimo acceso del usuario."
             ],
             "intervalo_temporal": "Pasado, presente y futuro",
-            "comentarios": "La estructura de los datos consolidados depende de las reglas de cálculo contable elegidas."
+            "comentarios": "Los permisos de cada usuario determinan a qué módulos administrativos puede entrar. La contraseña nunca se muestra en texto plano."
           },
           "diagrama": {
             "casos_con_actor": [
@@ -8003,18 +8009,18 @@
             {
               "id": "RNF-15",
               "tipo": "RNF",
-              "titulo": "Restricción de acceso a módulos administrativos.",
+              "titulo": "Restricción de acceso a módulos administrativos",
               "descripcion": "El sistema debe tener control de acceso a módulos basado en roles.",
-              "comentarios": "Se debe asegurar que usuarios sin permisos administrativos accedan a datos operativos.",
+              "comentarios": "Se debe asegurar que los usuarios sin permisos administrativos no accedan a datos operativos.",
               "dependencias": [
                 "RNF-13"
               ],
               "relaciones": [],
               "extiende": [],
-              "rol": "Administrador",
+              "rol": "Seguridad",
               "prioridad": "Alta",
               "metodo_verificacion": "Prueba de Seguridad",
-              "descripcion_resumida": "El sistema debe contar con control de acceso a módulos basado en roles para asegurar que usuarios sin permisos administrativos",
+              "descripcion_resumida": "El sistema debe contar con control de acceso a módulos basado en roles para asegurar que los usuarios solo entren a los módulos para los que tienen permiso.",
               "plantilla_caso_de_uso": {
                 "descripcion": "El sistema solo permite a cada usuario del personal entrar a los módulos para los que tiene permiso, y oculta o bloquea los demás.",
                 "precondicion": "Un usuario del personal intenta iniciar sesión o entrar a un módulo del panel administrativo.",
@@ -8121,7 +8127,7 @@
                 "RNF-11"
               ],
               "extiende": [],
-              "rol": "Administrador",
+              "rol": "Seguridad",
               "prioridad": "Media",
               "metodo_verificacion": "Prueba de Seguridad",
               "descripcion_resumida": "El sistema debe gestionar sesiones individuales para cada usuario del personal, invalidando más de una sesión activa simultánea.",
@@ -8234,7 +8240,7 @@
                   "descripcion_resumida": "Permitir al administrador crear cuentas de usuario del personal asignando una credencial con permisos específicos de acceso.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora crear la cuenta de un nuevo miembro del personal, con su nombre, usuario, contraseña y los permisos que tendrá.",
-                    "precondicion": "La administradora inició sesión y se encuentra en el módulo \"Gestión de usuarios\".",
+                    "precondicion": "La administradora inició sesión y se encuentra en el módulo \"Gestión de Usuarios\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -8354,7 +8360,7 @@
                   "descripcion_resumida": "Permitir dar de baja la cuenta de un usuario para revocar su acceso a la plataforma.",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora dar de baja la cuenta de un miembro del personal para que ya no pueda entrar al sistema, conservando el historial de lo que realizó.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de usuarios\".",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de Usuarios\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
@@ -8578,7 +8584,7 @@
                   "descripcion_resumida": "Permitir al administrador actualizar datos del usuario y modificar sus accesos",
                   "plantilla_caso_de_uso": {
                     "descripcion": "Permite a la administradora actualizar los datos de un miembro del personal y cambiar sus permisos; los cambios se aplican de inmediato.",
-                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de usuarios\".",
+                    "precondicion": "La administradora se encuentra en el módulo \"Gestión de Usuarios\".",
                     "actor": "Administradora",
                     "secuencia_normal": [
                       {
