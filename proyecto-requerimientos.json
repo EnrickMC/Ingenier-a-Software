@@ -567,6 +567,453 @@
           },
           "elementos": [
             {
+              "crud": "Carrito de compras",
+              "requerimientos": [
+                {
+                  "id": "RF-5",
+                  "tipo": "RF",
+                  "titulo": "Visualización de producto en el carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario visualizar su carrito de compras con los productos que ha agregado, su personalización, cantidad y subtotal.",
+                  "comentarios": "Mantiene la sesión del carrito activa durante la navegación.",
+                  "dependencias": [
+                    "RF-1",
+                    "RF-3"
+                  ],
+                  "relaciones": [],
+                  "extiende": [],
+                  "rol": "Cliente Público",
+                  "prioridad": "Alta",
+                  "metodo_verificacion": "Prueba Funcional / UI",
+                  "descripcion_resumida": "Permite al cliente ver los productos que ha agregado a su carrito de compras.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite al cliente revisar los productos de su carrito con su personalización, cantidad y subtotal, y el total a pagar.",
+                    "precondicion": "El cliente se encuentra navegando en el portal web.",
+                    "actor": "Cliente",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita ver su carrito de compras («Carrito»)"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Identifica la sesión del cliente y valida que tenga un carrito activo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que el carrito contenga al menos un producto"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que cada producto siga activo y con precio y opciones vigentes"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Calcula el subtotal de cada producto y el total a pagar"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra el «Resumen de tu pedido» con las opciones de modificar, eliminar y continuar"
+                      }
+                    ],
+                    "postcondicion": "El cliente visualiza el contenido actualizado de su carrito con precios vigentes. El contenido del carrito no se modifica, salvo la actualización de precios o disponibilidad detectada en el paso 4.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con el servidor?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible cargar tu carrito» con «Reintentar», sin información parcial",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Existe un carrito activo en la sesión?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿El carrito contiene productos?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿Todos los productos siguen activos?",
+                        "respuesta": "No",
+                        "accion": "Marca el producto como «No disponible», lo excluye del total y deshabilita «Continuar»",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿Los precios de los productos siguen vigentes?",
+                        "respuesta": "No",
+                        "accion": "Actualiza el precio, recalcula el total y avisa «El precio de [producto] se actualizó»",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿Las opciones de personalización siguen disponibles y compatibles entre sí?",
+                        "respuesta": "No",
+                        "accion": "Marca «Requiere actualizar personalización», ofrece modificarlo y deshabilita «Continuar»",
+                        "despues": "continua"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 a 6",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "60 veces/día",
+                    "comentarios": "Es el paso previo para modificar o eliminar productos del carrito y para continuar con los datos de entrega, el pago y el envío del pedido."
+                  }
+                },
+                {
+                  "id": "RF-6",
+                  "tipo": "RF",
+                  "titulo": "Registro de producto en el carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario agregar productos (estándar o personalizados) a un carrito de compras, calculando el subtotal acumulado.",
+                  "comentarios": "Mantiene la sesión del carrito activa durante la navegación.",
+                  "dependencias": [
+                    "RF-1",
+                    "RF-3",
+                    "RF-5"
+                  ],
+                  "relaciones": [
+                    "RF-3",
+                    "RF-4",
+                    "RNF-7"
+                  ],
+                  "extiende": [],
+                  "rol": "Cliente Público",
+                  "prioridad": "Alta",
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite agregar ítems estándar o personalizados acumulando el subtotal en tiempo real.",
+                  "plantilla_caso_de_uso": {
+                    "objetivos_de_otros_modulos": [
+                      "Catálogo Público"
+                    ],
+                    "descripcion": "Permite al cliente agregar a su carrito el postre que eligió o personalizó, mostrando el total acumulado.",
+                    "precondicion": "El cliente tiene un producto personalizado o seleccionado desde el catálogo con su configuración estándar.",
+                    "actor": "Cliente",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Solicita agregar el producto configurado a su carrito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que el producto siga activo y que el precio de la configuración sea el vigente"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Recupera el carrito activo de la sesión o crea uno nuevo si no existe"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Verifica si el carrito ya tiene el mismo producto con la misma configuración"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Agrega el producto con su precio y subtotal (o incrementa su cantidad si ya estaba)"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Recalcula el total acumulado del carrito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el contador «Carrito (N)» y muestra «Seguir comprando» y «Ver carrito»"
+                      }
+                    ],
+                    "postcondicion": "El producto queda almacenado en el carrito de compras de la sesión del cliente y el total acumulado está actualizado.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿Hay conexión con el servidor?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible agregar el producto» y conserva la configuración en pantalla",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El producto existe y sigue activo?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Este producto ya no está disponible», no lo agrega y redirige al catálogo",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El precio de la configuración es el vigente?",
+                        "respuesta": "No",
+                        "accion": "Muestra el precio actualizado y solicita confirmación al cliente",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El cliente acepta el precio?",
+                        "respuesta": "No",
+                        "accion": "No agrega el producto y regresa al formulario de personalización con sus selecciones",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 3,
+                        "pregunta": "¿Se obtuvo un carrito para la sesión?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible crear tu carrito. Revisa la configuración de tu navegador»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La cantidad excede el máximo permitido por producto?",
+                        "respuesta": "Sí",
+                        "accion": "Ajusta la cantidad al máximo permitido e informa el límite al cliente",
+                        "despues": "continua"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Se guardó en el carrito sin errores?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible agregar el producto»; el carrito queda como estaba",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 a 7",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "40 veces/día",
+                    "comentarios": "El carrito se mantiene activo durante la navegación y es temporal hasta que el cliente confirma y envía su pedido. Pertenece al catálogo público, pero también alimenta la solicitud del pedido; por eso se asocia a ambos objetivos."
+                  }
+                },
+                {
+                  "id": "RF-7",
+                  "tipo": "RF",
+                  "titulo": "Modificación de productos del carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario modificar la cantidad o la personalización de los productos agregados al carrito de compras.",
+                  "comentarios": "Recalcula de inmediato el subtotal del pedido.",
+                  "dependencias": [
+                    "RF-5"
+                  ],
+                  "relaciones": [
+                    "RF-6"
+                  ],
+                  "extiende": [],
+                  "rol": "Cliente Público",
+                  "prioridad": "Media",
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite ajustar cantidades o cambiar personalizaciones dentro del carrito activo.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite al cliente cambiar la cantidad o la personalización de un producto que ya está en su carrito, actualizando el total al instante.",
+                    "precondicion": "El cliente está visualizando su carrito de compras y este contiene al menos un producto.",
+                    "actor": "Cliente",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona un producto de su carrito y solicita modificarlo"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que el producto siga en el carrito y activo en la BD, y recupera sus opciones"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra el formulario de edición con la configuración actual del producto"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Realiza los cambios y elige «Guardar» o «Cancelar»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida los campos obligatorios, la cantidad y la dedicatoria"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida en la BD que las opciones elegidas sigan disponibles y obtiene el precio vigente"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Actualiza el producto en el carrito, recalcula subtotal y total y actualiza el contador"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Cierra el formulario, muestra el carrito actualizado e informa el éxito"
+                      }
+                    ],
+                    "postcondicion": "El producto del carrito refleja la nueva configuración y el total a pagar está actualizado.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La sesión del carrito sigue activa?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El producto sigue en el carrito?",
+                        "respuesta": "No",
+                        "accion": "Muestra «El producto ya no está en tu carrito» y recarga el carrito sin abrir el formulario",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El producto sigue activo en el catálogo?",
+                        "respuesta": "No",
+                        "accion": "Lo marca como «No disponible», no permite editarlo y ofrece eliminarlo del carrito",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿El cliente eligió «Guardar»?",
+                        "respuesta": "No",
+                        "accion": "Cierra el formulario sin guardar; el producto conserva su configuración y precio",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La cantidad capturada es cero?",
+                        "respuesta": "Sí",
+                        "accion": "No guarda la edición y muestra la confirmación para eliminar el producto del carrito",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿Cantidad y campos obligatorios válidos?",
+                        "respuesta": "No",
+                        "accion": "Resalta el error, indica el valor permitido y conserva los demás cambios",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 6,
+                        "pregunta": "¿Las opciones elegidas siguen disponibles?",
+                        "respuesta": "No",
+                        "accion": "Muestra «La opción seleccionada ya no está disponible», la retira y recalcula el precio",
+                        "despues": "4"
+                      },
+                      {
+                        "paso": 7,
+                        "pregunta": "¿El cambio se guardó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible actualizar tu carrito»; el carrito queda como estaba",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "2 y 3",
+                        "cota_de_tiempo": "1 segundo"
+                      },
+                      {
+                        "paso": "5 a 8",
+                        "cota_de_tiempo": "2 segundos"
+                      }
+                    ],
+                    "frecuencia_esperada": "15 veces/día",
+                    "comentarios": "El precio se recalcula en cada cambio para que el cliente siempre conozca el costo real antes de confirmar su pedido."
+                  }
+                },
+                {
+                  "id": "RF-8",
+                  "tipo": "RF",
+                  "titulo": "Eliminación de productos del carrito de compras",
+                  "descripcion": "El sistema debe permitir al usuario remover ítems individuales o vaciar por completo los productos agregados al carrito de compras.",
+                  "comentarios": "Requiere confirmación por parte del usuario.",
+                  "dependencias": [
+                    "RF-5"
+                  ],
+                  "relaciones": [
+                    "RF-6",
+                    "RNF-5"
+                  ],
+                  "extiende": [],
+                  "rol": "Cliente Público",
+                  "prioridad": "Media",
+                  "metodo_verificacion": "Prueba Funcional",
+                  "descripcion_resumida": "Permite remover artículos individuales o vaciar el carrito de compras.",
+                  "plantilla_caso_de_uso": {
+                    "descripcion": "Permite al cliente quitar un producto de su carrito o vaciarlo por completo, previa confirmación.",
+                    "precondicion": "El cliente está visualizando su carrito de compras y este contiene al menos un producto.",
+                    "actor": "Cliente",
+                    "secuencia_normal": [
+                      {
+                        "carril": "Actor",
+                        "accion": "Selecciona un producto y solicita eliminarlo, o solicita «Vaciar carrito»"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Valida que exista un carrito activo y, si eligió un producto, que siga en el carrito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Muestra la confirmación con el producto a eliminar o el número de productos a vaciar"
+                      },
+                      {
+                        "carril": "Actor",
+                        "accion": "Confirma o cancela la eliminación"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Elimina el producto seleccionado (o todos los productos) del carrito"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Recalcula el total y el contador (si quedó vacío, muestra «Tu carrito está vacío»)"
+                      },
+                      {
+                        "carril": "Sistema",
+                        "accion": "Informa al cliente que la eliminación se realizó con éxito"
+                      }
+                    ],
+                    "postcondicion": "El producto (o todos los productos) ya no está en el carrito y el total a pagar refleja el cambio.",
+                    "excepciones": [
+                      {
+                        "paso": 2,
+                        "pregunta": "¿La sesión del carrito sigue activa?",
+                        "respuesta": "No",
+                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 2,
+                        "pregunta": "¿El producto sigue dentro del carrito?",
+                        "respuesta": "No",
+                        "accion": "Muestra «El producto ya no está en tu carrito» y recarga el carrito sin eliminar nada",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 4,
+                        "pregunta": "¿El cliente confirmó la eliminación?",
+                        "respuesta": "No",
+                        "accion": "Cierra la ventana; el carrito conserva todos sus productos y el mismo total",
+                        "despues": "fin"
+                      },
+                      {
+                        "paso": 5,
+                        "pregunta": "¿La eliminación se realizó sin errores?",
+                        "respuesta": "No",
+                        "accion": "Muestra «No fue posible eliminar el producto»; el carrito queda como estaba",
+                        "despues": "fin"
+                      }
+                    ],
+                    "rendimiento": [
+                      {
+                        "paso": "5 a 7",
+                        "cota_de_tiempo": "1 segundo"
+                      }
+                    ],
+                    "frecuencia_esperada": "10 veces/día",
+                    "comentarios": "También se activa cuando el cliente, al modificar un producto del carrito, cambia su cantidad a cero."
+                  }
+                }
+              ]
+            },
+            {
               "id": "RF-9",
               "tipo": "RF",
               "titulo": "Registro de datos para la entrega del producto",
@@ -1036,453 +1483,6 @@
                 "frecuencia_esperada": "40 veces/día",
                 "comentarios": "Se usan dos datos (folio y teléfono) para que nadie pueda ver pedidos ajenos solo con adivinar un folio. Reduce las llamadas de consulta a la pastelería."
               }
-            },
-            {
-              "crud": "Carrito de compras",
-              "requerimientos": [
-                {
-                  "id": "RF-5",
-                  "tipo": "RF",
-                  "titulo": "Visualización de producto en el carrito de compras",
-                  "descripcion": "El sistema debe permitir al usuario visualizar su carrito de compras con los productos que ha agregado, su personalización, cantidad y subtotal.",
-                  "comentarios": "Mantiene la sesión del carrito activa durante la navegación.",
-                  "dependencias": [
-                    "RF-1",
-                    "RF-3"
-                  ],
-                  "relaciones": [],
-                  "extiende": [],
-                  "rol": "Cliente Público",
-                  "prioridad": "Alta",
-                  "metodo_verificacion": "Prueba Funcional / UI",
-                  "descripcion_resumida": "Permite al cliente ver los productos que ha agregado a su carrito de compras.",
-                  "plantilla_caso_de_uso": {
-                    "descripcion": "Permite al cliente revisar los productos de su carrito con su personalización, cantidad y subtotal, y el total a pagar.",
-                    "precondicion": "El cliente se encuentra navegando en el portal web.",
-                    "actor": "Cliente",
-                    "secuencia_normal": [
-                      {
-                        "carril": "Actor",
-                        "accion": "Solicita ver su carrito de compras («Carrito»)"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Identifica la sesión del cliente y valida que tenga un carrito activo"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida que el carrito contenga al menos un producto"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida en la BD que cada producto siga activo y con precio y opciones vigentes"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Calcula el subtotal de cada producto y el total a pagar"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Muestra el «Resumen de tu pedido» con las opciones de modificar, eliminar y continuar"
-                      }
-                    ],
-                    "postcondicion": "El cliente visualiza el contenido actualizado de su carrito con precios vigentes. El contenido del carrito no se modifica, salvo la actualización de precios o disponibilidad detectada en el paso 4.",
-                    "excepciones": [
-                      {
-                        "paso": 2,
-                        "pregunta": "¿Hay conexión con el servidor?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible cargar tu carrito» con «Reintentar», sin información parcial",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿Existe un carrito activo en la sesión?",
-                        "respuesta": "No",
-                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 3,
-                        "pregunta": "¿El carrito contiene productos?",
-                        "respuesta": "No",
-                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 4,
-                        "pregunta": "¿Todos los productos siguen activos?",
-                        "respuesta": "No",
-                        "accion": "Marca el producto como «No disponible», lo excluye del total y deshabilita «Continuar»",
-                        "despues": "continua"
-                      },
-                      {
-                        "paso": 4,
-                        "pregunta": "¿Los precios de los productos siguen vigentes?",
-                        "respuesta": "No",
-                        "accion": "Actualiza el precio, recalcula el total y avisa «El precio de [producto] se actualizó»",
-                        "despues": "continua"
-                      },
-                      {
-                        "paso": 4,
-                        "pregunta": "¿Las opciones de personalización siguen disponibles y compatibles entre sí?",
-                        "respuesta": "No",
-                        "accion": "Marca «Requiere actualizar personalización», ofrece modificarlo y deshabilita «Continuar»",
-                        "despues": "continua"
-                      }
-                    ],
-                    "rendimiento": [
-                      {
-                        "paso": "2 a 6",
-                        "cota_de_tiempo": "2 segundos"
-                      }
-                    ],
-                    "frecuencia_esperada": "60 veces/día",
-                    "comentarios": "Es el paso previo para modificar o eliminar productos del carrito y para continuar con los datos de entrega, el pago y el envío del pedido."
-                  }
-                },
-                {
-                  "id": "RF-6",
-                  "tipo": "RF",
-                  "titulo": "Registro de producto en el carrito de compras",
-                  "descripcion": "El sistema debe permitir al usuario agregar productos (estándar o personalizados) a un carrito de compras, calculando el subtotal acumulado.",
-                  "comentarios": "Mantiene la sesión del carrito activa durante la navegación.",
-                  "dependencias": [
-                    "RF-1",
-                    "RF-3",
-                    "RF-5"
-                  ],
-                  "relaciones": [
-                    "RF-3",
-                    "RF-4",
-                    "RNF-7"
-                  ],
-                  "extiende": [],
-                  "rol": "Cliente Público",
-                  "prioridad": "Alta",
-                  "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite agregar ítems estándar o personalizados acumulando el subtotal en tiempo real.",
-                  "plantilla_caso_de_uso": {
-                    "objetivos_de_otros_modulos": [
-                      "Catálogo Público"
-                    ],
-                    "descripcion": "Permite al cliente agregar a su carrito el postre que eligió o personalizó, mostrando el total acumulado.",
-                    "precondicion": "El cliente tiene un producto personalizado o seleccionado desde el catálogo con su configuración estándar.",
-                    "actor": "Cliente",
-                    "secuencia_normal": [
-                      {
-                        "carril": "Actor",
-                        "accion": "Solicita agregar el producto configurado a su carrito"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida en la BD que el producto siga activo y que el precio de la configuración sea el vigente"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Recupera el carrito activo de la sesión o crea uno nuevo si no existe"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Verifica si el carrito ya tiene el mismo producto con la misma configuración"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Agrega el producto con su precio y subtotal (o incrementa su cantidad si ya estaba)"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Recalcula el total acumulado del carrito"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Actualiza el contador «Carrito (N)» y muestra «Seguir comprando» y «Ver carrito»"
-                      }
-                    ],
-                    "postcondicion": "El producto queda almacenado en el carrito de compras de la sesión del cliente y el total acumulado está actualizado.",
-                    "excepciones": [
-                      {
-                        "paso": 2,
-                        "pregunta": "¿Hay conexión con el servidor?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible agregar el producto» y conserva la configuración en pantalla",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El producto existe y sigue activo?",
-                        "respuesta": "No",
-                        "accion": "Muestra «Este producto ya no está disponible», no lo agrega y redirige al catálogo",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El precio de la configuración es el vigente?",
-                        "respuesta": "No",
-                        "accion": "Muestra el precio actualizado y solicita confirmación al cliente",
-                        "despues": "continua"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El cliente acepta el precio?",
-                        "respuesta": "No",
-                        "accion": "No agrega el producto y regresa al formulario de personalización con sus selecciones",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 3,
-                        "pregunta": "¿Se obtuvo un carrito para la sesión?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible crear tu carrito. Revisa la configuración de tu navegador»",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 5,
-                        "pregunta": "¿La cantidad excede el máximo permitido por producto?",
-                        "respuesta": "Sí",
-                        "accion": "Ajusta la cantidad al máximo permitido e informa el límite al cliente",
-                        "despues": "continua"
-                      },
-                      {
-                        "paso": 5,
-                        "pregunta": "¿Se guardó en el carrito sin errores?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible agregar el producto»; el carrito queda como estaba",
-                        "despues": "fin"
-                      }
-                    ],
-                    "rendimiento": [
-                      {
-                        "paso": "2 a 7",
-                        "cota_de_tiempo": "2 segundos"
-                      }
-                    ],
-                    "frecuencia_esperada": "40 veces/día",
-                    "comentarios": "El carrito se mantiene activo durante la navegación y es temporal hasta que el cliente confirma y envía su pedido. Pertenece al catálogo público, pero también alimenta la solicitud del pedido; por eso se asocia a ambos objetivos."
-                  }
-                },
-                {
-                  "id": "RF-7",
-                  "tipo": "RF",
-                  "titulo": "Modificación de productos del carrito de compras",
-                  "descripcion": "El sistema debe permitir al usuario modificar la cantidad o la personalización de los productos agregados al carrito de compras.",
-                  "comentarios": "Recalcula de inmediato el subtotal del pedido.",
-                  "dependencias": [
-                    "RF-5"
-                  ],
-                  "relaciones": [
-                    "RF-6"
-                  ],
-                  "extiende": [],
-                  "rol": "Cliente Público",
-                  "prioridad": "Media",
-                  "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite ajustar cantidades o cambiar personalizaciones dentro del carrito activo.",
-                  "plantilla_caso_de_uso": {
-                    "descripcion": "Permite al cliente cambiar la cantidad o la personalización de un producto que ya está en su carrito, actualizando el total al instante.",
-                    "precondicion": "El cliente está visualizando su carrito de compras y este contiene al menos un producto.",
-                    "actor": "Cliente",
-                    "secuencia_normal": [
-                      {
-                        "carril": "Actor",
-                        "accion": "Selecciona un producto de su carrito y solicita modificarlo"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida que el producto siga en el carrito y activo en la BD, y recupera sus opciones"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Muestra el formulario de edición con la configuración actual del producto"
-                      },
-                      {
-                        "carril": "Actor",
-                        "accion": "Realiza los cambios y elige «Guardar» o «Cancelar»"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida los campos obligatorios, la cantidad y la dedicatoria"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida en la BD que las opciones elegidas sigan disponibles y obtiene el precio vigente"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Actualiza el producto en el carrito, recalcula subtotal y total y actualiza el contador"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Cierra el formulario, muestra el carrito actualizado e informa el éxito"
-                      }
-                    ],
-                    "postcondicion": "El producto del carrito refleja la nueva configuración y el total a pagar está actualizado.",
-                    "excepciones": [
-                      {
-                        "paso": 2,
-                        "pregunta": "¿La sesión del carrito sigue activa?",
-                        "respuesta": "No",
-                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El producto sigue en el carrito?",
-                        "respuesta": "No",
-                        "accion": "Muestra «El producto ya no está en tu carrito» y recarga el carrito sin abrir el formulario",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El producto sigue activo en el catálogo?",
-                        "respuesta": "No",
-                        "accion": "Lo marca como «No disponible», no permite editarlo y ofrece eliminarlo del carrito",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 4,
-                        "pregunta": "¿El cliente eligió «Guardar»?",
-                        "respuesta": "No",
-                        "accion": "Cierra el formulario sin guardar; el producto conserva su configuración y precio",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 5,
-                        "pregunta": "¿La cantidad capturada es cero?",
-                        "respuesta": "Sí",
-                        "accion": "No guarda la edición y muestra la confirmación para eliminar el producto del carrito",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 5,
-                        "pregunta": "¿Cantidad y campos obligatorios válidos?",
-                        "respuesta": "No",
-                        "accion": "Resalta el error, indica el valor permitido y conserva los demás cambios",
-                        "despues": "4"
-                      },
-                      {
-                        "paso": 6,
-                        "pregunta": "¿Las opciones elegidas siguen disponibles?",
-                        "respuesta": "No",
-                        "accion": "Muestra «La opción seleccionada ya no está disponible», la retira y recalcula el precio",
-                        "despues": "4"
-                      },
-                      {
-                        "paso": 7,
-                        "pregunta": "¿El cambio se guardó sin errores?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible actualizar tu carrito»; el carrito queda como estaba",
-                        "despues": "fin"
-                      }
-                    ],
-                    "rendimiento": [
-                      {
-                        "paso": "2 y 3",
-                        "cota_de_tiempo": "1 segundo"
-                      },
-                      {
-                        "paso": "5 a 8",
-                        "cota_de_tiempo": "2 segundos"
-                      }
-                    ],
-                    "frecuencia_esperada": "15 veces/día",
-                    "comentarios": "El precio se recalcula en cada cambio para que el cliente siempre conozca el costo real antes de confirmar su pedido."
-                  }
-                },
-                {
-                  "id": "RF-8",
-                  "tipo": "RF",
-                  "titulo": "Eliminación de productos del carrito de compras",
-                  "descripcion": "El sistema debe permitir al usuario remover ítems individuales o vaciar por completo los productos agregados al carrito de compras.",
-                  "comentarios": "Requiere confirmación por parte del usuario.",
-                  "dependencias": [
-                    "RF-5"
-                  ],
-                  "relaciones": [
-                    "RF-6",
-                    "RNF-5"
-                  ],
-                  "extiende": [],
-                  "rol": "Cliente Público",
-                  "prioridad": "Media",
-                  "metodo_verificacion": "Prueba Funcional",
-                  "descripcion_resumida": "Permite remover artículos individuales o vaciar el carrito de compras.",
-                  "plantilla_caso_de_uso": {
-                    "descripcion": "Permite al cliente quitar un producto de su carrito o vaciarlo por completo, previa confirmación.",
-                    "precondicion": "El cliente está visualizando su carrito de compras y este contiene al menos un producto.",
-                    "actor": "Cliente",
-                    "secuencia_normal": [
-                      {
-                        "carril": "Actor",
-                        "accion": "Selecciona un producto y solicita eliminarlo, o solicita «Vaciar carrito»"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Valida que exista un carrito activo y, si eligió un producto, que siga en el carrito"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Muestra la confirmación con el producto a eliminar o el número de productos a vaciar"
-                      },
-                      {
-                        "carril": "Actor",
-                        "accion": "Confirma o cancela la eliminación"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Elimina el producto seleccionado (o todos los productos) del carrito"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Recalcula el total y el contador (si quedó vacío, muestra «Tu carrito está vacío»)"
-                      },
-                      {
-                        "carril": "Sistema",
-                        "accion": "Informa al cliente que la eliminación se realizó con éxito"
-                      }
-                    ],
-                    "postcondicion": "El producto (o todos los productos) ya no está en el carrito y el total a pagar refleja el cambio.",
-                    "excepciones": [
-                      {
-                        "paso": 2,
-                        "pregunta": "¿La sesión del carrito sigue activa?",
-                        "respuesta": "No",
-                        "accion": "Muestra «Tu carrito está vacío», el total en $0.00 y el botón «Ir al catálogo»",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 2,
-                        "pregunta": "¿El producto sigue dentro del carrito?",
-                        "respuesta": "No",
-                        "accion": "Muestra «El producto ya no está en tu carrito» y recarga el carrito sin eliminar nada",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 4,
-                        "pregunta": "¿El cliente confirmó la eliminación?",
-                        "respuesta": "No",
-                        "accion": "Cierra la ventana; el carrito conserva todos sus productos y el mismo total",
-                        "despues": "fin"
-                      },
-                      {
-                        "paso": 5,
-                        "pregunta": "¿La eliminación se realizó sin errores?",
-                        "respuesta": "No",
-                        "accion": "Muestra «No fue posible eliminar el producto»; el carrito queda como estaba",
-                        "despues": "fin"
-                      }
-                    ],
-                    "rendimiento": [
-                      {
-                        "paso": "5 a 7",
-                        "cota_de_tiempo": "1 segundo"
-                      }
-                    ],
-                    "frecuencia_esperada": "10 veces/día",
-                    "comentarios": "También se activa cuando el cliente, al modificar un producto del carrito, cambia su cantidad a cero."
-                  }
-                }
-              ]
             }
           ]
         }
