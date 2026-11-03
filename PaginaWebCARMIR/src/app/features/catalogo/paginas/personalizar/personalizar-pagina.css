@@ -27,6 +27,10 @@
   flex-direction: column;
   gap: 12px;
   min-width: 0;
+  /* Celular y tableta: el visor centrado y sin crecer de más */
+  width: 100%;
+  max-width: 560px;
+  align-self: center;
 }
 
 .foto-respaldo {
@@ -230,8 +234,12 @@
   .columna-visor {
     flex: 0 0 44%;
     max-width: 540px;
+    align-self: flex-start;
     position: sticky;
     top: 112px;
+    /* El 3D se achica para que los botones y el precio quepan en la pantalla
+       (encabezado + botones + precio ocupan unos 380px) */
+    --alto-maximo-visor: calc(100vh - 380px);
   }
 
   .precios {
@@ -266,5 +274,14 @@
     min-width: 200px;
     min-height: 52px;
     font-size: 1.1rem;
+  }
+}
+
+/* Pantallas bajitas (laptop con zoom de Windows): el visor ya no se queda fijo,
+   así nunca tapa ni deja fuera de la pantalla sus botones */
+@media (min-width: 1024px) and (max-height: 700px) {
+  .columna-visor {
+    position: static;
+    --alto-maximo-visor: 62vh;
   }
 }

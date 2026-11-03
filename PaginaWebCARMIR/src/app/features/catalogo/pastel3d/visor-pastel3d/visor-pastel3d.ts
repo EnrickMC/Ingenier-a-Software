@@ -31,11 +31,17 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
   private controles: OrbitControls | null = null;
   private pastel: PastelConstruido | null = null;
   private observador: ResizeObserver | null = null;
+  private observadorVista: IntersectionObserver | null = null;
+  // Si el visor no está en pantalla no se dibuja (ahorra batería y procesador)
+  private visible = true;
   private cuadro = 0;
   // Texto del último diseño dibujado (si no cambia, no se vuelve a armar)
   private ultimoDiseno = '';
   // Animación de "aparecer" al cambiar una opción
   private inicioAparecer = 0;
+  // Último tamaño del lienzo (para no recalcular si no cambió)
+  private ultimoAncho = 0;
+  private ultimoAlto = 0;
 
   constructor() {
     // effect() necesita una función; bind(this) evita escribir una flecha
@@ -59,6 +65,9 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     if (this.observador !== null) {
       this.observador.disconnect();
     }
+    if (this.observadorVista !== null) {
+      this.observadorVista.disconnect();
+    }
     if (this.pastel !== null) {
       liberarPastel(this.pastel.grupo);
     }
@@ -75,13 +84,25 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
   private iniciarEscena(): void {
     const caja = this.contenedor().nativeElement;
     const renderizador = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-    renderizador.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderizador.setPixelRatio(this.densidadPixeles());
     renderizador.shadowMap.enabled = true;
     renderizador.shadowMap.type = THREE.PCFShadowMap;
     renderizador.toneMapping = THREE.ACESFilmicToneMapping;
     renderizador.toneMappingExposure = 1.05;
+    // «Ver por dentro» recorta las decoraciones con planos (ver constructor-pastel.ts)
+    renderizador.localClippingEnabled = true;
     renderizador.domElement.setAttribute('aria-hidden', 'true');
-    caja.appendChild(renderizador.domElement);
+    // El lienzo se crea desde código, así que el CSS del componente no lo alcanza:
+    // sus estilos se ponen aquí. Va encima de todo el contenedor y nunca lo empuja.
+    const estilo = renderizador.domElement.style;
+    estilo.position = 'absolute';
+    estilo.top = '0';
+    estilo.left = '0';
+    estilo.width = '100%';
+    estilo.height = '100%';
+    estilo.display = 'block';
+    // Se pone primero para que los letreros queden encima
+    caja.prepend(renderizador.domElement);
     this.renderizador = renderizador;
 
     // Luz de ambiente de "cuarto" para reflejos suaves
@@ -119,19 +140,42 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
 
     this.observador = new ResizeObserver(this.ajustarTamano.bind(this));
     this.observador.observe(caja);
+    this.observadorVista = new IntersectionObserver(this.alCambiarVisibilidad.bind(this));
+    this.observadorVista.observe(caja);
     this.ajustarTamano();
   }
 
+  private alCambiarVisibilidad(entradas: IntersectionObserverEntry[]): void {
+    const ultima = entradas[entradas.length - 1];
+    this.visible = ultima.isIntersecting;
+  }
+
+  // Pantallas de alta densidad: hasta 1.5 se ve nítido sin cargar de más la tarjeta de video
+  private densidadPixeles(): number {
+    return Math.min(window.devicePixelRatio, 1.5);
+  }
+
+  // Se llama cada vez que cambia el tamaño del contenedor (ventana, zoom o giro del celular)
   private ajustarTamano(): void {
     if (this.renderizador === null) {
       return;
     }
     const caja = this.contenedor().nativeElement;
-    const ancho = Math.max(1, caja.clientWidth);
-    const alto = Math.max(1, caja.clientHeight);
+    const ancho = Math.max(1, Math.round(caja.clientWidth));
+    const alto = Math.max(1, Math.round(caja.clientHeight));
+    // El zoom de Windows o del navegador cambia la densidad de pixeles
+    this.renderizador.setPixelRatio(this.densidadPixeles());
+    if (ancho === this.ultimoAncho && alto === this.ultimoAlto) {
+      return;
+    }
+    this.ultimoAncho = ancho;
+    this.ultimoAlto = alto;
+    // false: el tamaño en pantalla lo pone el CSS, aquí solo la resolución
     this.renderizador.setSize(ancho, alto, false);
     this.camara.aspect = ancho / alto;
     this.camara.updateProjectionMatrix();
+    // Con otra proporción se vuelve a calcular la distancia para que el postre quepa
+    this.acercarParaVerTodo();
   }
 
   // ===================== Armado =====================
@@ -170,24 +214,67 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     }
   }
 
-  // Coloca la cámara para que se vea todo el postre
+  // Coloca la cámara de frente, un poco desde arriba, apuntando al centro del postre
   private encuadrar(): void {
     if (this.pastel === null || this.controles === null) {
       return;
     }
-    const alto = this.pastel.alturaTotal;
-    const ancho = this.pastel.anchoTotal;
-    // Distancia mínima fija: así un pastel chico se ve chico y uno grande se ve grande
-    const distancia = Math.max(alto * 2.1, ancho * 1.8, 72);
-    this.controles.target.set(0, alto * 0.45, 0);
-    // Un poco desde arriba para que se lea el mensaje
-    this.camara.position.set(0, alto * 0.45 + distancia * 0.78, distancia);
+    const centro = this.medirPastel().getCenter(new THREE.Vector3());
+    this.controles.target.copy(centro);
+    // Dirección desde el centro hacia la cámara (un poco desde arriba para que se lea el mensaje)
+    const direccion = new THREE.Vector3(0, 0.78, 1).normalize();
+    const distancia = this.distanciaParaVerTodo();
+    this.camara.position.copy(centro).addScaledVector(direccion, distancia);
     this.controles.update();
+  }
+
+  // Deja la cámara en la misma dirección pero a la distancia en la que cabe todo el postre
+  private acercarParaVerTodo(): void {
+    if (this.pastel === null || this.controles === null) {
+      return;
+    }
+    const direccion = this.camara.position.clone().sub(this.controles.target);
+    if (direccion.lengthSq() === 0) {
+      this.encuadrar();
+      return;
+    }
+    direccion.normalize();
+    this.camara.position.copy(this.controles.target).addScaledVector(direccion, this.distanciaParaVerTodo());
+    this.controles.update();
+  }
+
+  // Caja que ocupa el postre a tamaño normal (sin la animación de "aparecer")
+  private medirPastel(): THREE.Box3 {
+    const caja = new THREE.Box3();
+    if (this.pastel === null) {
+      return caja;
+    }
+    const grupo = this.pastel.grupo;
+    const escalaAnterior = grupo.scale.x;
+    grupo.scale.setScalar(1);
+    grupo.updateMatrixWorld(true);
+    caja.setFromObject(grupo);
+    grupo.scale.setScalar(escalaAnterior);
+    grupo.updateMatrixWorld(true);
+    return caja;
+  }
+
+  // Distancia de la cámara para que el postre quepa a lo ancho y a lo alto del lienzo
+  private distanciaParaVerTodo(): number {
+    const esfera = this.medirPastel().getBoundingSphere(new THREE.Sphere());
+    // Radio mínimo fijo: así un pastel chico se ve chico y uno grande se ve grande
+    const radio = Math.max(esfera.radius, 21);
+    const mitadVertical = THREE.MathUtils.degToRad(this.camara.fov) / 2;
+    // En un lienzo angosto (celular) lo que limita es el ancho
+    const mitadHorizontal = Math.atan(Math.tan(mitadVertical) * this.camara.aspect);
+    const mitadMenor = Math.min(mitadVertical, mitadHorizontal);
+    // 1.08 deja un pequeño margen alrededor
+    return (radio / Math.sin(mitadMenor)) * 1.08;
   }
 
   private dibujar(): void {
     this.cuadro = requestAnimationFrame(this.dibujar.bind(this));
-    if (this.renderizador === null || this.controles === null) {
+    if (this.renderizador === null || this.controles === null || !this.visible) {
       return;
     }
     const tiempo = performance.now() / 1000;

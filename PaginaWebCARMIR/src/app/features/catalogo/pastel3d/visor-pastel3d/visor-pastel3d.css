@@ -10,24 +10,22 @@
   box-shadow: var(--sombra-alta);
 }
 
-/* Lienzo del 3D: alto fijo en proporción al ancho */
+/* Lienzo del 3D: cuadrado, pero sin pasar del alto que deja la pantalla.
+   La página puede cambiar el alto máximo con la variable --alto-maximo-visor.
+   El <canvas> se pone desde código (visor-pastel3d.ts) y ocupa todo este espacio. */
 .lienzo {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-height: 62vh;
+  min-height: 220px;
+  max-height: var(--alto-maximo-visor, 62vh);
+  overflow: hidden;
   touch-action: none;
   cursor: grab;
 }
 
 .lienzo:active {
   cursor: grabbing;
-}
-
-.lienzo canvas {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
 }
 
 .medidas {
@@ -41,6 +39,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   pointer-events: none;
+  z-index: 1;
 }
 
 .ayuda-giro {
@@ -55,12 +54,18 @@
   font-size: 0.78rem;
   white-space: nowrap;
   pointer-events: none;
+  z-index: 1;
+  max-width: calc(100% - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Botones debajo del 3D */
+/* Botones debajo del 3D: siempre por encima del lienzo para que reciban el clic */
 .controles {
+  position: relative;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   padding: 10px;
   background: rgba(255, 255, 255, 0.7);

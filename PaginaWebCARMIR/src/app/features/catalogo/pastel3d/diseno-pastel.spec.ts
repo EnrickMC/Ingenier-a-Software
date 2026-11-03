@@ -69,7 +69,7 @@ describe('Diseño del pastel 3D', function () {
       ' ¡Feliz día! ',
     );
     expect(diseno.forma).toBe('corazon');
-    expect(diseno.colorBizcocho).toBe('#5a3221');
+    expect(diseno.colorBizcocho).toBe('#4e2a1a');
     expect(diseno.decoraciones.velas).toBe(3);
     expect(diseno.decoraciones.mono).toBe(1);
     expect(diseno.decoraciones.flores).toBe(0);
@@ -93,6 +93,15 @@ describe('Diseño del pastel 3D', function () {
     const unica = caracteristica(7, 'Adorno', false, [opcion(17, 7, 'Fresas')]);
     const diseno = disenoDesdeSeleccion([unica], [{ idOpcion: 17, cantidad: 4 }], 'Pastel', 'Pastel', '');
     expect(diseno.decoraciones.fresas).toBe(1);
+  });
+
+  it('el relleno toma el color de la mermelada o crema, no el del pan', function () {
+    const relleno = caracteristica(8, 'Relleno', false, [opcion(18, 8, 'Mermelada de fresa'), opcion(19, 8, 'Cajeta')]);
+    const fresa = disenoDesdeSeleccion([relleno], [{ idOpcion: 18, cantidad: 1 }], 'Pastel', 'Pastel', '');
+    const cajeta = disenoDesdeSeleccion([relleno], [{ idOpcion: 19, cantidad: 1 }], 'Pastel', 'Pastel', '');
+    expect(fresa.colorRelleno).toBe('#c3203a');
+    expect(cajeta.colorRelleno).toBe('#a35d24');
+    expect(aparienciaDeOpcion(relleno, relleno.opciones[0], false).color).toBe('#c3203a');
   });
 
   it('una gelatina se dibuja de un solo molde', function () {

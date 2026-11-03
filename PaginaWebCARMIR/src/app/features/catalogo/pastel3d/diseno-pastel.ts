@@ -64,43 +64,56 @@ export interface AparienciaOpcion {
 
 interface ColoresSabor {
   palabras: string[];
+  // Color del pan (o de la gelatina)
   bizcocho: string;
+  // Color del betún que combina con el sabor
   cobertura: string;
+  // Color del relleno de ese sabor (mermelada, crema, cajeta...)
+  relleno: string;
 }
 
 // Colores de cada sabor: el primero que coincida con el nombre de la opción
 const SABORES: ColoresSabor[] = [
-  { palabras: ['red velvet', 'terciopelo'], bizcocho: '#a3202c', cobertura: '#fbf5ee' },
-  { palabras: ['tres leches', '3 leches'], bizcocho: '#f3dfae', cobertura: '#fff8ea' },
-  { palabras: ['chocolate', 'choco', 'cacao', 'brownie', 'ganache'], bizcocho: '#5a3221', cobertura: '#7a4529' },
-  { palabras: ['fresa', 'frutos rojos'], bizcocho: '#f5c3c6', cobertura: '#f4a7b9' },
-  { palabras: ['frambuesa', 'mora', 'zarzamora', 'uva', 'arandano'], bizcocho: '#b4568a', cobertura: '#d9a3c4' },
-  { palabras: ['limon', 'lima'], bizcocho: '#f4df78', cobertura: '#e9f5b0' },
-  { palabras: ['naranja', 'mandarina'], bizcocho: '#f7b267', cobertura: '#ffd29a' },
-  { palabras: ['mango', 'durazno', 'maracuya'], bizcocho: '#f7b84a', cobertura: '#ffd27a' },
-  { palabras: ['pina'], bizcocho: '#f6dd6b', cobertura: '#fff1a8' },
-  { palabras: ['cajeta', 'caramelo', 'dulce de leche', 'cafe', 'moka'], bizcocho: '#c98c4a', cobertura: '#e3b47a' },
-  { palabras: ['nuez', 'almendra', 'zanahoria'], bizcocho: '#b07a45', cobertura: '#f4e6cf' },
-  { palabras: ['coco'], bizcocho: '#f6efe2', cobertura: '#ffffff' },
-  { palabras: ['matcha', 'pistache', 'menta'], bizcocho: '#a9c46a', cobertura: '#d4e4a8' },
-  { palabras: ['mosaico'], bizcocho: '#fbf6ee', cobertura: '#fbf6ee' },
-  { palabras: ['leche', 'rompope', 'vainilla', 'queso'], bizcocho: '#f1d79a', cobertura: '#fbf2dc' },
+  { palabras: ['red velvet', 'terciopelo'], bizcocho: '#9b1b2a', cobertura: '#fbf5ee', relleno: '#fbf3e6' },
+  { palabras: ['tres leches', '3 leches'], bizcocho: '#f6e2b3', cobertura: '#fff8ea', relleno: '#fff1d2' },
+  { palabras: ['oreo', 'galleta', 'cookies'], bizcocho: '#3b2b26', cobertura: '#f4efe6', relleno: '#f4efe6' },
+  { palabras: ['nutella', 'avellana'], bizcocho: '#5c3420', cobertura: '#8a5534', relleno: '#5e3219' },
+  { palabras: ['chocolate blanco'], bizcocho: '#f3e6c8', cobertura: '#fbf5ee', relleno: '#f8efd9' },
+  { palabras: ['chocolate', 'choco', 'cacao', 'brownie', 'ganache'], bizcocho: '#4e2a1a', cobertura: '#6b3a22', relleno: '#3d1f12' },
+  { palabras: ['cereza'], bizcocho: '#f1c0c4', cobertura: '#f7c6cf', relleno: '#8f1026' },
+  { palabras: ['fresa', 'frutos rojos'], bizcocho: '#f4b8c0', cobertura: '#f7b2c1', relleno: '#c3203a' },
+  { palabras: ['frambuesa', 'mora', 'zarzamora', 'uva', 'arandano'], bizcocho: '#d48aa8', cobertura: '#dba4c4', relleno: '#8e1846' },
+  { palabras: ['limon', 'lima'], bizcocho: '#f3e08a', cobertura: '#f3f6c6', relleno: '#efd34a' },
+  { palabras: ['naranja', 'mandarina'], bizcocho: '#f5c07a', cobertura: '#ffd9a6', relleno: '#f08a1c' },
+  { palabras: ['mango', 'durazno', 'maracuya'], bizcocho: '#f6c25a', cobertura: '#ffd98a', relleno: '#f5a01e' },
+  { palabras: ['pina'], bizcocho: '#f5df7d', cobertura: '#fff2b3', relleno: '#f2c230' },
+  { palabras: ['cafe', 'moka', 'capuchino'], bizcocho: '#9c6b46', cobertura: '#d2ae8a', relleno: '#6f4a33' },
+  { palabras: ['cajeta', 'caramelo', 'dulce de leche'], bizcocho: '#d7a46a', cobertura: '#e8bf8a', relleno: '#a35d24' },
+  { palabras: ['zanahoria'], bizcocho: '#d9893e', cobertura: '#f6ecd9', relleno: '#f6ecd9' },
+  { palabras: ['nuez', 'almendra'], bizcocho: '#c79a66', cobertura: '#f4e6cf', relleno: '#8a5a32' },
+  { palabras: ['coco'], bizcocho: '#f7f1e3', cobertura: '#ffffff', relleno: '#fbf7ee' },
+  { palabras: ['matcha', 'te verde'], bizcocho: '#a5c26a', cobertura: '#dbe8b8', relleno: '#8fae55' },
+  { palabras: ['pistache'], bizcocho: '#bccf88', cobertura: '#e1ebc4', relleno: '#9db66a' },
+  { palabras: ['menta'], bizcocho: '#bfe6d2', cobertura: '#d8f1e4', relleno: '#8fd3b4' },
+  { palabras: ['mosaico'], bizcocho: '#fbf6ee', cobertura: '#fbf6ee', relleno: '#fbf6ee' },
+  { palabras: ['crema pastelera', 'pastelera', 'natilla'], bizcocho: '#f3dda7', cobertura: '#fbf2dc', relleno: '#f6dc8c' },
+  { palabras: ['leche', 'rompope', 'vainilla', 'queso'], bizcocho: '#f3d9a0', cobertura: '#fbf2dc', relleno: '#fff3d6' },
 ];
 
 // Colores de gelatina (más intensos que el bizcocho)
 const SABORES_GELATINA: ColoresSabor[] = [
-  { palabras: ['fresa', 'frutos rojos', 'cereza'], bizcocho: '#e2334f', cobertura: '#e2334f' },
-  { palabras: ['frambuesa', 'mora', 'uva', 'zarzamora'], bizcocho: '#8e2f7a', cobertura: '#8e2f7a' },
-  { palabras: ['limon', 'lima', 'menta'], bizcocho: '#9fd356', cobertura: '#9fd356' },
-  { palabras: ['naranja', 'mandarina', 'mango', 'durazno'], bizcocho: '#f59a2c', cobertura: '#f59a2c' },
-  { palabras: ['pina'], bizcocho: '#f4d03f', cobertura: '#f4d03f' },
-  { palabras: ['mosaico'], bizcocho: '#fbf6ee', cobertura: '#fbf6ee' },
-  { palabras: ['chocolate', 'cafe'], bizcocho: '#6b3b26', cobertura: '#6b3b26' },
-  { palabras: ['cajeta', 'rompope', 'leche', 'vainilla', 'coco', 'queso'], bizcocho: '#f3e3c3', cobertura: '#f3e3c3' },
+  { palabras: ['fresa', 'frutos rojos', 'cereza'], bizcocho: '#e0283f', cobertura: '#e0283f', relleno: '#e0283f' },
+  { palabras: ['frambuesa', 'mora', 'uva', 'zarzamora'], bizcocho: '#8a2378', cobertura: '#8a2378', relleno: '#8a2378' },
+  { palabras: ['limon', 'lima', 'menta'], bizcocho: '#8fd14a', cobertura: '#8fd14a', relleno: '#8fd14a' },
+  { palabras: ['naranja', 'mandarina', 'mango', 'durazno'], bizcocho: '#f7941d', cobertura: '#f7941d', relleno: '#f7941d' },
+  { palabras: ['pina'], bizcocho: '#f6d02f', cobertura: '#f6d02f', relleno: '#f6d02f' },
+  { palabras: ['mosaico'], bizcocho: '#fbf6ee', cobertura: '#fbf6ee', relleno: '#fbf6ee' },
+  { palabras: ['chocolate', 'cafe'], bizcocho: '#6b3b26', cobertura: '#6b3b26', relleno: '#6b3b26' },
+  { palabras: ['cajeta', 'rompope', 'leche', 'vainilla', 'coco', 'queso'], bizcocho: '#f3e3c3', cobertura: '#f3e3c3', relleno: '#f3e3c3' },
 ];
 
-const COLOR_NORMAL: ColoresSabor = { palabras: [], bizcocho: '#f1d79a', cobertura: '#fbf2dc' };
-const COLOR_GELATINA_NORMAL: ColoresSabor = { palabras: [], bizcocho: '#e2334f', cobertura: '#e2334f' };
+const COLOR_NORMAL: ColoresSabor = { palabras: [], bizcocho: '#f3d9a0', cobertura: '#fbf2dc', relleno: '#e8657a' };
+const COLOR_GELATINA_NORMAL: ColoresSabor = { palabras: [], bizcocho: '#e0283f', cobertura: '#e0283f', relleno: '#e0283f' };
 
 // ===================== Texto =====================
 
@@ -239,11 +252,14 @@ function coloresDe(nombre: string, gelatina: boolean): ColoresSabor {
   return normal;
 }
 
-// Color que representa una opción de sabor o relleno (null si no se reconoce)
-export function colorDeOpcion(nombre: string, gelatina: boolean): string | null {
+// Color que representa una opción de sabor o de relleno (null si no se reconoce)
+export function colorDeOpcion(nombre: string, gelatina: boolean, esRelleno: boolean): string | null {
   const colores = coloresDe(nombre, gelatina);
   if (colores.palabras.length === 0) {
     return null;
+  }
+  if (esRelleno) {
+    return colores.relleno;
   }
   return colores.bizcocho;
 }
@@ -343,7 +359,7 @@ export function aparienciaDeOpcion(
     return apariencia;
   }
   if (tipo === 'sabor' || tipo === 'relleno') {
-    const color = colorDeOpcion(opcion.nombre, gelatina && tipo === 'sabor');
+    const color = colorDeOpcion(opcion.nombre, gelatina && tipo === 'sabor', tipo === 'relleno');
     if (color !== null) {
       apariencia.tipo = 'color';
       apariencia.color = color;
@@ -483,7 +499,7 @@ export function disenoDesdeSeleccion(
         }
         diseno.mosaico = normalizar(opcion.nombre).indexOf('mosaico') >= 0;
       } else if (tipoCaracteristica === 'relleno') {
-        diseno.colorRelleno = coloresDe(opcion.nombre, false).bizcocho;
+        diseno.colorRelleno = coloresDe(opcion.nombre, false).relleno;
       } else if (tipoCaracteristica === 'cobertura') {
         const aspecto = aspectoCobertura(caracteristica, opcion);
         diseno.cobertura = aspecto.acabado;
