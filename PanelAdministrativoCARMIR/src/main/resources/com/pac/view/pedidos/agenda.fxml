@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.modulos.pedidos.controller.BarraEstados?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Módulo 4 · Agenda de Producción (RF-30, RF-31) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.AgendaController"
+      stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      spacing="14">
+
+    <fx:define>
+        <ToggleGroup fx:id="grupoVista"/>
+    </fx:define>
+
+    <!-- Periodo: día, semana (por defecto), mes o rango -->
+    <VBox styleClass="tarjeta" spacing="10">
+    <HBox spacing="10" alignment="TOP_LEFT">
+    <FlowPane HBox.hgrow="ALWAYS" minWidth="0" hgap="8" vgap="8" alignment="CENTER_LEFT">
+        <HBox spacing="0" styleClass="grupo-vista">
+            <ToggleButton fx:id="btnDia" text="Día" styleClass="boton-vista, vista-izq" toggleGroup="$grupoVista" onAction="#onCambioVista">
+                <graphic><FontIcon iconLiteral="bi-calendar-event"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="btnSemana" text="Semana" styleClass="boton-vista, vista-medio" toggleGroup="$grupoVista" onAction="#onCambioVista">
+                <graphic><FontIcon iconLiteral="bi-calendar-week"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="btnMes" text="Mes" styleClass="boton-vista, vista-medio" toggleGroup="$grupoVista" onAction="#onCambioVista">
+                <graphic><FontIcon iconLiteral="bi-calendar3"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="btnRango" text="Rango" styleClass="boton-vista, vista-der" toggleGroup="$grupoVista" onAction="#onCambioVista">
+                <graphic><FontIcon iconLiteral="bi-calendar-range"/></graphic>
+            </ToggleButton>
+        </HBox>
+        <HBox fx:id="cajaNavegacion" spacing="6" alignment="CENTER_LEFT">
+            <Button styleClass="btn-oscuro" onAction="#onAnterior">
+                <graphic><FontIcon iconLiteral="bi-chevron-left"/></graphic>
+            </Button>
+            <Button text="Hoy" styleClass="btn-oscuro" onAction="#onHoy"/>
+            <Button styleClass="btn-oscuro" onAction="#onSiguiente">
+                <graphic><FontIcon iconLiteral="bi-chevron-right"/></graphic>
+            </Button>
+        </HBox>
+        <HBox fx:id="cajaRango" spacing="6" alignment="CENTER_LEFT">
+            <DatePicker fx:id="dpDesde" styleClass="campo-fecha" prefWidth="130" promptText="Desde"/>
+            <DatePicker fx:id="dpHasta" styleClass="campo-fecha" prefWidth="130" promptText="Hasta"/>
+            <Button text="Aplicar" styleClass="btn-oscuro" onAction="#onAplicarRango">
+                <graphic><FontIcon iconLiteral="bi-funnel-fill"/></graphic>
+            </Button>
+        </HBox>
+        <Label fx:id="lblPeriodo" styleClass="agenda-periodo"/>
+        <Label fx:id="lblFiltro" styleClass="texto-suave"/>
+    </FlowPane>
+    <Button text="Actualizar" minWidth="-Infinity" styleClass="btn-azul" onAction="#onActualizar">
+        <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+    </Button>
+    </HBox>
+        <!-- Botones de estado: al pulsarlos filtran el calendario -->
+        <BarraEstados fx:id="barraEstados"/>
+    </VBox>
+
+    <Label fx:id="lblAviso" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill"/></graphic>
+    </Label>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+        <!-- Calendario -->
+        <StackPane styleClass="tarjeta" HBox.hgrow="ALWAYS">
+            <ScrollPane fx:id="scrollCalendario" fitToWidth="true" styleClass="scroll-detalle">
+                <VBox fx:id="contenedorCalendario" spacing="8"/>
+            </ScrollPane>
+            <VBox fx:id="cajaVacia" alignment="CENTER" spacing="12" mouseTransparent="false" pickOnBounds="false">
+                <Label fx:id="lblVacio" styleClass="tabla-vacia" wrapText="true"/>
+            </VBox>
+        </StackPane>
+
+        <!-- Resumen, atrasados, datos por revisar e insumos -->
+        <VBox styleClass="tarjeta" spacing="8" minWidth="310" prefWidth="310" maxWidth="310">
+            <Label styleClass="tarjeta-titulo" text="Resumen del periodo"/>
+            <Label fx:id="lblResumen" wrapText="true"/>
+            <ScrollPane fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+                <VBox spacing="6">
+                    <Label styleClass="seccion-titulo" text="ATRASADOS"/>
+                    <VBox fx:id="listaAtrasados" spacing="4"/>
+                    <Label styleClass="seccion-titulo" text="PEDIDOS CON DATOS POR REVISAR"/>
+                    <VBox fx:id="listaPorRevisar" spacing="4"/>
+                    <Label styleClass="seccion-titulo" text="INSUMOS NECESARIOS (ESTIMADO)"/>
+                    <Label styleClass="texto-ayuda" wrapText="true"
+                           text="Pedidos «Aprobado» y «Pagado» del periodo, con las recetas activas. No se descuenta nada."/>
+                    <VBox fx:id="listaInsumos" spacing="3"/>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </HBox>
+</VBox>

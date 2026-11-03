@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Respaldos y sistema: conexión, notificaciones (WhatsApp y correo) y respaldos de la base de datos (RNF-8) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.RespaldosController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <!-- Conexión a la base de datos -->
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Conexión a la base de datos">
+            <graphic><FontIcon iconLiteral="bi-hdd-stack-fill"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="8">
+            <columnConstraints>
+                <ColumnConstraints minWidth="160"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="texto-suave" text="Servidor" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <Label fx:id="lblServidor" styleClass="dato-sistema" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-suave" text="Base de datos" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <Label fx:id="lblBaseDatos" styleClass="dato-sistema" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-suave" text="Usuario de MySQL" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <Label fx:id="lblUsuarioBD" styleClass="dato-sistema" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-suave" text="Estado" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <Label fx:id="lblEstadoConexion" styleClass="dato-sistema" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-suave" text="Parámetros" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <Label fx:id="lblOrigenParametros" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-suave" text="Notificaciones" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <Label fx:id="lblNotificaciones" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        </GridPane>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Probar conexión" minWidth="-Infinity" styleClass="btn-azul" onAction="#onProbarConexion">
+                <graphic><FontIcon iconLiteral="bi-plug-fill"/></graphic>
+            </Button>
+            <Label styleClass="texto-ayuda" wrapText="true"
+                   text="Los datos de conexión están en config/db.properties. Las cuentas de WhatsApp y correo se escriben abajo, en «Notificaciones al cliente»."/>
+        </HBox>
+    </VBox>
+
+    <!-- Notificaciones al cliente: datos de WhatsApp y correo (RF-32), con su propio controlador -->
+    <fx:include fx:id="integraciones" source="integraciones.fxml"/>
+
+    <!-- Respaldos -->
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Respaldos de la base de datos">
+            <graphic><FontIcon iconLiteral="bi-cloud-arrow-down-fill"/></graphic>
+        </Label>
+        <Label styleClass="texto-suave" wrapText="true" maxWidth="Infinity"
+               text="El respaldo guarda toda la base de datos en un archivo .sql con mysqldump. Guárdalo fuera de la computadora (memoria USB o la nube)."/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label styleClass="texto-suave" text="Carpeta bin de MySQL"/>
+            <TextField fx:id="txtCarpetaMysql" styleClass="campo" prefWidth="360" editable="false"
+                       promptText="Se busca sola; elígela si no se encuentra"/>
+            <Button text="Elegir carpeta" minWidth="-Infinity" styleClass="btn-secundario" onAction="#onElegirCarpeta">
+                <graphic><FontIcon iconLiteral="bi-folder2-open"/></graphic>
+            </Button>
+        </HBox>
+        <Label fx:id="lblProgramas" styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"/>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button fx:id="btnGenerar" text="Generar respaldo" minWidth="-Infinity" styleClass="btn-verde" onAction="#onGenerarRespaldo">
+                <graphic><FontIcon iconLiteral="bi-download"/></graphic>
+            </Button>
+            <Button fx:id="btnRestaurar" text="Restaurar respaldo" minWidth="-Infinity" styleClass="btn-rojo" onAction="#onRestaurarRespaldo">
+                <graphic><FontIcon iconLiteral="bi-cloud-arrow-up-fill"/></graphic>
+            </Button>
+            <Label fx:id="lblSoloAdministradora" styleClass="texto-ayuda" wrapText="true"
+                   text="Solo la administradora puede restaurar un respaldo."/>
+        </HBox>
+        <Label fx:id="lblResultado" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true"/>
+    </VBox>
+</VBox>

@@ -1,0 +1,298 @@
+<div class="contenedor pagina">
+  <app-pasos-pedido [actual]="2" />
+  <h1>Datos de entrega</h1>
+
+  @if (estado() === 'cargando') {
+    <app-cargando texto="Cargando días de entrega..." />
+  } @else if (estado() === 'error') {
+    <!-- RF-9 · Excepción paso 3: sin conexión no se pueden cargar las reglas de entrega. -->
+    <app-mensaje-estado tipo="error" titulo="No fue posible continuar" [texto]="mensajeSinConexion">
+      <button type="button" class="btn btn-principal" (click)="cargarReglas()">Reintentar</button>
+      <a routerLink="/carrito" class="btn btn-secundario">Volver al carrito</a>
+    </app-mensaje-estado>
+  } @else {
+    @if (reglas(); as reglas) {
+      <div class="diseno-pedido">
+        <app-resumen-pedido [articulos]="carrito.articulos()" [conEnvio]="conEnvio()" [costoEnvio]="costoEnvio()" />
+
+        <!-- RF-9 · Paso 3: formulario de entrega (contacto, método, dirección, fecha y horario). -->
+        <form class="panel bloque" (submit)="alEnviar($event)" novalidate>
+          <h2>Datos de entrega y contacto</h2>
+
+          <!-- RF-9 · Excepción paso 6: la fecha que había elegido ya no está disponible (y otros avisos). -->
+          @if (aviso() !== '') {
+            <div class="aviso" role="status"><p>{{ aviso() }}</p></div>
+          }
+
+          <!-- Contacto -->
+          <div class="campo" [class.con-error]="errorDe('nombre') !== ''">
+            <label for="nombre">Nombre completo</label>
+            <input
+              #campoNombre
+              id="nombre"
+              type="text"
+              autocomplete="name"
+              maxlength="100"
+              placeholder="Ej. Ana María López"
+              [value]="nombre()"
+              (input)="cambiarCampo('nombre', campoNombre.value)"
+              [attr.aria-invalid]="errorDe('nombre') !== ''"
+              aria-describedby="error-nombre"
+            />
+            <!-- RF-9 · Excepción paso 5: nombre faltante o inválido. -->
+            @if (errorDe('nombre') !== '') {
+              <span class="mensaje-error" id="error-nombre">{{ errorDe('nombre') }}</span>
+            }
+          </div>
+
+          <div class="fila-doble">
+            <div class="campo" [class.con-error]="errorDe('telefono') !== ''">
+              <label for="telefono">Teléfono (WhatsApp)</label>
+              <input
+                #campoTelefono
+                id="telefono"
+                type="tel"
+                inputmode="numeric"
+                autocomplete="tel-national"
+                maxlength="10"
+                placeholder="10 dígitos"
+                [value]="telefono()"
+                (input)="cambiarCampo('telefono', campoTelefono.value)"
+                [attr.aria-invalid]="errorDe('telefono') !== ''"
+                aria-describedby="ayuda-telefono error-telefono"
+              />
+              <span class="ayuda" id="ayuda-telefono">Te avisaremos por WhatsApp. También sirve para consultar tu pedido.</span>
+              <!-- RF-9 · Excepción paso 5: teléfono de WhatsApp con formato inválido. -->
+              @if (errorDe('telefono') !== '') {
+                <span class="mensaje-error" id="error-telefono">{{ errorDe('telefono') }}</span>
+              }
+            </div>
+
+            <div class="campo" [class.con-error]="errorDe('correo') !== ''">
+              <label for="correo">Correo (opcional)</label>
+              <input
+                #campoCorreo
+                id="correo"
+                type="email"
+                autocomplete="email"
+                maxlength="100"
+                placeholder="nombre@correo.com"
+                [value]="correo()"
+                (input)="cambiarCampo('correo', campoCorreo.value)"
+                [attr.aria-invalid]="errorDe('correo') !== ''"
+                aria-describedby="error-correo"
+              />
+              <!-- RF-9 · Excepción paso 5: correo con formato inválido. -->
+              @if (errorDe('correo') !== '') {
+                <span class="mensaje-error" id="error-correo">{{ errorDe('correo') }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- Modalidad de entrega -->
+          <!-- RF-9 · Paso 4: método de entrega (recoger en tienda o envío a domicilio). -->
+          <fieldset class="opciones-tarjeta">
+            <legend>¿Cómo quieres recibir tu pedido?</legend>
+            <label class="opcion-tarjeta" [class.elegida]="modalidad() === 'Recoger en tienda'">
+              <input
+                type="radio"
+                name="modalidad"
+                [checked]="modalidad() === 'Recoger en tienda'"
+                (change)="elegirModalidad('Recoger en tienda')"
+              />
+              <span>
+                <strong>Recoger en tienda</strong>
+                <small>Gratis, en nuestra tienda de Prado Hermoso</small>
+              </span>
+            </label>
+            <label class="opcion-tarjeta" [class.elegida]="modalidad() === 'Envio a domicilio'">
+              <input
+                type="radio"
+                name="modalidad"
+                [checked]="modalidad() === 'Envio a domicilio'"
+                (change)="elegirModalidad('Envio a domicilio')"
+              />
+              <span>
+                <strong>Envío a domicilio</strong>
+                @if (cobertura() === 'con-envio') {
+                  <small>+ {{ costoEnvio() | currency: 'MXN' : 'symbol-narrow' }} a tu código postal</small>
+                } @else {
+                  <small>El costo depende de tu código postal</small>
+                }
+              </span>
+            </label>
+          </fieldset>
+
+          <!-- Al recoger en tienda se muestra la dirección completa con su mapa -->
+          @if (!conEnvio()) {
+            <app-ubicacion-tienda titulo="Recoge tu pedido en nuestra tienda" />
+          }
+
+          <!-- Dirección (solo con envío) -->
+          <!-- RF-9 · Paso 7: dirección y código postal solo con envío a domicilio. -->
+          @if (conEnvio()) {
+            <div class="direccion">
+              <div class="campo" [class.con-error]="errorDe('codigoPostal') !== ''">
+                <label for="codigoPostal">Código postal</label>
+                <input
+                  #campoCodigo
+                  id="codigoPostal"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="postal-code"
+                  maxlength="5"
+                  [value]="direccion().codigoPostal"
+                  (input)="cambiarDireccion('codigoPostal', campoCodigo.value)"
+                  [attr.aria-invalid]="errorDe('codigoPostal') !== ''"
+                  aria-describedby="estado-cobertura error-codigoPostal"
+                />
+                <span class="ayuda" id="estado-cobertura" aria-live="polite">
+                  @if (cobertura() === 'revisando') {
+                    Revisando cobertura...
+                  } @else if (cobertura() === 'con-envio') {
+                    <span class="cobertura-ok">✓ Sí llegamos a tu zona. Envío: {{ costoEnvio() | currency: 'MXN' : 'symbol-narrow' }}</span>
+                  } @else if (cobertura() === 'sin-envio' && errorDe('codigoPostal') === '') {
+                    <span class="cobertura-no">Por el momento no tenemos envío a tu zona. Puedes elegir recoger en tienda.</span>
+                  } @else if (cobertura() === 'error') {
+                    <span class="cobertura-no">No fue posible revisar tu código postal.</span>
+                    <button type="button" class="enlace-boton" (click)="revisarCobertura()">Reintentar</button>
+                  }
+                </span>
+                <!-- RF-9 · Excepción pasos 5 y 7: código postal inválido o «Por el momento no tenemos envío a tu zona». -->
+                @if (errorDe('codigoPostal') !== '') {
+                  <span class="mensaje-error" id="error-codigoPostal">{{ errorDe('codigoPostal') }}</span>
+                }
+              </div>
+
+              <div class="campo" [class.con-error]="errorDe('calle') !== ''">
+                <label for="calle">Calle</label>
+                <input
+                  #campoCalle
+                  id="calle"
+                  type="text"
+                  autocomplete="address-line1"
+                  maxlength="100"
+                  [value]="direccion().calle"
+                  (input)="cambiarDireccion('calle', campoCalle.value)"
+                  [attr.aria-invalid]="errorDe('calle') !== ''"
+                />
+                @if (errorDe('calle') !== '') {
+                  <span class="mensaje-error">{{ errorDe('calle') }}</span>
+                }
+              </div>
+
+              <div class="fila-doble">
+                <div class="campo" [class.con-error]="errorDe('numeroExterior') !== ''">
+                  <label for="numeroExterior">Número exterior</label>
+                  <input
+                    #campoExterior
+                    id="numeroExterior"
+                    type="text"
+                    maxlength="10"
+                    [value]="direccion().numeroExterior"
+                    (input)="cambiarDireccion('numeroExterior', campoExterior.value)"
+                    [attr.aria-invalid]="errorDe('numeroExterior') !== ''"
+                  />
+                  @if (errorDe('numeroExterior') !== '') {
+                    <span class="mensaje-error">{{ errorDe('numeroExterior') }}</span>
+                  }
+                </div>
+                <div class="campo" [class.con-error]="errorDe('numeroInterior') !== ''">
+                  <label for="numeroInterior">Número interior (opcional)</label>
+                  <input
+                    #campoInterior
+                    id="numeroInterior"
+                    type="text"
+                    maxlength="10"
+                    [value]="direccion().numeroInterior"
+                    (input)="cambiarDireccion('numeroInterior', campoInterior.value)"
+                  />
+                  @if (errorDe('numeroInterior') !== '') {
+                    <span class="mensaje-error">{{ errorDe('numeroInterior') }}</span>
+                  }
+                </div>
+              </div>
+
+              <div class="campo" [class.con-error]="errorDe('colonia') !== ''">
+                <label for="colonia">Colonia</label>
+                <input
+                  #campoColonia
+                  id="colonia"
+                  type="text"
+                  maxlength="80"
+                  [value]="direccion().colonia"
+                  (input)="cambiarDireccion('colonia', campoColonia.value)"
+                  [attr.aria-invalid]="errorDe('colonia') !== ''"
+                />
+                @if (errorDe('colonia') !== '') {
+                  <span class="mensaje-error">{{ errorDe('colonia') }}</span>
+                }
+              </div>
+
+              <div class="campo" [class.con-error]="errorDe('referencias') !== ''">
+                <label for="referencias">Referencias (opcional)</label>
+                <textarea
+                  #campoReferencias
+                  id="referencias"
+                  maxlength="255"
+                  placeholder="Entre qué calles, color de la casa..."
+                  [value]="direccion().referencias"
+                  (input)="cambiarDireccion('referencias', campoReferencias.value)"
+                ></textarea>
+                @if (errorDe('referencias') !== '') {
+                  <span class="mensaje-error">{{ errorDe('referencias') }}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Fecha y horario -->
+          <div class="campo" [class.con-error]="errorDe('fecha') !== ''">
+            <span class="titulo-campo" id="titulo-fecha">Fecha de entrega</span>
+            <span class="ayuda reglas">{{ textoReglas(reglas) }}</span>
+            <!-- RF-9 · Paso 6: calendario que deshabilita las fechas sin anticipación, no laborables o sin cupo. -->
+            <app-calendario-entrega
+              [reglas]="reglas"
+              [seleccionada]="fecha()"
+              [conError]="errorDe('fecha') !== ''"
+              (elegir)="elegirFecha($event)"
+            />
+            @if (fecha() !== '') {
+              <span class="fecha-elegida" aria-live="polite">Elegiste: <strong>{{ fechaElegidaTexto() }}</strong></span>
+            }
+            <!-- RF-9 · Excepción paso 6: «Elige una fecha a partir del…». -->
+            @if (errorDe('fecha') !== '') {
+              <span class="mensaje-error">{{ errorDe('fecha') }}</span>
+            }
+          </div>
+
+          <div class="campo" [class.con-error]="errorDe('horario') !== ''">
+            <label for="horario">Horario</label>
+            <select #campoHorario id="horario" [value]="horario()" (change)="elegirHorario(campoHorario.value)">
+              <option value="" [selected]="horario() === ''">Elige un horario</option>
+              <!-- RF-9 · Paso 6: solo se muestran los horarios de atención. -->
+              @for (hora of reglas.horarios; track hora) {
+                <option [value]="hora" [selected]="hora === horario()">{{ hora }} h</option>
+              }
+            </select>
+            <!-- RF-9 · Excepción paso 6: falta el horario. -->
+            @if (errorDe('horario') !== '') {
+              <span class="mensaje-error">{{ errorDe('horario') }}</span>
+            }
+          </div>
+
+          <!-- RF-9 · Excepción paso 5: se resaltan los campos con error. -->
+          @if (hayErrores()) {
+            <div class="aviso error" role="alert"><p>Revisa los campos marcados en rojo.</p></div>
+          }
+
+          <div class="barra-acciones">
+            <!-- RF-9 · Excepción paso 4: «Volver al carrito» conserva los datos capturados. -->
+            <a routerLink="/carrito" class="btn btn-secundario">Volver al carrito</a>
+            <button type="submit" class="btn btn-principal" [disabled]="cobertura() === 'revisando'">Continuar al pago</button>
+          </div>
+        </form>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,24 @@
+/* La página ocupa al menos toda la pantalla para que el pie quede abajo */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.contenido {
+  flex: 1;
+}
+
+/* Enlace para usuarios de teclado: aparece solo al recibir el foco */
+.saltar-contenido {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 50;
+  background: var(--color-blanco);
+  padding: 8px 12px;
+}
+
+.saltar-contenido:focus {
+  left: 8px;
+}

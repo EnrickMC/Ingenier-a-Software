@@ -1,0 +1,167 @@
+<fieldset class="paso panel" [class.con-error]="error() !== ''" [attr.id]="'caracteristica-' + caracteristica().idCaracteristica">
+  <legend class="titulo-paso">
+    {{ caracteristica().nombre }}
+    @if (caracteristica().obligatoria) {
+      <span class="requerida">Obligatoria</span>
+    } @else {
+      <span class="opcional">Opcional</span>
+    }
+    @if (seVeEn3d()) {
+      <span class="en-3d" title="Esta elección se ve en el pastel 3D">Se ve en 3D</span>
+    }
+  </legend>
+
+  @if (caracteristica().descripcion) {
+    <p class="descripcion-paso">{{ caracteristica().descripcion }}</p>
+  }
+
+  @if (conTarjetas()) {
+    <!-- Selección única con dibujo: tarjetas de tamaño (pisos), forma (silueta) o color (sabor, relleno) -->
+    <div class="tarjetas">
+      @if (!caracteristica().obligatoria) {
+        <label class="tarjeta" [class.elegida]="ningunaElegida()">
+          <input
+            type="radio"
+            class="solo-lector"
+            [name]="'caracteristica-' + caracteristica().idCaracteristica"
+            [checked]="ningunaElegida()"
+            (change)="elegirUnica(0)"
+          />
+          <span class="dibujo ninguno" aria-hidden="true"></span>
+          <span class="nombre-opcion">Sin {{ caracteristica().nombre.toLowerCase() }}</span>
+        </label>
+      }
+      @for (opcion of caracteristica().opciones; track opcion.idOpcion) {
+        <label class="tarjeta" [class.elegida]="estaElegida(opcion)" [class.bloqueada]="bloqueada(opcion)" [title]="opcion.descripcion || opcion.nombre">
+          <input
+            type="radio"
+            class="solo-lector"
+            [name]="'caracteristica-' + caracteristica().idCaracteristica"
+            [checked]="estaElegida(opcion)"
+            [disabled]="bloqueada(opcion)"
+            (change)="elegirUnica(opcion.idOpcion)"
+          />
+          @switch (apariencia(opcion).tipo) {
+            @case ('tamano') {
+              <!-- Tamaño: el postre visto desde arriba, más grande entre más grande -->
+              <svg class="dibujo" viewBox="0 0 64 56" aria-hidden="true">
+                <circle class="regla" cx="32" cy="28" r="27" />
+                <circle class="piso" cx="32" cy="28" [attr.r]="radioTamano(opcion)" />
+                <circle class="centro-tamano" cx="32" cy="28" [attr.r]="radioTamano(opcion) * 0.55" />
+              </svg>
+            }
+            @case ('pisos') {
+              <svg class="dibujo" viewBox="0 0 64 56" aria-hidden="true">
+                <rect class="plato" x="6" y="51" width="52" height="3" rx="1.5" />
+                @for (piso of pisosIcono(opcion); track $index) {
+                  <rect class="piso" [attr.x]="piso.x" [attr.y]="piso.y" [attr.width]="piso.ancho" [attr.height]="piso.alto" rx="3" />
+                }
+              </svg>
+            }
+            @case ('forma') {
+              <svg class="dibujo" viewBox="0 0 48 48" aria-hidden="true">
+                <path class="silueta" [attr.d]="rutaForma(opcion)" />
+              </svg>
+            }
+            @case ('color') {
+              <span class="dibujo muestra" [style.background-color]="apariencia(opcion).color" aria-hidden="true"></span>
+            }
+            @default {
+              <span class="dibujo muestra sin-color" aria-hidden="true">{{ opcion.nombre.charAt(0) }}</span>
+            }
+          }
+          <span class="nombre-opcion">{{ opcion.nombre }}</span>
+          @if (opcion.descripcion) {
+            <span class="detalle">{{ opcion.descripcion }}</span>
+          }
+          @if (bloqueada(opcion)) {
+            <span class="motivo">{{ motivo(opcion) }}</span>
+          }
+        </label>
+      }
+    </div>
+  } @else if (!caracteristica().seleccionMultiple) {
+    <!-- Selección única -->
+    <div class="opciones">
+      @if (!caracteristica().obligatoria) {
+        <label class="opcion" [class.elegida]="ningunaElegida()">
+          <input
+            type="radio"
+            [name]="'caracteristica-' + caracteristica().idCaracteristica"
+            [checked]="ningunaElegida()"
+            (change)="elegirUnica(0)"
+          />
+          <span class="texto-opcion">
+            <span class="nombre-opcion">Sin {{ caracteristica().nombre.toLowerCase() }}</span>
+          </span>
+        </label>
+      }
+      @for (opcion of caracteristica().opciones; track opcion.idOpcion) {
+        <label class="opcion" [class.elegida]="estaElegida(opcion)" [class.bloqueada]="bloqueada(opcion)">
+          <input
+            type="radio"
+            [name]="'caracteristica-' + caracteristica().idCaracteristica"
+            [checked]="estaElegida(opcion)"
+            [disabled]="bloqueada(opcion)"
+            (change)="elegirUnica(opcion.idOpcion)"
+          />
+          <span class="texto-opcion">
+            <span class="nombre-opcion">{{ opcion.nombre }}</span>
+            @if (opcion.descripcion) {
+              <span class="detalle">{{ opcion.descripcion }}</span>
+            }
+            @if (bloqueada(opcion)) {
+              <span class="motivo">{{ motivo(opcion) }}</span>
+            }
+          </span>
+        </label>
+      }
+    </div>
+  } @else {
+    <!-- Selección múltiple con presupuesto de puntos -->
+    <p class="presupuesto" aria-live="polite">
+      Te quedan <strong>{{ textoPuntos(puntosRestantes()) }}</strong> de {{ textoPuntos(puntosTotales()) }}
+    </p>
+    <ul class="opciones">
+      @for (opcion of caracteristica().opciones; track opcion.idOpcion) {
+        <li class="opcion multiple" [class.elegida]="estaElegida(opcion)" [class.bloqueada]="bloqueada(opcion)">
+          <span class="texto-opcion">
+            <span class="nombre-opcion">{{ opcion.nombre }}</span>
+            @if (opcion.descripcion) {
+              <span class="detalle">{{ opcion.descripcion }}</span>
+            }
+            <span class="detalle">Usa {{ textoPuntos(opcion.puntosSeleccion) }}</span>
+            @if (bloqueada(opcion)) {
+              <span class="motivo">{{ motivo(opcion) }}</span>
+            }
+          </span>
+          <span class="contador">
+            <button
+              type="button"
+              class="boton-contador"
+              [disabled]="cantidad(opcion) === 0"
+              [attr.aria-label]="'Quitar ' + opcion.nombre"
+              (click)="restar(opcion)"
+            >
+              −
+            </button>
+            <span class="cantidad" [attr.aria-label]="'Cantidad de ' + opcion.nombre">{{ cantidad(opcion) }}</span>
+            <button
+              type="button"
+              class="boton-contador"
+              [disabled]="!puedeSumar(opcion)"
+              [attr.aria-label]="'Agregar ' + opcion.nombre"
+              (click)="sumar(opcion)"
+            >
+              +
+            </button>
+          </span>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (error() !== '') {
+    <p class="mensaje-error" role="alert">{{ error() }}</p>
+  }
+</fieldset>

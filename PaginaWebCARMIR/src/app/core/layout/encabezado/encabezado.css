@@ -1,0 +1,222 @@
+/*
+ * Encabezado (menú de arriba) en una cuadrícula. Todo lo de una fila queda centrado verticalmente:
+ *
+ *   Escritorio:  [ logo ] [ buscador · Todos ]                 [ Catálogo · Mis pedidos · Carrito ]
+ *   Tableta:     [ logo ]                                      [ menú ]
+ *                [ buscador · Todos ]
+ *   Celular:     [ logo ]                                      [ ☰ ]
+ *                [ buscador · Todos ]  y el menú se despliega abajo
+ *
+ * El buscador viene del componente de filtros, que se acomoda directo en la zona «buscador».
+ * Las categorías están en la página del catálogo, junto al total de postres.
+ * El logo tiene una ALTURA fija en cada tamaño para que nunca se salga de la franja.
+ */
+.encabezado {
+  background-color: var(--color-encabezado);
+  color: var(--color-blanco);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* En celular y tableta, con filtros el encabezado es alto: no se queda pegado arriba al bajar */
+.encabezado.con-filtros {
+  position: relative;
+}
+
+.barra {
+  /* Usa todo el ancho de la pantalla */
+  width: 100%;
+  padding: 10px var(--espacio-lateral);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'logo . boton'
+    'buscador buscador buscador'
+    'menu menu menu';
+  align-items: center;
+  column-gap: 24px;
+}
+
+/* ===== Logo (tal cual, con transparencia) ===== */
+.logo {
+  grid-area: logo;
+  display: flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.logo img {
+  height: 64px;
+  width: auto;
+  filter: drop-shadow(0 2px 3px rgba(74, 59, 50, 0.25));
+  transition: transform 0.2s;
+}
+
+.logo:hover img {
+  transform: scale(1.04);
+}
+
+/* ===== Botón de menú (solo celular) ===== */
+.boton-menu {
+  grid-area: boton;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boton-menu:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.rayas,
+.rayas::before,
+.rayas::after {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: var(--color-blanco);
+  border-radius: 2px;
+  position: relative;
+}
+
+.rayas::before,
+.rayas::after {
+  content: '';
+  position: absolute;
+}
+
+.rayas::before {
+  top: -8px;
+}
+
+.rayas::after {
+  top: 8px;
+}
+
+/* ===== Menú: en celular es una tarjeta blanca que se despliega ===== */
+.menu {
+  grid-area: menu;
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  margin-top: 12px;
+  padding: 6px;
+  background: var(--color-blanco);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-alta);
+}
+
+.menu.abierto {
+  display: flex;
+  animation: desplegar 0.18s ease-out;
+}
+
+@keyframes desplegar {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu a {
+  color: var(--color-texto);
+  text-decoration: none;
+  font-weight: 600;
+  padding: 12px 14px;
+  border-radius: var(--radio-chico);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.menu a:hover {
+  background: var(--color-crema-claro);
+}
+
+.menu a.activo {
+  background: #fbe7e8;
+  color: var(--color-acento-oscuro);
+}
+
+.icono-carrito {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ===== Tableta: logo y menú arriba; filtros en la fila de abajo ===== */
+@media (min-width: 600px) {
+  .barra {
+    grid-template-areas:
+      'logo . menu'
+      'buscador buscador buscador';
+  }
+
+  .logo img {
+    height: 72px;
+  }
+
+  .boton-menu {
+    display: none;
+  }
+
+  .menu,
+  .menu.abierto {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    gap: 6px;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+  }
+
+  /* Pestañas del menú: mismas medidas que los botones de los filtros (44 px de alto) */
+  .menu a {
+    height: 44px;
+    color: var(--color-blanco);
+    padding: 0 18px;
+    border-radius: 999px;
+  }
+
+  .menu a:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .menu a.activo {
+    background: var(--color-blanco);
+    color: var(--color-acento-oscuro);
+  }
+}
+
+/* ===== Escritorio: logo, buscador y menú en UNA sola fila ===== */
+@media (min-width: 1000px) {
+  .encabezado.con-filtros {
+    position: sticky;
+  }
+
+  .barra {
+    grid-template-areas: 'logo buscador menu';
+    column-gap: 32px;
+  }
+
+  .logo img {
+    height: 72px;
+  }
+}

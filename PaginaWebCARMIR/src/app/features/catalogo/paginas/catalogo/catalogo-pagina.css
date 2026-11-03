@@ -1,0 +1,182 @@
+/* Banner de bienvenida (más bajo para que el catálogo se vea primero) */
+.banner {
+  background: linear-gradient(135deg, var(--color-crema) 0%, #fbe7e8 100%);
+  text-align: center;
+  padding: 18px 0;
+  border-bottom: 3px solid #efe3cc;
+}
+
+.banner h1 {
+  font-size: 1.3rem;
+  margin-bottom: 6px;
+}
+
+.banner p {
+  margin: 0;
+}
+
+/* Los productos ocupan todo el ancho (los filtros están en el menú de arriba) */
+.diseno {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+.resultados {
+  min-width: 0;
+}
+
+.encabezado-resultados {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.titulo-total {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+/* Categorías: botones redondos con los colores de la página */
+.categorias {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.categoria {
+  min-height: 36px;
+  padding: 6px 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.categoria:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento-oscuro);
+}
+
+.categoria.activa {
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+.cuenta {
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+/* Tableta y escritorio: título a la izquierda, categorías a la derecha en la misma fila */
+@media (min-width: 700px) {
+  .encabezado-resultados {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .categorias {
+    justify-content: flex-end;
+  }
+}
+
+.encabezado-resultados h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.total {
+  color: var(--color-texto-suave);
+  font-size: 0.95rem;
+}
+
+.criterio {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.btn-chico {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+/* Cuadrícula: tantas columnas como quepan (1 en celular, 2 en tableta, 3 o 4 en escritorio) */
+.cuadricula {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Tarjetas "esqueleto" mientras carga */
+.esqueleto {
+  padding: 0 0 16px;
+  overflow: hidden;
+}
+
+.esqueleto-foto {
+  aspect-ratio: 4 / 3;
+  background: var(--color-crema-claro);
+}
+
+.esqueleto-linea {
+  height: 14px;
+  margin: 14px 16px 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f3eadb 25%, #faf4e8 50%, #f3eadb 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.2s infinite;
+}
+
+.esqueleto-linea.corta {
+  width: 40%;
+}
+
+@keyframes brillo {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (min-width: 600px) {
+  .banner {
+    padding: 24px 0;
+  }
+
+  .banner h1 {
+    font-size: 1.8rem;
+  }
+
+  .cuadricula {
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .diseno {
+    padding-top: 28px;
+  }
+}

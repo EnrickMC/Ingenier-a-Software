@@ -1,0 +1,49 @@
+/* Campos de formulario (mismo estilo que el diseño "Personalizar pedido") */
+.campo {
+  margin-bottom: 18px;
+}
+
+.campo label,
+.campo .titulo-campo {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #cdbfae;
+  border-radius: var(--radio-chico);
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.campo textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.campo .ayuda {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  margin-top: 4px;
+}
+
+.campo.con-error input,
+.campo.con-error textarea {
+  border-color: var(--color-error);
+}
+
+.campo .mensaje-error {
+  display: block;
+  color: var(--color-error);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}

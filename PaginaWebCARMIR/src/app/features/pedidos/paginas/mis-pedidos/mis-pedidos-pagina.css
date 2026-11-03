@@ -1,0 +1,359 @@
+.busqueda {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.ayuda-busqueda {
+  color: var(--color-texto-suave);
+  margin-top: 0;
+}
+
+.cabecera-pedido {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cabecera-pedido h2 {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.solicitado {
+  margin: 4px 0 0;
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+}
+
+.estado-actual {
+  font-size: 0.95rem;
+  padding: 6px 14px;
+  background: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+/* Barra de avance: vertical en celular, horizontal en escritorio */
+.avance {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.avance li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  column-gap: 10px;
+  align-items: center;
+  color: var(--color-texto-suave);
+}
+
+.punto {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--color-borde);
+  background: var(--color-blanco);
+}
+
+.avance li.hecho .punto {
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+}
+
+.avance li.actual {
+  color: var(--color-titulo);
+  font-weight: 700;
+}
+
+.avance li.actual .punto {
+  box-shadow: 0 0 0 4px var(--color-crema);
+}
+
+.cuando {
+  grid-column: 2;
+  font-size: 0.8rem;
+  font-weight: 400;
+}
+
+.diseno-seguimiento > .bloque + .bloque {
+  margin-top: 0;
+}
+
+.diseno-seguimiento {
+  display: grid;
+  gap: 20px;
+}
+
+.productos,
+.pagos {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.productos li {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed #ccc;
+}
+
+.foto {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.datos {
+  min-width: 0;
+}
+
+.extra {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.extra.rechazo {
+  color: var(--color-error);
+}
+
+.importe {
+  font-weight: 700;
+  color: var(--color-encabezado);
+  white-space: nowrap;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+}
+
+.cuentas {
+  margin: 0 0 16px;
+}
+
+.cuentas div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 3px 0;
+}
+
+.cuentas dt,
+.cuentas dd {
+  margin: 0;
+}
+
+.total,
+.saldo {
+  font-weight: 700;
+  color: var(--color-titulo);
+}
+
+.pagos li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.estado-pago {
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.estado-pago.validado {
+  background: var(--color-exito-fondo);
+  color: var(--color-exito);
+}
+
+.estado-pago.rechazado {
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+}
+
+.estado-pago.pendiente {
+  background: var(--color-aviso-fondo);
+  color: var(--color-titulo);
+}
+
+.comprobante {
+  border-top: 2px solid var(--color-crema);
+  padding-top: 14px;
+}
+
+.datos-bancarios {
+  background: var(--color-crema-claro);
+  border: 1px solid var(--color-crema);
+  border-radius: var(--radio-chico);
+  padding: 12px;
+  margin-bottom: 14px;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.datos-bancarios p {
+  margin: 0 0 6px;
+}
+
+.en-linea {
+  grid-template-columns: 1fr 1fr;
+}
+
+.final {
+  margin-top: 20px;
+}
+
+/* ===== Comprobante desde los archivos del cliente (RF-12) ===== */
+
+/* Recuadro punteado que abre el selector de archivos */
+.zona-archivo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 20px 14px;
+  border: 2px dashed var(--color-acento);
+  border-radius: var(--radio);
+  background: var(--color-crema-claro);
+  text-align: center;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background-color 0.15s;
+}
+
+.zona-archivo:hover {
+  background: #fbe7e8;
+}
+
+.zona-archivo svg {
+  width: 32px;
+  height: 32px;
+  fill: var(--color-acento-oscuro);
+}
+
+.zona-archivo strong {
+  color: var(--color-acento-oscuro);
+}
+
+.zona-archivo span {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+/* Se ve el contorno de foco cuando se llega con el teclado al input oculto */
+input[type='file']:focus-visible + .zona-archivo,
+input[type='file']:focus-visible + .archivo-elegido {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.archivo-elegido {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-blanco);
+}
+
+.archivo-elegido img,
+.icono-pdf {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radio-chico);
+  object-fit: cover;
+}
+
+.icono-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+  font-weight: 700;
+}
+
+.archivo-datos {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.archivo-datos strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archivo-datos span {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.archivo-acciones {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+}
+
+.archivo-acciones .btn {
+  flex: 1;
+  margin: 0;
+  font-weight: 600;
+}
+
+.btn-chico {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+@media (min-width: 600px) {
+  .archivo-elegido {
+    grid-template-columns: 64px 1fr auto;
+  }
+
+  .archivo-acciones {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .avance {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .avance li {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+  }
+
+  .diseno-seguimiento {
+    grid-template-columns: 1.2fr 1fr;
+    align-items: start;
+  }
+}

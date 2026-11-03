@@ -1,0 +1,26 @@
+.datos-entrega {
+  margin: 0 0 8px;
+}
+
+.datos-entrega div {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.datos-entrega dt {
+  font-weight: 600;
+  color: var(--color-texto-suave);
+}
+
+.datos-entrega dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.ayuda-pago {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+}

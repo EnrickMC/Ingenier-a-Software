@@ -1,0 +1,29 @@
+{
+  "name": "api-carmir",
+  "version": "1.0.0",
+  "description": "API REST de la página web de CARMIR. Es la única parte que habla con MySQL.",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/servidor.js",
+  "scripts": {
+    "start": "node src/servidor.js",
+    "dev": "node --watch src/servidor.js",
+    "diagnostico": "node src/diagnostico.js",
+    "test": "node --test --test-concurrency=1 pruebas/*.test.js",
+    "test:pedidos": "node --test --test-concurrency=1 pruebas/escritura/*.test.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "cors": "2.8.6",
+    "dotenv": "17.2.3",
+    "express": "5.3.0",
+    "express-rate-limit": "8.7.1",
+    "helmet": "8.3.0",
+    "mysql2": "3.24.6"
+  },
+  "overrides": {
+    "ip-address": "10.7.4"
+  }
+}

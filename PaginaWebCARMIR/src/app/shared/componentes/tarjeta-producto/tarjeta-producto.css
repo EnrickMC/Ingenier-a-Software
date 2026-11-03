@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+.tarjeta {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tarjeta:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-alta);
+}
+
+.foto {
+  display: block;
+  aspect-ratio: 4 / 3;
+  background: var(--color-crema-claro);
+}
+
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 14px 16px 16px;
+  text-align: center;
+  gap: 4px;
+}
+
+.etiqueta {
+  align-self: center;
+}
+
+.nombre {
+  font-size: 1.05rem;
+  margin: 6px 0 0;
+  color: var(--color-texto);
+}
+
+.descripcion {
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.precio {
+  font-size: 1.3rem;
+  margin: 8px 0 12px;
+  margin-top: auto;
+  padding-top: 8px;
+}

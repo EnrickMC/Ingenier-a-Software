@@ -1,0 +1,616 @@
+/* =====================================================================
+   CARMIR - Estilos base compartidos (paleta tomada de los diseños HTML)
+   ===================================================================== */
+.root {
+    /* ---- Paleta pastel (modo claro) ---- */
+    /* Color principal (botones oscuros, pestañas activas, encabezados) */
+    -carmir-sidebar: #9a88d0;
+    -carmir-sidebar-oscuro: #7f6cb8;
+    -carmir-sidebar-linea: #b3a4de;
+    -carmir-acento: #e79ab8;
+    -carmir-acento-fuerte: #e58bae;
+    -carmir-acento-fuerte-hover: #d4739b;
+    -carmir-acento-texto: #a24a78;
+    -carmir-fondo: #f8f3fc;
+    -carmir-superficie: #ffffff;
+    -carmir-texto: #3f3556;
+    -carmir-texto-titulo: #3b3158;
+    -carmir-texto-suave: #8b82a3;
+    -carmir-gris-claro: #fbf8fe;
+    -carmir-gris-fondo: #efeaf6;
+    -carmir-borde: #eee7f6;
+    -carmir-borde-input: #d7cce8;
+    -carmir-hover: #fdeff5;
+    -carmir-hover-suave: #fff7fb;
+    -carmir-seleccion: #f9dbe8;
+    -carmir-seleccion-texto: #6d3354;
+    -carmir-azul: #86b8ea;
+    -carmir-verde: #86d3a9;
+    -carmir-verde-oscuro: #52ad80;
+    -carmir-naranja: #f6b872;
+    -carmir-rojo: #ef8f9a;
+
+    /* Menú lateral */
+    -carmir-menu-fondo: #efe7fa;
+    -carmir-menu-fondo2: #dfd2f4;
+    -carmir-menu-linea: #d3c4ee;
+    -carmir-menu-texto: #43375f;
+    -carmir-menu-texto-suave: #7a6d9a;
+    -carmir-menu-icono: #7c69b0;
+    -carmir-menu-hover: #fbe3ee;
+    -carmir-menu-titulo: #b8457c;
+
+    /* Avisos y etiquetas de estado */
+    -carmir-rojo-fondo: #fde4e8;   -carmir-rojo-texto: #b4455a;   -carmir-rojo-borde: #f3b5bf;
+    -carmir-ambar-fondo: #fff2d6;  -carmir-ambar-texto: #8f6410;
+    -carmir-azul-fondo: #e6f1fc;   -carmir-azul-texto: #2f628f;   -carmir-azul-borde: #b5d3f0;
+    -carmir-verde-fondo: #e2f6ea;  -carmir-verde-texto: #2f7d57;  -carmir-verde-borde: #b3e0c7;
+    -carmir-lila-fondo: #ebe3f9;   -carmir-lila-texto: #5b3c99;   -carmir-lila-borde: #cdbbea;
+    -carmir-durazno-fondo: #fde6d4; -carmir-durazno-texto: #a9591a; -carmir-durazno-borde: #f4c7a4;
+
+    /* Colores base de JavaFX (controles, textos, listas) */
+    -fx-control-inner-background: -carmir-superficie;
+    -fx-text-inner-color: -carmir-texto;
+    -fx-text-base-color: -carmir-texto;
+
+    -fx-font-family: "Segoe UI", "Tahoma", "Verdana", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: -carmir-texto;
+    -fx-background-color: -carmir-fondo;
+}
+
+/* ---------- Botones de color (pastel, con texto oscuro para que se lea bien) ---------- */
+.btn-verde, .btn-azul, .btn-naranja, .btn-oscuro {
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 9 15 9 15;
+}
+.btn-verde   { -fx-background-color: #a9e2c3; -fx-text-fill: #1f5c3f; }
+.btn-verde:hover { -fx-background-color: #92d8b2; }
+.btn-azul    { -fx-background-color: #b3d4f4; -fx-text-fill: #1f4d78; }
+.btn-azul:hover { -fx-background-color: #9cc6ee; }
+.btn-naranja { -fx-background-color: #fcd3a8; -fx-text-fill: #854812; }
+.btn-naranja:hover { -fx-background-color: #f9c590; }
+.btn-oscuro  { -fx-background-color: #d3c8ef; -fx-text-fill: #3f3270; }
+.btn-oscuro:hover { -fx-background-color: #c2b4e8; }
+/* Color base de todos los iconos (se adapta al modo claro/oscuro); las reglas de abajo lo cambian donde hace falta */
+.ikonli-font-icon { -fx-icon-color: -carmir-texto; }
+.tarjeta-titulo .ikonli-font-icon { -fx-icon-color: -carmir-acento; }
+.btn-verde .ikonli-font-icon { -fx-icon-color: #1f5c3f; }
+.btn-azul .ikonli-font-icon { -fx-icon-color: #1f4d78; }
+.btn-naranja .ikonli-font-icon { -fx-icon-color: #854812; }
+.btn-oscuro .ikonli-font-icon { -fx-icon-color: #3f3270; }
+
+/* Estados comunes de los botones de color */
+.btn-verde:pressed, .btn-azul:pressed, .btn-naranja:pressed,
+.btn-oscuro:pressed, .btn-rojo:pressed { -fx-opacity: 0.85; }
+/* Anillo solo cuando se llega con el teclado (Tab) */
+.btn-verde:focus-visible, .btn-azul:focus-visible, .btn-naranja:focus-visible,
+.btn-oscuro:focus-visible, .btn-rojo:focus-visible {
+    -fx-effect: dropshadow(gaussian, rgba(134,184,234,0.8), 6, 0.5, 0, 0);
+}
+.btn-verde:disabled, .btn-azul:disabled, .btn-naranja:disabled,
+.btn-oscuro:disabled, .btn-rojo:disabled { -fx-opacity: 0.5; }
+
+/* ---------- Botón secundario (Limpiar filtro, Elegir carpeta, Quitar...) ---------- */
+/* Blanco con borde; mide lo mismo que los botones de color para alinearse en las barras */
+.btn-secundario {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 8;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 8;
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-weight: bold;
+    -fx-padding: 8 14 8 14;
+    -fx-graphic-text-gap: 7;
+    -fx-cursor: hand;
+}
+.btn-secundario .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 17; }
+.btn-secundario:hover {
+    -fx-background-color: -carmir-hover;
+    -fx-border-color: -carmir-acento;
+    -fx-text-fill: -carmir-acento-texto;
+}
+.btn-secundario:hover .ikonli-font-icon { -fx-icon-color: -carmir-acento; }
+.btn-secundario:pressed {
+    -fx-background-color: -carmir-seleccion;
+    -fx-border-color: -carmir-acento-fuerte-hover;
+}
+.btn-secundario:focus-visible {
+    -fx-border-color: -carmir-azul;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.45), 5, 0.4, 0, 0);
+}
+.btn-secundario:disabled { -fx-opacity: 0.5; }
+
+/* Variante para quitar o borrar algo: al pasar el mouse se pinta de rojo */
+.btn-secundario.peligro:hover {
+    -fx-background-color: -carmir-rojo-fondo;
+    -fx-border-color: -carmir-rojo;
+    -fx-text-fill: -carmir-rojo-texto;
+}
+.btn-secundario.peligro:hover .ikonli-font-icon { -fx-icon-color: -carmir-rojo-texto; }
+.btn-secundario.peligro:pressed { -fx-background-color: -carmir-rojo-fondo; }
+
+/* ---------- Botón de solo ícono (cerrar avisos) ---------- */
+.btn-icono {
+    -fx-background-color: transparent;
+    -fx-background-radius: 20;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+}
+.btn-icono .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 21; }
+.btn-icono:hover { -fx-background-color: rgba(0,0,0,0.07); }
+.btn-icono:hover .ikonli-font-icon { -fx-icon-color: -carmir-texto-titulo; }
+.btn-icono:pressed { -fx-background-color: rgba(0,0,0,0.13); }
+.btn-icono:focus-visible { -fx-background-color: rgba(52,152,219,0.18); }
+
+/* ---------- Campos de texto ---------- */
+.campo {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 11;
+    -fx-font-size: 14px;
+}
+.campo:focused {
+    -fx-background-color: -carmir-superficie;
+    -fx-border-color: -carmir-azul;
+}
+.campo-solo-lectura {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Mensajes ---------- */
+.mensaje-error {
+    -fx-text-fill: -carmir-rojo-texto;
+    -fx-background-color: -carmir-rojo-fondo;
+    -fx-background-radius: 5;
+    -fx-padding: 8 10 8 10;
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+}
+
+/* ---------- Enlaces ---------- */
+.enlace {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+    -fx-text-fill: -carmir-azul;
+    -fx-border-color: transparent;
+    -fx-font-size: 12px;
+    -fx-padding: 2;
+}
+.enlace:hover { -fx-underline: true; }
+.enlace .ikonli-font-icon { -fx-icon-color: -carmir-azul; -fx-icon-size: 13; }
+
+/* ---------- Barras de desplazamiento discretas ---------- */
+.scroll-bar { -fx-background-color: transparent; }
+.scroll-bar .thumb { -fx-background-color: rgba(0,0,0,0.28); -fx-background-radius: 4; }
+.scroll-bar:horizontal { -fx-pref-height: 10; }
+.scroll-bar:vertical { -fx-pref-width: 10; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button { -fx-padding: 0; }
+.scroll-bar .increment-arrow, .scroll-bar .decrement-arrow { -fx-shape: " "; -fx-padding: 0; }
+
+/* ---------- Casillas (CheckBox) ---------- */
+/* Se aplica a todas las casillas del panel, también a las que se crean desde Java */
+.check-box {
+    -fx-text-fill: -carmir-texto;
+    -fx-label-padding: 0 0 0 8;
+    -fx-cursor: hand;
+}
+/* Cuadro de la casilla */
+.check-box > .box {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 4;
+    -fx-padding: 3;
+}
+/* Palomita (oculta mientras no está marcada) */
+.check-box > .box > .mark {
+    -fx-background-color: transparent;
+    -fx-shape: "M1,5 L4,8 L10,1";
+    -fx-padding: 5 6 5 6;
+}
+.check-box:hover > .box {
+    -fx-border-color: -carmir-acento;
+    -fx-background-color: -carmir-hover-suave;
+}
+/* Marcada: cuadro color acento con palomita blanca */
+.check-box:selected > .box {
+    -fx-background-color: -carmir-acento-fuerte;
+    -fx-border-color: -carmir-acento-fuerte;
+}
+.check-box:selected:hover > .box {
+    -fx-background-color: -carmir-acento-fuerte-hover;
+    -fx-border-color: -carmir-acento-fuerte-hover;
+}
+.check-box:selected > .box > .mark {
+    -fx-background-color: -carmir-superficie;
+    -fx-shape: "M2,6.2 L0.6,7.6 L4.6,11.6 L13.4,2.8 L12,1.4 L4.6,8.8 Z";
+}
+/* Indeterminada: una raya */
+.check-box:indeterminate > .box {
+    -fx-background-color: -carmir-acento-fuerte;
+    -fx-border-color: -carmir-acento-fuerte;
+}
+.check-box:indeterminate > .box > .mark {
+    -fx-background-color: -carmir-superficie;
+    -fx-shape: "M0,0 H10 V2 H0 Z";
+    /* Sin escalar: la raya conserva su tamaño y queda centrada */
+    -fx-scale-shape: false;
+}
+.check-box:pressed > .box { -fx-background-color: -carmir-seleccion; }
+.check-box:selected:pressed > .box { -fx-background-color: -carmir-acento-texto; }
+/* Anillo azul cuando se llega con el teclado (Tab) */
+.check-box:focus-visible > .box {
+    -fx-border-color: -carmir-azul;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.55), 5, 0.4, 0, 0);
+}
+.check-box:disabled { -fx-opacity: 0.5; }
+
+/* Casilla dentro de una barra de filtros: se ve como una pastilla */
+.casilla-filtro {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 18;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 18;
+    -fx-padding: 7 13 7 10;
+}
+.casilla-filtro:hover { -fx-background-color: -carmir-hover; -fx-border-color: -carmir-acento; }
+.casilla-filtro:selected {
+    -fx-background-color: -carmir-hover;
+    -fx-border-color: -carmir-acento;
+    -fx-text-fill: -carmir-acento-texto;
+    -fx-font-weight: bold;
+}
+
+/* Casilla corta en grupo (días de la semana): pastilla que se pinta al marcar */
+.casilla-dia {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 18;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 18;
+    -fx-padding: 6 12 6 9;
+}
+.casilla-dia:hover { -fx-border-color: -carmir-acento; }
+.casilla-dia:selected {
+    -fx-background-color: -carmir-hover;
+    -fx-border-color: -carmir-acento;
+    -fx-text-fill: -carmir-acento-texto;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Opciones (RadioButton), con el mismo estilo que las casillas ---------- */
+.radio-button {
+    -fx-label-padding: 0 0 0 8;
+    -fx-cursor: hand;
+}
+.radio-button > .radio {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 10;
+    -fx-padding: 4;
+}
+.radio-button > .radio > .dot {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 4;
+}
+.radio-button:hover > .radio { -fx-border-color: -carmir-acento; }
+.radio-button:selected > .radio { -fx-border-color: -carmir-acento-fuerte; }
+.radio-button:selected > .radio > .dot {
+    -fx-background-color: -carmir-acento-fuerte;
+    -fx-background-radius: 6;
+}
+.radio-button:focus-visible > .radio {
+    -fx-border-color: -carmir-azul;
+    -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.55), 5, 0.4, 0, 0);
+}
+.radio-button:disabled { -fx-opacity: 0.5; }
+
+/* =====================================================================
+   Mejoras de diseño general (ayudas, filtros, selectores, tablas, fechas, ventanas)
+   ===================================================================== */
+
+/* ---------- Ícono de ayuda (?) junto al nombre de un campo ---------- */
+.icono-ayuda { -fx-padding: 0; -fx-cursor: hand; }
+.icono-ayuda .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 17; }
+.icono-ayuda:hover .ikonli-font-icon { -fx-icon-color: -carmir-acento; }
+.globo-ayuda {
+    -fx-background-color: -carmir-sidebar;
+    -fx-background-radius: 8;
+    -fx-background-insets: 0;
+    -fx-padding: 10 14 10 14;
+    -fx-text-fill: white;
+    -fx-font-size: 12.5px;
+    -fx-font-weight: normal;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 10, 0.1, 0, 3);
+}
+
+/* ---------- Filtros: nombre pequeño arriba de cada control ---------- */
+.filtro-etiqueta {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 11.5px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Selectores (ComboBox) ---------- */
+.combo-box-base, .combo-carmir {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 6;
+    -fx-padding: 2 2 2 4;
+    -fx-cursor: hand;
+}
+.combo-box-base:hover, .combo-carmir:hover {
+    -fx-border-color: -carmir-acento;
+    -fx-background-color: -carmir-hover-suave;
+}
+.combo-box-base:focused, .combo-carmir:focused,
+.combo-box-base:showing, .combo-carmir:showing {
+    -fx-border-color: -carmir-azul;
+    -fx-background-color: -carmir-superficie;
+}
+.combo-box-base:disabled { -fx-opacity: 0.55; }
+.combo-box-base > .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -carmir-texto;
+    -fx-padding: 5 4 5 6;
+}
+.combo-box-base > .arrow-button { -fx-background-color: transparent; -fx-padding: 0 8 0 4; }
+.combo-box-base > .arrow-button > .arrow {
+    -fx-background-color: -carmir-texto-suave;
+    -fx-padding: 2.5 4 2.5 4;
+}
+.combo-box-base:hover > .arrow-button > .arrow { -fx-background-color: -carmir-acento; }
+.combo-box-base > .arrow-button:focused { -fx-background-color: transparent; }
+/* Lista que se despliega */
+.combo-box-popup > .list-view {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 6;
+    -fx-padding: 4;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 10, 0.1, 0, 3);
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4;
+    -fx-text-fill: -carmir-texto;
+    -fx-padding: 7 10 7 10;
+    -fx-cursor: hand;
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
+    -fx-background-color: -carmir-hover;
+    -fx-text-fill: -carmir-acento-texto;
+}
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
+    -fx-background-color: -carmir-seleccion;
+    -fx-text-fill: -carmir-seleccion-texto;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Tablas ---------- */
+.tabla-carmir {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-table-cell-border-color: transparent;
+    -fx-padding: 0;
+}
+.tabla-carmir .column-header-background {
+    -fx-background-color: -carmir-gris-fondo;
+    -fx-background-radius: 6 6 0 0;
+}
+.tabla-carmir .column-header, .tabla-carmir .filler {
+    -fx-background-color: -carmir-gris-fondo;
+    -fx-size: 36;
+    -fx-border-color: transparent transparent -carmir-borde-input transparent;
+    -fx-padding: 6 10 6 10;
+}
+.tabla-carmir .column-header .label {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.tabla-carmir .column-header .arrow, .tabla-carmir .column-header .sort-order-dots-container { -fx-opacity: 0.6; }
+.tabla-carmir .table-row-cell {
+    -fx-background-color: -carmir-superficie;
+    -fx-cell-size: 34;
+    -fx-border-color: transparent transparent -carmir-borde transparent;
+}
+.tabla-carmir .table-row-cell:odd { -fx-background-color: -carmir-gris-claro; }
+.tabla-carmir .table-row-cell:hover { -fx-background-color: -carmir-hover; }
+.tabla-carmir .table-row-cell:selected,
+.tabla-carmir .table-row-cell:odd:selected { -fx-background-color: -carmir-seleccion; }
+.tabla-carmir .table-cell { -fx-padding: 0 8 0 8; -fx-alignment: center-left; -fx-text-fill: -carmir-texto; -fx-text-background-color: -carmir-texto; }
+.tabla-carmir .table-cell .text { -fx-fill: -carmir-texto; }
+/* Renglón seleccionado: se repiten los estados (:filled, :focused) para ganarle a los estilos
+   por defecto de JavaFX, que ponían el texto en negro al seleccionar o agregar un renglón */
+.tabla-carmir .table-row-cell:selected .table-cell,
+.tabla-carmir .table-row-cell:filled:selected .table-cell,
+.tabla-carmir .table-row-cell:filled:selected:focused .table-cell,
+.tabla-carmir:focused .table-row-cell:filled:selected .table-cell,
+.tabla-carmir:focused .table-row-cell:filled:focused:selected .table-cell {
+    -fx-text-fill: -carmir-seleccion-texto;
+    -fx-text-background-color: -carmir-seleccion-texto;
+}
+.tabla-carmir .table-row-cell:selected .table-cell .text,
+.tabla-carmir .table-row-cell:filled:selected .table-cell .text,
+.tabla-carmir:focused .table-row-cell:filled:selected .table-cell .text,
+.tabla-carmir .table-row-cell:selected .text { -fx-fill: -carmir-seleccion-texto; }
+.tabla-carmir .table-row-cell:selected .table-cell .label,
+.tabla-carmir .table-row-cell:filled:selected .table-cell .label { -fx-text-fill: -carmir-seleccion-texto; }
+.tabla-carmir .table-row-cell:filled:selected .table-cell,
+.tabla-carmir:focused .table-row-cell:filled:selected .table-cell { -fx-background-color: transparent; -fx-border-color: transparent; }
+.tabla-carmir .table-row-cell:filled:selected,
+.tabla-carmir:focused .table-row-cell:filled:selected,
+.tabla-carmir:focused .table-row-cell:filled:focused:selected { -fx-background-color: -carmir-seleccion; }
+/* Sin renglones vacíos de relleno: solo líneas suaves */
+.tabla-carmir .table-row-cell:empty { -fx-background-color: -carmir-superficie; -fx-border-color: transparent; }
+.tabla-carmir:focused { -fx-background-color: -carmir-superficie; }
+.tabla-carmir .placeholder .label { -fx-text-fill: -carmir-texto-suave; }
+
+/* Lista (ListView) con el mismo estilo */
+.list-view { -fx-background-color: -carmir-superficie; -fx-background-radius: 6; -fx-border-color: -carmir-borde; -fx-border-radius: 6; }
+.list-cell:filled:hover { -fx-background-color: -carmir-hover; }
+.list-cell:filled:selected { -fx-background-color: -carmir-seleccion; -fx-text-fill: -carmir-seleccion-texto; }
+.list-view:focused .list-cell:filled:selected,
+.list-view:focused .list-cell:filled:focused:selected { -fx-background-color: -carmir-seleccion; -fx-text-fill: -carmir-seleccion-texto; -fx-text-background-color: -carmir-seleccion-texto; }
+.list-cell:filled:selected .label { -fx-text-fill: -carmir-seleccion-texto; }
+
+/* ---------- Campos de fecha (DatePicker) ---------- */
+.date-picker, .campo-fecha {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 6;
+    -fx-background-insets: 0;
+}
+.date-picker:hover, .campo-fecha:hover { -fx-border-color: -carmir-acento; }
+.date-picker:focused, .campo-fecha:focused { -fx-border-color: -carmir-azul; }
+.date-picker > .text-field, .date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 8 8 8 10;
+    -fx-font-size: 13px;
+}
+.date-picker > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0 9 0 4;
+    -fx-cursor: hand;
+}
+.date-picker > .arrow-button > .arrow {
+    -fx-background-color: -carmir-acento;
+    -fx-background-insets: 0;
+    -fx-padding: 7 8 7 8;
+}
+/* Calendario que se despliega */
+.date-picker-popup {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 8;
+    -fx-border-color: -carmir-borde-input;
+    -fx-border-radius: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 12, 0.1, 0, 4);
+    -fx-padding: 6;
+}
+.date-picker-popup > .month-year-pane {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-color: transparent transparent -carmir-borde transparent;
+}
+.date-picker-popup > .month-year-pane > .secondary-label { -fx-text-fill: -carmir-texto-titulo; -fx-font-weight: bold; }
+.date-picker-popup > .month-year-pane .spinner .button { -fx-background-color: transparent; -fx-cursor: hand; }
+.date-picker-popup > .month-year-pane .spinner .button:hover { -fx-background-color: -carmir-hover; -fx-background-radius: 8; }
+.date-picker-popup > .calendar-grid { -fx-background-color: -carmir-superficie; -fx-border-color: transparent; }
+.date-picker-popup > * > .day-name-cell, .date-picker-popup > * > .week-number-cell {
+    -fx-text-fill: -carmir-texto-suave; -fx-font-size: 11px; -fx-font-weight: bold;
+}
+.date-picker-popup > * > .day-cell {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-background-insets: 2;
+    -fx-text-fill: -carmir-texto;
+    -fx-cursor: hand;
+}
+.date-picker-popup > * > .day-cell:hover { -fx-background-color: -carmir-hover; }
+.date-picker-popup > * > .day-cell:selected { -fx-background-color: -carmir-acento-fuerte; -fx-text-fill: white; }
+.date-picker-popup > * > .today { -fx-border-color: -carmir-acento; -fx-border-width: 1.5; -fx-border-radius: 8; -fx-border-insets: 2; -fx-text-fill: -carmir-acento-texto; -fx-font-weight: bold; }
+.date-picker-popup > * > .today:selected { -fx-text-fill: white; }
+.date-picker-popup > * > .other-month { -fx-text-fill: -carmir-borde-input; }
+
+/* ---------- Pestañas (todas las del panel) ---------- */
+.tab-pane > .tab-header-area > .headers-region > .tab { -fx-cursor: hand; }
+
+/* ---------- Tarjetas con borde suave ---------- */
+.tarjeta { -fx-border-color: -carmir-borde; -fx-border-radius: 8; }
+
+/* ---------- Ventanas flotantes (diálogos de aviso, confirmación y error) ---------- */
+.dialog-pane {
+    -fx-background-color: -carmir-superficie;
+    -fx-font-family: "Segoe UI", "Tahoma", "Verdana", sans-serif;
+    -fx-font-size: 14px;
+    -fx-border-color: -carmir-borde-input;
+}
+.dialog-pane > .header-panel { -fx-background-color: -carmir-superficie; -fx-padding: 14 20 4 20; }
+.dialog-pane > .header-panel .label { -fx-text-fill: -carmir-texto-titulo; -fx-font-size: 16px; -fx-font-weight: bold; }
+.dialog-pane > .content.label { -fx-padding: 14 22 14 22; -fx-text-fill: -carmir-texto; -fx-font-size: 14px; }
+.dialog-pane > .graphic-container { -fx-padding: 14 0 0 20; }
+.dialog-pane > .button-bar > .container { -fx-padding: 10 16 14 16; -fx-background-color: -carmir-superficie; }
+.dialog-pane .button {
+    -fx-background-color: -carmir-sidebar-linea;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-padding: 8 20 8 20;
+    -fx-cursor: hand;
+}
+.dialog-pane .button:hover { -fx-background-color: -carmir-sidebar; }
+.dialog-pane .button:default { -fx-background-color: -carmir-verde; }
+.dialog-pane .button:default:hover { -fx-background-color: -carmir-verde-oscuro; }
+.dialog-pane .button:cancel { -fx-background-color: -carmir-superficie; -fx-border-color: -carmir-borde-input; -fx-border-radius: 5; -fx-text-fill: -carmir-texto-titulo; }
+.dialog-pane .button:cancel:hover { -fx-background-color: -carmir-hover; -fx-border-color: -carmir-acento; }
+.dialog-pane .button:focused { -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.5), 5, 0.4, 0, 0); }
+
+/* Formularios en ventana flotante: encabezado más marcado y separación entre secciones */
+.formulario { -fx-background-color: -carmir-superficie; }
+.formulario-titulo { -fx-border-color: transparent transparent transparent transparent; }
+.formulario .text-area .content { -fx-background-color: transparent; }
+.text-area { -fx-background-color: transparent; }
+.campo.text-area, .text-area.campo { -fx-padding: 0; }
+.text-field:disabled, .text-area:disabled { -fx-opacity: 0.6; }
+
+/* Cuadros de texto con el mismo foco que el resto */
+.password-field.campo { -fx-padding: 11; }
+
+/* Deslizador de las ventanas flotantes: sin marco, fondo blanco */
+.scroll-modal, .scroll-modal > .viewport {
+    -fx-background-color: -carmir-superficie;
+    -fx-background: -carmir-superficie;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+/* Selector con escritura (ComboBox editable): el campo de texto no lleva marco propio */
+.combo-box-base > .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 5 4 5 6;
+}
+
+/* ---------- Iconos más grandes y robustos en botones, pestañas y avisos ---------- */
+.btn-verde .ikonli-font-icon, .btn-azul .ikonli-font-icon, .btn-naranja .ikonli-font-icon,
+.btn-oscuro .ikonli-font-icon, .btn-rojo .ikonli-font-icon { -fx-icon-size: 17; }
+.pestanas-catalogo .tab .ikonli-font-icon { -fx-icon-size: 17; }
+.aviso-amarillo .ikonli-font-icon, .aviso-consulta .ikonli-font-icon { -fx-icon-size: 16; }
+.tarjeta-titulo .ikonli-font-icon { -fx-icon-size: 19; }
+
+
+/* ---------- Letras de los campos de texto y de fecha (siempre con el color del tema) ---------- */
+.text-field, .password-field, .text-area, .date-picker > .text-field,
+.date-picker .text-field, .combo-box-base > .text-field, .spinner .text-field {
+    -fx-text-fill: -carmir-texto;
+    -fx-text-inner-color: -carmir-texto;
+    -fx-prompt-text-fill: -carmir-texto-suave;
+    -fx-highlight-fill: -carmir-seleccion;
+    -fx-highlight-text-fill: -carmir-seleccion-texto;
+}
+.text-area .text { -fx-fill: -carmir-texto; }
+.date-picker-popup .label, .date-picker-popup .spinner .label { -fx-text-fill: -carmir-texto; }

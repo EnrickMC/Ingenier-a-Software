@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Apartado sin funcionalidad todavía: muestra a qué módulo pertenece y qué tendrá -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.controller.SeccionEnConstruccionController"
+      alignment="TOP_CENTER">
+
+    <VBox styleClass="tarjeta" alignment="TOP_CENTER" spacing="14" maxWidth="620">
+        <StackPane styleClass="construccion-icono">
+            <FontIcon fx:id="icoSeccion" iconLiteral="bi-tools"/>
+        </StackPane>
+        <Label fx:id="lblNombre" styleClass="construccion-titulo" text="Apartado"/>
+        <Label fx:id="lblModulo" styleClass="etiqueta-modulo" text="Módulo"/>
+        <Label styleClass="construccion-texto" wrapText="true" textAlignment="CENTER"
+               text="Este apartado está en construcción. Aquí se integrarán las siguientes funciones:"/>
+
+        <VBox styleClass="caja-info" spacing="10" maxWidth="Infinity">
+            <Label styleClass="caja-info-titulo" text="Funciones previstas"/>
+            <VBox fx:id="listaFunciones" spacing="8"/>
+        </VBox>
+    </VBox>
+</VBox>

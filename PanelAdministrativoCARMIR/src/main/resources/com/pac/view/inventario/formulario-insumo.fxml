@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar (RF-34) o modificar (RF-35) un insumo -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.FormularioInsumoController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css"
+      styleClass="formulario" spacing="12" prefWidth="560">
+
+    <VBox spacing="2">
+        <Label fx:id="lblTitulo" styleClass="formulario-titulo" text="Registrar insumo"/>
+        <Label fx:id="lblSubtitulo" styleClass="texto-suave" wrapText="true"
+               text="El insumo se registra con existencia en cero; las cantidades se agregan al registrar una compra."/>
+    </VBox>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Nombre *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Nombre único del insumo, por ejemplo Harina de trigo."/></graphic></Label>
+        <TextField fx:id="txtNombre" styleClass="campo" promptText="Ej. Harina de trigo, Fresa, Leche entera"/>
+    </VBox>
+
+    <GridPane hgap="12" vgap="4">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Label styleClass="formulario-etiqueta" text="Categoría *" GridPane.rowIndex="0" GridPane.columnIndex="0" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Grupo al que pertenece el insumo (Lácteos, Frutas...). Sirve para filtrar el inventario."/></graphic></Label>
+        <Label styleClass="formulario-etiqueta" text="Unidad de medida *" GridPane.rowIndex="0" GridPane.columnIndex="1" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Unidad en que se mide, se compra y se usa en las recetas. No se puede cambiar si el insumo ya tiene movimientos."/></graphic></Label>
+        <ComboBox fx:id="cmbCategoria" styleClass="combo-carmir" editable="true" maxWidth="Infinity"
+                  promptText="Ej. Lácteos, Harinas, Frutas" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cmbUnidad" styleClass="combo-carmir" maxWidth="Infinity" promptText="Elige la unidad"
+                  onAction="#onCambioUnidad" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <GridPane hgap="12" vgap="4">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Label fx:id="lblCosto" styleClass="formulario-etiqueta" text="Costo por unidad *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="lblStock" styleClass="formulario-etiqueta" text="Stock mínimo *" GridPane.rowIndex="0" GridPane.columnIndex="1" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Cantidad por debajo de la cual se genera una alerta de existencia baja."/></graphic></Label>
+        <TextField fx:id="txtCosto" styleClass="campo" promptText="Ej. 28.50" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtStockMinimo" styleClass="campo" promptText="0 = sin alerta" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="0"
+               text="Se usa para calcular el costo de las recetas y el precio del catálogo."/>
+        <Label styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1"
+               text="Si la existencia llega a esta cantidad o menos, se genera la alerta de stock bajo."/>
+    </GridPane>
+
+    <CheckBox fx:id="chkPerecedero" text="Es perecedero (cada compra pide fecha de caducidad)"/>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Guardar" styleClass="btn-verde" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

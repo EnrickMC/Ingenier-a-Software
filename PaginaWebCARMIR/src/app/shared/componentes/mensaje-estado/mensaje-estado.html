@@ -1,0 +1,16 @@
+<div class="mensaje-estado" [class.error]="tipo() === 'error'" [attr.role]="rol()">
+  <div class="icono" aria-hidden="true">
+    @if (tipo() === 'error') {
+      <span>!</span>
+    } @else {
+      <span>i</span>
+    }
+  </div>
+  <p class="titulo">{{ titulo() }}</p>
+  @if (texto() !== '') {
+    <p class="texto">{{ texto() }}</p>
+  }
+  <div class="acciones">
+    <ng-content />
+  </div>
+</div>

@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+.visor {
+  border-radius: var(--radio);
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, #fffaf3 0%, #f6e7d6 70%, #ecd6bf 100%);
+  border: 1px solid var(--color-borde);
+  box-shadow: var(--sombra-alta);
+}
+
+/* Lienzo del 3D: alto fijo en proporción al ancho */
+.lienzo {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 62vh;
+  touch-action: none;
+  cursor: grab;
+}
+
+.lienzo:active {
+  cursor: grabbing;
+}
+
+.lienzo canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.medidas {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--color-titulo);
+  font-size: 0.85rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.ayuda-giro {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--color-texto-suave);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Botones debajo del 3D */
+.controles {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-top: 1px solid var(--color-borde);
+}
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.control svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.control:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento-oscuro);
+}
+
+.control.activo {
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+.sin-3d {
+  padding: 16px;
+  text-align: center;
+  color: var(--color-texto-suave);
+}
+

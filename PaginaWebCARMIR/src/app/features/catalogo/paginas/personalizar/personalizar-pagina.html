@@ -1,0 +1,220 @@
+<div class="contenedor pagina">
+  <button type="button" class="enlace-regresar boton-texto" (click)="regresar()">← Regresar al producto</button>
+
+  @if (estado() === 'cargando') {
+    <app-cargando texto="Cargando las opciones de personalización..." />
+  }
+
+  @if (estado() === 'error') {
+    <!-- RF-3 · Excepción paso 2: sin conexión, «No fue posible cargar las opciones de personalización». -->
+    <app-mensaje-estado
+      tipo="error"
+      titulo="No fue posible cargar las opciones de personalización"
+      [texto]="detalleError()"
+    >
+      <button type="button" class="btn btn-principal" (click)="cargar()">Reintentar</button>
+      <button type="button" class="btn btn-secundario" (click)="regresar()">Ver el producto</button>
+    </app-mensaje-estado>
+  }
+
+  @if (estado() === 'listo' && datos(); as info) {
+    @if (!info.sePuedePersonalizar) {
+      <!-- RF-2 / RF-3 · Excepción paso 4: una característica obligatoria no tiene opciones; no se puede personalizar. -->
+      <app-mensaje-estado tipo="info" titulo="Este producto no se puede personalizar por ahora" [texto]="info.motivoNoPersonalizable || ''">
+        <a routerLink="/" class="btn btn-secundario">Volver al catálogo</a>
+      </app-mensaje-estado>
+    } @else {
+      <!-- RF-3 · Paso 3: formulario de personalización con características, dedicatoria, cantidad y precio. -->
+      <h1 class="titulo-pagina">Personaliza tu postre</h1>
+
+      <div class="diseno">
+        <!-- Columna del modelo 3D y del precio (fija al bajar en escritorio) -->
+        <aside class="columna-visor" aria-labelledby="titulo-precio">
+          <!-- RF-3 · Paso 4: el pastel 3D cambia con cada opción elegida (tamaño, forma, sabor, decoración...). -->
+          <app-visor-pastel3d [diseno]="diseno3d()" [nombre]="info.producto.nombre">
+            <app-imagen-postre class="foto-respaldo" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+          </app-visor-pastel3d>
+
+          <!-- RF-3 · Paso 4: precio por pieza y total que se recalculan con cada cambio. -->
+          <div class="precios panel" aria-live="polite">
+            <h2 id="titulo-precio" class="solo-lector">Precio</h2>
+            <p class="fila-precio">
+              <span>Precio por pieza</span>
+              <span class="precio">{{ precioUnitario() | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </p>
+            <p class="fila-precio total">
+              <span>Total ({{ cantidad() }})</span>
+              <span class="precio">{{ total() | currency: 'MXN' : 'symbol-narrow' }} MXN</span>
+            </p>
+          </div>
+        </aside>
+
+        <!-- Formulario de personalización -->
+        <form class="formulario" (submit)="alEnviar($event)" novalidate>
+          <!-- Plantilla base: foto y datos en una franja arriba de las opciones -->
+          <section class="plantilla-base panel" aria-labelledby="titulo-plantilla">
+            <app-imagen-postre class="foto" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+            <div class="datos-plantilla">
+              <p class="plantilla-aplicada">Partes de la plantilla base</p>
+              <h2 id="titulo-plantilla">{{ info.producto.nombre }}</h2>
+              <span class="etiqueta">{{ info.producto.nombreCategoria }}</span>
+            </div>
+            <!-- RF-4 · Paso 1: botón para ver la galería de plantillas. -->
+            <button type="button" class="btn btn-secundario boton-plantillas" [disabled]="cargandoGaleria()" (click)="abrirGaleria()">
+              @if (cargandoGaleria()) {
+                Cargando plantillas...
+              } @else {
+                Ver plantillas de diseño
+              }
+            </button>
+            <!-- RF-4 · Excepciones paso 2 y 3: sin conexión o sin plantillas, el mensaje sale aquí y no se abre la galería. -->
+            @if (mensajeGaleria() !== '') {
+              <p class="nota" role="status">{{ mensajeGaleria() }}</p>
+            }
+          </section>
+
+          <!-- RF-3 · Paso 2: opciones de la plantilla que ya no están disponibles. -->
+          @if (info.opcionesRetiradas.length > 0) {
+            <div class="aviso" role="status">
+              <p>
+                Algunas opciones de esta plantilla ya no están disponibles ({{ info.opcionesRetiradas.join(', ') }}).
+                Elige otras para completar tu postre.
+              </p>
+            </div>
+          }
+
+          <!-- RF-3 · Pasos 3 y 4: una tarjeta por característica en su orden de muestra. -->
+          @for (caracteristica of info.caracteristicas; track caracteristica.idCaracteristica) {
+            <app-selector-caracteristica
+              [caracteristica]="caracteristica"
+              [seleccion]="seleccion()"
+              [exclusiones]="info.exclusiones"
+              [puntosTotales]="puntosDe(caracteristica)"
+              [error]="errorDe(caracteristica)"
+              [esGelatina]="esGelatina()"
+              (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
+              (cantidadCambiada)="cambiarCantidadOpcion($event)"
+            />
+          }
+
+          <fieldset class="paso panel">
+            <legend class="titulo-paso">Detalles de tu pedido</legend>
+
+            <div class="campo" [class.con-error]="errorCantidad() !== ''">
+              <label for="cantidad">Cantidad de piezas</label>
+              <div class="cantidad-piezas">
+                <button type="button" class="boton-contador" aria-label="Una pieza menos" [disabled]="cantidad() <= 1" (click)="restarPieza()">−</button>
+                <input
+                  #campoCantidad
+                  id="cantidad"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  [max]="cantidadMaxima"
+                  [value]="cantidad()"
+                  (input)="cambiarCantidad(campoCantidad.value)"
+                />
+                <button type="button" class="boton-contador" aria-label="Una pieza más" [disabled]="cantidad() >= cantidadMaxima" (click)="sumarPieza()">+</button>
+              </div>
+              <!-- RF-3 · Excepción paso 6: cantidad inválida. -->
+              @if (errorCantidad() !== '') {
+                <span class="mensaje-error">{{ errorCantidad() }}</span>
+              }
+            </div>
+
+            <div class="campo" [class.con-error]="errorDedicatoria() !== ''">
+              <label for="dedicatoria">Mensaje en el postre (opcional)</label>
+              <textarea
+                #campoDedicatoria
+                id="dedicatoria"
+                rows="2"
+                [attr.maxlength]="largoDedicatoria"
+                placeholder="Ej. ¡Feliz cumpleaños, Mamá!"
+                [value]="dedicatoria()"
+                (input)="cambiarDedicatoria(campoDedicatoria.value)"
+              ></textarea>
+              <span class="ayuda">{{ dedicatoria().length }} de {{ largoDedicatoria }} caracteres. Sin emojis.</span>
+              <!-- RF-3 · Excepción paso 6: la dedicatoria no cumple el largo o los caracteres; se conserva el texto. -->
+              @if (errorDedicatoria() !== '') {
+                <span class="mensaje-error">{{ errorDedicatoria() }}</span>
+              }
+            </div>
+
+            <div class="campo" [class.con-error]="errorComentario() !== ''">
+              <label for="comentario">Indicaciones especiales (opcional)</label>
+              <textarea
+                #campoComentario
+                id="comentario"
+                rows="3"
+                [attr.maxlength]="largoComentario"
+                placeholder="Ej. Sin nuez, por favor"
+                [value]="comentario()"
+                (input)="cambiarComentario(campoComentario.value)"
+              ></textarea>
+              <span class="ayuda">{{ comentario().length }} de {{ largoComentario }} caracteres.</span>
+              @if (errorComentario() !== '') {
+                <span class="mensaje-error">{{ errorComentario() }}</span>
+              }
+            </div>
+          </fieldset>
+
+          <!-- RF-3 · Excepción paso 7: exclusiones y opciones no disponibles (con su motivo). -->
+          @if (erroresGenerales().length > 0) {
+            <div class="aviso error" role="alert">
+              <ul>
+                @for (error of erroresGenerales(); track error.mensaje) {
+                  <li>{{ error.mensaje }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <!-- RF-3 · Pasos 7 y 8: resultado de «Agregar al carrito» (error, aviso de precio o éxito). -->
+          @if (mensajeResultado() !== '') {
+            <div class="aviso" [class.error]="tipoResultado() === 'error'" [class.exito]="tipoResultado() === 'exito'" role="status">
+              <p>{{ mensajeResultado() }}</p>
+              @if (tipoResultado() === 'exito') {
+                <div class="acciones-exito">
+                  <a routerLink="/carrito" class="btn btn-principal">Ver carrito</a>
+                  <a routerLink="/" class="btn btn-secundario">Seguir comprando</a>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Barra de acciones: fija abajo en celular y tableta -->
+          <div class="barra-acciones">
+            <p class="total-barra">
+              <span>Total</span>
+              <span class="precio">{{ total() | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </p>
+            <div class="botones">
+              <!-- RF-3 · Paso 5: «Regresar» o «Agregar al carrito». -->
+              <button type="button" class="btn btn-secundario" (click)="regresar()">Regresar</button>
+              <button type="submit" class="btn btn-principal" [disabled]="enviando()">
+                @if (enviando()) {
+                  Validando...
+                } @else if (editando() !== null) {
+                  Guardar cambios
+                } @else {
+                  Agregar al carrito
+                }
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- RF-4 · Paso 4: galería de plantillas. -->
+      @if (galeriaAbierta()) {
+        <app-galeria-plantillas
+          [plantillas]="plantillas()"
+          [mensaje]="mensajeDentroGaleria()"
+          [aplicando]="aplicandoPlantilla()"
+          (confirmar)="aplicarPlantilla($event)"
+          (cerrar)="cerrarGaleria()"
+        />
+      }
+    }
+  }
+</div>

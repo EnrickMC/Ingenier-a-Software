@@ -1,0 +1,82 @@
+.resumen {
+  padding: 18px;
+}
+
+h2 {
+  font-size: 1.25rem;
+  border-bottom: 2px solid var(--color-crema);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.renglon {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px dashed #ccc;
+}
+
+.detalles h3 {
+  font-size: 1rem;
+  color: var(--color-texto);
+  margin: 0 0 4px;
+}
+
+.detalles p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.importe {
+  font-weight: 700;
+  color: var(--color-encabezado);
+  white-space: nowrap;
+}
+
+.cuentas {
+  margin: 14px 0 0;
+}
+
+.cuentas div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.cuentas dt,
+.cuentas dd {
+  margin: 0;
+}
+
+.cuentas dd {
+  text-align: right;
+}
+
+.total {
+  margin-top: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-titulo);
+}
+
+.iniciar {
+  color: var(--color-acento-oscuro);
+  font-weight: 600;
+}
+
+@media (min-width: 600px) {
+  .resumen {
+    padding: 24px;
+  }
+}

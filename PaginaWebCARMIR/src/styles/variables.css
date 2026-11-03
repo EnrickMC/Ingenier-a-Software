@@ -1,0 +1,48 @@
+/*
+ * Paleta y medidas de CARMIR (tomadas de los diseños HTML: inicio, catálogo y personalizar).
+ * Si se cambia un color aquí, cambia en toda la página.
+ */
+:root {
+  /* Colores */
+  --color-fondo: #fcf9f2;
+  --color-texto: #4a3b32;
+  --color-texto-suave: #77685e;
+  --color-encabezado: #d4a373;
+  --color-crema: #faedcd;
+  --color-crema-claro: #fefae0;
+  --color-titulo: #8c5a2b;
+  --color-acento: #e5989b;
+  --color-acento-oscuro: #c97377;
+  --color-precio: #b07a43;
+  --color-borde: #eee3d3;
+  --color-blanco: #ffffff;
+  --color-error: #b3261e;
+  --color-error-fondo: #fdecea;
+  --color-exito: #2e6b3f;
+  --color-exito-fondo: #e7f4ea;
+  --color-aviso-fondo: #fff4d6;
+
+  /* Medidas */
+  --radio: 10px;
+  --radio-chico: 6px;
+  --sombra: 0 4px 10px rgba(74, 59, 50, 0.07);
+  --sombra-alta: 0 10px 24px rgba(74, 59, 50, 0.14);
+  --ancho-maximo: 1200px;
+  --espacio-lateral: 16px;
+
+  /* Tipografía (la misma de los diseños) */
+  --fuente: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* En tableta y escritorio hay más margen a los lados */
+@media (min-width: 600px) {
+  :root {
+    --espacio-lateral: 24px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --espacio-lateral: 40px;
+  }
+}

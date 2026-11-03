@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Detalle de un pedido (RF-21, RF-23, RF-29). Se usa dentro de Gestión de Pedidos
+     y como ventana desde la Agenda y la Validación de pagos. -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.DetallePedidoController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      styleClass="tarjeta" spacing="10" minWidth="460">
+
+    <!-- Sin pedido elegido -->
+    <VBox fx:id="cajaSinSeleccion" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+        <!-- Pastel animado (Lottie4J): corre sola en ciclo. Se llena desde el controlador -->
+        <StackPane fx:id="decoracionPastel" styleClass="decoracion-pastel" minWidth="456" minHeight="456"
+                   prefWidth="456" prefHeight="456" maxWidth="456" maxHeight="456"/>
+        <Label fx:id="lblSinSeleccion" styleClass="texto-suave" wrapText="true" textAlignment="CENTER"
+               text="Selecciona un pedido de la lista para ver su detalle"/>
+    </VBox>
+
+    <VBox fx:id="cajaContenido" spacing="10" VBox.vgrow="ALWAYS">
+        <!-- Encabezado: folio, estado y fechas -->
+        <HBox spacing="10" alignment="TOP_LEFT">
+            <VBox spacing="4">
+                <Label fx:id="lblFolio" styleClass="detalle-folio"/>
+                <HBox fx:id="cajaEtiquetas" spacing="6" alignment="CENTER_LEFT">
+                    <Label fx:id="lblEstado"/>
+                </HBox>
+            </VBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblFechas" styleClass="texto-suave" textAlignment="RIGHT" wrapText="true"/>
+        </HBox>
+
+        <!-- Cancelado o dado de baja -->
+        <Label fx:id="lblBanner" styleClass="aviso-rojo" maxWidth="Infinity" wrapText="true">
+            <graphic><FontIcon iconLiteral="bi-x-octagon-fill"/></graphic>
+        </Label>
+
+        <!-- Avance por los 6 estados -->
+        <HBox fx:id="cajaPasos" spacing="2"/>
+
+        <!-- Avisos de la revisión (datos incompletos, fecha vencida, agenda saturada) -->
+        <VBox fx:id="listaAvisos" spacing="4"/>
+
+        <ScrollPane fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+            <VBox spacing="8">
+                <Label styleClass="seccion-titulo" text="DATOS DEL CLIENTE"/>
+                <Label fx:id="lblCliente" wrapText="true"/>
+
+                <Label styleClass="seccion-titulo" text="ESPECIFICACIONES DE LOS POSTRES"/>
+                <VBox fx:id="listaPostres" spacing="6"/>
+
+                <HBox spacing="10">
+                    <VBox styleClass="caja-info" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label styleClass="postre-nombre" text="Logística de entrega"/>
+                        <Label fx:id="lblEntrega" wrapText="true"/>
+                    </VBox>
+                    <VBox styleClass="caja-info" spacing="4" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                        <Label styleClass="postre-nombre" text="Información de pago"/>
+                        <Label fx:id="lblDesglose" wrapText="true"/>
+                        <ProgressBar fx:id="barraPagado" styleClass="barra-pagado" maxWidth="Infinity" prefHeight="10"/>
+                        <Label fx:id="lblSituacion" wrapText="true"/>
+                        <Label fx:id="lblTotal" styleClass="total-destacado"/>
+                    </VBox>
+                </HBox>
+
+                <Label styleClass="seccion-titulo" text="PAGOS REGISTRADOS"/>
+                <VBox fx:id="listaPagos" spacing="4"/>
+
+                <Label styleClass="seccion-titulo" text="HISTORIAL DE ESTADOS"/>
+                <VBox fx:id="listaHistorial" spacing="4"/>
+
+                <Label fx:id="lblTituloModificaciones" styleClass="seccion-titulo" text="MODIFICACIONES"/>
+                <VBox fx:id="listaModificaciones" spacing="4"/>
+
+                <Label styleClass="seccion-titulo" text="NOTIFICACIONES ENVIADAS"/>
+                <VBox fx:id="listaNotificaciones" spacing="4"/>
+            </VBox>
+        </ScrollPane>
+
+        <!-- Por qué no se puede avanzar (RF-49) -->
+        <Label fx:id="lblBloqueo" styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity">
+            <graphic><FontIcon iconLiteral="bi-lock-fill"/></graphic>
+        </Label>
+
+        <!-- Acciones -->
+        <FlowPane hgap="8" vgap="8">
+            <Button fx:id="btnAprobar" text="Aprobar" styleClass="btn-verde" onAction="#onAprobar">
+                <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+            </Button>
+            <Button fx:id="btnAvanzar" styleClass="btn-azul" onAction="#onAvanzar">
+                <graphic><FontIcon iconLiteral="bi-arrow-right-circle-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnPago" text="Registrar pago" styleClass="btn-verde" onAction="#onRegistrarPago">
+                <graphic><FontIcon iconLiteral="bi-cash-stack"/></graphic>
+            </Button>
+            <Button fx:id="btnModificar" text="Modificar" styleClass="btn-oscuro" onAction="#onModificar">
+                <graphic><FontIcon iconLiteral="bi-pencil-square"/></graphic>
+            </Button>
+            <Button fx:id="btnCancelar" text="Cancelar pedido" styleClass="btn-naranja" onAction="#onCancelar">
+                <graphic><FontIcon iconLiteral="bi-x-circle-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnBaja" text="Dar de baja" styleClass="btn-rojo" onAction="#onDarDeBaja">
+                <graphic><FontIcon iconLiteral="bi-trash-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnImprimir" text="Imprimir ticket" styleClass="btn-oscuro" onAction="#onImprimir">
+                <graphic><FontIcon iconLiteral="bi-printer-fill"/></graphic>
+            </Button>
+        </FlowPane>
+    </VBox>
+</VBox>

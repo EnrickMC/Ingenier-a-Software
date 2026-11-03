@@ -1,0 +1,37 @@
+<div class="calendario" [class.con-error]="conError()">
+  <div class="cabecera">
+    <button type="button" class="flecha" [disabled]="!puedeRetroceder()" (click)="mesAnterior()" aria-label="Mes anterior">‹</button>
+    <span class="mes" aria-live="polite">{{ tituloMes() }}</span>
+    <button type="button" class="flecha" [disabled]="!puedeAvanzar()" (click)="mesSiguiente()" aria-label="Mes siguiente">›</button>
+  </div>
+
+  <div class="rejilla" role="group" [attr.aria-label]="'Días de ' + tituloMes()">
+    @for (letra of encabezados; track letra) {
+      <span class="dia-semana" aria-hidden="true">{{ letra }}</span>
+    }
+    @for (dia of dias(); track $index) {
+      @if (dia.fecha === '') {
+        <span class="hueco"></span>
+      } @else {
+        <button
+          type="button"
+          class="dia"
+          [class.lleno]="dia.estado === 'lleno'"
+          [class.elegido]="dia.fecha === seleccionada()"
+          [disabled]="dia.estado !== 'disponible'"
+          [attr.aria-pressed]="dia.fecha === seleccionada()"
+          [attr.aria-label]="etiqueta(dia)"
+          (click)="elegirDia(dia)"
+        >
+          {{ dia.numero }}
+        </button>
+      }
+    }
+  </div>
+
+  <ul class="leyenda">
+    <li><span class="muestra disponible"></span> Disponible</li>
+    <li><span class="muestra lleno"></span> Sin cupo</li>
+    <li><span class="muestra cerrado"></span> Sin entregas</li>
+  </ul>
+</div>

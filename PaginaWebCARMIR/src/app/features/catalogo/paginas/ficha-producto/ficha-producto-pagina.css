@@ -1,0 +1,148 @@
+.pagina {
+  padding-top: 12px;
+  padding-bottom: 40px;
+}
+
+/* Celular: la foto arriba y los detalles abajo */
+.ficha {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.columna-imagen {
+  background-color: var(--color-crema-claro);
+  padding: 16px;
+}
+
+.foto {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.columna-detalles {
+  padding: 20px 16px 24px;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin: 10px 0 6px;
+}
+
+.precio-destacado {
+  font-size: 1.5rem;
+  margin: 0 0 12px;
+}
+
+.descripcion {
+  color: var(--color-texto-suave);
+  margin: 0 0 8px;
+}
+
+.seccion {
+  border-top: 1px solid var(--color-borde);
+  padding-top: 14px;
+  margin-top: 14px;
+}
+
+.seccion h2 {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.incluye {
+  margin: 0;
+}
+
+.incluye .fila {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.incluye dt {
+  font-weight: 600;
+  min-width: 110px;
+}
+
+.incluye dd {
+  margin: 0;
+}
+
+.ingredientes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ingredientes li {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.9rem;
+}
+
+.personalizables {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.personalizables li {
+  margin-bottom: 4px;
+}
+
+.obligatoria {
+  color: var(--color-texto-suave);
+  font-size: 0.85rem;
+}
+
+.nota {
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+  font-style: italic;
+  margin: 8px 0 0;
+}
+
+.boton-personalizar {
+  margin-top: 22px;
+  font-size: 1.1rem;
+  min-height: 52px;
+}
+
+/* Tableta y escritorio: dos columnas como el diseño "Personalizar pedido" */
+@media (min-width: 768px) {
+  .ficha {
+    flex-direction: row;
+    max-width: 980px;
+    margin: 12px auto 0;
+  }
+
+  .columna-imagen {
+    flex: 1;
+    padding: 32px;
+    border-right: 1px solid var(--color-borde);
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .foto {
+    width: 100%;
+    position: sticky;
+    top: 90px;
+  }
+
+  .columna-detalles {
+    flex: 1;
+    padding: 32px;
+  }
+
+  h1 {
+    font-size: 1.9rem;
+  }
+}

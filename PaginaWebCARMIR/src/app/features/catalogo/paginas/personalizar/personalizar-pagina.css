@@ -1,0 +1,270 @@
+.pagina {
+  padding-top: 12px;
+  padding-bottom: 24px;
+}
+
+.boton-texto {
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.titulo-pagina {
+  font-size: 1.5rem;
+  margin: 4px 0 16px;
+}
+
+/* Celular: pastel 3D arriba, opciones abajo */
+.diseno {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.columna-visor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.foto-respaldo {
+  max-width: 320px;
+  aspect-ratio: 4 / 3;
+  margin: 0 auto 10px;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+/* Franja de la plantilla base: foto chica, nombre y botón de plantillas */
+.plantilla-base {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.foto {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.datos-plantilla {
+  min-width: 0;
+}
+
+.plantilla-base .boton-plantillas,
+.plantilla-base .nota {
+  grid-column: 1 / -1;
+}
+
+.plantilla-aplicada {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-texto-suave);
+}
+
+.datos-plantilla h2 {
+  font-size: 1.1rem;
+  margin: 2px 0 4px;
+}
+
+.boton-plantillas {
+  min-height: 40px;
+  font-size: 0.95rem;
+}
+
+.nota {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+}
+
+/* En celular el precio se ve en la barra de abajo */
+.precios {
+  display: none;
+}
+
+.fila-precio {
+  display: flex;
+  justify-content: space-between;
+  margin: 6px 0;
+}
+
+.fila-precio.total {
+  font-size: 1.15rem;
+  font-weight: 700;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 8px;
+}
+
+.paso {
+  margin: 0 0 16px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.titulo-paso {
+  float: left;
+  width: 100%;
+  padding: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-titulo);
+  margin-bottom: 10px;
+}
+
+.titulo-paso + * {
+  clear: both;
+}
+
+.cantidad-piezas {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+}
+
+.cantidad-piezas input {
+  text-align: center;
+}
+
+.boton-contador {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--color-encabezado);
+  background: var(--color-blanco);
+  color: var(--color-titulo);
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-contador:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.acciones-exito {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Barra fija abajo con el total y los botones */
+.barra-acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 calc(var(--espacio-lateral) * -1);
+  padding: 10px var(--espacio-lateral);
+  background: var(--color-blanco);
+  border-top: 1px solid var(--color-borde);
+  box-shadow: 0 -4px 10px rgba(74, 59, 50, 0.08);
+}
+
+.total-barra {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  font-size: 0.85rem;
+}
+
+.total-barra .precio {
+  font-size: 1.2rem;
+}
+
+.botones {
+  display: flex;
+  gap: 8px;
+}
+
+.botones .btn-secundario {
+  display: none;
+}
+
+/* Tableta: los dos botones caben */
+@media (min-width: 600px) {
+  .botones .btn-secundario {
+    display: inline-flex;
+  }
+
+  /* La franja de la plantilla queda en una sola fila */
+  .plantilla-base {
+    grid-template-columns: 72px 1fr auto;
+  }
+
+  .plantilla-base .boton-plantillas {
+    grid-column: auto;
+  }
+}
+
+/* Escritorio: resumen fijo a la izquierda (como el diseño) y formulario a la derecha */
+@media (min-width: 1024px) {
+  .titulo-pagina {
+    font-size: 1.9rem;
+  }
+
+  .diseno {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  /* El pastel 3D se queda a la vista mientras se eligen las opciones */
+  .columna-visor {
+    flex: 0 0 44%;
+    max-width: 540px;
+    position: sticky;
+    top: 112px;
+  }
+
+  .precios {
+    display: block;
+    padding: 12px 18px;
+  }
+
+  .formulario {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .barra-acciones {
+    position: static;
+    margin: 0;
+    padding: 16px 0 0;
+    background: transparent;
+    border-top: none;
+    box-shadow: none;
+  }
+
+  .total-barra {
+    display: none;
+  }
+
+  .botones {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .botones .btn {
+    min-width: 200px;
+    min-height: 52px;
+    font-size: 1.1rem;
+  }
+}

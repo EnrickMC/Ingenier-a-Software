@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import com.pac.modulos.pedidos.controller.BarraEstados?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Módulo 4 · Gestión de Pedidos (RF-21 a RF-27): lista a la izquierda y detalle a la derecha -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.PedidosController"
+      stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      spacing="14">
+
+    <!-- Aviso de pedido nuevo de la web (se revisa cada 60 segundos) -->
+    <HBox fx:id="cajaNuevo" styleClass="aviso-nuevo" spacing="10" alignment="CENTER_LEFT">
+        <FontIcon iconLiteral="bi-bell-fill"/>
+        <Label fx:id="lblNuevo" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Button text="Ver" styleClass="btn-verde" onAction="#onVerNuevo"/>
+        <Button styleClass="btn-icono" onAction="#onCerrarAvisoNuevo">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+    </HBox>
+
+    <!-- Aviso para el personal: solo ve los pedidos activos -->
+    <Label fx:id="lblModoPersonal" styleClass="aviso-consulta" maxWidth="Infinity" wrapText="true"
+           text="Ves los pedidos activos. El historial completo, las modificaciones y las bajas son de la administradora.">
+        <graphic><FontIcon iconLiteral="bi-eye-fill"/></graphic>
+    </Label>
+
+    <!-- Filtros (RF-22): si la ventana es angosta, los botones pasan a un segundo renglón -->
+    <VBox styleClass="tarjeta" spacing="10">
+    <HBox spacing="10" alignment="TOP_LEFT">
+    <FlowPane HBox.hgrow="ALWAYS" minWidth="0" hgap="10" vgap="10" alignment="CENTER_LEFT">
+        <TextField fx:id="txtBuscar" minWidth="-Infinity" styleClass="campo, campo-busqueda" prefWidth="195"
+                   promptText="Folio, nombre o teléfono" onAction="#onBuscar"/>
+        <ComboBox fx:id="cmbGrupo" minWidth="-Infinity" styleClass="combo-carmir" prefWidth="130" onAction="#onBuscar"/>
+        <DatePicker fx:id="dpDesde" minWidth="-Infinity" styleClass="campo-fecha" prefWidth="118" promptText="Desde"/>
+        <DatePicker fx:id="dpHasta" minWidth="-Infinity" styleClass="campo-fecha" prefWidth="118" promptText="Hasta"/>
+        <Button text="Buscar" minWidth="-Infinity" styleClass="btn-oscuro" onAction="#onBuscar">
+            <graphic><FontIcon iconLiteral="bi-zoom-in"/></graphic>
+        </Button>
+    </FlowPane>
+    <Button text="Actualizar" minWidth="-Infinity" styleClass="btn-azul" onAction="#onActualizar">
+        <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+    </Button>
+    </HBox>
+        <!-- Botones de estado: al pulsarlos filtran la lista (otra pulsación vuelve a "Todos") -->
+        <BarraEstados fx:id="barraEstados"/>
+    </VBox>
+
+    <!-- Lista (35 %) y detalle (65 %) -->
+    <GridPane hgap="16" VBox.vgrow="ALWAYS">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="35"/>
+            <ColumnConstraints percentWidth="65"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="ALWAYS"/>
+        </rowConstraints>
+
+        <VBox styleClass="tarjeta" spacing="10" GridPane.columnIndex="0" minWidth="300">
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <Label fx:id="lblTituloLista" styleClass="tarjeta-titulo" text="Pedidos activos"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblConteo" styleClass="texto-suave"/>
+            </HBox>
+            <Label fx:id="lblAviso" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+                <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill"/></graphic>
+            </Label>
+            <ListView fx:id="lstPedidos" styleClass="lista-pedidos" VBox.vgrow="ALWAYS"
+                      onMouseClicked="#onClicLista" onKeyReleased="#onTeclaLista">
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="12">
+                        <Label fx:id="lblVacio" styleClass="tabla-vacia" wrapText="true" text="No hay pedidos activos"/>
+                    </VBox>
+                </placeholder>
+            </ListView>
+        </VBox>
+
+        <fx:include fx:id="detalle" source="detalle-pedido.fxml" GridPane.columnIndex="1"/>
+    </GridPane>
+</VBox>

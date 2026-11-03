@@ -1,0 +1,128 @@
+.calendario {
+  border: 1px solid #cdbfae;
+  border-radius: var(--radio-chico);
+  padding: 12px;
+  background: var(--color-blanco);
+  max-width: 420px;
+}
+
+.calendario.con-error {
+  border-color: var(--color-error);
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mes {
+  font-weight: 700;
+  color: var(--color-titulo);
+}
+
+.flecha {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-crema);
+  color: var(--color-titulo);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.flecha:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dia-semana {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-texto-suave);
+  padding: 4px 0;
+}
+
+.dia {
+  aspect-ratio: 1;
+  min-height: 38px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  background: var(--color-crema-claro);
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dia:hover:not(:disabled) {
+  border-color: var(--color-acento);
+}
+
+.dia:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: #b9aea4;
+  font-weight: 400;
+  cursor: not-allowed;
+}
+
+/* Día laborable pero sin cupo: tachado para que se note la diferencia */
+.dia.lleno:disabled {
+  text-decoration: line-through;
+  color: var(--color-error);
+  background: var(--color-error-fondo);
+}
+
+.dia.elegido {
+  background: var(--color-acento);
+  border-color: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+.leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 0.8rem;
+  color: var(--color-texto-suave);
+}
+
+.leyenda li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.muestra {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--color-borde);
+}
+
+.muestra.disponible {
+  background: var(--color-crema-claro);
+}
+
+.muestra.lleno {
+  background: var(--color-error-fondo);
+}
+
+.muestra.cerrado {
+  background: transparent;
+}

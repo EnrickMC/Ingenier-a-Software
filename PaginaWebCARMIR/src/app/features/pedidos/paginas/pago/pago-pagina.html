@@ -1,0 +1,152 @@
+<div class="contenedor pagina">
+  <app-pasos-pedido [actual]="3" />
+  <h1>Pago</h1>
+
+  @if (estado() === 'cargando') {
+    <app-cargando texto="Cargando formas de pago..." />
+  } @else if (estado() === 'error') {
+    <!-- RF-10 · Excepción paso 3: sin conexión, no se pueden cargar las formas de pago. -->
+    <app-mensaje-estado tipo="error" titulo="No fue posible continuar" [texto]="mensajeSinConexion">
+      <button type="button" class="btn btn-principal" (click)="cargarReglas()">Reintentar</button>
+      <a routerLink="/pedido/entrega" class="btn btn-secundario">Volver a entrega</a>
+    </app-mensaje-estado>
+  } @else {
+    @if (reglas(); as reglas) {
+      <div class="diseno-pedido">
+        <!-- RF-10 · Paso 3 / RF-11 · Paso 4: desglose del total. -->
+        <app-resumen-pedido
+          [articulos]="carrito.articulos()"
+          [conEnvio]="conEnvio()"
+          [costoEnvio]="costoEnvio()"
+          [modalidadPago]="modalidadPago()"
+          [porcentajeAnticipo]="reglas.porcentajeAnticipo"
+        />
+
+        <div>
+          <!-- RF-10 · Paso 7: resumen final del pedido (entrega) para confirmarlo. -->
+          <section class="panel bloque" aria-labelledby="titulo-entrega">
+            <h2 id="titulo-entrega">Entrega</h2>
+            <dl class="datos-entrega">
+              <div>
+                <dt>Recibe</dt>
+                <dd>{{ pedido.datos().cliente.nombre }} · {{ pedido.datos().cliente.telefono }}</dd>
+              </div>
+              <div>
+                <dt>Cuándo</dt>
+                <dd>{{ textoFecha() }}</dd>
+              </div>
+              <div>
+                <dt>Dónde</dt>
+                @if (conEnvio()) {
+                  <dd>Envío a domicilio: {{ textoDireccion() }}</dd>
+                } @else {
+                  <dd>Recoger en tienda: {{ direccionTienda }}</dd>
+                }
+              </div>
+            </dl>
+            <a routerLink="/pedido/entrega" class="enlace-regresar">Cambiar datos de entrega</a>
+          </section>
+
+          <section class="panel bloque" aria-labelledby="titulo-pago">
+            <h2 id="titulo-pago">¿Cómo quieres pagar?</h2>
+
+            <!-- RF-11 · Excepción paso 3: los precios cambiaron; se avisa del nuevo total. -->
+            @if (avisoPrecio() !== '') {
+              <div class="aviso" role="alert"><p>{{ avisoPrecio() }}</p></div>
+            }
+
+            <!-- RF-10 · Paso 4: método de pago (efectivo en la tienda o transferencia). -->
+            <fieldset class="opciones-tarjeta">
+              <legend>Método de pago</legend>
+              <label class="opcion-tarjeta" [class.elegida]="metodo() === 'Efectivo'">
+                <input type="radio" name="metodo" [checked]="metodo() === 'Efectivo'" (change)="elegirMetodo('Efectivo')" />
+                <span>
+                  <strong>Efectivo en la tienda</strong>
+                  <small>Pagas en nuestra tienda cuando aprobemos tu pedido</small>
+                </span>
+              </label>
+              <label
+                class="opcion-tarjeta"
+                [class.elegida]="metodo() === 'Transferencia'"
+                [class.desactivada]="!reglas.aceptaTransferencia"
+              >
+                <input
+                  type="radio"
+                  name="metodo"
+                  [disabled]="!reglas.aceptaTransferencia"
+                  [checked]="metodo() === 'Transferencia'"
+                  (change)="elegirMetodo('Transferencia')"
+                />
+                <span>
+                  <strong>Transferencia bancaria / SPEI</strong>
+                  <small>Te damos los datos al terminar; después subes la foto de tu comprobante</small>
+                </span>
+              </label>
+              <!-- RF-10 · Excepción paso 6: «Por el momento solo está disponible el pago en sucursal». -->
+              @if (!reglas.aceptaTransferencia) {
+                <p class="ayuda-pago">{{ reglas.mensajeSoloSucursal }}</p>
+              }
+            </fieldset>
+
+            <!-- Pago en efectivo: dónde está la tienda -->
+            @if (metodo() === 'Efectivo') {
+              <app-ubicacion-tienda titulo="Paga en efectivo en nuestra tienda" />
+            }
+
+            <!-- RF-10 · Paso 4: modalidad de pago (anticipo o total). -->
+            <fieldset class="opciones-tarjeta">
+              <legend>¿Cuánto pagas para iniciar?</legend>
+              <label class="opcion-tarjeta" [class.elegida]="modalidadPago() === 'Anticipo'">
+                <input type="radio" name="modalidadPago" [checked]="modalidadPago() === 'Anticipo'" (change)="elegirModalidad('Anticipo')" />
+                <span>
+                  <strong>Anticipo del {{ reglas.porcentajeAnticipo }} %: {{ anticipo() | currency: 'MXN' : 'symbol-narrow' }}</strong>
+                  <small>El resto lo pagas antes de la entrega</small>
+                </span>
+              </label>
+              <label class="opcion-tarjeta" [class.elegida]="modalidadPago() === 'Pago total'">
+                <input type="radio" name="modalidadPago" [checked]="modalidadPago() === 'Pago total'" (change)="elegirModalidad('Pago total')" />
+                <span>
+                  <strong>Pago total: {{ total() | currency: 'MXN' : 'symbol-narrow' }}</strong>
+                  <small>Liquidas todo de una vez</small>
+                </span>
+              </label>
+            </fieldset>
+
+            <!-- RF-11 · Excepción paso 6: «No fue posible enviar tu pedido» (y otros errores). -->
+            @if (mensajeError() !== '') {
+              <div class="aviso error" role="alert"><p>{{ mensajeError() }}</p></div>
+            }
+
+            <div class="barra-acciones">
+              <!-- RF-10 · Excepción paso 4: «Regresar» vuelve al formulario de entrega sin guardar nada más. -->
+              <a routerLink="/pedido/entrega" class="btn btn-secundario">Regresar</a>
+              <button type="button" class="btn btn-principal" [disabled]="enviando()" (click)="pedirConfirmacion()">
+                @if (enviando()) {
+                  Enviando pedido...
+                } @else {
+                  Confirmar pedido
+                }
+              </button>
+            </div>
+            <p class="nota">
+              Tu pedido quedará «En proceso de aceptación». Te avisaremos por WhatsApp cuando la repostería lo apruebe.
+            </p>
+          </section>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- RF-11 · Pasos 4 y 5: ventana de confirmación final (RNF-5). -->
+@if (confirmando()) {
+  <app-dialogo-confirmacion
+    titulo="¿Enviar tu pedido?"
+    [texto]="textoConfirmacion()"
+    [textoConfirmar]="textoBotonEnviar()"
+    textoCancelar="Revisar otra vez"
+    [ocupado]="enviando()"
+    (confirmar)="enviarPedido()"
+    (cancelar)="cancelarConfirmacion()"
+  />
+}

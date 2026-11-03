@@ -1,0 +1,17 @@
+<div class="fondo" (click)="alTocarFondo($event)" (keydown.escape)="alCancelar()">
+  <div class="ventana panel" role="alertdialog" aria-modal="true" aria-labelledby="titulo-dialogo" aria-describedby="texto-dialogo">
+    <h2 id="titulo-dialogo">{{ titulo() }}</h2>
+    @if (texto() !== '') {
+      <p id="texto-dialogo">{{ texto() }}</p>
+    }
+    <ng-content />
+    <div class="botones">
+      <button #botonCancelar type="button" class="btn btn-secundario" [disabled]="ocupado()" (click)="alCancelar()">
+        {{ textoCancelar() }}
+      </button>
+      <button type="button" class="btn btn-principal" [disabled]="ocupado()" (click)="alConfirmar()">
+        {{ textoConfirmar() }}
+      </button>
+    </div>
+  </div>
+</div>

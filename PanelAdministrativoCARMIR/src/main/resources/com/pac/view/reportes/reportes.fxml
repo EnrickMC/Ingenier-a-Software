@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Módulo 6 · Reportes Financieros: ingresos y gastos (RF-46), más vendidos (RF-47) y exportación (RF-48) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.reportes.controller.ReportesController"
+      stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/reportes.css"
+      spacing="14">
+
+    <!-- Periodo del reporte (lo usan las dos pestañas) -->
+    <VBox styleClass="tarjeta" spacing="10">
+        <!-- Fila 1: título y acciones -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label styleClass="tarjeta-titulo" text="Periodo del reporte" minWidth="-Infinity"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnGenerar" text="Generar reporte" styleClass="btn-azul" minWidth="-Infinity" onAction="#onGenerar">
+                <graphic><FontIcon iconLiteral="bi-bar-chart-line-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnExportar" text="Exportar a Excel" styleClass="btn-verde" minWidth="-Infinity" onAction="#onExportar">
+                <graphic><FontIcon iconLiteral="bi-file-earmark-spreadsheet-fill"/></graphic>
+            </Button>
+        </HBox>
+        <!-- Fila 2: fechas y accesos rápidos -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label styleClass="texto-suave" text="Del" minWidth="-Infinity"/>
+            <DatePicker fx:id="dpDesde" styleClass="campo-fecha" prefWidth="140" minWidth="-Infinity" promptText="dd/mm/aaaa"/>
+            <Label styleClass="texto-suave" text="al" minWidth="-Infinity"/>
+            <DatePicker fx:id="dpHasta" styleClass="campo-fecha" prefWidth="140" minWidth="-Infinity" promptText="dd/mm/aaaa"/>
+            <Button text="Este mes" styleClass="atajo-periodo" minWidth="-Infinity" onAction="#onEsteMes"/>
+            <Button text="Mes pasado" styleClass="atajo-periodo" minWidth="-Infinity" onAction="#onMesPasado"/>
+            <Button text="Este año" styleClass="atajo-periodo" minWidth="-Infinity" onAction="#onEsteAnio"/>
+        </HBox>
+        <Label fx:id="lblErrorPeriodo" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+            <graphic><FontIcon iconLiteral="bi-x-circle-fill"/></graphic>
+        </Label>
+        <Label fx:id="lblAvisoPeriodo" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+            <graphic><FontIcon iconLiteral="bi-info-circle-fill"/></graphic>
+        </Label>
+    </VBox>
+
+    <TabPane fx:id="pestanas" styleClass="pestanas-catalogo" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <Tab fx:id="tabIngresos" text="Ingresos y gastos" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-cash-stack"/></graphic>
+            <content><ScrollPane fitToWidth="true" styleClass="scroll-detalle"><fx:include fx:id="ingresosGastos" source="ingresos-gastos.fxml"/></ScrollPane></content>
+        </Tab>
+        <Tab fx:id="tabVentas" text="Más vendidos" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-award-fill"/></graphic>
+            <content><ScrollPane fitToWidth="true" styleClass="scroll-detalle"><fx:include fx:id="masVendidos" source="mas-vendidos.fxml"/></ScrollPane></content>
+        </Tab>
+    </TabPane>
+</VBox>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar una salida por merma (RF-38): desperdicio, caducidad, daño u otro -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.FormularioMermaController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css"
+      styleClass="formulario" spacing="12" prefWidth="560">
+
+    <VBox spacing="2">
+        <Label styleClass="formulario-titulo" text="Registrar merma"/>
+        <Label styleClass="texto-suave" wrapText="true"
+               text="La cantidad se descuenta del inventario y queda en el historial como pérdida."/>
+    </VBox>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Insumo *"/>
+        <ComboBox fx:id="cmbInsumo" styleClass="combo-carmir" maxWidth="Infinity" promptText="Elige el insumo"
+                  onAction="#onCambioInsumo"/>
+        <Label fx:id="lblExistencia" styleClass="texto-ayuda" wrapText="true"/>
+    </VBox>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Lote del que sale" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Lote del que se descuenta la merma. Si no eliges uno, se descuenta primero del que caduca antes (PEPS)."/></graphic></Label>
+        <ComboBox fx:id="cmbLote" styleClass="combo-carmir" maxWidth="Infinity" onAction="#onCambioLote"/>
+    </VBox>
+
+    <GridPane hgap="12" vgap="4">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Label fx:id="lblCantidad" styleClass="formulario-etiqueta" text="Cantidad *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label styleClass="formulario-etiqueta" text="Motivo *" GridPane.rowIndex="0" GridPane.columnIndex="1" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Razón de la pérdida: caducidad, accidente, error de producción, etc."/></graphic></Label>
+        <TextField fx:id="txtCantidad" styleClass="campo" promptText="Ej. 0.5" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <ComboBox fx:id="cmbMotivo" styleClass="combo-carmir" maxWidth="Infinity" promptText="Elige el motivo"
+                  onAction="#onCambioMotivo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <VBox spacing="4">
+        <Label fx:id="lblDetalle" styleClass="formulario-etiqueta" text="Detalle"/>
+        <TextField fx:id="txtDetalle" styleClass="campo" promptText="Opcional. Ej. Se cayó la bolsa al descargar"/>
+    </VBox>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Registrar merma" styleClass="btn-naranja" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-box-arrow-up"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

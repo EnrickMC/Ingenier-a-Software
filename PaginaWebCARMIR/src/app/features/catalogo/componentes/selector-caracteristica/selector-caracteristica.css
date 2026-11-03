@@ -1,0 +1,301 @@
+.paso {
+  margin: 0 0 16px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.paso.con-error {
+  border-color: var(--color-error);
+}
+
+.titulo-paso {
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-titulo);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.titulo-paso + * {
+  clear: both;
+}
+
+.requerida,
+.opcional {
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.requerida {
+  background: #fbe7e8;
+  color: var(--color-acento-oscuro);
+}
+
+.opcional {
+  background: var(--color-fondo);
+  color: var(--color-texto-suave);
+}
+
+.en-3d {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-acento-oscuro);
+  border: 1px dashed var(--color-acento);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+/* Tarjetas con dibujo (tamaño, forma, sabor, relleno) */
+.tarjetas {
+  clear: both;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 10px;
+}
+
+.tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 8px 10px;
+  border: 2px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-blanco);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.tarjeta:hover {
+  border-color: var(--color-acento);
+  transform: translateY(-2px);
+}
+
+.tarjeta.elegida {
+  border-color: var(--color-acento);
+  background: #fdf0f0;
+  box-shadow: 0 4px 12px rgba(201, 71, 107, 0.15);
+}
+
+/* Palomita de la tarjeta elegida */
+.tarjeta.elegida::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-acento);
+  color: var(--color-blanco);
+  font-size: 0.75rem;
+  line-height: 20px;
+}
+
+.tarjeta:has(input:focus-visible) {
+  outline: 3px solid var(--color-acento);
+  outline-offset: 2px;
+}
+
+.tarjeta.bloqueada {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.dibujo {
+  width: 56px;
+  height: 52px;
+}
+
+.plato {
+  fill: #d4a94f;
+}
+
+.piso {
+  fill: #f6d6dc;
+  stroke: var(--color-acento-oscuro);
+  stroke-width: 1.5;
+}
+
+.regla {
+  fill: none;
+  stroke: var(--color-borde);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.centro-tamano {
+  fill: none;
+  stroke: var(--color-acento);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.silueta {
+  fill: #f6d6dc;
+  stroke: var(--color-acento-oscuro);
+  stroke-width: 1.5;
+}
+
+.muestra {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 3px solid var(--color-blanco);
+  box-shadow: 0 0 0 1px var(--color-borde), inset 0 -6px 10px rgba(0, 0, 0, 0.12);
+}
+
+.sin-color {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-crema-claro);
+  font-weight: 700;
+  color: var(--color-titulo);
+}
+
+.ninguno {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 2px dashed var(--color-borde);
+}
+
+.tarjeta .detalle {
+  font-size: 0.78rem;
+}
+
+.descripcion-paso {
+  clear: both;
+  margin: 0 0 10px;
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+}
+
+.presupuesto {
+  clear: both;
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+}
+
+.opciones {
+  clear: both;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  min-height: 52px;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-chico);
+  background: var(--color-fondo);
+  cursor: pointer;
+}
+
+.opcion.elegida {
+  border-color: var(--color-acento);
+  background: #fdf0f0;
+}
+
+.opcion.bloqueada {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.opcion input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-acento-oscuro);
+  flex-shrink: 0;
+}
+
+.texto-opcion {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.nombre-opcion {
+  font-weight: 600;
+}
+
+.detalle {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.motivo {
+  font-size: 0.85rem;
+  color: var(--color-error);
+}
+
+.multiple {
+  cursor: default;
+}
+
+.contador {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.boton-contador {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--color-encabezado);
+  background: var(--color-blanco);
+  color: var(--color-titulo);
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.boton-contador:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cantidad {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.mensaje-error {
+  margin: 10px 0 0;
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+/* En pantallas medianas las opciones únicas van en dos columnas */
+@media (min-width: 600px) {
+  .opciones {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .opciones:has(.multiple) {
+    grid-template-columns: 1fr;
+  }
+}

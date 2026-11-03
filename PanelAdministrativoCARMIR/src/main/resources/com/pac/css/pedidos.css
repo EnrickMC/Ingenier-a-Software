@@ -1,0 +1,209 @@
+/* =====================================================================
+   Módulo 4 · Gestor de Pedidos y Producción (pedidos, agenda, pagos y formularios)
+   Usa los colores de carmir-base.css y las clases de usuarios.css, catalogo.css e inventario.css
+   ===================================================================== */
+
+/* ---------- Etiqueta de estado (paleta pastel, RF-22) ----------
+   Diseño simple: fondo liso del color del estado, sin degradado ni sombra, y todas del mismo tamaño */
+.estado-pedido {
+    -fx-background-radius: 10;
+    -fx-padding: 2 6 2 6;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-min-width: 134;
+    -fx-pref-width: 134;
+    -fx-max-width: 134;
+    -fx-alignment: center;
+    -fx-graphic-text-gap: 5;
+}
+.estado-pedido .ikonli-font-icon { -fx-icon-size: 12px; }
+/* Etiquetas con texto largo: se ajustan a su texto */
+.estado-pedido.estado-libre { -fx-min-width: -1; -fx-pref-width: -1; -fx-max-width: -1; -fx-padding: 2 10 2 8; }
+.estado-aceptacion  { -fx-background-color: -carmir-ambar-fondo; -fx-text-fill: -carmir-ambar-texto; }
+.estado-aprobado    { -fx-background-color: -carmir-azul-fondo; -fx-text-fill: -carmir-azul-texto; }
+.estado-pagado      { -fx-background-color: -carmir-lila-fondo; -fx-text-fill: -carmir-lila-texto; }
+.estado-preparacion { -fx-background-color: -carmir-durazno-fondo; -fx-text-fill: -carmir-durazno-texto; }
+.estado-terminado   { -fx-background-color: -carmir-verde-fondo; -fx-text-fill: -carmir-verde-texto; }
+.estado-entregado   { -fx-background-color: -carmir-gris-fondo; -fx-text-fill: -carmir-texto-suave; }
+.estado-cancelado   { -fx-background-color: -carmir-rojo-fondo; -fx-text-fill: -carmir-rojo-texto; }
+.estado-baja        { -fx-background-color: -carmir-gris-fondo; -fx-text-fill: -carmir-texto-suave; }
+.estado-atrasado    { -fx-background-color: -carmir-rojo; -fx-text-fill: white; }
+.estado-pendiente-pago { -fx-background-color: -carmir-ambar-fondo; -fx-text-fill: -carmir-ambar-texto; }
+.estado-preparar    { -fx-background-color: -carmir-azul-fondo; -fx-text-fill: -carmir-azul-texto; }
+.estado-aceptacion .ikonli-font-icon, .estado-pendiente-pago .ikonli-font-icon { -fx-icon-color: -carmir-ambar-texto; }
+.estado-aprobado .ikonli-font-icon, .estado-preparar .ikonli-font-icon { -fx-icon-color: -carmir-azul-texto; }
+.estado-pagado .ikonli-font-icon { -fx-icon-color: -carmir-lila-texto; }
+.estado-preparacion .ikonli-font-icon { -fx-icon-color: -carmir-durazno-texto; }
+.estado-terminado .ikonli-font-icon { -fx-icon-color: -carmir-verde-texto; }
+.estado-entregado .ikonli-font-icon, .estado-baja .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; }
+.estado-cancelado .ikonli-font-icon { -fx-icon-color: -carmir-rojo-texto; }
+.estado-atrasado .ikonli-font-icon { -fx-icon-color: white; }
+
+/* ---------- Lista de pedidos (izquierda) ---------- */
+.lista-pedidos { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; }
+.lista-pedidos .list-cell {
+    -fx-background-color: -carmir-superficie;
+    -fx-border-color: transparent transparent -carmir-borde transparent;
+    -fx-padding: 10 12 10 12;
+}
+.lista-pedidos .list-cell:filled:hover { -fx-background-color: -carmir-hover-suave; }
+.lista-pedidos .list-cell:filled:selected {
+    -fx-background-color: -carmir-hover;
+    -fx-border-color: transparent transparent -carmir-borde -carmir-acento;
+    -fx-border-width: 0 0 1 4;
+}
+.lista-pedidos .list-cell:empty { -fx-background-color: -carmir-superficie; -fx-border-color: transparent; }
+.celda-titulo { -fx-text-fill: -carmir-texto-titulo; -fx-font-weight: bold; -fx-font-size: 14px; }
+.celda-subtitulo { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 12px; }
+.celda-total { -fx-text-fill: -carmir-verde-oscuro; -fx-font-weight: bold; -fx-font-size: 13px; }
+.celda-atrasada .celda-titulo { -fx-text-fill: -carmir-rojo-texto; }
+.celda-inactiva .celda-titulo { -fx-text-fill: -carmir-texto-suave; }
+
+/* ---------- Aviso de pedido nuevo (cada 60 segundos) ---------- */
+.aviso-nuevo {
+    -fx-background-color: -carmir-verde-fondo;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+}
+.aviso-nuevo .label { -fx-text-fill: -carmir-verde-texto; -fx-font-weight: bold; }
+.aviso-nuevo .ikonli-font-icon { -fx-icon-color: -carmir-verde-texto; }
+
+/* ---------- Detalle del pedido (derecha) ---------- */
+.detalle-folio { -fx-text-fill: -carmir-texto-titulo; -fx-font-size: 22px; -fx-font-weight: bold; }
+.seccion-titulo {
+    -fx-text-fill: -carmir-acento;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 6 0 2 0;
+}
+.caja-info {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-padding: 10 12 10 12;
+}
+.total-destacado { -fx-text-fill: -carmir-verde-oscuro; -fx-font-size: 18px; -fx-font-weight: bold; }
+.saldo-pendiente { -fx-text-fill: -carmir-rojo-texto; -fx-font-weight: bold; }
+.saldo-cero { -fx-text-fill: -carmir-verde-oscuro; -fx-font-weight: bold; }
+.aviso-rojo {
+    -fx-background-color: -carmir-rojo-fondo;
+    -fx-text-fill: -carmir-rojo-texto;
+    -fx-background-radius: 5;
+    -fx-padding: 6 10 6 10;
+    -fx-font-size: 12px;
+}
+.aviso-rojo .ikonli-font-icon { -fx-icon-color: -carmir-rojo-texto; }
+
+/* Línea de un postre */
+.linea-postre {
+    -fx-background-color: -carmir-superficie;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 8 10 8 10;
+}
+.postre-nombre { -fx-text-fill: -carmir-texto-titulo; -fx-font-weight: bold; }
+.especificaciones { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 12px; }
+.dedicatoria { -fx-text-fill: -carmir-ambar-texto; -fx-font-size: 12px; -fx-font-style: italic; }
+.miniatura {
+    -fx-border-color: -carmir-borde;
+    -fx-cursor: hand;
+}
+
+/* Barra de progreso de estados */
+.paso-estado {
+    -fx-background-color: -carmir-gris-fondo;
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 11px;
+    -fx-padding: 4 6 4 6;
+    -fx-alignment: center;
+}
+.paso-hecho  { -fx-background-color: -carmir-verde-fondo; -fx-text-fill: -carmir-verde-texto; }
+.paso-actual { -fx-background-color: -carmir-sidebar; -fx-text-fill: white; -fx-font-weight: bold; }
+.paso-detenido { -fx-background-color: -carmir-rojo-fondo; -fx-text-fill: -carmir-rojo-texto; -fx-font-weight: bold; }
+
+/* Pagado vs total */
+.barra-pagado .bar { -fx-background-color: -carmir-verde; -fx-background-radius: 4; -fx-background-insets: 0; }
+.barra-pagado .track { -fx-background-color: -carmir-gris-fondo; -fx-background-radius: 4; }
+
+/* Historial, notificaciones y pagos del detalle */
+.linea-bitacora {
+    -fx-font-size: 12px;
+    -fx-padding: 4 8 4 8;
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 4;
+}
+.linea-fallida { -fx-background-color: -carmir-rojo-fondo; }
+
+/* ---------- Agenda de producción ---------- */
+.agenda-dia {
+    -fx-background-color: -carmir-superficie;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6;
+}
+.agenda-hoy { -fx-border-color: -carmir-acento; -fx-border-width: 2; }
+.agenda-fuera-mes { -fx-background-color: -carmir-gris-claro; -fx-opacity: 0.7; }
+.agenda-fecha { -fx-text-fill: -carmir-texto-titulo; -fx-font-weight: bold; -fx-font-size: 12px; }
+.agenda-tarjeta {
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-padding: 4 6 4 6;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+.agenda-tarjeta .label { -fx-font-size: 11px; }
+.agenda-tarjeta.estado-aprobado    { -fx-border-color: -carmir-azul-borde; }
+.agenda-tarjeta.estado-pagado      { -fx-border-color: -carmir-lila-borde; }
+.agenda-tarjeta.estado-preparacion { -fx-border-color: -carmir-durazno-borde; }
+.agenda-tarjeta.estado-terminado   { -fx-border-color: -carmir-verde-borde; }
+.agenda-tarjeta.tarjeta-atrasada   { -fx-border-color: -carmir-rojo; -fx-border-width: 2; }
+.agenda-encabezado { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 12px; -fx-font-weight: bold; }
+.agenda-periodo { -fx-text-fill: -carmir-texto-titulo; -fx-font-size: 16px; -fx-font-weight: bold; }
+.insumo-falta { -fx-text-fill: -carmir-rojo-texto; -fx-font-weight: bold; -fx-font-size: 12px; }
+.insumo-alcanza { -fx-font-size: 12px; }
+
+/* ---------- Botones de vista (Día / Semana / Mes / Rango) ---------- */
+.boton-vista {
+    -fx-background-color: -carmir-superficie;
+    -fx-border-color: -carmir-borde-input;
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-padding: 8 16 8 14;
+    -fx-graphic-text-gap: 7;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+.boton-vista .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 14px; }
+.vista-izq { -fx-background-radius: 18 0 0 18; -fx-border-radius: 18 0 0 18; }
+.vista-medio { -fx-background-radius: 0; -fx-border-radius: 0; -fx-border-width: 1 1 1 0; }
+.vista-der { -fx-background-radius: 0 18 18 0; -fx-border-radius: 0 18 18 0; -fx-border-width: 1 1 1 0; }
+.boton-vista:hover { -fx-background-color: -carmir-hover; -fx-border-color: -carmir-acento; }
+.boton-vista:selected { -fx-background-color: -carmir-sidebar; -fx-text-fill: white; -fx-border-color: -carmir-sidebar; }
+.boton-vista:selected .ikonli-font-icon { -fx-icon-color: white; }
+.boton-vista:focus-visible { -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.5), 5, 0.4, 0, 0); }
+
+/* ---------- Ticket para imprimir ---------- */
+.ticket { -fx-background-color: -carmir-superficie; -fx-padding: 16; }
+.ticket .label { -fx-text-fill: black; -fx-font-size: 12px; }
+.ticket-titulo { -fx-font-size: 16px; -fx-font-weight: bold; }
+
+/* ---------- Botones de estado que filtran (BarraEstados) ----------
+   Los colores vienen de las clases estado-*; el botón activo se marca con un borde del color del texto */
+.filtro-estado {
+    -fx-cursor: hand;
+    -fx-opacity: 0.6;
+    -fx-background-insets: 0;
+    -fx-border-radius: 10;
+    -fx-border-color: transparent;
+    -fx-border-width: 1.5;
+}
+.filtro-compacto { -fx-min-width: 112; -fx-pref-width: 112; -fx-max-width: 112; -fx-padding: 2 4 2 4; }
+.filtro-estado:hover { -fx-opacity: 0.9; }
+.filtro-estado:selected { -fx-opacity: 1; -fx-border-color: -carmir-texto-suave; }
+.filtro-estado:focus-visible { -fx-border-color: -carmir-acento; }
+.filtro-todos { -fx-background-color: -carmir-gris-fondo; -fx-text-fill: -carmir-texto-titulo; }
+.filtro-todos .ikonli-font-icon { -fx-icon-color: -carmir-texto-titulo; }
+.filtro-todos:selected { -fx-background-color: -carmir-sidebar; -fx-text-fill: white; -fx-border-color: -carmir-sidebar; }
+.filtro-todos:selected .ikonli-font-icon { -fx-icon-color: white; }

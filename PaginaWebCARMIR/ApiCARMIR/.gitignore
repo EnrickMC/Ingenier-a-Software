@@ -1,0 +1,11 @@
+# Dependencias
+node_modules/
+
+# Datos de conexión reales (NUNCA subir)
+.env
+.env.*
+!.env.example
+
+# Registros
+npm-debug.log*
+*.log

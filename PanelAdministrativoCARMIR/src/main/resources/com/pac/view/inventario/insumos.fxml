@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.modulos.pedidos.controller.BarraEstados?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Insumos (RF-33 a RF-36) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.InsumosController"
+      stylesheets="@../../css/pedidos.css"
+      styleClass="pestana-contenido" spacing="16">
+
+    <VBox styleClass="tarjeta" spacing="10">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField fx:id="txtBuscar" styleClass="campo, campo-busqueda" HBox.hgrow="ALWAYS" maxWidth="240"
+                       promptText="Buscar por nombre o clave" onAction="#onBuscar"/>
+            <ComboBox fx:id="cmbCategoria" styleClass="combo-carmir" prefWidth="170" onAction="#onBuscar"/>
+            <CheckBox fx:id="chkInactivos" minWidth="-Infinity" styleClass="casilla-filtro" text="Ver dados de baja" onAction="#onBuscar"/>
+            <Button text="Buscar" minWidth="-Infinity" styleClass="btn-oscuro" onAction="#onBuscar">
+                <graphic><FontIcon iconLiteral="bi-zoom-in"/></graphic>
+            </Button>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnNuevo" text="Registrar insumo" minWidth="-Infinity" styleClass="btn-verde" onAction="#onNuevo">
+                <graphic><FontIcon iconLiteral="bi-plus-circle-fill"/></graphic>
+            </Button>
+        </HBox>
+        <!-- Botones de estado del stock: al pulsarlos filtran la tabla -->
+        <BarraEstados fx:id="barraStock" compacto="true"/>
+    </VBox>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="tarjeta" spacing="12" HBox.hgrow="ALWAYS">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label styleClass="tarjeta-titulo" text="Insumos del inventario"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblConteo" styleClass="texto-suave"/>
+            </HBox>
+            <Label fx:id="lblAviso" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+                <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill"/></graphic>
+            </Label>
+            <TableView fx:id="tblInsumos" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="260"
+                       onMouseClicked="#onClicTabla" onKeyReleased="#onTeclaTabla">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Clave" minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="clave"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Nombre" minWidth="150" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="nombre"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Categoría" minWidth="95" prefWidth="95">
+                        <cellValueFactory><PropertyValueFactory property="categoria"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Existencia" minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="existencia"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Unidad" minWidth="55" prefWidth="55">
+                        <cellValueFactory><PropertyValueFactory property="unidad"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Stock mín." minWidth="70" prefWidth="70">
+                        <cellValueFactory><PropertyValueFactory property="stockMinimo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Costo unit." minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="costo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Perecedero" minWidth="70" prefWidth="70">
+                        <cellValueFactory><PropertyValueFactory property="perecedero"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Estado" minWidth="110" prefWidth="110">
+                        <cellValueFactory><PropertyValueFactory property="estado"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="12">
+                        <Label fx:id="lblVacio" styleClass="tabla-vacia" text="No hay insumos registrados"/>
+                    </VBox>
+                </placeholder>
+            </TableView>
+        </VBox>
+
+        <VBox styleClass="tarjeta, tarjeta-detalle" spacing="10" minWidth="310" prefWidth="310" maxWidth="310">
+            <Label styleClass="tarjeta-titulo" text="Detalle"/>
+            <VBox fx:id="cajaSinSeleccion" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+                <FontIcon iconLiteral="bi-box-seam" styleClass="detalle-icono-vacio"/>
+                <Label styleClass="texto-suave" wrapText="true" textAlignment="CENTER"
+                       text="Selecciona un insumo para ver sus lotes y sus últimos movimientos"/>
+            </VBox>
+            <ScrollPane fx:id="cajaDetalle" fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+                <VBox spacing="8">
+                    <Label fx:id="lblDetNombre" styleClass="detalle-nombre" wrapText="true"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Label fx:id="lblDetClave" styleClass="texto-suave"/>
+                        <Label fx:id="lblDetEstado" styleClass="chip"/>
+                    </HBox>
+                    <Label styleClass="detalle-etiqueta" text="Existencia"/>
+                    <Label fx:id="lblDetExistencia" styleClass="existencia-grande"/>
+                    <Label fx:id="lblDetValores" wrapText="true"/>
+                    <Separator/>
+                    <Label styleClass="detalle-etiqueta" text="Lotes con existencia (orden PEPS)"/>
+                    <VBox fx:id="listaLotes" spacing="4"/>
+                    <Separator/>
+                    <Label styleClass="detalle-etiqueta" text="Últimos movimientos"/>
+                    <VBox fx:id="listaMovimientos" spacing="4"/>
+                </VBox>
+            </ScrollPane>
+            <VBox fx:id="cajaBotones" spacing="8">
+                <HBox spacing="8">
+                    <Button fx:id="btnEntrada" text="Compra" styleClass="btn-verde" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            onAction="#onEntrada">
+                        <graphic><FontIcon iconLiteral="bi-box-arrow-in-down"/></graphic>
+                    </Button>
+                    <Button fx:id="btnMerma" text="Merma" styleClass="btn-naranja" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                            onAction="#onMerma">
+                        <graphic><FontIcon iconLiteral="bi-box-arrow-up"/></graphic>
+                    </Button>
+                </HBox>
+                <Button text="Ver todos sus movimientos" styleClass="btn-oscuro" maxWidth="Infinity" onAction="#onVerMovimientos">
+                    <graphic><FontIcon iconLiteral="bi-clock-history"/></graphic>
+                </Button>
+                <Button fx:id="btnModificar" text="Modificar insumo" styleClass="btn-azul" maxWidth="Infinity" onAction="#onModificar">
+                    <graphic><FontIcon iconLiteral="bi-pencil-square"/></graphic>
+                </Button>
+                <Button fx:id="btnDarDeBaja" text="Dar de baja" styleClass="btn-rojo" maxWidth="Infinity" onAction="#onDarDeBaja">
+                    <graphic><FontIcon iconLiteral="bi-trash-fill"/></graphic>
+                </Button>
+                <Button fx:id="btnReactivar" text="Reactivar insumo" styleClass="btn-verde" maxWidth="Infinity" onAction="#onReactivar">
+                    <graphic><FontIcon iconLiteral="bi-arrow-counterclockwise"/></graphic>
+                </Button>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

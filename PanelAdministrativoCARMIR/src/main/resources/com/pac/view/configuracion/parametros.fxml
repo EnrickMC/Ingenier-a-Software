@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Parámetros: valores del negocio guardados en la tabla Configuracion -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.ParametrosController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <!-- Barra de acciones -->
+    <HBox styleClass="tarjeta" spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblOrigen" styleClass="texto-suave" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnDescartar" text="Descartar cambios" styleClass="btn-naranja" onAction="#onDescartar">
+            <graphic><FontIcon iconLiteral="bi-arrow-counterclockwise"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Guardar configuración" styleClass="btn-verde" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+        </Button>
+    </HBox>
+
+    <Label fx:id="lblError" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-x-circle-fill"/></graphic>
+    </Label>
+
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Negocio">
+            <graphic><FontIcon iconLiteral="bi-shop"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="210" prefWidth="210"/>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="etiqueta-config" text="Nombre del negocio" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtNombreNegocio" styleClass="campo" prefWidth="320" promptText="" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Aparece en el panel y en los mensajes a los clientes." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+        </GridPane>
+    </VBox>
+
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Producción y agenda">
+            <graphic><FontIcon iconLiteral="bi-calendar-check-fill"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="210" prefWidth="210"/>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="etiqueta-config" text="Capacidad diaria (pedidos)" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtCapacidadDiaria" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Pedidos que se pueden entregar el mismo día antes de avisar «Agenda saturada». De 1 a 100." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Días para preparar" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDiasParaPreparar" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Días antes de la entrega en que un pedido debe pasar a «En preparación». De 1 a 30." GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Días máximos de la agenda" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDiasMaximosAgenda" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Días máximos de un rango personalizado en la agenda. De 7 a 366." GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Días de anticipación mínima" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDiasAnticipacion" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Días mínimos entre la solicitud y la entrega de un pedido. De 0 a 60." GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Hora de apertura" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtHoraApertura" styleClass="campo, campo-corto" prefWidth="110" promptText="09:00" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Formato HH:mm, por ejemplo 09:00." GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Hora de cierre" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtHoraCierre" styleClass="campo, campo-corto" prefWidth="110" promptText="19:00" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Debe ser posterior a la hora de apertura." GridPane.rowIndex="5" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Días laborables" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+            <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="6" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                <CheckBox fx:id="chkLunes" styleClass="casilla-dia" text="Lun"/>
+                <CheckBox fx:id="chkMartes" styleClass="casilla-dia" text="Mar"/>
+                <CheckBox fx:id="chkMiercoles" styleClass="casilla-dia" text="Mié"/>
+                <CheckBox fx:id="chkJueves" styleClass="casilla-dia" text="Jue"/>
+                <CheckBox fx:id="chkViernes" styleClass="casilla-dia" text="Vie"/>
+                <CheckBox fx:id="chkSabado" styleClass="casilla-dia" text="Sáb"/>
+                <CheckBox fx:id="chkDomingo" styleClass="casilla-dia" text="Dom"/>
+            </HBox>
+        </GridPane>
+    </VBox>
+
+    <Label styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"
+           text="La anticipación mínima, el horario, los días laborables, el anticipo y los datos bancarios quedan guardados para la tienda en línea; el panel los muestra y los registra en el historial."/>
+
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Pagos">
+            <graphic><FontIcon iconLiteral="bi-credit-card-fill"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="210" prefWidth="210"/>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="etiqueta-config" text="Porcentaje de anticipo (%)" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtPorcentajeAnticipo" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Parte del total que el cliente paga para apartar su pedido. De 1 a 100." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Datos bancarios" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextArea fx:id="txtDatosBancarios" styleClass="campo" prefWidth="320" prefRowCount="3" wrapText="true"
+                      promptText="Banco, titular y CLABE para transferencias" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.columnSpan="2"/>
+        </GridPane>
+    </VBox>
+
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Inventario">
+            <graphic><FontIcon iconLiteral="bi-box-seam"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="210" prefWidth="210"/>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="etiqueta-config" text="Días de aviso de caducidad" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtDiasAvisoCaducidad" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Días antes de que caduque un lote en que aparece «Próxima caducidad». De 0 a 60." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+        </GridPane>
+    </VBox>
+
+    <VBox styleClass="tarjeta, seccion-config" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Seguridad">
+            <graphic><FontIcon iconLiteral="bi-shield-lock-fill"/></graphic>
+        </Label>
+        <GridPane hgap="12" vgap="10">
+            <columnConstraints>
+                <ColumnConstraints minWidth="210" prefWidth="210"/>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints hgrow="ALWAYS"/>
+            </columnConstraints>
+            <Label styleClass="etiqueta-config" text="Intentos de inicio de sesión" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtIntentosLogin" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Intentos fallidos seguidos antes de bloquear una cuenta del personal. De 1 a 10." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+            <Label styleClass="etiqueta-config" text="Minutos de inactividad" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="txtMinutosInactividad" styleClass="campo, campo-corto" prefWidth="110" promptText="" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label styleClass="texto-ayuda" wrapText="true" text="Minutos sin usar el panel antes de cerrar la sesión. 0 = no se cierra sola. Máximo 480." GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+        </GridPane>
+    </VBox>
+</VBox>

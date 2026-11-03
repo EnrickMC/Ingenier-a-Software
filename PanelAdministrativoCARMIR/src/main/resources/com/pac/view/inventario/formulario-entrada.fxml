@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar una compra / entrada de insumo (RF-37). Cada compra crea un lote. -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.FormularioEntradaController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css"
+      styleClass="formulario" spacing="12" prefWidth="560">
+
+    <VBox spacing="2">
+        <Label styleClass="formulario-titulo" text="Registrar compra / entrada"/>
+        <Label styleClass="texto-suave" wrapText="true"
+               text="Cada compra se guarda como un lote con su fecha de caducidad; las salidas usan primero el lote que caduca antes."/>
+    </VBox>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Insumo *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Insumo que se compró. Cada compra crea un lote con su propia existencia y caducidad."/></graphic></Label>
+        <ComboBox fx:id="cmbInsumo" styleClass="combo-carmir" maxWidth="Infinity" promptText="Elige el insumo"
+                  onAction="#onCambioInsumo"/>
+        <Label fx:id="lblExistencia" styleClass="texto-ayuda" wrapText="true"/>
+    </VBox>
+
+    <GridPane hgap="12" vgap="4">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Label fx:id="lblCantidad" styleClass="formulario-etiqueta" text="Cantidad comprada *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label styleClass="formulario-etiqueta" text="Costo total de la compra *" GridPane.rowIndex="0" GridPane.columnIndex="1" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Lo que se pagó en total por la cantidad comprada. Con él se calcula el costo por unidad."/></graphic></Label>
+        <TextField fx:id="txtCantidad" styleClass="campo" promptText="Ej. 5" onKeyReleased="#onCambioCosto"
+                   GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtCosto" styleClass="campo" promptText="Ej. 142.50" onKeyReleased="#onCambioCosto"
+                   GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label fx:id="lblCostoUnidad" styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <GridPane hgap="12" vgap="4">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+        <Label styleClass="formulario-etiqueta" text="Fecha de compra *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="lblCaducidad" styleClass="formulario-etiqueta" text="Fecha de caducidad" GridPane.rowIndex="0" GridPane.columnIndex="1" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Solo para insumos perecederos. El lote que caduca primero es el primero que se descuenta (PEPS)."/></graphic></Label>
+        <DatePicker fx:id="dpCompra" styleClass="campo-fecha" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <DatePicker fx:id="dpCaducidad" styleClass="campo-fecha" maxWidth="Infinity" promptText="Sin caducidad"
+                    GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Proveedor"/>
+        <TextField fx:id="txtProveedor" styleClass="campo" promptText="Opcional. Ej. Central de abastos"/>
+    </VBox>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Registrar entrada" styleClass="btn-verde" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-box-arrow-in-down"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

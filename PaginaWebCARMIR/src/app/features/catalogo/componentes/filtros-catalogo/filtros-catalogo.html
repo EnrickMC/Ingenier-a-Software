@@ -1,0 +1,44 @@
+<!-- Buscador del catálogo en el menú de arriba (las categorías están en la página, junto a «N postres») -->
+<section class="filtros" aria-label="Filtros del catálogo">
+  <div class="fila-superior">
+    <!-- Buscador con lupa y botón «Buscar» dentro de la misma cápsula; «Todos» va al lado -->
+    <div class="grupo-busqueda">
+      <form class="buscador" role="search" (submit)="alEnviarBusqueda($event, cajaBusqueda.value)">
+        <svg class="lupa" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-4-4" />
+        </svg>
+        <label for="buscar-postre" class="solo-lector">Buscar postre</label>
+        <input
+          #cajaBusqueda
+          id="buscar-postre"
+          type="search"
+          maxlength="60"
+          placeholder="Buscar..."
+          [value]="filtros().buscar"
+        />
+        <button type="submit" class="boton-buscar">Buscar</button>
+      </form>
+
+      <!-- «Todos los postres»: quita la categoría elegida -->
+      <button
+        type="button"
+        class="boton-todos"
+        [class.activa]="filtros().idCategoria === 0"
+        [attr.aria-pressed]="filtros().idCategoria === 0"
+        title="Todos los postres"
+        (click)="elegirCategoria(0)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="2" />
+          <rect x="14" y="3" width="7" height="7" rx="2" />
+          <rect x="3" y="14" width="7" height="7" rx="2" />
+          <rect x="14" y="14" width="7" height="7" rx="2" />
+        </svg>
+        Todos
+      </button>
+    </div>
+
+  </div>
+
+</section>

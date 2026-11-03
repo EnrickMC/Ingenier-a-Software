@@ -1,0 +1,144 @@
+<div class="contenedor pagina">
+  <app-pasos-pedido [actual]="1" />
+  <h1>Tu carrito</h1>
+
+  <!-- RF-7 / RF-8 · Excepción paso 2: «El producto ya no está en tu carrito» y otros avisos. -->
+  @if (avisoGeneral() !== '') {
+    <div class="aviso" role="status"><p>{{ avisoGeneral() }}</p></div>
+  }
+  <!-- RF-7 · Paso 8 / RF-8 · Paso 7: mensaje de éxito. -->
+  @if (mensajeExito() !== '') {
+    <div class="aviso exito" role="status"><p>{{ mensajeExito() }}</p></div>
+  }
+  <!-- RF-6 · Excepción paso 3: el navegador no deja guardar el carrito (revisar su configuración). -->
+  @if (!carrito.guardadoDisponible()) {
+    <div class="aviso" role="status">
+      <p>Tu navegador no permite guardar el carrito: si cierras esta página se perderá.</p>
+    </div>
+  }
+
+  <!-- RF-5 · Excepciones pasos 2 y 3: «Tu carrito está vacío», total en $0.00 e «Ir al catálogo». -->
+  @if (carrito.articulos().length === 0) {
+    <app-mensaje-estado tipo="vacio" titulo="Tu carrito está vacío" texto="Elige un postre del catálogo y personalízalo.">
+      <a routerLink="/" class="btn btn-principal">Ir al catálogo</a>
+    </app-mensaje-estado>
+  } @else {
+    <!-- RF-5 · Excepción paso 2: sin conexión con el servidor, con «Reintentar». -->
+    @if (errorRevision() !== '') {
+      <div class="aviso error" role="alert">
+        <p>{{ errorRevision() }}</p>
+        <button type="button" class="btn btn-secundario reintentar" (click)="revisar()">Reintentar</button>
+      </div>
+    }
+    <!-- RF-5 · Excepción paso 4: «El precio de [producto] se actualizó». -->
+    @if (avisoPrecios() !== '') {
+      <div class="aviso" role="status"><p>{{ avisoPrecios() }}</p></div>
+    }
+
+    <!-- RF-5 · Paso 6: «Resumen de tu pedido» con cada producto, su personalización, cantidad y subtotal. -->
+    <ul class="lista">
+      @for (articulo of carrito.articulos(); track articulo.id) {
+        <li class="articulo panel" [class.con-problema]="tieneProblema(articulo)">
+          <app-imagen-postre class="foto" [link]="articulo.linkFotografia" [nombre]="articulo.nombre" />
+          <div class="datos">
+            <h2>{{ articulo.nombre }}</h2>
+            <p class="opciones">{{ resumen(articulo) }}</p>
+            @if (articulo.dedicatoria !== '') {
+              <p class="extra">Mensaje: «{{ articulo.dedicatoria }}»</p>
+            }
+            @if (articulo.comentario !== '') {
+              <p class="extra">Indicaciones: {{ articulo.comentario }}</p>
+            }
+            <p class="extra">{{ articulo.precioUnitario | currency: 'MXN' : 'symbol-narrow' }} por pieza</p>
+
+            @if (estadoDe(articulo); as revision) {
+              <!-- RF-5 · Excepción paso 4: «No disponible» o «Requiere actualizar personalización». -->
+              @if (revision.estado !== 'disponible') {
+                <p class="problema" role="alert">
+                  <strong>{{ revision.mensaje }}</strong>
+                  @if (revision.estado === 'no_disponible') {
+                    <span>Quítalo para poder continuar.</span>
+                  }
+                </p>
+              }
+            }
+          </div>
+
+          <div class="lado">
+            <!-- RF-7 · Pasos 1 a 7: cambiar la cantidad del producto. -->
+            <div class="cantidad" role="group" [attr.aria-label]="'Cantidad de ' + articulo.nombre">
+              <button type="button" class="paso" [disabled]="articulo.cantidad <= 1" (click)="restarPieza(articulo)" aria-label="Una pieza menos">−</button>
+              <input
+                #campoCantidad
+                type="number"
+                inputmode="numeric"
+                min="1"
+                [max]="piezasMaximas"
+                [value]="articulo.cantidad"
+                (change)="escribirCantidad(articulo, campoCantidad.value)"
+                aria-label="Piezas"
+              />
+              <button type="button" class="paso" [disabled]="articulo.cantidad >= piezasMaximas" (click)="sumarPieza(articulo)" aria-label="Una pieza más">+</button>
+            </div>
+            <!-- RF-5 · Paso 5: subtotal de cada producto. -->
+            <span class="precio">{{ subtotal(articulo) | currency: 'MXN' : 'symbol-narrow' }}</span>
+            <div class="acciones">
+              <!-- RF-7 · Paso 1: «Editar» abre el formulario de personalización con el postre. RF-8 · Paso 1: «Quitar». -->
+              <a class="btn btn-suave" [routerLink]="enlaceEditar(articulo)" [queryParams]="{ editar: articulo.id }">Editar</a>
+              <button type="button" class="btn btn-secundario" (click)="pedirQuitar(articulo)">Quitar</button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <!-- RF-5 · Paso 5: total a pagar. -->
+    <div class="total panel">
+      <span>Total de productos</span>
+      <span class="precio">{{ carrito.totalImporte() | currency: 'MXN' : 'symbol-narrow' }} MXN</span>
+    </div>
+    <p class="nota">El costo de envío (si lo eliges) se suma en el siguiente paso.</p>
+
+    <div class="barra">
+      <!-- RF-8 · Paso 1: «Vaciar carrito». RF-5 · Paso 6: «Continuar» (deshabilitado si hay productos con problema). -->
+      <button type="button" class="btn btn-secundario" (click)="pedirVaciar()">Vaciar carrito</button>
+      <a routerLink="/" class="btn btn-secundario">Seguir comprando</a>
+      <button
+        type="button"
+        class="btn btn-principal continuar"
+        [disabled]="revisando() || !puedeContinuar()"
+        (click)="continuar()"
+      >
+        @if (revisando()) {
+          Revisando tu carrito...
+        } @else {
+          Continuar con mi pedido
+        }
+      </button>
+    </div>
+    @if (revisado() && !puedeContinuar() && errorRevision() === '' && !revisando()) {
+      <p class="nota alerta">Corrige los productos marcados para poder continuar.</p>
+    }
+  }
+</div>
+
+<!-- RF-8 · Pasos 3 y 4: confirmación para quitar un producto (RNF-5). -->
+@if (porQuitar(); as articulo) {
+  <app-dialogo-confirmacion
+    titulo="¿Quitar este postre?"
+    [texto]="'Se quitará «' + articulo.nombre + '» (' + articulo.cantidad + ' pieza(s)) de tu carrito.'"
+    textoConfirmar="Sí, quitar"
+    (confirmar)="confirmarQuitar()"
+    (cancelar)="cancelarQuitar()"
+  />
+}
+<!-- RF-8 · Pasos 3 y 4: confirmación para vaciar el carrito (RNF-5). -->
+@if (confirmandoVaciar()) {
+  <app-dialogo-confirmacion
+    titulo="¿Vaciar tu carrito?"
+    texto="Se quitarán todos los postres de tu carrito. Esta acción no se puede deshacer."
+    textoConfirmar="Sí, vaciar"
+    (confirmar)="confirmarVaciar()"
+    (cancelar)="cancelarVaciar()"
+  />
+}

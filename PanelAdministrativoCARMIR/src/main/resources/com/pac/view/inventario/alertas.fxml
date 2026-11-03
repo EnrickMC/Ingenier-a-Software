@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Alertas: existencia baja (RF-39) y caducidad (RF-40) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.AlertasController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <HBox styleClass="tarjeta" spacing="10" alignment="CENTER_LEFT">
+        <CheckBox fx:id="chkAtendidas" styleClass="casilla-filtro" text="Ver también las atendidas" onAction="#onFiltro"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label fx:id="lblUltimaRevision" styleClass="texto-suave"/>
+        <Button text="Revisar ahora" styleClass="btn-azul" onAction="#onRevisar">
+            <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+        </Button>
+    </HBox>
+
+    <VBox styleClass="tarjeta" spacing="12" VBox.vgrow="ALWAYS">
+        <HBox alignment="CENTER_LEFT" spacing="10">
+            <Label styleClass="tarjeta-titulo" text="Alertas de inventario"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblConteo" styleClass="texto-suave"/>
+        </HBox>
+        <Label styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"
+               text="Las alertas se generan solas al abrir el inventario, al registrar compras o mermas y cada hora. Desaparecen cuando el problema se resuelve (por ejemplo, al comprar más) o al marcarlas como atendidas."/>
+        <TableView fx:id="tblAlertas" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="260"
+                   onMouseClicked="#onClicTabla">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+            <columns>
+                <TableColumn text="Fecha" minWidth="110" prefWidth="110">
+                    <cellValueFactory><PropertyValueFactory property="fecha"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Tipo" minWidth="120" prefWidth="120">
+                    <cellValueFactory><PropertyValueFactory property="tipo"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Insumo" minWidth="140" prefWidth="140">
+                    <cellValueFactory><PropertyValueFactory property="insumo"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Detalle" minWidth="300" prefWidth="300">
+                    <cellValueFactory><PropertyValueFactory property="detalle"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Estado" minWidth="80" prefWidth="80">
+                    <cellValueFactory><PropertyValueFactory property="estado"/></cellValueFactory>
+                </TableColumn>
+            </columns>
+            <placeholder>
+                <VBox alignment="CENTER" spacing="12">
+                    <Label fx:id="lblVacio" styleClass="tabla-vacia" text="No hay alertas pendientes"/>
+                </VBox>
+            </placeholder>
+        </TableView>
+
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label fx:id="lblSeleccion" styleClass="texto-suave" maxWidth="Infinity" HBox.hgrow="ALWAYS" wrapText="true"
+                   text="Selecciona una alerta para atenderla"/>
+            <Button fx:id="btnCompra" text="Registrar compra" styleClass="btn-verde" onAction="#onCompra">
+                <graphic><FontIcon iconLiteral="bi-box-arrow-in-down"/></graphic>
+            </Button>
+            <Button fx:id="btnMermaLote" text="Merma del lote" styleClass="btn-naranja" onAction="#onMermaLote">
+                <graphic><FontIcon iconLiteral="bi-box-arrow-up"/></graphic>
+            </Button>
+            <Button fx:id="btnAtendida" text="Marcar como atendida" styleClass="btn-oscuro" onAction="#onAtendida">
+                <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+            </Button>
+        </HBox>
+    </VBox>
+</VBox>

@@ -1,0 +1,110 @@
+/* =====================================================================
+   Modo semi oscuro (conserva la paleta pastel).
+   Se agrega a la escena solo cuando el modo oscuro está activo; la clase
+   "tema-oscuro" se pone en la raíz de cada ventana (ver util/TemaVisual).
+   Solo redefine las variables de color: el resto de los estilos las usa.
+   ===================================================================== */
+.root.tema-oscuro {
+    /* Base de JavaFX: así los controles que no tienen estilo propio también se oscurecen */
+    -fx-base: #38334f;
+    -fx-background: #2b2740;
+    -fx-control-inner-background: #38334f;
+    -fx-control-inner-background-alt: #332e49;
+
+    -carmir-sidebar: #7d6bb8;
+    -carmir-sidebar-oscuro: #6a59a3;
+    -carmir-sidebar-linea: #6a5d95;
+    -carmir-acento: #f0a6c4;
+    -carmir-acento-fuerte: #d9729c;
+    -carmir-acento-fuerte-hover: #e88ab0;
+    -carmir-acento-texto: #f7bfd7;
+    -carmir-fondo: #2b2740;
+    -carmir-superficie: #38334f;
+    -carmir-texto: #ece6f7;
+    -carmir-texto-titulo: #f6f0fd;
+    -carmir-texto-suave: #b4abcb;
+    -carmir-gris-claro: #312c47;
+    -carmir-gris-fondo: #433d5e;
+    -carmir-borde: #474161;
+    -carmir-borde-input: #5f5883;
+    -carmir-hover: #4a3d5f;
+    -carmir-hover-suave: #413852;
+    -carmir-seleccion: #5d4673;
+    -carmir-seleccion-texto: #ffe3ef;
+    -carmir-azul: #8fbdee;
+    -carmir-verde: #86d3a9;
+    -carmir-verde-oscuro: #6cc095;
+    -carmir-naranja: #f6b872;
+    -carmir-rojo: #ee8590;
+
+    -carmir-menu-fondo: #302b47;
+    -carmir-menu-fondo2: #262239;
+    -carmir-menu-linea: #453f63;
+    -carmir-menu-texto: #ece6f7;
+    -carmir-menu-texto-suave: #b4abcb;
+    -carmir-menu-icono: #cbbdf0;
+    -carmir-menu-hover: #4b4170;
+    -carmir-menu-titulo: #f4b3d1;
+
+    -carmir-rojo-fondo: #5b3946;   -carmir-rojo-texto: #ffb3bf;   -carmir-rojo-borde: #8a5262;
+    -carmir-ambar-fondo: #594c38;  -carmir-ambar-texto: #ffd9a0;
+    -carmir-azul-fondo: #34496a;   -carmir-azul-texto: #bad9ff;   -carmir-azul-borde: #55739c;
+    -carmir-verde-fondo: #34574b;  -carmir-verde-texto: #b9efd3;  -carmir-verde-borde: #4f8a73;
+    -carmir-lila-fondo: #4c4272;   -carmir-lila-texto: #dccdff;   -carmir-lila-borde: #6f62a0;
+    -carmir-durazno-fondo: #5c4640; -carmir-durazno-texto: #ffcba8; -carmir-durazno-borde: #8a6655;
+}
+
+/* Botones de color: tonos pastel apagados con texto claro */
+.tema-oscuro .btn-verde   { -fx-background-color: #3f7a60; -fx-text-fill: #e6fbf0; }
+.tema-oscuro .btn-verde:hover { -fx-background-color: #4a8a6d; }
+.tema-oscuro .btn-azul    { -fx-background-color: #46699b; -fx-text-fill: #e8f3ff; }
+.tema-oscuro .btn-azul:hover { -fx-background-color: #5278ad; }
+.tema-oscuro .btn-naranja { -fx-background-color: #9a6a3a; -fx-text-fill: #fff1e0; }
+.tema-oscuro .btn-naranja:hover { -fx-background-color: #ad7a46; }
+.tema-oscuro .btn-oscuro  { -fx-background-color: #5f5391; -fx-text-fill: #f0eaff; }
+.tema-oscuro .btn-oscuro:hover { -fx-background-color: #6e61a4; }
+.tema-oscuro .btn-rojo    { -fx-background-color: #94495a; -fx-text-fill: #ffe9ed; }
+.tema-oscuro .btn-rojo:hover { -fx-background-color: #a6586a; }
+.tema-oscuro .btn-verde .ikonli-font-icon { -fx-icon-color: #e6fbf0; }
+.tema-oscuro .btn-azul .ikonli-font-icon { -fx-icon-color: #e8f3ff; }
+.tema-oscuro .btn-naranja .ikonli-font-icon { -fx-icon-color: #fff1e0; }
+.tema-oscuro .btn-oscuro .ikonli-font-icon { -fx-icon-color: #f0eaff; }
+.tema-oscuro .btn-rojo .ikonli-font-icon { -fx-icon-color: #ffe9ed; }
+
+/* Detalles que usaban negro o blanco translúcido */
+.tema-oscuro .scroll-bar .thumb { -fx-background-color: rgba(255,255,255,0.28); }
+.tema-oscuro .btn-icono:hover { -fx-background-color: rgba(255,255,255,0.10); }
+.tema-oscuro .btn-icono:pressed { -fx-background-color: rgba(255,255,255,0.18); }
+.tema-oscuro .btn-secundario.peligro:hover { -fx-text-fill: -carmir-rojo-texto; }
+.tema-oscuro .tarjeta, .tema-oscuro .kpi-card, .tema-oscuro .topbar {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 8, 0, 0, 2);
+}
+.tema-oscuro .logo-menu { -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.55), 7, 0.5, 0, 0); }
+.tema-oscuro .fondo-bloqueo { -fx-background-color: linear-gradient(to bottom right, #2b2740, #4a3d6e); }
+.tema-oscuro .reloj-hora { -fx-text-fill: #f6f0fd; }
+.tema-oscuro .reloj-fecha { -fx-text-fill: #cbbdf0; }
+.tema-oscuro .grafica-carmir .chart-horizontal-grid-lines { -fx-stroke: #474161; }
+.tema-oscuro .grafica-carmir .axis, .tema-oscuro .grafica-carmir .axis-label { -fx-text-fill: -carmir-texto; -fx-tick-label-fill: -carmir-texto; }
+.tema-oscuro .tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: transparent; }
+
+/* Sin halo ni contorno en los iconos animados del menú */
+
+/* Letras claras en todos los campos de texto y de fecha (se repite aquí con más fuerza
+   para que ninguna pantalla se quede con letras negras en modo oscuro) */
+.tema-oscuro .text-field, .tema-oscuro .password-field, .tema-oscuro .text-area, .tema-oscuro .text-input,
+.tema-oscuro .campo, .tema-oscuro .campo-fecha, .tema-oscuro .campo-busqueda,
+.tema-oscuro .date-picker > .text-field, .tema-oscuro .date-picker .text-field,
+.tema-oscuro .combo-box-base > .text-field, .tema-oscuro .spinner .text-field {
+    -fx-text-fill: #ece6f7;
+    -fx-text-inner-color: #ece6f7;
+    -fx-prompt-text-fill: #9f95b8;
+    -fx-highlight-fill: #5d4673;
+    -fx-highlight-text-fill: #ffe3ef;
+}
+.tema-oscuro .text-area .text, .tema-oscuro .text-area .content .text { -fx-fill: #ece6f7; }
+.tema-oscuro .combo-box-base .list-cell, .tema-oscuro .combo-box-base > .list-cell { -fx-text-fill: #ece6f7; }
+.tema-oscuro .date-picker-popup .label, .tema-oscuro .date-picker-popup .spinner .label,
+.tema-oscuro .date-picker-popup > * > .day-cell { -fx-text-fill: #ece6f7; }
+.tema-oscuro .date-picker-popup > * > .day-cell:selected { -fx-text-fill: white; }
+.tema-oscuro .date-picker-popup > * > .other-month { -fx-text-fill: #7d7498; }
+.tema-oscuro .date-picker-popup > * > .day-name-cell { -fx-text-fill: #b4abcb; }

@@ -1,0 +1,34 @@
+<!-- RF-3 · Paso 4: vista previa 3D del postre con las opciones elegidas -->
+<section class="visor" aria-label="Vista previa 3D de tu postre">
+  @if (sinWebgl()) {
+    <div class="sin-3d">
+      <ng-content />
+      <p>Tu navegador no puede mostrar la vista 3D. Puedes personalizar tu postre normalmente.</p>
+    </div>
+  } @else {
+    <div class="lienzo" #contenedor>
+      @if (textoPisos() !== '') {
+        <span class="medidas" aria-live="polite">{{ textoPisos() }}</span>
+      }
+      <span class="ayuda-giro">Arrastra para girar · rueda o pellizca para acercar</span>
+    </div>
+    <div class="controles">
+      <button type="button" class="control" [class.activo]="girando()" [attr.aria-pressed]="girando()" (click)="alternarGiro()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4" /></svg>
+        Girar
+      </button>
+      <button type="button" class="control" [class.activo]="verDentro()" [attr.aria-pressed]="verDentro()" (click)="alternarDentro()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18l9-14 9 14zM12 4v14" /></svg>
+        Ver por dentro
+      </button>
+      <button type="button" class="control" (click)="centrar()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M12 2v4M12 18v4M2 12h4M18 12h4" /></svg>
+        Centrar
+      </button>
+      <button type="button" class="control" (click)="guardarImagen()">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" /></svg>
+        Guardar imagen
+      </button>
+    </div>
+  }
+</section>

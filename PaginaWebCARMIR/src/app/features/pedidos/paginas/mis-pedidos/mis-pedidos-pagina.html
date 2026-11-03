@@ -1,0 +1,374 @@
+<div class="contenedor pagina">
+  <h1>Mis pedidos</h1>
+
+  @if (seguimiento(); as pedido) {
+    <!-- ===================== Seguimiento (RF-12) ===================== -->
+    <!-- RF-12 · Paso 7: detalle del pedido con su estado actual. -->
+    <section class="panel bloque cabecera-pedido" aria-labelledby="titulo-pedido">
+      <div>
+        <h2 id="titulo-pedido">Pedido #{{ pedido.folio }}</h2>
+        <p class="solicitado">Hecho el {{ fechaHora(pedido.fechaSolicitud) }} · {{ pedido.nombreCliente }}</p>
+      </div>
+      <span class="etiqueta estado-actual">{{ pedido.estadoTexto }}</span>
+    </section>
+
+    <!-- RF-12 · Excepción paso 7: «Esta solicitud fue dada de baja» con motivo y fecha. -->
+    @if (pedido.baja; as baja) {
+      <div class="aviso error" role="status">
+        <p><strong>Esta solicitud fue dada de baja.</strong> Motivo: {{ baja.motivo }}</p>
+      </div>
+    }
+    <!-- RF-12 · Excepción paso 7: «Pedido cancelado» con motivo, fecha y reembolso. -->
+    @if (pedido.cancelacion; as cancelacion) {
+      <div class="aviso error" role="status">
+        <p><strong>Este pedido fue cancelado</strong> el {{ fechaHora(cancelacion.fecha) }}. Motivo: {{ cancelacion.motivo }}</p>
+        @if (cancelacion.montoReembolso > 0) {
+          <p>
+            Reembolso: {{ cancelacion.montoReembolso | currency: 'MXN' : 'symbol-narrow' }} ({{ cancelacion.estadoReembolso }})
+          </p>
+        }
+      </div>
+    }
+
+    <!-- RF-12 · Paso 7: barra de avance de los 6 estados. -->
+    <ol class="avance panel" aria-label="Avance del pedido">
+      @for (paso of pedido.pasos; track paso.estado) {
+        <li [class.hecho]="paso.completado" [class.actual]="paso.actual" [attr.aria-current]="marcaPaso(paso)">
+          <span class="punto" aria-hidden="true"></span>
+          <span class="nombre">{{ paso.texto }}</span>
+          @if (paso.fecha !== null) {
+            <span class="cuando">{{ fechaHora(paso.fecha) }}</span>
+          }
+        </li>
+      }
+    </ol>
+
+    <div class="diseno-seguimiento">
+      <!-- RF-12 · Paso 6: productos, entrega, total y saldo. -->
+      <section class="panel bloque" aria-labelledby="titulo-productos">
+        <h2 id="titulo-productos">Productos</h2>
+        <ul class="productos">
+          @for (producto of pedido.productos; track $index) {
+            <li>
+              <app-imagen-postre class="foto" [link]="producto.linkFotografia" [nombre]="producto.nombre" />
+              <div class="datos">
+                <strong>{{ producto.cantidad }} × {{ producto.nombre }}</strong>
+                @for (texto of producto.personalizacion; track $index) {
+                  <span class="extra">{{ texto }}</span>
+                }
+                @if (producto.dedicatoria) {
+                  <span class="extra">Mensaje: «{{ producto.dedicatoria }}»</span>
+                }
+                @if (producto.comentario) {
+                  <span class="extra">Indicaciones: {{ producto.comentario }}</span>
+                }
+              </div>
+              <span class="importe">{{ producto.subtotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </li>
+          }
+        </ul>
+
+        <h3>Entrega</h3>
+        <p>{{ pedido.entrega.modalidad }} · {{ fechaLarga(pedido.entrega.fecha) }} a las {{ pedido.entrega.horario }} h</p>
+        @if (pedido.entrega.direccion; as direccion) {
+          <p>{{ textoDireccion(direccion) }}</p>
+        } @else {
+          <!-- Recoger en tienda: dirección de la tienda -->
+          <app-ubicacion-tienda titulo="Recoge tu pedido en" />
+        }
+      </section>
+
+      <!-- RF-12 · Paso 6: pagos registrados y saldo pendiente. -->
+      <section class="panel bloque" aria-labelledby="titulo-pagos">
+        <h2 id="titulo-pagos">Pagos</h2>
+        <dl class="cuentas">
+          <div>
+            <dt>Envío</dt>
+            <dd>{{ pedido.costoEnvio | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          <div class="total">
+            <dt>Total</dt>
+            <dd>{{ pedido.montoTotal | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          <div>
+            <dt>Para iniciar ({{ pedido.modalidadPago }})</dt>
+            <dd>{{ pedido.montoParaIniciar | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          <div>
+            <dt>Pagado y validado</dt>
+            <dd>{{ pedido.totalPagado | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          @if (pedido.porValidar > 0) {
+            <div>
+              <dt>En revisión</dt>
+              <dd>{{ pedido.porValidar | currency: 'MXN' : 'symbol-narrow' }}</dd>
+            </div>
+          }
+          <div class="saldo">
+            <dt>Saldo pendiente</dt>
+            <dd>{{ pedido.saldo | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+        </dl>
+
+        @if (pedido.pagos.length > 0) {
+          <ul class="pagos">
+            @for (pago of pedido.pagos; track $index) {
+              <li>
+                <div>
+                  <strong>{{ pago.monto | currency: 'MXN' : 'symbol-narrow' }}</strong> · {{ pago.metodo }}
+                  <span class="extra">{{ fechaHora(pago.fecha) }}</span>
+                  @if (pago.referencia) {
+                    <span class="extra">Referencia: {{ pago.referencia }}</span>
+                  }
+                  @if (pago.motivoRechazo) {
+                    <span class="extra rechazo">Motivo: {{ pago.motivoRechazo }}</span>
+                  }
+                </div>
+                <span [class]="'estado-pago ' + claseEstadoPago(pago)">{{ textoEstadoPago(pago) }}</span>
+              </li>
+            }
+          </ul>
+        }
+
+        @if (mensajeComprobante() !== '') {
+          <div class="aviso exito" role="status"><p>{{ mensajeComprobante() }}</p></div>
+        }
+
+        <!-- RF-12: envío del comprobante de pago (solo si el pedido lo permite). -->
+        @if (pedido.puedeEnviarComprobante) {
+          @if (!formularioAbierto()) {
+            <button type="button" class="btn btn-principal btn-bloque" (click)="abrirFormulario()">
+              Enviar comprobante de transferencia
+            </button>
+            <p class="nota">Si pagas en efectivo, hazlo en nuestra tienda mencionando tu folio.</p>
+            <app-ubicacion-tienda titulo="Paga en efectivo en" />
+          } @else {
+            <form class="comprobante" (submit)="alEnviarComprobante($event)" novalidate>
+              <h3>Comprobante de pago</h3>
+              @if (pedido.datosBancarios !== '') {
+                <div class="datos-bancarios">
+                  <p>{{ pedido.datosBancarios }}</p>
+                  <p>Concepto: <strong>Pedido {{ pedido.folio }}</strong></p>
+                </div>
+              }
+
+              <div class="campo" [class.con-error]="errorDe('monto') !== ''">
+                <label for="monto">Monto pagado</label>
+                <input
+                  #campoMonto
+                  id="monto"
+                  type="number"
+                  inputmode="decimal"
+                  min="0.01"
+                  step="0.01"
+                  [value]="monto()"
+                  (input)="cambiarCampoComprobante('monto', campoMonto.value)"
+                />
+                <span class="ayuda">Falta por pagar: {{ porCubrir(pedido) | currency: 'MXN' : 'symbol-narrow' }}</span>
+                @if (errorDe('monto') !== '') {
+                  <span class="mensaje-error">{{ errorDe('monto') }}</span>
+                }
+              </div>
+
+              <div class="campo" [class.con-error]="errorDe('referencia') !== ''">
+                <label for="referencia">Referencia o folio bancario</label>
+                <input
+                  #campoReferencia
+                  id="referencia"
+                  type="text"
+                  maxlength="50"
+                  [value]="referencia()"
+                  (input)="cambiarCampoComprobante('referencia', campoReferencia.value)"
+                />
+                @if (errorDe('referencia') !== '') {
+                  <span class="mensaje-error">{{ errorDe('referencia') }}</span>
+                }
+              </div>
+
+              <!-- RF-12: el cliente sube la foto/PDF desde sus archivos o pega un enlace (como antes). -->
+              <fieldset class="opciones-tarjeta en-linea">
+                <legend>¿Cómo nos envías tu comprobante?</legend>
+                <label class="opcion-tarjeta" [class.elegida]="modoComprobante() === 'archivo'">
+                  <input
+                    type="radio"
+                    name="modoComprobante"
+                    [checked]="modoComprobante() === 'archivo'"
+                    (change)="elegirModoComprobante('archivo')"
+                  />
+                  <span>
+                    <strong>Subir foto o PDF</strong>
+                    <small>Desde tu celular o computadora</small>
+                  </span>
+                </label>
+                <label class="opcion-tarjeta" [class.elegida]="modoComprobante() === 'enlace'">
+                  <input
+                    type="radio"
+                    name="modoComprobante"
+                    [checked]="modoComprobante() === 'enlace'"
+                    (change)="elegirModoComprobante('enlace')"
+                  />
+                  <span>
+                    <strong>Pegar un enlace</strong>
+                    <small>Google Drive, Dropbox...</small>
+                  </span>
+                </label>
+              </fieldset>
+
+              @if (modoComprobante() === 'archivo') {
+                <div class="campo" [class.con-error]="errorDe('archivo') !== ''">
+                  <span class="titulo-campo" id="titulo-archivo">Foto o PDF de tu comprobante</span>
+                  <!-- El input real está oculto; la etiqueta funciona como botón grande -->
+                  <input
+                    #campoArchivo
+                    id="archivo"
+                    class="solo-lector"
+                    type="file"
+                    [accept]="aceptaComprobante"
+                    aria-labelledby="titulo-archivo"
+                    (change)="alElegirArchivo(campoArchivo)"
+                  />
+                  @if (archivo(); as elegido) {
+                    <div class="archivo-elegido">
+                      @if (vistaPrevia() !== '') {
+                        <img [src]="vistaPrevia()" alt="Vista previa del comprobante" />
+                      } @else {
+                        <span class="icono-pdf" aria-hidden="true">PDF</span>
+                      }
+                      <div class="archivo-datos">
+                        <strong>{{ elegido.name }}</strong>
+                        <span>{{ textoTamano(elegido.size) }}</span>
+                      </div>
+                      <div class="archivo-acciones">
+                        <label for="archivo" class="btn btn-secundario btn-chico">Cambiar</label>
+                        <button type="button" class="btn btn-secundario btn-chico" (click)="quitarArchivo(campoArchivo)">
+                          Quitar
+                        </button>
+                      </div>
+                    </div>
+                  } @else {
+                    <label for="archivo" class="zona-archivo">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M12 3l5 5h-3v6h-4V8H7l5-5zm-7 14h14v4H5v-4z" />
+                      </svg>
+                      <strong>Elegir archivo</strong>
+                      <span>JPG, PNG, WEBP o PDF · máximo 5 MB</span>
+                    </label>
+                  }
+                  @if (errorDe('archivo') !== '') {
+                    <span class="mensaje-error">{{ errorDe('archivo') }}</span>
+                  }
+                </div>
+              } @else {
+                <div class="campo" [class.con-error]="errorDe('enlace') !== ''">
+                  <label for="enlace">Enlace de la foto de tu comprobante</label>
+                  <input
+                    #campoEnlace
+                    id="enlace"
+                    type="url"
+                    maxlength="255"
+                    placeholder="https://..."
+                    [value]="enlace()"
+                    (input)="cambiarCampoComprobante('enlace', campoEnlace.value)"
+                  />
+                  <span class="ayuda">Sube la foto a Google Drive, Dropbox o similar y pega aquí el enlace para compartir.</span>
+                  @if (errorDe('enlace') !== '') {
+                    <span class="mensaje-error">{{ errorDe('enlace') }}</span>
+                  }
+                </div>
+              }
+
+              @if (errorComprobante() !== '') {
+                <div class="aviso error" role="alert"><p>{{ errorComprobante() }}</p></div>
+              }
+
+              <div class="barra-acciones">
+                <button type="button" class="btn btn-secundario" (click)="cerrarFormulario()">Cancelar</button>
+                <button type="submit" class="btn btn-principal" [disabled]="enviandoComprobante()">
+                  @if (enviandoComprobante()) {
+                    Enviando...
+                  } @else {
+                    Enviar comprobante
+                  }
+                </button>
+              </div>
+            </form>
+          }
+        } @else if (pedido.motivoSinComprobante !== '') {
+          <p class="nota">{{ pedido.motivoSinComprobante }}</p>
+        }
+      </section>
+    </div>
+
+    <div class="barra-acciones final">
+      <button type="button" class="btn btn-secundario" (click)="otraBusqueda()">Consultar otro pedido</button>
+      <button type="button" class="btn btn-principal" [disabled]="buscando()" (click)="buscar()">
+        @if (buscando()) {
+          Actualizando...
+        } @else {
+          Actualizar estado
+        }
+      </button>
+    </div>
+  } @else {
+    <!-- ===================== Búsqueda ===================== -->
+    <!-- RF-12 · Pasos 2 y 3: formulario de búsqueda con folio y teléfono. -->
+    <form class="panel bloque busqueda" (submit)="alBuscar($event)" novalidate>
+      <h2>Consulta tu pedido</h2>
+      <p class="ayuda-busqueda">Escribe el folio que recibiste al enviar tu pedido y el teléfono de WhatsApp que registraste.</p>
+
+      <div class="campo" [class.con-error]="errorFolio() !== ''">
+        <label for="folio">Folio</label>
+        <input
+          #campoFolio
+          id="folio"
+          type="text"
+          inputmode="numeric"
+          maxlength="10"
+          placeholder="Ej. 125"
+          [value]="folio()"
+          (input)="cambiarFolio(campoFolio.value)"
+        />
+        <!-- RF-12 · Excepción paso 4: formato de folio inválido. -->
+        @if (errorFolio() !== '') {
+          <span class="mensaje-error">{{ errorFolio() }}</span>
+        }
+      </div>
+
+      <div class="campo" [class.con-error]="errorTelefono() !== ''">
+        <label for="telefonoConsulta">Teléfono (WhatsApp)</label>
+        <input
+          #campoTelefono
+          id="telefonoConsulta"
+          type="tel"
+          inputmode="numeric"
+          maxlength="10"
+          placeholder="10 dígitos"
+          [value]="telefono()"
+          (input)="cambiarTelefono(campoTelefono.value)"
+        />
+        <!-- RF-12 · Excepción paso 4: formato de teléfono inválido. -->
+        @if (errorTelefono() !== '') {
+          <span class="mensaje-error">{{ errorTelefono() }}</span>
+        }
+      </div>
+
+      <!-- RF-12 · Excepción paso 5: no encontrado, búsqueda bloqueada por intentos o sin conexión. -->
+      @if (errorBusqueda() !== '') {
+        <div class="aviso error" role="alert"><p>{{ errorBusqueda() }}</p></div>
+      }
+
+      <button type="submit" class="btn btn-principal btn-bloque" [disabled]="buscando()">
+        @if (buscando()) {
+          Buscando...
+        } @else {
+          Consultar
+        }
+      </button>
+    </form>
+    @if (buscando()) {
+      <app-cargando texto="Buscando tu pedido..." />
+    }
+    <!-- RF-12 · Excepción paso 3: el cliente no busca y regresa al inicio del portal. -->
+    <p class="nota"><a routerLink="/">Ir al catálogo</a></p>
+  }
+</div>

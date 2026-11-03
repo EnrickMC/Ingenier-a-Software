@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import com.pac.modulos.pedidos.controller.BarraEstados?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Lotes y movimientos: entradas (RF-37), mermas (RF-38) e historial -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.inventario.controller.MovimientosController"
+      stylesheets="@../../css/pedidos.css"
+      styleClass="pestana-contenido" spacing="16">
+
+    <!-- Filtros: selectores con las fechas al lado; abajo los botones de tipo de movimiento.
+         Para quitar un filtro se elige "Todos/Todas" en el selector, o se borra la fecha -->
+    <VBox styleClass="tarjeta" spacing="12">
+        <HBox spacing="14" alignment="BOTTOM_LEFT">
+        <FlowPane HBox.hgrow="ALWAYS" minWidth="0" hgap="14" vgap="10" alignment="BOTTOM_LEFT">
+            <VBox styleClass="filtro-grupo" spacing="4" minWidth="-Infinity">
+                <Label styleClass="filtro-etiqueta" text="Categoría de insumo"/>
+                <ComboBox fx:id="cmbCategoria" styleClass="combo-carmir" prefWidth="150" onAction="#onCambioCategoria"/>
+            </VBox>
+            <VBox styleClass="filtro-grupo" spacing="4" minWidth="-Infinity">
+                <Label styleClass="filtro-etiqueta" text="Insumo"/>
+                <ComboBox fx:id="cmbInsumo" styleClass="combo-carmir" prefWidth="150" onAction="#onBuscar"/>
+            </VBox>
+            <VBox styleClass="filtro-grupo" spacing="4" minWidth="-Infinity">
+                <Label styleClass="filtro-etiqueta" text="Desde"/>
+                <DatePicker fx:id="dpDesde" styleClass="campo-fecha" prefWidth="120" promptText="dd/mm/aaaa" onAction="#onBuscar"/>
+            </VBox>
+            <VBox styleClass="filtro-grupo" spacing="4" minWidth="-Infinity">
+                <Label styleClass="filtro-etiqueta" text="Hasta"/>
+                <DatePicker fx:id="dpHasta" styleClass="campo-fecha" prefWidth="120" promptText="dd/mm/aaaa" onAction="#onBuscar"/>
+            </VBox>
+        </FlowPane>
+        <!-- Acciones: siempre a la derecha del panel de filtros -->
+        <Button fx:id="btnEntrada" text="Compra" minWidth="-Infinity" styleClass="btn-verde" onAction="#onEntrada">
+            <graphic><FontIcon iconLiteral="bi-box-arrow-in-down"/></graphic>
+        </Button>
+        <Button fx:id="btnMerma" text="Merma" minWidth="-Infinity" styleClass="btn-naranja" onAction="#onMerma">
+            <graphic><FontIcon iconLiteral="bi-box-arrow-up"/></graphic>
+        </Button>
+        </HBox>
+        <BarraEstados fx:id="barraTipo" compacto="true"/>
+    </VBox>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="tarjeta" spacing="12" HBox.hgrow="ALWAYS" minWidth="0">
+            <VBox spacing="2" minWidth="-Infinity">
+                <Label styleClass="tarjeta-titulo" text="Historial de movimientos"/>
+                <Label fx:id="lblConteo" styleClass="texto-suave"/>
+            </VBox>
+            <Label fx:id="lblAviso" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+                <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill"/></graphic>
+            </Label>
+            <TableView fx:id="tblMovimientos" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="240" minWidth="0">
+                <columnResizePolicy><TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Fecha" minWidth="135" prefWidth="135">
+                        <cellValueFactory><PropertyValueFactory property="fecha"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Insumo" minWidth="140" prefWidth="140">
+                        <cellValueFactory><PropertyValueFactory property="insumo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Tipo" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="tipo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Cantidad" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="cantidad"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Costo" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="costo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Pedido" minWidth="70" prefWidth="70">
+                        <cellValueFactory><PropertyValueFactory property="folio"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Usuario" minWidth="100" prefWidth="100">
+                        <cellValueFactory><PropertyValueFactory property="usuario"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Motivo" minWidth="200" prefWidth="200">
+                        <cellValueFactory><PropertyValueFactory property="motivo"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <VBox alignment="CENTER" spacing="12">
+                        <Label fx:id="lblVacio" styleClass="tabla-vacia" text="No hay movimientos registrados"/>
+                    </VBox>
+                </placeholder>
+            </TableView>
+            <Label fx:id="lblTotales" styleClass="caja-totales" maxWidth="Infinity" wrapText="true"/>
+        </VBox>
+
+        <VBox styleClass="tarjeta" spacing="10" minWidth="490" prefWidth="490" maxWidth="490">
+            <Label fx:id="lblTituloLotes" styleClass="tarjeta-titulo" text="Lotes con existencia"/>
+            <Label styleClass="texto-ayuda" wrapText="true"
+                   text="Ordenados por PEPS: arriba el que caduca primero, que es el que se descuenta primero."/>
+            <TableView fx:id="tblLotes" styleClass="tabla-carmir" VBox.vgrow="ALWAYS">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Lote" minWidth="72" prefWidth="72">
+                        <cellValueFactory><PropertyValueFactory property="clave"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn fx:id="colLoteInsumo" text="Insumo" minWidth="105" prefWidth="105">
+                        <cellValueFactory><PropertyValueFactory property="insumo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Queda" minWidth="80" prefWidth="80">
+                        <cellValueFactory><PropertyValueFactory property="existencia"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Caducidad" minWidth="170" prefWidth="170">
+                        <cellValueFactory><PropertyValueFactory property="caducidad"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label fx:id="lblLotesVacio" styleClass="tabla-vacia" text="Sin lotes con existencia"/>
+                </placeholder>
+            </TableView>
+            <Button fx:id="btnMermaLote" text="Merma de este lote" styleClass="btn-naranja" maxWidth="Infinity"
+                    onAction="#onMermaLote">
+                <graphic><FontIcon iconLiteral="bi-box-arrow-up"/></graphic>
+            </Button>
+        </VBox>
+    </HBox>
+</VBox>

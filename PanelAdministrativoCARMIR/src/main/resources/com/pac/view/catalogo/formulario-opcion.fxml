@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar o modificar una opción de característica -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.catalogo.controller.FormularioOpcionController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css"
+      styleClass="formulario" spacing="12" prefWidth="620">
+
+    <VBox spacing="2">
+        <Label fx:id="lblTitulo" styleClass="formulario-titulo" text="Nueva opción"/>
+        <Label fx:id="lblCaracteristica" styleClass="texto-suave" wrapText="true"/>
+    </VBox>
+
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Nombre *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Valor que el cliente puede elegir dentro de la característica, por ejemplo Grande, Tres leches o Moño."/></graphic></Label>
+        <ComboBox fx:id="cmbNombre" styleClass="combo-carmir" editable="true" maxWidth="Infinity" promptText="Ej. Grande, Tres leches, Moño"/>
+    </VBox>
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Descripción"/>
+        <TextArea fx:id="txtDescripcion" styleClass="campo" prefRowCount="2" wrapText="true"
+                  promptText="Detalle de la opción"/>
+    </VBox>
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Imagen" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+            <graphic><IconoAyuda texto="Foto de referencia de la opción. Pega un enlace de internet (http/https) o elige un archivo de esta computadora con el botón Elegir imagen."/></graphic>
+        </Label>
+        <HBox spacing="6">
+            <TextField fx:id="txtImagen" styleClass="campo" HBox.hgrow="ALWAYS" promptText="https://... o ruta de un archivo"/>
+            <Button text="Elegir imagen" minWidth="-Infinity" styleClass="btn-secundario" onAction="#onElegirImagen">
+                <graphic><FontIcon iconLiteral="bi-folder2-open"/></graphic>
+            </Button>
+        </HBox>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Formatos: PNG, JPG, JPEG, GIF, BMP o WEBP."/>
+    </VBox>
+
+    <GridPane styleClass="caja-permisos" hgap="12" vgap="6">
+        <columnConstraints>
+            <ColumnConstraints minWidth="270"/>
+            <ColumnConstraints minWidth="80" prefWidth="80"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+
+        <Label styleClass="formulario-etiqueta" text="Multiplicador de ingredientes *" GridPane.rowIndex="0" GridPane.columnIndex="0" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Escala la cantidad de ingredientes de la receta. Tamaño grande = 2 usa el doble. Solo aplica si la opción se escala con el tamaño."/></graphic></Label>
+        <TextField fx:id="txtMultIngredientes" styleClass="campo" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="2"
+               text="Escala las opciones que se escalan. Ej. tamaño grande = 2 (usa el doble de ingredientes)."/>
+
+        <Label styleClass="formulario-etiqueta" text="Multiplicador de costo *" GridPane.rowIndex="1" GridPane.columnIndex="0" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Convierte el costo de la receta en precio de venta. 2 significa que se cobra el doble de lo que cuesta."/></graphic></Label>
+        <TextField fx:id="txtMultCosto" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="2"
+               text="Convierte el costo en precio. Un glaseado especial, difícil de hacer, puede llevar un multiplicador mayor."/>
+
+        <Label styleClass="formulario-etiqueta" text="Puntos de selección *" GridPane.rowIndex="2" GridPane.columnIndex="0" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Puntos que gasta esta opción del presupuesto de su característica. Ej. moño = 1 punto, listón = 2 puntos."/></graphic></Label>
+        <TextField fx:id="txtPuntos" styleClass="campo" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label fx:id="lblAyudaPuntos" styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="2"
+               text="Puntos que gasta del presupuesto de la característica. Ej. moño = 1 punto, listón = 2 puntos."/>
+
+        <Label styleClass="formulario-etiqueta" text="Multiplicador de presupuesto *" GridPane.rowIndex="3" GridPane.columnIndex="0" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Amplía el presupuesto de las características de selección múltiple. Ej. un tamaño para 200 personas = 2 para poder poner más decoraciones."/></graphic></Label>
+        <TextField fx:id="txtMultPresupuesto" styleClass="campo" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" GridPane.rowIndex="3" GridPane.columnIndex="2"
+               text="Amplía el presupuesto de las características múltiples. Ej. tamaño para 200 personas = 2 (más decoraciones)."/>
+    </GridPane>
+
+    <HBox spacing="24">
+        <CheckBox fx:id="chkSeEscala" text="Se escala con el tamaño (el glaseado sí, las velas no)"/>
+        <CheckBox fx:id="chkDisponible" text="Disponible" selected="true"/>
+    </HBox>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Guardar" styleClass="btn-verde" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

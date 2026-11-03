@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Módulo 3 · Catálogo de Personalización: una pestaña por cada parte del catálogo -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.catalogo.controller.CatalogoController"
+      stylesheets="@../../css/usuarios.css, @../../css/catalogo.css" spacing="14">
+
+    <!-- Aviso para el personal que solo puede consultar -->
+    <Label fx:id="lblModoConsulta" styleClass="aviso-consulta" maxWidth="Infinity" wrapText="true"
+           text="Modo consulta: solo la administradora puede registrar, modificar o dar de baja.">
+        <graphic><FontIcon iconLiteral="bi-eye-fill"/></graphic>
+    </Label>
+
+    <TabPane fx:id="pestanas" styleClass="pestanas-catalogo" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <Tab fx:id="tabCategorias" text="Categorías" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-tags-fill"/></graphic>
+            <content><fx:include fx:id="categorias" source="categorias.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabCaracteristicas" text="Características" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-sliders"/></graphic>
+            <content><fx:include fx:id="caracteristicas" source="caracteristicas.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabOpciones" text="Opciones" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-list-check"/></graphic>
+            <content><fx:include fx:id="opciones" source="opciones.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabExclusiones" text="Exclusiones" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-slash-circle-fill"/></graphic>
+            <content><fx:include fx:id="exclusiones" source="exclusiones.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabProductos" text="Productos" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-gift-fill"/></graphic>
+            <content><fx:include fx:id="productos" source="productos.fxml"/></content>
+        </Tab>
+    </TabPane>
+</VBox>

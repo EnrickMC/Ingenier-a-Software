@@ -1,0 +1,88 @@
+/* =====================================================================
+   Módulo 5 · Inventario y Recetas (inventario.fxml, recetas.fxml y formularios)
+   Usa los colores de carmir-base.css y las clases de usuarios.css y catalogo.css
+   ===================================================================== */
+
+/* ---------- Renglones de color en las tablas ---------- */
+/* Durazno: existencia baja (RF-33, RF-39) */
+.tabla-carmir .table-row-cell.fila-bajo-minimo { -fx-background-color: -carmir-durazno-fondo; }
+/* Rojo claro: agotado o caducado */
+.tabla-carmir .table-row-cell.fila-critica { -fx-background-color: -carmir-rojo-fondo; }
+/* Ámbar: próximo a caducar (RF-40) */
+.tabla-carmir .table-row-cell.fila-proxima { -fx-background-color: -carmir-ambar-fondo; }
+/* Gris: dado de baja o alerta atendida */
+.tabla-carmir .table-row-cell.fila-inactiva { -fx-background-color: -carmir-gris-fondo; }
+.tabla-carmir .table-row-cell.fila-inactiva .text { -fx-fill: -carmir-texto-suave; }
+/* Al seleccionar se usa el color normal de selección */
+.tabla-carmir .table-row-cell:selected { -fx-background-color: -carmir-seleccion; }
+
+/* ---------- Etiquetas de estado ---------- */
+.chip {
+    -fx-background-radius: 12;
+    -fx-padding: 2 10 2 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.chip-normal   { -fx-background-color: -carmir-verde-fondo; -fx-text-fill: -carmir-verde-oscuro; }
+.chip-bajo     { -fx-background-color: -carmir-durazno-fondo; -fx-text-fill: -carmir-durazno-texto; }
+.chip-critico  { -fx-background-color: -carmir-rojo-fondo; -fx-text-fill: -carmir-rojo-texto; }
+.chip-proximo  { -fx-background-color: -carmir-ambar-fondo; -fx-text-fill: -carmir-ambar-texto; }
+.chip-gris     { -fx-background-color: -carmir-gris-fondo; -fx-text-fill: -carmir-texto-suave; }
+.chip-info     { -fx-background-color: -carmir-azul-fondo; -fx-text-fill: -carmir-azul-texto; }
+
+/* ---------- Detalle del insumo ---------- */
+.existencia-grande {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+.linea-lote {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 5;
+    -fx-padding: 5 8 5 8;
+    -fx-font-size: 12px;
+}
+.linea-movimiento { -fx-font-size: 12px; }
+.cantidad-entrada { -fx-text-fill: -carmir-verde-oscuro; -fx-font-weight: bold; }
+.cantidad-salida  { -fx-text-fill: -carmir-rojo-texto; -fx-font-weight: bold; }
+
+/* ---------- Totales del historial ---------- */
+.caja-totales {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+}
+
+/* ---------- Botón naranja con hover ---------- */
+.btn-naranja:hover { -fx-background-color: #f9c590; }
+
+/* ---------- Recetas: vista para la cocina (texto grande) ---------- */
+.receta-titulo {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+.receta-subtitulo { -fx-text-fill: -carmir-acento; -fx-font-size: 15px; -fx-font-weight: bold; }
+.receta-seccion {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+.receta-ingrediente { -fx-font-size: 16px; }
+.receta-ingrediente-baja { -fx-font-size: 16px; -fx-text-fill: -carmir-rojo-texto; }
+.receta-pasos { -fx-font-size: 16px; -fx-line-spacing: 4px; }
+.caja-pasos {
+    -fx-background-color: -carmir-hover-suave;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 12;
+}
+
+/* ---------- Formularios ---------- */
+.costo-vivo {
+    -fx-text-fill: -carmir-verde-oscuro;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}

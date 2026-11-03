@@ -1,0 +1,16 @@
+<article class="tarjeta panel">
+  <a class="foto" [routerLink]="['/producto', producto().idPostre]" tabindex="-1" aria-hidden="true">
+    <app-imagen-postre [link]="producto().linkFotografia" [nombre]="producto().nombre" />
+  </a>
+  <div class="cuerpo">
+    <span class="etiqueta">{{ producto().nombreCategoria }}</span>
+    <h3 class="nombre">{{ producto().nombre }}</h3>
+    @if (producto().descripcion) {
+      <p class="descripcion">{{ producto().descripcion }}</p>
+    }
+    <p class="precio">{{ producto().precio | currency: 'MXN' : 'symbol-narrow' }}</p>
+    <a class="btn btn-suave btn-bloque" [routerLink]="['/producto', producto().idPostre]">
+      Ver y personalizar
+    </a>
+  </div>
+</article>

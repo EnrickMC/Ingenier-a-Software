@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Modificación de pedidos (solo la Administradora, antes de «En preparación») -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.FormularioModificacionController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      styleClass="formulario" spacing="12" prefWidth="780" prefHeight="760">
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTitulo" styleClass="formulario-titulo"/>
+            <Label styleClass="texto-suave" wrapText="true"
+                   text="Cambia los datos del cliente, la entrega o los postres. El total y el anticipo se recalculan y el cambio queda en la bitácora."/>
+        </VBox>
+        <VBox styleClass="caja-precio" alignment="CENTER" minWidth="170">
+            <Label styleClass="texto-ayuda" text="Nuevo total"/>
+            <Label fx:id="lblTotal" styleClass="precio-grande" text="\$0.00"/>
+            <Label fx:id="lblDiferencia" styleClass="texto-ayuda"/>
+        </VBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+        <VBox spacing="10">
+            <!-- Cliente -->
+            <Label styleClass="seccion-titulo" text="CLIENTE"/>
+            <GridPane hgap="12" vgap="4">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="40"/>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="35"/>
+                </columnConstraints>
+                <Label styleClass="formulario-etiqueta" text="Nombre *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label styleClass="formulario-etiqueta" text="Teléfono (WhatsApp) *" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label styleClass="formulario-etiqueta" text="Correo" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <TextField fx:id="txtNombre" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtTelefono" styleClass="campo" promptText="10 dígitos" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <TextField fx:id="txtCorreo" styleClass="campo" promptText="Opcional" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            </GridPane>
+            <Label styleClass="texto-ayuda" wrapText="true"
+                   text="Los datos del cliente son los mismos en todos sus pedidos."/>
+
+            <!-- Entrega -->
+            <Label styleClass="seccion-titulo" text="ENTREGA"/>
+            <GridPane hgap="12" vgap="4">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33"/>
+                    <ColumnConstraints percentWidth="25"/>
+                    <ColumnConstraints percentWidth="42"/>
+                </columnConstraints>
+                <Label styleClass="formulario-etiqueta" text="Fecha de entrega *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label styleClass="formulario-etiqueta" text="Hora (HH:mm) *" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label styleClass="formulario-etiqueta" text="Modalidad *" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                <DatePicker fx:id="dpFecha" styleClass="campo-fecha" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="txtHora" styleClass="campo" promptText="Ej. 14:30" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <ComboBox fx:id="cmbModalidad" styleClass="combo-carmir" maxWidth="Infinity" onAction="#onCambioModalidad"
+                          GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+            </GridPane>
+            <Label fx:id="lblCarga" styleClass="texto-ayuda" wrapText="true"/>
+
+            <VBox fx:id="cajaDireccion" spacing="4">
+                <GridPane hgap="12" vgap="4">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="46"/>
+                        <ColumnConstraints percentWidth="18"/>
+                        <ColumnConstraints percentWidth="18"/>
+                        <ColumnConstraints percentWidth="18"/>
+                    </columnConstraints>
+                    <Label styleClass="formulario-etiqueta" text="Calle *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label styleClass="formulario-etiqueta" text="Núm. ext. *" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label styleClass="formulario-etiqueta" text="Núm. int." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <Label styleClass="formulario-etiqueta" text="C.P. *" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+                    <TextField fx:id="txtCalle" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtNumExt" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <TextField fx:id="txtNumInt" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    <TextField fx:id="txtCodigoPostal" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+                </GridPane>
+                <GridPane hgap="12" vgap="4">
+                    <columnConstraints>
+                        <ColumnConstraints percentWidth="40"/>
+                        <ColumnConstraints percentWidth="60"/>
+                    </columnConstraints>
+                    <Label styleClass="formulario-etiqueta" text="Colonia *" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label styleClass="formulario-etiqueta" text="Referencias" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <TextField fx:id="txtColonia" styleClass="campo" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <TextField fx:id="txtReferencias" styleClass="campo" promptText="Opcional" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                </GridPane>
+            </VBox>
+
+            <!-- Postres -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label styleClass="seccion-titulo" text="POSTRES"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <ComboBox fx:id="cmbCategoriaNueva" styleClass="combo-carmir" prefWidth="220" promptText="Categoría del postre"/>
+                <Button text="Agregar postre" styleClass="btn-verde" onAction="#onAgregarPostre">
+                    <graphic><FontIcon iconLiteral="bi-plus-circle-fill"/></graphic>
+                </Button>
+            </HBox>
+            <VBox fx:id="listaLineas" spacing="8"/>
+        </VBox>
+    </ScrollPane>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button text="Guardar cambios" styleClass="btn-verde" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

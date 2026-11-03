@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar (RNF-11) o modificar (RNF-14) un usuario del personal -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.usuarios.controller.FormularioUsuarioController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css"
+      styleClass="formulario" spacing="14" prefWidth="560">
+
+    <!-- Encabezado -->
+    <VBox spacing="2">
+        <Label fx:id="lblTitulo" styleClass="formulario-titulo" text="Nuevo usuario"/>
+        <Label fx:id="lblSubtitulo" styleClass="texto-suave" wrapText="true" text=""/>
+    </VBox>
+
+    <!-- Datos generales -->
+    <VBox spacing="4">
+        <Label styleClass="formulario-etiqueta" text="Nombre completo *"/>
+        <TextField fx:id="txtNombre" styleClass="campo" promptText="Ej. María López Hernández"/>
+    </VBox>
+
+    <HBox spacing="14">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label styleClass="formulario-etiqueta" text="Nombre de usuario *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Nombre con el que el personal inicia sesión. No se puede repetir."/></graphic></Label>
+            <TextField fx:id="txtUsuario" styleClass="campo" promptText="Ej. maria.lopez"/>
+        </VBox>
+        <VBox fx:id="cajaEstado" spacing="4" prefWidth="170">
+            <Label styleClass="formulario-etiqueta" text="Estado" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Un usuario inactivo o bloqueado no puede entrar al panel."/></graphic></Label>
+            <ComboBox fx:id="cmbEstado" styleClass="combo-carmir" maxWidth="Infinity"/>
+        </VBox>
+    </HBox>
+
+    <Separator/>
+
+    <!-- Contraseña -->
+    <CheckBox fx:id="chkRestablecer" text="Restablecer contraseña" onAction="#onCambiarRestablecer"/>
+    <HBox spacing="14">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label styleClass="formulario-etiqueta" text="Contraseña *"/>
+            <PasswordField fx:id="pwdContrasena" styleClass="campo" promptText="Contraseña"/>
+        </VBox>
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label styleClass="formulario-etiqueta" text="Confirmar contraseña *"/>
+            <PasswordField fx:id="pwdConfirmacion" styleClass="campo" promptText="Repite la contraseña"/>
+        </VBox>
+    </HBox>
+    <Label fx:id="lblAyudaContrasena" styleClass="texto-ayuda"
+           text="Mínimo 8 caracteres, con al menos una mayúscula y un número."/>
+
+    <Separator/>
+
+    <!-- Permisos -->
+    <Label styleClass="formulario-etiqueta" text="Permisos (marca al menos uno) *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Apartados del panel a los que podrá entrar esta persona."/></graphic></Label>
+    <GridPane fx:id="contenedorPermisos" styleClass="caja-permisos" hgap="20" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints percentWidth="50"/>
+            <ColumnConstraints percentWidth="50"/>
+        </columnConstraints>
+    </GridPane>
+
+    <!-- Mensaje de error -->
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <!-- Botones -->
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Guardar" styleClass="btn-verde" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

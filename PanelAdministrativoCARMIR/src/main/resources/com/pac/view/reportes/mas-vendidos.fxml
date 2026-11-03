@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Más vendidos (RF-47) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.reportes.controller.MasVendidosController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <HBox styleClass="tarjeta" spacing="10" alignment="CENTER_LEFT">
+        <Label styleClass="texto-suave" text="Categoría"/>
+        <ComboBox fx:id="cmbCategoria" styleClass="combo-carmir" prefWidth="200" onAction="#onFiltro"/>
+        <Label styleClass="texto-suave" text="Ordenar por"/>
+        <ComboBox fx:id="cmbOrden" styleClass="combo-carmir" prefWidth="170" onAction="#onFiltro"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Label styleClass="texto-ayuda" wrapText="true" maxWidth="360"
+               text="Cuenta los pedidos pagados (o más avanzados) que no están cancelados ni dados de baja, por fecha de solicitud."/>
+    </HBox>
+
+    <!-- Error de conexión con "Reintentar" -->
+    <HBox fx:id="cajaError" styleClass="aviso-rojo" spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblError" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <graphic><FontIcon iconLiteral="bi-wifi-off"/></graphic>
+        </Label>
+        <Button text="Reintentar" styleClass="btn-azul" onAction="#onReintentar">
+            <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+        </Button>
+    </HBox>
+
+    <HBox spacing="16">
+        <VBox styleClass="kpi-card" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label styleClass="kpi-titulo" text="UNIDADES VENDIDAS"/>
+            <Label fx:id="lblUnidades" styleClass="kpi-valor-chico" text="0"/>
+            <Label fx:id="lblPedidos" styleClass="kpi-detalle"/>
+        </VBox>
+        <VBox styleClass="kpi-card, ingresos" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label styleClass="kpi-titulo" text="INGRESOS POR VENTAS"/>
+            <Label fx:id="lblIngresosVentas" styleClass="kpi-valor-chico" text="\$0.00"/>
+            <Label fx:id="lblCostoVentas" styleClass="kpi-detalle"/>
+        </VBox>
+        <VBox styleClass="kpi-card, utilidad" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label styleClass="kpi-titulo" text="UTILIDAD"/>
+            <Label fx:id="lblUtilidadVentas" styleClass="kpi-valor-chico" text="\$0.00"/>
+            <Label fx:id="lblMargen" styleClass="kpi-detalle"/>
+        </VBox>
+    </HBox>
+
+    <VBox fx:id="cajaAvisos" styleClass="caja-avisos-reporte"/>
+
+    <HBox spacing="16" minHeight="320">
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="420">
+            <Label styleClass="tarjeta-titulo" text="Top 10 productos"/>
+            <BarChart fx:id="graficaTop" styleClass="grafica-carmir, grafica-top" animated="false" legendVisible="false"
+                      VBox.vgrow="ALWAYS" minHeight="260" categoryGap="6">
+                <xAxis><NumberAxis side="BOTTOM" forceZeroInRange="true"/></xAxis>
+                <yAxis><CategoryAxis side="LEFT"/></yAxis>
+            </BarChart>
+        </VBox>
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="620">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label styleClass="tarjeta-titulo" text="Ranking de productos"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblConteoProductos" styleClass="texto-suave"/>
+            </HBox>
+            <TableView fx:id="tblProductos" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="240">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="#" prefWidth="35" minWidth="30">
+                        <cellValueFactory><PropertyValueFactory property="posicion"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Producto" minWidth="170" prefWidth="170">
+                        <cellValueFactory><PropertyValueFactory property="nombre"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Unidades" minWidth="70" prefWidth="70">
+                        <cellValueFactory><PropertyValueFactory property="unidades"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Ingresos" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="ingresos"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Utilidad" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="utilidad"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Margen" prefWidth="70" minWidth="65">
+                        <cellValueFactory><PropertyValueFactory property="margen"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="\% ingresos" minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="porcentaje"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Estado" minWidth="120" prefWidth="120">
+                        <cellValueFactory><PropertyValueFactory property="estado"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label fx:id="lblVacioProductos" styleClass="tabla-vacia" text="Genera el reporte para ver el ranking"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="16" minHeight="220">
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="420">
+            <Label styleClass="tarjeta-titulo" text="Resumen por categoría"/>
+            <TableView fx:id="tblCategorias" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="160">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Categoría" minWidth="130" prefWidth="130">
+                        <cellValueFactory><PropertyValueFactory property="nombre"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Unidades" minWidth="70" prefWidth="70">
+                        <cellValueFactory><PropertyValueFactory property="unidades"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Ingresos" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="ingresos"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Utilidad" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="utilidad"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="\% ingresos" minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="porcentaje"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label styleClass="tabla-vacia" text="Sin ventas"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="620">
+            <Label styleClass="tarjeta-titulo" text="Resumen por personalización"/>
+            <Label styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"
+                   text="Cuántos postres vendidos llevaban cada opción (sabor, relleno, decoración...) y cuánto se cobró por ellos."/>
+            <TableView fx:id="tblOpciones" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="160">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Opción" minWidth="130" prefWidth="130">
+                        <cellValueFactory><PropertyValueFactory property="nombre"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Característica" minWidth="150" prefWidth="150">
+                        <cellValueFactory><PropertyValueFactory property="grupo"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Postres" minWidth="65" prefWidth="65">
+                        <cellValueFactory><PropertyValueFactory property="unidades"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Ingresos" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="ingresos"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Utilidad" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="utilidad"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label styleClass="tabla-vacia" text="Sin ventas"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </HBox>
+</VBox>

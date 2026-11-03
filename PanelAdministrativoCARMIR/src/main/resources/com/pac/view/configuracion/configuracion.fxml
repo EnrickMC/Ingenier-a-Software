@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Configuración del sistema: parámetros, cobertura de envío, historial de cambios y respaldos -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.ConfiguracionController"
+      stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/reportes.css"
+      spacing="14">
+
+    <!-- Se muestra si la base de datos todavía no tiene las tablas de configuración -->
+    <Label fx:id="lblAvisoMigracion" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill"/></graphic>
+    </Label>
+
+    <TabPane fx:id="pestanas" styleClass="pestanas-catalogo" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <Tab fx:id="tabParametros" text="Parámetros" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-sliders"/></graphic>
+            <content><ScrollPane fitToWidth="true" styleClass="scroll-detalle"><fx:include fx:id="parametros" source="parametros.fxml"/></ScrollPane></content>
+        </Tab>
+        <Tab fx:id="tabCobertura" text="Cobertura de envío" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-truck"/></graphic>
+            <content><fx:include fx:id="cobertura" source="cobertura.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabHistorial" text="Historial de cambios" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-clock-history"/></graphic>
+            <content><fx:include fx:id="historial" source="historial.fxml"/></content>
+        </Tab>
+        <Tab fx:id="tabRespaldos" text="Respaldos y sistema" onSelectionChanged="#onCambioPestana">
+            <graphic><FontIcon iconLiteral="bi-hdd-stack-fill"/></graphic>
+            <content><ScrollPane fitToWidth="true" styleClass="scroll-detalle"><fx:include fx:id="respaldos" source="respaldos.fxml"/></ScrollPane></content>
+        </Tab>
+    </TabPane>
+</VBox>

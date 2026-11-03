@@ -1,0 +1,136 @@
+:host {
+  display: contents;
+}
+
+/*
+ * Filtros del catálogo dentro del menú de arriba (encabezado café claro).
+ * El componente no dibuja caja propia (display: contents): su fila se acomoda directo
+ * en la zona «buscador» de la cuadrícula del encabezado (misma fila que el logo y el menú en escritorio).
+ */
+.filtros {
+  display: contents;
+  color: var(--color-blanco);
+}
+
+.fila-superior {
+  grid-area: buscador;
+  min-width: 0;
+  margin-top: 12px;
+  color: var(--color-blanco);
+}
+
+/* Buscador + botón «Todos» en la misma fila */
+.grupo-busqueda {
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Cápsula blanca: lupa, texto y botón «Buscar» por dentro */
+.buscador {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 4px 4px 4px 14px;
+  background: var(--color-blanco);
+  border: 2px solid transparent;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(74, 59, 50, 0.15);
+  transition: border-color 0.15s;
+}
+
+.buscador:focus-within {
+  border-color: var(--color-acento);
+}
+
+.lupa {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: var(--color-texto-suave);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.buscador input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.buscador input:focus {
+  outline: none;
+}
+
+.boton-buscar {
+  flex-shrink: 0;
+  height: 100%;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-acento) 0%, var(--color-acento-oscuro) 100%);
+  color: var(--color-blanco);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.boton-buscar:hover {
+  filter: brightness(1.08);
+}
+
+/* «Todos»: cápsula transparente con borde blanco; blanca cuando está elegida */
+.boton-todos {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-blanco);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.boton-todos svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.boton-todos:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.boton-todos.activa {
+  background: var(--color-blanco);
+  border-color: var(--color-blanco);
+  color: var(--color-acento-oscuro);
+  box-shadow: 0 2px 6px rgba(74, 59, 50, 0.15);
+}
+
+/* Escritorio: el buscador va en la misma fila que el logo y el menú */
+@media (min-width: 1000px) {
+  .fila-superior {
+    margin-top: 0;
+  }
+}

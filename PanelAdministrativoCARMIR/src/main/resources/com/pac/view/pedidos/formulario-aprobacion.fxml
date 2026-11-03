@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana de aprobación del pedido (RF-24) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.FormularioAprobacionController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      styleClass="formulario" spacing="12" prefWidth="500">
+
+    <VBox spacing="2">
+        <Label styleClass="formulario-titulo" text="Aprobar pedido"/>
+        <Label styleClass="texto-suave" wrapText="true"
+               text="El pedido pasará a «Aprobado» y se avisará al cliente con el monto a pagar."/>
+    </VBox>
+
+    <VBox styleClass="caja-info" spacing="4">
+        <Label fx:id="lblResumen" wrapText="true"/>
+    </VBox>
+    <Label fx:id="lblCarga" styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"/>
+
+    <VBox spacing="4">
+        <Label fx:id="lblModalidad" styleClass="formulario-etiqueta"/>
+        <Label styleClass="formulario-etiqueta" text="Anticipo requerido ($) *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Monto que el cliente debe pagar para que el pedido pase a preparación."/></graphic></Label>
+        <TextField fx:id="txtAnticipo" styleClass="campo" promptText="Ej. 300"/>
+        <Label fx:id="lblAyudaAnticipo" styleClass="texto-ayuda" wrapText="true"/>
+    </VBox>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button text="Aprobar pedido" styleClass="btn-verde" defaultButton="true" onAction="#onAprobar">
+            <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

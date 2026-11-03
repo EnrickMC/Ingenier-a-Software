@@ -1,0 +1,2457 @@
+{
+  "modelo": "CARMIR – sistema web de Delicias de Postres",
+  "forma_normal": "3FN",
+  "convenciones": {
+    "tipos": "MySQL",
+    "longitud": "caracteres en textos; [dígitos, decimales] en DECIMAL; null en tipos de tamaño fijo",
+    "cardinalidad": "1:1 o 1:M, leída de la tabla referenciada (padre) a la tabla que tiene la llave foránea (hija)"
+  },
+  "tablas": [
+    {
+      "nombre": "Cliente",
+      "descripcion": "Persona que hace pedidos desde la tienda en línea.",
+      "llave_primaria": [
+        "IdCliente"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdCliente",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del cliente"
+        },
+        {
+          "nombre": "NombreCliente",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre completo para identificar el pedido"
+        },
+        {
+          "nombre": "TelefonoWhatsApp",
+          "tipo": "VARCHAR",
+          "longitud": 10,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Número a 10 dígitos al que llegan las notificaciones"
+        },
+        {
+          "nombre": "CorreoCliente",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Correo de contacto"
+        }
+      ],
+      "llaves_foraneas": [],
+      "unicas": [
+        [
+          "TelefonoWhatsApp"
+        ]
+      ]
+    },
+    {
+      "nombre": "Direccion",
+      "descripcion": "Direcciones de entrega que registra un cliente.",
+      "llave_primaria": [
+        "IdDireccion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdDireccion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la dirección"
+        },
+        {
+          "nombre": "IdCliente",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Cliente dueño de la dirección (relación Registra)"
+        },
+        {
+          "nombre": "Calle",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre de la calle"
+        },
+        {
+          "nombre": "NumeroExterior",
+          "tipo": "VARCHAR",
+          "longitud": 10,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Número exterior"
+        },
+        {
+          "nombre": "NumeroInterior",
+          "tipo": "VARCHAR",
+          "longitud": 10,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Número interior, si existe"
+        },
+        {
+          "nombre": "Colonia",
+          "tipo": "VARCHAR",
+          "longitud": 80,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Colonia o fraccionamiento"
+        },
+        {
+          "nombre": "CodigoPostal",
+          "tipo": "CHAR",
+          "longitud": 5,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Código postal a 5 dígitos"
+        },
+        {
+          "nombre": "Referencias",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Indicaciones para encontrar el domicilio"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdCliente",
+          "referencia": {
+            "tabla": "Cliente",
+            "columna": "IdCliente"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Pedido",
+      "descripcion": "Solicitud del cliente; controla fechas, montos y el estado del proceso.",
+      "llave_primaria": [
+        "Folio"
+      ],
+      "columnas": [
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del pedido que ve el cliente"
+        },
+        {
+          "nombre": "IdCliente",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Cliente que hizo el pedido (relación Realiza)"
+        },
+        {
+          "nombre": "FechaSolicitud",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Fecha y hora en que se creó el pedido"
+        },
+        {
+          "nombre": "FechaEntrega",
+          "tipo": "DATE",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Día en que se entrega"
+        },
+        {
+          "nombre": "HorarioEntrega",
+          "tipo": "TIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Hora acordada de entrega"
+        },
+        {
+          "nombre": "ModalidadEntrega",
+          "tipo": "ENUM('Recoger en tienda','Envio a domicilio')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si se recoge en tienda o se envía a domicilio"
+        },
+        {
+          "nombre": "ModalidadPago",
+          "tipo": "ENUM('Anticipo','Pago total')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si se paga con anticipo o el total al inicio"
+        },
+        {
+          "nombre": "MontoTotal",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Suma de Cantidad × PrecioUnitario de sus postres"
+        },
+        {
+          "nombre": "AnticipoRequerido",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Monto mínimo a pagar para iniciar el pedido"
+        },
+        {
+          "nombre": "EstadoPedido",
+          "tipo": "ENUM('En proceso de aceptacion','Aprobado','Pagado','En preparacion','Pedido terminado','Entregado')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Estado actual del pedido"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdCliente",
+          "referencia": {
+            "tabla": "Cliente",
+            "columna": "IdCliente"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "EntregaDomicilio",
+      "descripcion": "Dirección a la que se entrega un pedido; solo existe para pedidos a domicilio.",
+      "llave_primaria": [
+        "Folio"
+      ],
+      "columnas": [
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Pedido que se entrega a domicilio (relación Se entrega)"
+        },
+        {
+          "nombre": "IdDireccion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Dirección a la que se entrega el pedido (relación Se entrega en)"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        },
+        {
+          "columna": "IdDireccion",
+          "referencia": {
+            "tabla": "Direccion",
+            "columna": "IdDireccion"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "DetallePedido",
+      "descripcion": "Postres incluidos en cada pedido, con los datos propios de ese pedido.",
+      "llave_primaria": [
+        "Folio",
+        "IdPostre"
+      ],
+      "columnas": [
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Pedido al que pertenece la línea (relación Contiene)"
+        },
+        {
+          "nombre": "IdPostre",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Postre pedido"
+        },
+        {
+          "nombre": "Cantidad",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Piezas de ese postre",
+          "regla": "Mayor a 0"
+        },
+        {
+          "nombre": "Dedicatoria",
+          "tipo": "VARCHAR",
+          "longitud": 150,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Texto que va escrito en el postre"
+        },
+        {
+          "nombre": "Comentario",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Indicaciones especiales del cliente"
+        },
+        {
+          "nombre": "PrecioUnitario",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "PrecioVenta del postre al momento del pedido"
+        },
+        {
+          "nombre": "CostoUnitario",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "CostoIngredientes del postre al momento del pedido"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        },
+        {
+          "columna": "IdPostre",
+          "referencia": {
+            "tabla": "Postre",
+            "columna": "IdPostre"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Pago",
+      "descripcion": "Cada pago o comprobante que envía el cliente.",
+      "llave_primaria": [
+        "IdPago"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdPago",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del pago"
+        },
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Pedido que se paga (relación Recibe)"
+        },
+        {
+          "nombre": "IdUsuario",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": true,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Usuario que validó o rechazó el pago (relación Valida)",
+          "regla": "opcional hasta validar"
+        },
+        {
+          "nombre": "MontoPago",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Cantidad pagada",
+          "regla": "Mayor a 0"
+        },
+        {
+          "nombre": "FechaPago",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Fecha y hora del pago"
+        },
+        {
+          "nombre": "MetodoPago",
+          "tipo": "ENUM('Transferencia','Deposito','Efectivo')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Forma de pago"
+        },
+        {
+          "nombre": "Referencia",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Número de referencia o folio bancario"
+        },
+        {
+          "nombre": "LinkComprobante",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Enlace a la imagen del comprobante"
+        },
+        {
+          "nombre": "EstadoValidacion",
+          "tipo": "ENUM('Pendiente','Validado','Rechazado')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Resultado de la revisión"
+        },
+        {
+          "nombre": "MotivoRechazo",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Por qué se rechazó el pago"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        },
+        {
+          "columna": "IdUsuario",
+          "referencia": {
+            "tabla": "Usuario",
+            "columna": "IdUsuario"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Cancelacion",
+      "descripcion": "Registro de un pedido cancelado; el pedido conserva su último estado.",
+      "llave_primaria": [
+        "IdCancelacion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdCancelacion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la cancelación"
+        },
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Pedido cancelado (relación Puede tener)"
+        },
+        {
+          "nombre": "MotivoCancelacion",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Motivo escrito en texto libre"
+        },
+        {
+          "nombre": "FechaHoraCancelacion",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Momento de la cancelación"
+        },
+        {
+          "nombre": "MontoReembolso",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Dinero a devolver, a partir de los pagos validados",
+          "regla": "0 si no hubo pagos"
+        },
+        {
+          "nombre": "EstadoReembolso",
+          "tipo": "ENUM('No aplica','Pendiente','Realizado')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Situación de la devolución"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        }
+      ],
+      "unicas": [
+        [
+          "Folio"
+        ]
+      ]
+    },
+    {
+      "nombre": "HistorialEstado",
+      "descripcion": "Bitácora de cada cambio de estado de un pedido.",
+      "llave_primaria": [
+        "IdHistorial"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdHistorial",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del cambio"
+        },
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Pedido que cambió (relación Registra)"
+        },
+        {
+          "nombre": "IdUsuario",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Usuario que hizo el cambio (relación Realiza)"
+        },
+        {
+          "nombre": "EstadoAnterior",
+          "tipo": "VARCHAR",
+          "longitud": 30,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Estado antes del cambio; vacío en el primer registro"
+        },
+        {
+          "nombre": "EstadoNuevo",
+          "tipo": "VARCHAR",
+          "longitud": 30,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Estado después del cambio"
+        },
+        {
+          "nombre": "FechaHoraCambio",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Momento del cambio"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        },
+        {
+          "columna": "IdUsuario",
+          "referencia": {
+            "tabla": "Usuario",
+            "columna": "IdUsuario"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Notificacion",
+      "descripcion": "Mensajes enviados al cliente por eventos del pedido.",
+      "llave_primaria": [
+        "IdNotificacion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdNotificacion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del envío"
+        },
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Pedido que generó el aviso (relación Genera)"
+        },
+        {
+          "nombre": "TipoEvento",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Evento que disparó el aviso, por ejemplo \"Pago validado\""
+        },
+        {
+          "nombre": "Canal",
+          "tipo": "ENUM('WhatsApp','Correo')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Medio de envío"
+        },
+        {
+          "nombre": "Destino",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Número o correo al que se envió"
+        },
+        {
+          "nombre": "Mensaje",
+          "tipo": "TEXT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Texto enviado"
+        },
+        {
+          "nombre": "FechaHoraEnvio",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Momento del envío"
+        },
+        {
+          "nombre": "ResultadoEnvio",
+          "tipo": "ENUM('Enviado','Fallido')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si el mensaje se entregó"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "CategoriaPostre",
+      "descripcion": "Tipo de postre que se vende: Pastel, Gelatina, Galletas.",
+      "llave_primaria": [
+        "IdCategoria"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdCategoria",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la categoría"
+        },
+        {
+          "nombre": "NombreCategoria",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre que se muestra al cliente"
+        },
+        {
+          "nombre": "DescripcionCategoria",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Explicación breve de la categoría"
+        },
+        {
+          "nombre": "EstadoCategoria",
+          "tipo": "ENUM('Activa','Inactiva')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si la categoría está en uso (baja lógica)"
+        }
+      ],
+      "llaves_foraneas": [],
+      "unicas": [
+        [
+          "NombreCategoria"
+        ]
+      ]
+    },
+    {
+      "nombre": "Postre",
+      "descripcion": "Configuración única de un postre; la usan los pedidos y el catálogo.",
+      "llave_primaria": [
+        "IdPostre"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdPostre",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del postre"
+        },
+        {
+          "nombre": "IdCategoria",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Categoría del postre (relación Clasifica)"
+        },
+        {
+          "nombre": "ClaveConfiguracion",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Texto con las opciones elegidas en orden (IdOpcion × cantidad); evita duplicar postres iguales"
+        },
+        {
+          "nombre": "NombrePostre",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre comercial; solo en postres del catálogo"
+        },
+        {
+          "nombre": "DescripcionPostre",
+          "tipo": "TEXT",
+          "longitud": null,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Descripción para el catálogo"
+        },
+        {
+          "nombre": "LinkFotografia",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Enlace a la foto del postre"
+        },
+        {
+          "nombre": "MostrarEnTienda",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si aparece en el catálogo público"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdCategoria",
+          "referencia": {
+            "tabla": "CategoriaPostre",
+            "columna": "IdCategoria"
+          }
+        }
+      ],
+      "unicas": [
+        [
+          "ClaveConfiguracion"
+        ]
+      ]
+    },
+    {
+      "nombre": "Caracteristica",
+      "descripcion": "Característica que se puede personalizar dentro de una categoría (Tipo, Sabor, Pisos, Decoración) y sus reglas de selección.",
+      "llave_primaria": [
+        "IdCaracteristica"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdCaracteristica",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la característica"
+        },
+        {
+          "nombre": "IdCategoria",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Categoría a la que pertenece (relación Incluye)"
+        },
+        {
+          "nombre": "NombreCaracteristica",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre que ve el cliente, por ejemplo \"Decoración\"",
+          "regla": "Único por categoría"
+        },
+        {
+          "nombre": "DescripcionCaracteristica",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Explicación para el cliente o el personal"
+        },
+        {
+          "nombre": "Obligatoria",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si el cliente debe elegir al menos una opción"
+        },
+        {
+          "nombre": "SeleccionMultiple",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Falso: solo se elige una opción (Sabor). Verdadero: varias opciones, limitadas por el presupuesto"
+        },
+        {
+          "nombre": "PresupuestoSeleccion",
+          "tipo": "DECIMAL",
+          "longitud": [
+            6,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Puntos disponibles para elegir opciones; solo aplica si SeleccionMultiple es verdadero",
+          "regla": "Mayor a 0"
+        },
+        {
+          "nombre": "OrdenMostrar",
+          "tipo": "TINYINT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Orden en que aparece al armar el postre"
+        },
+        {
+          "nombre": "Disponible",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si se muestra al armar postres de esa categoría"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdCategoria",
+          "referencia": {
+            "tabla": "CategoriaPostre",
+            "columna": "IdCategoria"
+          }
+        }
+      ],
+      "unicas": [
+        [
+          "IdCategoria",
+          "NombreCaracteristica"
+        ]
+      ]
+    },
+    {
+      "nombre": "OpcionCaracteristica",
+      "descripcion": "Cada valor que el cliente puede elegir dentro de una característica de una categoría.",
+      "llave_primaria": [
+        "IdOpcion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdOpcion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la opción"
+        },
+        {
+          "nombre": "IdCaracteristica",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Característica a la que pertenece (relación Ofrece)"
+        },
+        {
+          "nombre": "NombreOpcion",
+          "tipo": "VARCHAR",
+          "longitud": 60,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Valor que ve el cliente, por ejemplo \"Tres leches\""
+        },
+        {
+          "nombre": "DescripcionOpcion",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Detalle de la opción"
+        },
+        {
+          "nombre": "LinkImagen",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Enlace a la foto de la opción"
+        },
+        {
+          "nombre": "MultiplicadorIngredientes",
+          "tipo": "DECIMAL",
+          "longitud": [
+            4,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Factor que escala las opciones con SeEscala; por ejemplo 2 para 2 pisos",
+          "regla": "1 por defecto"
+        },
+        {
+          "nombre": "MultiplicadorCosto",
+          "tipo": "DECIMAL",
+          "longitud": [
+            4,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Factor que convierte el costo de la opción en precio de venta",
+          "regla": "3 por defecto"
+        },
+        {
+          "nombre": "SeEscala",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si su costo se multiplica por el MultiplicadorIngredientes del tamaño o pisos"
+        },
+        {
+          "nombre": "Disponible",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si el cliente la puede elegir"
+        },
+        {
+          "nombre": "PuntosSeleccion",
+          "tipo": "DECIMAL",
+          "longitud": [
+            6,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Puntos que consume del presupuesto de su característica por cada vez que se elige",
+          "regla": "Mayor a 0 en selección múltiple"
+        },
+        {
+          "nombre": "MultiplicadorPresupuesto",
+          "tipo": "DECIMAL",
+          "longitud": [
+            4,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Factor que amplía el presupuesto de las características múltiples de la categoría; por ejemplo 2 en tamaño para 200 personas",
+          "regla": "1 por defecto; distinto de 1 solo en características de selección única"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdCaracteristica",
+          "referencia": {
+            "tabla": "Caracteristica",
+            "columna": "IdCaracteristica"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "PostreOpcion",
+      "descripcion": "Opciones que forman cada postre.",
+      "llave_primaria": [
+        "IdPostre",
+        "IdOpcion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdPostre",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Postre configurado"
+        },
+        {
+          "nombre": "IdOpcion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Opción elegida"
+        },
+        {
+          "nombre": "CantidadElegida",
+          "tipo": "TINYINT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Veces que se eligió la opción; 1 si la característica no es de selección múltiple. La suma de PuntosSeleccion × CantidadElegida no debe pasar del PresupuestoSeleccion × los MultiplicadorPresupuesto elegidos",
+          "regla": "Mayor a 0"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdPostre",
+          "referencia": {
+            "tabla": "Postre",
+            "columna": "IdPostre"
+          }
+        },
+        {
+          "columna": "IdOpcion",
+          "referencia": {
+            "tabla": "OpcionCaracteristica",
+            "columna": "IdOpcion"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "ExclusionOpciones",
+      "descripcion": "Pares de opciones que no pueden elegirse juntas, por ejemplo tres leches con frambuesa.",
+      "llave_primaria": [
+        "IdExclusion"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdExclusion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la exclusión"
+        },
+        {
+          "nombre": "IdOpcion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Primera opción del par (relación Excluye)"
+        },
+        {
+          "nombre": "IdOpcionExcluida",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Segunda opción del par (relación Es excluida)"
+        },
+        {
+          "nombre": "MotivoExclusion",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Por qué no se pueden combinar"
+        },
+        {
+          "nombre": "EstadoExclusion",
+          "tipo": "ENUM('Activa','Inactiva')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si la regla está vigente"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdOpcion",
+          "referencia": {
+            "tabla": "OpcionCaracteristica",
+            "columna": "IdOpcion"
+          }
+        },
+        {
+          "columna": "IdOpcionExcluida",
+          "referencia": {
+            "tabla": "OpcionCaracteristica",
+            "columna": "IdOpcion"
+          }
+        }
+      ],
+      "unicas": [
+        [
+          "IdOpcion",
+          "IdOpcionExcluida"
+        ]
+      ]
+    },
+    {
+      "nombre": "Receta",
+      "descripcion": "Receta de una opción; sus ingredientes están en la tabla intermedia RecetaInsumo.",
+      "llave_primaria": [
+        "IdReceta"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdReceta",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la receta"
+        },
+        {
+          "nombre": "IdOpcion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Opción que se prepara con esta receta"
+        },
+        {
+          "nombre": "NombreReceta",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre de la receta, por ejemplo \"Bizcocho tres leches\""
+        },
+        {
+          "nombre": "PasosPreparacion",
+          "tipo": "TEXT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Instrucciones de elaboración"
+        },
+        {
+          "nombre": "TiempoElaboracion",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Minutos que tarda en prepararse"
+        },
+        {
+          "nombre": "EstadoReceta",
+          "tipo": "ENUM('Activa','Inactiva')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si la receta está en uso (baja lógica)"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdOpcion",
+          "referencia": {
+            "tabla": "OpcionCaracteristica",
+            "columna": "IdOpcion"
+          }
+        }
+      ],
+      "unicas": [
+        [
+          "IdOpcion"
+        ]
+      ]
+    },
+    {
+      "nombre": "RecetaInsumo",
+      "descripcion": "Ingredientes de cada receta.",
+      "llave_primaria": [
+        "IdReceta",
+        "IdInsumo"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdReceta",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Receta"
+        },
+        {
+          "nombre": "IdInsumo",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Insumo que lleva"
+        },
+        {
+          "nombre": "CantidadInsumo",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Cantidad del insumo, en la UnidadMedida del insumo",
+          "regla": "Mayor a 0"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdReceta",
+          "referencia": {
+            "tabla": "Receta",
+            "columna": "IdReceta"
+          }
+        },
+        {
+          "columna": "IdInsumo",
+          "referencia": {
+            "tabla": "Insumo",
+            "columna": "IdInsumo"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Insumo",
+      "descripcion": "Materia prima que se compra y se descuenta al preparar pedidos.",
+      "llave_primaria": [
+        "IdInsumo"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdInsumo",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del insumo"
+        },
+        {
+          "nombre": "NombreInsumo",
+          "tipo": "VARCHAR",
+          "longitud": 80,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre del insumo, por ejemplo \"Harina de trigo\""
+        },
+        {
+          "nombre": "CategoriaInsumo",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Grupo del insumo, por ejemplo \"Lácteos\""
+        },
+        {
+          "nombre": "UnidadMedida",
+          "tipo": "ENUM('kg','g','L','ml','pieza')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Unidad en que se mide"
+        },
+        {
+          "nombre": "CostoUnitario",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Costo por unidad de medida"
+        },
+        {
+          "nombre": "StockMinimo",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Cantidad por debajo de la cual se genera alerta"
+        },
+        {
+          "nombre": "Perecedero",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si caduca; activa el control de caducidad por lote"
+        },
+        {
+          "nombre": "EstadoInsumo",
+          "tipo": "ENUM('Activo','Inactivo')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si el insumo está en uso (baja lógica), no si hay existencia"
+        }
+      ],
+      "llaves_foraneas": [],
+      "unicas": [
+        [
+          "NombreInsumo"
+        ]
+      ]
+    },
+    {
+      "nombre": "Lote",
+      "descripcion": "Cada compra de un insumo, con su propia existencia y caducidad.",
+      "llave_primaria": [
+        "IdLote"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdLote",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del lote"
+        },
+        {
+          "nombre": "IdInsumo",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Insumo comprado (relación Tiene)"
+        },
+        {
+          "nombre": "CantidadComprada",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Cantidad que entró en la compra",
+          "regla": "Mayor a 0"
+        },
+        {
+          "nombre": "ExistenciaLote",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Lo que queda de esa compra; baja al descontar",
+          "regla": "0 o más"
+        },
+        {
+          "nombre": "CostoCompra",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Total pagado por el lote"
+        },
+        {
+          "nombre": "FechaCompra",
+          "tipo": "DATE",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Fecha de la compra"
+        },
+        {
+          "nombre": "Proveedor",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Proveedor de la compra"
+        },
+        {
+          "nombre": "FechaCaducidad",
+          "tipo": "DATE",
+          "longitud": null,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Fecha en que caduca; vacía si no es perecedero"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdInsumo",
+          "referencia": {
+            "tabla": "Insumo",
+            "columna": "IdInsumo"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "MovimientoInventario",
+      "descripcion": "Cada entrada o salida de un insumo.",
+      "llave_primaria": [
+        "IdMovimiento"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdMovimiento",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del movimiento"
+        },
+        {
+          "nombre": "IdInsumo",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Insumo afectado (relación Afecta)"
+        },
+        {
+          "nombre": "IdUsuario",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Usuario que lo registró (relación Captura)"
+        },
+        {
+          "nombre": "Folio",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": true,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Pedido que lo provocó; vacío en compras, mermas y ajustes (relación Provoca)"
+        },
+        {
+          "nombre": "TipoMovimiento",
+          "tipo": "ENUM('Compra','Produccion','Merma','Ajuste')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Clase de movimiento"
+        },
+        {
+          "nombre": "CantidadMovimiento",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Cantidad que entra (+) o sale (−)"
+        },
+        {
+          "nombre": "Motivo",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Explicación, sobre todo en mermas y ajustes"
+        },
+        {
+          "nombre": "FechaMovimiento",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Momento del movimiento"
+        },
+        {
+          "nombre": "CostoMovimiento",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            2
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Valor en dinero del movimiento"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdInsumo",
+          "referencia": {
+            "tabla": "Insumo",
+            "columna": "IdInsumo"
+          }
+        },
+        {
+          "columna": "IdUsuario",
+          "referencia": {
+            "tabla": "Usuario",
+            "columna": "IdUsuario"
+          }
+        },
+        {
+          "columna": "Folio",
+          "referencia": {
+            "tabla": "Pedido",
+            "columna": "Folio"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "AlertaInventario",
+      "descripcion": "Aviso de existencia baja o de caducidad próxima de un insumo.",
+      "llave_primaria": [
+        "IdAlerta"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdAlerta",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único de la alerta"
+        },
+        {
+          "nombre": "IdInsumo",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Insumo que generó la alerta (relación Genera)"
+        },
+        {
+          "nombre": "TipoAlerta",
+          "tipo": "ENUM('Existencia baja','Proxima caducidad','Caducado')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Motivo de la alerta"
+        },
+        {
+          "nombre": "FechaAlerta",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Momento en que se generó"
+        },
+        {
+          "nombre": "ExistenciaEnAlerta",
+          "tipo": "DECIMAL",
+          "longitud": [
+            10,
+            3
+          ],
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "ExistenciaTotal del insumo al generarse la alerta"
+        },
+        {
+          "nombre": "EstadoAlerta",
+          "tipo": "ENUM('Pendiente','Atendida')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si ya se atendió"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdInsumo",
+          "referencia": {
+            "tabla": "Insumo",
+            "columna": "IdInsumo"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "AlertaCaducidad",
+      "descripcion": "Datos extra de una alerta de caducidad: el lote que está por caducar. Los días para caducar se calculan con Lote.FechaCaducidad − FechaAlerta.",
+      "llave_primaria": [
+        "IdAlerta"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdAlerta",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Alerta de inventario de tipo caducidad que se detalla"
+        },
+        {
+          "nombre": "IdLote",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": true,
+          "descripcion": "Lote que está por caducar (relación Advierte)"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdAlerta",
+          "referencia": {
+            "tabla": "AlertaInventario",
+            "columna": "IdAlerta"
+          }
+        },
+        {
+          "columna": "IdLote",
+          "referencia": {
+            "tabla": "Lote",
+            "columna": "IdLote"
+          }
+        }
+      ],
+      "unicas": []
+    },
+    {
+      "nombre": "Usuario",
+      "descripcion": "Persona del negocio que entra al sistema (Administradora o Personal). La sesión se maneja en el programa y no se guarda.",
+      "llave_primaria": [
+        "IdUsuario"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdUsuario",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del usuario"
+        },
+        {
+          "nombre": "NombreCompleto",
+          "tipo": "VARCHAR",
+          "longitud": 100,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre de la persona"
+        },
+        {
+          "nombre": "NombreUsuario",
+          "tipo": "VARCHAR",
+          "longitud": 30,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Nombre con el que inicia sesión"
+        },
+        {
+          "nombre": "Contraseña",
+          "tipo": "VARCHAR",
+          "longitud": 255,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Contraseña cifrada (hash), nunca en texto plano"
+        },
+        {
+          "nombre": "EstadoUsuario",
+          "tipo": "ENUM('Activo','Inactivo','Bloqueado')",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si puede entrar al sistema"
+        },
+        {
+          "nombre": "UltimoAcceso",
+          "tipo": "DATETIME",
+          "longitud": null,
+          "nulo": true,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Fecha y hora de su último inicio de sesión"
+        },
+        {
+          "nombre": "IntentosFallidos",
+          "tipo": "TINYINT",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Intentos fallidos seguidos; bloquea al llegar al límite",
+          "regla": "Inicia en 0"
+        }
+      ],
+      "llaves_foraneas": [],
+      "unicas": [
+        [
+          "NombreUsuario"
+        ]
+      ]
+    },
+    {
+      "nombre": "Permiso",
+      "descripcion": "Cada acción del sistema que se le puede asignar a un usuario.",
+      "llave_primaria": [
+        "IdPermiso"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdPermiso",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": false,
+          "descripcion": "Identificador único del permiso"
+        },
+        {
+          "nombre": "NombrePermiso",
+          "tipo": "VARCHAR",
+          "longitud": 50,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Acción permitida, por ejemplo \"Validar pagos\""
+        }
+      ],
+      "llaves_foraneas": [],
+      "unicas": [
+        [
+          "NombrePermiso"
+        ]
+      ]
+    },
+    {
+      "nombre": "UsuarioPermiso",
+      "descripcion": "Permisos asignados a cada usuario.",
+      "llave_primaria": [
+        "IdUsuario",
+        "IdPermiso"
+      ],
+      "columnas": [
+        {
+          "nombre": "IdUsuario",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Usuario"
+        },
+        {
+          "nombre": "IdPermiso",
+          "tipo": "INT",
+          "longitud": null,
+          "nulo": false,
+          "pk": true,
+          "fk": true,
+          "descripcion": "Permiso asignado"
+        }
+      ],
+      "llaves_foraneas": [
+        {
+          "columna": "IdUsuario",
+          "referencia": {
+            "tabla": "Usuario",
+            "columna": "IdUsuario"
+          }
+        },
+        {
+          "columna": "IdPermiso",
+          "referencia": {
+            "tabla": "Permiso",
+            "columna": "IdPermiso"
+          }
+        }
+      ],
+      "unicas": []
+    }
+  ],
+  "relaciones": [
+    {
+      "nombre": "Registra",
+      "padre": {
+        "tabla": "Cliente",
+        "columna": "IdCliente"
+      },
+      "hija": {
+        "tabla": "Direccion",
+        "columna": "IdCliente"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Realiza",
+      "padre": {
+        "tabla": "Cliente",
+        "columna": "IdCliente"
+      },
+      "hija": {
+        "tabla": "Pedido",
+        "columna": "IdCliente"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Se entrega",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "EntregaDomicilio",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:1",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Se entrega en",
+      "padre": {
+        "tabla": "Direccion",
+        "columna": "IdDireccion"
+      },
+      "hija": {
+        "tabla": "EntregaDomicilio",
+        "columna": "IdDireccion"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Contiene",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "DetallePedido",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Contiene",
+      "padre": {
+        "tabla": "Postre",
+        "columna": "IdPostre"
+      },
+      "hija": {
+        "tabla": "DetallePedido",
+        "columna": "IdPostre"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Recibe",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "Pago",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Valida",
+      "padre": {
+        "tabla": "Usuario",
+        "columna": "IdUsuario"
+      },
+      "hija": {
+        "tabla": "Pago",
+        "columna": "IdUsuario"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": false,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Puede tener",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "Cancelacion",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:1",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Registra",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "HistorialEstado",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Realiza",
+      "padre": {
+        "tabla": "Usuario",
+        "columna": "IdUsuario"
+      },
+      "hija": {
+        "tabla": "HistorialEstado",
+        "columna": "IdUsuario"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Genera",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "Notificacion",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Clasifica",
+      "padre": {
+        "tabla": "CategoriaPostre",
+        "columna": "IdCategoria"
+      },
+      "hija": {
+        "tabla": "Postre",
+        "columna": "IdCategoria"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Incluye",
+      "padre": {
+        "tabla": "CategoriaPostre",
+        "columna": "IdCategoria"
+      },
+      "hija": {
+        "tabla": "Caracteristica",
+        "columna": "IdCategoria"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Ofrece",
+      "padre": {
+        "tabla": "Caracteristica",
+        "columna": "IdCaracteristica"
+      },
+      "hija": {
+        "tabla": "OpcionCaracteristica",
+        "columna": "IdCaracteristica"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Elige",
+      "padre": {
+        "tabla": "Postre",
+        "columna": "IdPostre"
+      },
+      "hija": {
+        "tabla": "PostreOpcion",
+        "columna": "IdPostre"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Elige",
+      "padre": {
+        "tabla": "OpcionCaracteristica",
+        "columna": "IdOpcion"
+      },
+      "hija": {
+        "tabla": "PostreOpcion",
+        "columna": "IdOpcion"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Excluye",
+      "padre": {
+        "tabla": "OpcionCaracteristica",
+        "columna": "IdOpcion"
+      },
+      "hija": {
+        "tabla": "ExclusionOpciones",
+        "columna": "IdOpcion"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Excluye",
+      "padre": {
+        "tabla": "OpcionCaracteristica",
+        "columna": "IdOpcion"
+      },
+      "hija": {
+        "tabla": "ExclusionOpciones",
+        "columna": "IdOpcionExcluida"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Se prepara con",
+      "padre": {
+        "tabla": "OpcionCaracteristica",
+        "columna": "IdOpcion"
+      },
+      "hija": {
+        "tabla": "Receta",
+        "columna": "IdOpcion"
+      },
+      "cardinalidad": "1:1",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Necesita",
+      "padre": {
+        "tabla": "Receta",
+        "columna": "IdReceta"
+      },
+      "hija": {
+        "tabla": "RecetaInsumo",
+        "columna": "IdReceta"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Necesita",
+      "padre": {
+        "tabla": "Insumo",
+        "columna": "IdInsumo"
+      },
+      "hija": {
+        "tabla": "RecetaInsumo",
+        "columna": "IdInsumo"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Tiene",
+      "padre": {
+        "tabla": "Insumo",
+        "columna": "IdInsumo"
+      },
+      "hija": {
+        "tabla": "Lote",
+        "columna": "IdInsumo"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Afecta",
+      "padre": {
+        "tabla": "Insumo",
+        "columna": "IdInsumo"
+      },
+      "hija": {
+        "tabla": "MovimientoInventario",
+        "columna": "IdInsumo"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Captura",
+      "padre": {
+        "tabla": "Usuario",
+        "columna": "IdUsuario"
+      },
+      "hija": {
+        "tabla": "MovimientoInventario",
+        "columna": "IdUsuario"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Provoca",
+      "padre": {
+        "tabla": "Pedido",
+        "columna": "Folio"
+      },
+      "hija": {
+        "tabla": "MovimientoInventario",
+        "columna": "Folio"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": false,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Genera",
+      "padre": {
+        "tabla": "Insumo",
+        "columna": "IdInsumo"
+      },
+      "hija": {
+        "tabla": "AlertaInventario",
+        "columna": "IdInsumo"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Detalla",
+      "padre": {
+        "tabla": "AlertaInventario",
+        "columna": "IdAlerta"
+      },
+      "hija": {
+        "tabla": "AlertaCaducidad",
+        "columna": "IdAlerta"
+      },
+      "cardinalidad": "1:1",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Advierte",
+      "padre": {
+        "tabla": "Lote",
+        "columna": "IdLote"
+      },
+      "hija": {
+        "tabla": "AlertaCaducidad",
+        "columna": "IdLote"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "no identificadora"
+    },
+    {
+      "nombre": "Tiene",
+      "padre": {
+        "tabla": "Usuario",
+        "columna": "IdUsuario"
+      },
+      "hija": {
+        "tabla": "UsuarioPermiso",
+        "columna": "IdUsuario"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    },
+    {
+      "nombre": "Tiene",
+      "padre": {
+        "tabla": "Permiso",
+        "columna": "IdPermiso"
+      },
+      "hija": {
+        "tabla": "UsuarioPermiso",
+        "columna": "IdPermiso"
+      },
+      "cardinalidad": "1:M",
+      "obligatoria": true,
+      "tipo": "identificadora"
+    }
+  ]
+}

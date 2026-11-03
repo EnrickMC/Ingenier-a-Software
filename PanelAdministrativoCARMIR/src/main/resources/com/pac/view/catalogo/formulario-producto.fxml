@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.pac.util.IconoAyuda?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Ventana para registrar (RF-18) o modificar (RF-19) un producto con sus opciones -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.catalogo.controller.FormularioProductoController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css"
+      styleClass="formulario" spacing="10" prefWidth="860" prefHeight="700">
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTitulo" styleClass="formulario-titulo" text="Nuevo Postre"/>
+            <Label fx:id="lblSku" styleClass="texto-suave"/>
+        </VBox>
+        <!-- Precio y costo calculados en vivo con las recetas de las opciones -->
+        <VBox styleClass="caja-precio" alignment="CENTER_RIGHT" spacing="2">
+            <Label fx:id="lblPrecio" styleClass="precio-grande" text="\$0.00"/>
+            <Label fx:id="lblCosto" styleClass="texto-suave" text="Costo: \$0.00"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="16" VBox.vgrow="ALWAYS">
+        <!-- ===== Datos generales ===== -->
+        <VBox spacing="10" prefWidth="330" minWidth="330" maxWidth="330">
+            <VBox spacing="4">
+                <Label styleClass="formulario-etiqueta" text="Categoría *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Categoría de postres a la que pertenece el producto. Define qué características se pueden elegir."/></graphic></Label>
+                <ComboBox fx:id="cmbCategoria" styleClass="combo-carmir" maxWidth="Infinity" onAction="#onCambioCategoria"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label styleClass="formulario-etiqueta" text="Nombre *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Nombre del producto tal como lo verá el cliente en la tienda."/></graphic></Label>
+                <TextField fx:id="txtNombre" styleClass="campo" promptText="Ej. Pastel de tres leches"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label styleClass="formulario-etiqueta" text="Descripción"/>
+                <TextArea fx:id="txtDescripcion" styleClass="campo" prefRowCount="3" wrapText="true"
+                          promptText="Descripción para el catálogo"/>
+            </VBox>
+            <VBox spacing="4">
+                <Label styleClass="formulario-etiqueta" text="Imagen del producto" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+                    <graphic><IconoAyuda texto="Foto del producto. Pega un enlace de internet (http/https) o elige un archivo de esta computadora con el botón Elegir imagen. Es obligatoria si se muestra en la tienda. Ojo: la tienda web solo puede mostrar imágenes con enlace de internet."/></graphic>
+                </Label>
+                <HBox spacing="6">
+                    <TextField fx:id="txtFoto" styleClass="campo" HBox.hgrow="ALWAYS" promptText="Enlace o archivo"/>
+                    <Button text="Elegir" minWidth="-Infinity" styleClass="btn-secundario" onAction="#onElegirFoto">
+                        <graphic><FontIcon iconLiteral="bi-folder2-open"/></graphic>
+                    </Button>
+                    <Button text="Ver" minWidth="-Infinity" styleClass="btn-oscuro" onAction="#onVerFoto">
+                        <graphic><FontIcon iconLiteral="bi-image-fill"/></graphic>
+                    </Button>
+                </HBox>
+                <Label styleClass="texto-ayuda" wrapText="true"
+                       text="Formatos: PNG, JPG, JPEG, GIF, BMP o WEBP."/>
+            </VBox>
+            <VBox styleClass="caja-imagen" alignment="CENTER" minHeight="130" prefHeight="130">
+                <ImageView fx:id="imgFoto" fitWidth="300" fitHeight="125" preserveRatio="true"/>
+                <Label fx:id="lblSinImagen" styleClass="texto-suave" text="Sin imagen">
+                    <graphic><FontIcon iconLiteral="bi-image-fill"/></graphic>
+                </Label>
+            </VBox>
+            <CheckBox fx:id="chkMostrar" text="Mostrar producto en la tienda web"/>
+        </VBox>
+
+        <Separator orientation="VERTICAL"/>
+
+        <!-- ===== Opciones por característica (se arman en el controlador) ===== -->
+        <VBox spacing="8" HBox.hgrow="ALWAYS">
+            <Label styleClass="formulario-etiqueta" text="Opciones que forman el postre" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
+<graphic><IconoAyuda texto="Combinación de opciones que define el postre. El precio y el costo se calculan con las recetas de esas opciones."/></graphic></Label>
+            <Label styleClass="texto-ayuda" wrapText="true"
+                   text="Las características aparecen en el orden en que las ve el cliente. Se respetan las obligatorias, el presupuesto de selección y las exclusiones."/>
+            <ScrollPane fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+                <VBox fx:id="contenedorCaracteristicas" spacing="10"/>
+            </ScrollPane>
+            <VBox fx:id="listaAvisos" styleClass="caja-avisos" spacing="3"/>
+        </VBox>
+    </HBox>
+
+    <Label fx:id="lblMensaje" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-exclamation-triangle-fill" iconColor="#c0392b"/></graphic>
+    </Label>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button fx:id="btnGuardar" text="Guardar" styleClass="btn-verde" defaultButton="true" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

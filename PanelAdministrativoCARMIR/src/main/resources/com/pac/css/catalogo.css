@@ -1,0 +1,117 @@
+/* =====================================================================
+   Módulo 3 · Catálogo de Personalización (catalogo.fxml, sus pestañas y formularios)
+   Usa los colores definidos en carmir-base.css y las clases de usuarios.css
+   ===================================================================== */
+
+/* ---------- Pestañas ---------- */
+.pestanas-catalogo { -fx-background-color: transparent; }
+.pestanas-catalogo > .tab-header-area { -fx-padding: 0 0 6 0; }
+.pestanas-catalogo > .tab-header-area > .tab-header-background { -fx-background-color: transparent; }
+.pestanas-catalogo .tab {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 6 6 0 0;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+.pestanas-catalogo .tab:selected { -fx-background-color: -carmir-sidebar; }
+.pestanas-catalogo .tab .tab-label { -fx-text-fill: -carmir-texto-titulo; -fx-font-weight: bold; }
+.pestanas-catalogo .tab:selected .tab-label { -fx-text-fill: white; }
+.pestanas-catalogo .tab .ikonli-font-icon { -fx-icon-color: -carmir-acento; -fx-icon-size: 17; }
+.pestanas-catalogo .tab:selected .ikonli-font-icon { -fx-icon-color: white; }
+.pestanas-catalogo .tab:selected .focus-indicator { -fx-border-color: transparent; }
+
+.pestana-contenido { -fx-padding: 12 0 0 0; }
+
+/* ---------- Avisos ---------- */
+.aviso-consulta {
+    -fx-background-color: -carmir-azul-fondo;
+    -fx-text-fill: -carmir-azul-texto;
+    -fx-background-radius: 6;
+    -fx-padding: 8 12 8 12;
+    -fx-font-size: 13px;
+}
+.aviso-consulta .ikonli-font-icon { -fx-icon-color: -carmir-azul-texto; }
+
+.aviso-amarillo {
+    -fx-background-color: -carmir-ambar-fondo;
+    -fx-text-fill: -carmir-ambar-texto;
+    -fx-background-radius: 5;
+    -fx-padding: 6 10 6 10;
+    -fx-font-size: 12px;
+}
+.aviso-amarillo .ikonli-font-icon { -fx-icon-color: -carmir-naranja; }
+
+.caja-avisos { -fx-padding: 4 0 0 0; }
+.aviso-error { -fx-text-fill: -carmir-rojo-texto; -fx-font-size: 12px; }
+.aviso-info  { -fx-text-fill: -carmir-ambar-texto; -fx-font-size: 12px; }
+
+/* ---------- Detalle ---------- */
+.scroll-detalle, .scroll-detalle > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    /* Con fondo transparente JavaFX calcula el texto en blanco; se fija el color normal */
+    -fx-text-background-color: -carmir-texto;
+}
+.caja-imagen {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 6;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-padding: 6;
+}
+.precio { -fx-text-fill: -carmir-verde-oscuro; -fx-font-weight: bold; }
+
+/* ---------- Formulario de productos ---------- */
+.caja-precio {
+    -fx-background-color: -carmir-verde-fondo;
+    -fx-background-radius: 8;
+    -fx-padding: 8 14 8 14;
+}
+.precio-grande {
+    -fx-text-fill: -carmir-verde-oscuro;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+.caja-caracteristica {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 12 10 12;
+}
+
+/* ---------- Vista en cuadrícula (tiles) de Productos ---------- */
+.btn-vista {
+    -fx-background-color: -carmir-gris-fondo;
+    -fx-background-radius: 0;
+    -fx-padding: 5 10 5 10;
+    -fx-cursor: hand;
+}
+.btn-vista-izq { -fx-background-radius: 8 0 0 8; }
+.btn-vista-der { -fx-background-radius: 0 8 8 0; }
+.btn-vista .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 17; }
+.btn-vista:hover { -fx-background-color: -carmir-hover; }
+.btn-vista.activo { -fx-background-color: -carmir-acento-fuerte; }
+.btn-vista.activo .ikonli-font-icon { -fx-icon-color: white; }
+
+.scroll-tiles { -fx-background-color: transparent; -fx-background: transparent; }
+.scroll-tiles > .viewport { -fx-background-color: transparent; }
+.flujo-tiles { -fx-padding: 4 4 10 4; -fx-background-color: transparent; }
+
+.tile-producto {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 12;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(110, 90, 150, 0.12), 8, 0.1, 0, 2);
+}
+.tile-producto:hover { -fx-background-color: -carmir-hover-suave; -fx-border-color: -carmir-acento; }
+.tile-seleccionado { -fx-border-color: -carmir-acento-fuerte; -fx-border-width: 2; -fx-background-color: -carmir-hover; }
+.tile-imagen {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 8;
+}
+.tile-nombre { -fx-font-weight: bold; -fx-text-fill: -carmir-texto-titulo; }

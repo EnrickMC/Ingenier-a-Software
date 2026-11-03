@@ -1,0 +1,216 @@
+/* =====================================================================
+   Panel principal (basado en MenuAdmin, Admin-Pedidos, Inventario, Recetas)
+   ===================================================================== */
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    -fx-background-color: -carmir-menu-fondo;
+    -fx-pref-width: 250; -fx-min-width: 250; -fx-max-width: 250;
+}
+.sidebar-header {
+    -fx-background-color: linear-gradient(to bottom, -carmir-menu-fondo2, -carmir-menu-fondo);
+    -fx-padding: 12 20 10 20;
+    -fx-border-color: transparent transparent -carmir-menu-linea transparent;
+}
+.sidebar-titulo {
+    -fx-text-fill: -carmir-menu-titulo;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.sidebar-sub {
+    -fx-text-fill: -carmir-menu-texto-suave;
+    -fx-font-size: 12px;
+}
+.sidebar-scroll, .sidebar-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-padding: 0;
+}
+
+/* Elementos del menú */
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-text-fill: -carmir-menu-texto;
+    -fx-font-size: 14px;
+    -fx-padding: 2 8 2 10;
+    -fx-border-color: transparent transparent -carmir-menu-linea transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-cursor: hand;
+}
+.menu-item .menu-icono {
+    -fx-icon-color: -carmir-menu-icono;
+    -fx-icon-size: 22;
+}
+.menu-item:hover, .menu-item.activo {
+    -fx-background-color: -carmir-menu-hover;
+    -fx-border-color: transparent transparent -carmir-menu-linea -carmir-acento;
+    -fx-border-width: 0 0 1 4;
+    -fx-padding: 2 8 2 6;
+}
+.menu-item:hover .menu-icono, .menu-item.activo .menu-icono {
+    -fx-icon-color: -carmir-menu-titulo;
+}
+.menu-item.activo { -fx-font-weight: bold; }
+
+/* Decorador de permiso: apartado bloqueado */
+.menu-item-bloqueado:disabled { -fx-opacity: 0.45; }
+.menu-candado {
+    -fx-icon-color: -carmir-texto-suave;
+    -fx-icon-size: 14;
+}
+
+/* Decorador de insignia */
+.insignia {
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-padding: 1 7 1 7;
+}
+.insignia-alerta { -fx-background-color: -carmir-rojo; }
+.insignia-info   { -fx-background-color: -carmir-acento; }
+
+/* Pie del sidebar */
+.sidebar-footer {
+    -fx-padding: 10 0 10 0;
+    -fx-border-color: -carmir-menu-linea transparent transparent transparent;
+    -fx-background-color: -carmir-menu-fondo2;
+}
+.sidebar-footer .menu-item {
+    -fx-font-size: 13px;
+    -fx-padding: 10 20 10 20;
+    -fx-border-width: 0;
+}
+.sidebar-footer .menu-item:hover { -fx-padding: 10 20 10 16; -fx-border-width: 0 0 0 4; }
+
+/* ---------- Barra superior ---------- */
+.topbar {
+    -fx-background-color: -carmir-superficie;
+    -fx-padding: 15 30 15 30;
+    -fx-effect: dropshadow(gaussian, rgba(120,100,170,0.12), 8, 0, 0, 2);
+}
+.topbar-titulo {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+.topbar-usuario {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.topbar-usuario .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 20; }
+
+.contenido-scroll, .contenido-scroll > .viewport {
+    -fx-background-color: -carmir-fondo;
+    -fx-background: -carmir-fondo;
+}
+.contenido { -fx-padding: 30; }
+
+/* ---------- Tarjetas genéricas ---------- */
+.tarjeta {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, rgba(120,100,170,0.14), 8, 0, 0, 2);
+    -fx-padding: 20;
+}
+.tarjeta-titulo {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- KPIs del dashboard ---------- */
+.kpi-card {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent transparent transparent -carmir-azul;
+    -fx-border-width: 0 0 0 5;
+    -fx-border-radius: 8 0 0 8;
+    -fx-effect: dropshadow(gaussian, rgba(120,100,170,0.14), 8, 0, 0, 2);
+    -fx-padding: 20;
+}
+.kpi-card.ingresos { -fx-border-color: transparent transparent transparent -carmir-verde; }
+.kpi-card.alerta   { -fx-border-color: transparent transparent transparent -carmir-rojo; }
+.kpi-titulo {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.kpi-titulo .ikonli-font-icon { -fx-icon-color: -carmir-texto-suave; -fx-icon-size: 19; }
+.kpi-valor {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+.kpi-card.alerta .kpi-valor { -fx-text-fill: -carmir-rojo; }
+.kpi-detalle {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 12px;
+}
+
+/* ---------- Tablas: el estilo está en carmir-base.css ---------- */
+.tabla-vacia { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 13px; }
+
+/* ---------- Apartado en construcción ---------- */
+.construccion-icono {
+    -fx-background-color: -carmir-fondo;
+    -fx-background-radius: 50;
+    -fx-min-width: 84; -fx-min-height: 84;
+    -fx-max-width: 84; -fx-max-height: 84;
+}
+.construccion-icono .ikonli-font-icon { -fx-icon-color: -carmir-acento; -fx-icon-size: 38; }
+.construccion-titulo {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+.etiqueta-modulo {
+    -fx-background-color: -carmir-hover;
+    -fx-text-fill: -carmir-acento-texto;
+    -fx-background-radius: 20;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.construccion-texto { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 14px; }
+.caja-info {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 15;
+}
+.caja-info-titulo {
+    -fx-text-fill: -carmir-acento;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.funcion-item { -fx-text-fill: -carmir-texto-titulo; -fx-font-size: 13px; }
+.funcion-icono { -fx-icon-color: -carmir-verde; -fx-icon-size: 15; }
+
+/* Logo del menú: un resplandor claro para que se lea sobre el fondo oscuro */
+.logo-menu {
+    -fx-effect: dropshadow(gaussian, rgba(255, 255, 255, 0.85), 7, 0.55, 0, 0);
+}
+
+/* ---------- Botón para cambiar entre modo claro y semi oscuro ---------- */
+.btn-tema {
+    -fx-background-color: -carmir-hover;
+    -fx-background-radius: 18;
+    -fx-border-color: -carmir-acento;
+    -fx-border-radius: 18;
+    -fx-padding: 6 14 6 12;
+    -fx-text-fill: -carmir-acento-texto;
+    -fx-font-weight: bold;
+    -fx-font-size: 12.5px;
+    -fx-graphic-text-gap: 7;
+    -fx-cursor: hand;
+}
+.btn-tema .ikonli-font-icon { -fx-icon-color: -carmir-acento-texto; -fx-icon-size: 17; }
+.btn-tema:hover { -fx-background-color: -carmir-seleccion; }
+.btn-tema:pressed { -fx-opacity: 0.85; }
+
+/* Adorno animado en la pantalla de pedidos */
+.decoracion-pastel { -fx-cursor: default; }

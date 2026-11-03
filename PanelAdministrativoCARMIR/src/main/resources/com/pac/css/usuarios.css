@@ -1,0 +1,81 @@
+/* =====================================================================
+   Módulo 7 · Gestión de Usuarios (usuarios.fxml y usuario-formulario.fxml)
+   Usa los colores definidos en carmir-base.css
+   ===================================================================== */
+
+/* ---------- Textos de apoyo ---------- */
+.texto-suave { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 13px; }
+.texto-ayuda { -fx-text-fill: -carmir-texto-suave; -fx-font-size: 12px; }
+
+/* ---------- Barra de búsqueda ---------- */
+.campo-busqueda { -fx-padding: 8 11 8 11; }
+
+
+/* ---------- Botón rojo (dar de baja) ---------- */
+.btn-rojo {
+    -fx-background-color: #f7bcc4;
+    -fx-text-fill: #8a2a3b;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-padding: 9 15 9 15;
+}
+.btn-rojo:hover { -fx-background-color: #f2a4af; }
+.btn-rojo .ikonli-font-icon { -fx-icon-color: #8a2a3b; }
+
+/* ---------- Tarjeta de detalle ---------- */
+.detalle-nombre {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+}
+.detalle-etiqueta {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.detalle-sin-permisos { -fx-text-fill: -carmir-rojo; -fx-font-size: 13px; }
+.detalle-icono-vacio { -fx-icon-color: -carmir-borde-input; -fx-icon-size: 48; }
+
+/* Etiqueta de color según el estado del usuario */
+.estado-chip {
+    -fx-background-radius: 12;
+    -fx-padding: 2 10 2 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+.estado-activo    { -fx-background-color: -carmir-verde-fondo; -fx-text-fill: -carmir-verde-oscuro; }
+.estado-inactivo  { -fx-background-color: -carmir-gris-fondo; -fx-text-fill: -carmir-texto-suave; }
+.estado-bloqueado { -fx-background-color: -carmir-rojo-fondo; -fx-text-fill: -carmir-rojo-texto; }
+
+/* ---------- Formulario (ventana modal) ---------- */
+.formulario {
+    -fx-background-color: -carmir-superficie;
+    -fx-padding: 24;
+}
+.formulario-titulo {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+.formulario-etiqueta {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.formulario .campo { -fx-padding: 8 10 8 10; }
+
+.caja-permisos {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-padding: 12;
+}
+.casilla-permiso { -fx-font-size: 13px; }
+
+/* Campo con error: borde rojo */
+.campo-error, .campo-error:focused {
+    -fx-border-color: -carmir-rojo;
+    -fx-border-width: 1.5;
+}

@@ -1,0 +1,108 @@
+<div class="contenedor pagina">
+  <a routerLink="/" class="enlace-regresar">← Volver al catálogo</a>
+
+  @if (estado() === 'cargando') {
+    <app-cargando texto="Cargando el producto..." />
+  }
+
+  <!-- RF-2 · Excepción paso 2: sin conexión, «No fue posible cargar el producto». -->
+  @if (estado() === 'error') {
+    <app-mensaje-estado
+      tipo="error"
+      titulo="No fue posible cargar el producto"
+      [texto]="detalleError()"
+    >
+      <button type="button" class="btn btn-principal" (click)="cargarFicha()">Reintentar</button>
+      <a routerLink="/" class="btn btn-secundario">Ir al catálogo</a>
+    </app-mensaje-estado>
+  }
+
+  <!-- RF-2 · Paso 5: ficha detallada con fotografía, descripción y precio base. -->
+  @if (estado() === 'listo' && ficha(); as datos) {
+    <article class="ficha panel">
+      <div class="columna-imagen">
+        <app-imagen-postre
+          class="foto"
+          [link]="datos.producto.linkFotografia"
+          [nombre]="datos.producto.nombre"
+        />
+      </div>
+
+      <div class="columna-detalles">
+        <span class="etiqueta">{{ datos.producto.nombreCategoria }}</span>
+        <h1>{{ datos.producto.nombre }}</h1>
+        <p class="precio precio-destacado">
+          {{ datos.producto.precio | currency: 'MXN' : 'symbol-narrow' }} MXN
+        </p>
+        @if (datos.producto.descripcion) {
+          <p class="descripcion">{{ datos.producto.descripcion }}</p>
+        }
+
+        <!-- RF-2 · Paso 3: lo que incluye la plantilla (sus opciones). -->
+        <section class="seccion" aria-labelledby="titulo-incluye">
+          <h2 id="titulo-incluye">Esta plantilla incluye</h2>
+          <dl class="incluye">
+            @for (grupo of datos.incluye; track grupo.idCaracteristica) {
+              <div class="fila">
+                <dt>{{ grupo.caracteristica }}</dt>
+                <dd>{{ textoGrupo(grupo) }}</dd>
+              </div>
+            }
+          </dl>
+          @if (datos.opcionesRetiradas.length > 0) {
+            <p class="nota">
+              Ya no están disponibles: {{ datos.opcionesRetiradas.join(', ') }}. Podrás elegir otras opciones al
+              personalizar.
+            </p>
+          }
+        </section>
+
+        <!-- RF-2 · Paso 3: ingredientes según las recetas de sus opciones. -->
+        <section class="seccion" aria-labelledby="titulo-ingredientes">
+          <h2 id="titulo-ingredientes">Ingredientes</h2>
+          @if (datos.ingredientes.length > 0) {
+            <ul class="ingredientes">
+              @for (ingrediente of datos.ingredientes; track ingrediente) {
+                <li>{{ ingrediente }}</li>
+              }
+            </ul>
+          } @else {
+            <!-- RF-2 · Excepción paso 3: sin ingredientes registrados se muestra la leyenda. -->
+            <p class="nota">Información de ingredientes no disponible, consulte con la pastelería</p>
+          }
+        </section>
+
+        <!-- RF-2 · Paso 3: características de la categoría que aplican al producto con sus opciones. -->
+        @if (datos.caracteristicas.length > 0) {
+          <section class="seccion" aria-labelledby="titulo-personalizar">
+            <h2 id="titulo-personalizar">Puedes personalizar</h2>
+            <ul class="personalizables">
+              @for (caracteristica of datos.caracteristicas; track caracteristica.nombre) {
+                <li>
+                  <strong>{{ caracteristica.nombre }}</strong>
+                  @if (caracteristica.obligatoria) {
+                    <span class="obligatoria">(obligatoria)</span>
+                  }
+                  : {{ caracteristica.opciones.join(', ') }}
+                </li>
+              }
+            </ul>
+          </section>
+        }
+
+        @if (datos.sePuedePersonalizar) {
+          <!-- RF-2 · Paso 5: botón «Personalizar pedido» (aquí empieza RF-3). -->
+          <a class="btn btn-principal btn-bloque boton-personalizar" [routerLink]="['/producto', datos.producto.idPostre, 'personalizar']">
+            Personalizar pedido
+          </a>
+        } @else {
+          <!-- RF-2 paso 4: modo informativo -->
+          <button type="button" class="btn btn-principal btn-bloque boton-personalizar" disabled aria-describedby="motivo-no-personalizable">
+            Personalizar pedido
+          </button>
+          <p id="motivo-no-personalizable" class="nota">{{ datos.motivoNoPersonalizable }}</p>
+        }
+      </div>
+    </article>
+  }
+</div>

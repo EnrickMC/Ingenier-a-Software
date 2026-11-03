@@ -1,0 +1,54 @@
+<header class="encabezado" [class.con-filtros]="filtrosCatalogo.visibles()">
+  <div class="barra">
+    <!-- Logo de CARMIR tal cual: lleva al catálogo -->
+    <a class="logo" routerLink="/" (click)="cerrarMenu()" aria-label="CARMIR Delicias de Postres, ir al catálogo">
+      <img src="img/logo-carmir.png" alt="Logo de CARMIR" width="360" height="456" />
+    </a>
+
+    <!-- RF-1 · Paso 5: buscador del catálogo en el menú de arriba. Solo en el catálogo. -->
+    @if (filtrosCatalogo.visibles()) {
+      <app-filtros-catalogo
+        class="filtros-arriba"
+        [filtros]="filtrosCatalogo.filtros()"
+        (filtrosCambiados)="filtrosCatalogo.aplicar($event)"
+      />
+    }
+
+    <button
+      type="button"
+      class="boton-menu"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-controls="menu-principal"
+      (click)="alternarMenu()"
+    >
+      <span class="solo-lector">Abrir menú</span>
+      <span class="rayas" aria-hidden="true"></span>
+    </button>
+
+    <nav id="menu-principal" class="menu" [class.abierto]="menuAbierto()" aria-label="Menú principal">
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="opcionesCatalogoActivo"
+        (click)="cerrarMenu()"
+        >Catálogo</a
+      >
+      <a routerLink="/mis-pedidos" routerLinkActive="activo" (click)="cerrarMenu()">Mis pedidos</a>
+      <a routerLink="/carrito" routerLinkActive="activo" class="enlace-carrito" (click)="cerrarMenu()">
+        <svg class="icono-carrito" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M3 3h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 7H6.2"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <circle cx="10" cy="20" r="1.6" />
+          <circle cx="17" cy="20" r="1.6" />
+        </svg>
+        Carrito ({{ carrito.totalPiezas() }})
+      </a>
+    </nav>
+  </div>
+</header>

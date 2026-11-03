@@ -1,0 +1,150 @@
+/*
+ * Estilos que comparten las pantallas del Portal de Pedidos (diseño "Carrito y Checkout"):
+ * resumen a la izquierda y formulario a la derecha en escritorio; uno debajo del otro en celular.
+ */
+.pagina {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+
+.diseno-pedido {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 20px;
+}
+
+.bloque {
+  padding: 18px;
+}
+
+.bloque h2 {
+  font-size: 1.25rem;
+  border-bottom: 2px solid var(--color-crema);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+}
+
+.bloque + .bloque {
+  margin-top: 20px;
+}
+
+/* Dos campos en la misma fila (solo en tableta y escritorio) */
+.fila-doble {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0 15px;
+}
+
+/* Opciones grandes tipo tarjeta (modalidad de entrega, método de pago) */
+.opciones-tarjeta {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: none;
+}
+
+.opciones-tarjeta legend {
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.opcion-tarjeta {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #cdbfae;
+  border-radius: var(--radio-chico);
+  background: var(--color-blanco);
+  cursor: pointer;
+}
+
+.opcion-tarjeta input {
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-acento);
+  flex-shrink: 0;
+}
+
+.opcion-tarjeta.elegida {
+  border-color: var(--color-acento);
+  background: var(--color-crema-claro);
+}
+
+.opcion-tarjeta.desactivada {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.opcion-tarjeta strong {
+  display: block;
+}
+
+.opcion-tarjeta small {
+  color: var(--color-texto-suave);
+}
+
+.barra-acciones {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.barra-acciones .btn {
+  width: 100%;
+}
+
+.nota {
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 12px 0 0;
+}
+
+@media (min-width: 600px) {
+  .bloque {
+    padding: 24px;
+  }
+
+  .fila-doble {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .barra-acciones {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .barra-acciones .btn {
+    width: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .diseno-pedido {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    align-items: start;
+    gap: 30px;
+  }
+
+  /* El resumen se queda a la vista al bajar por el formulario */
+  .diseno-pedido > app-resumen-pedido {
+    position: sticky;
+    top: 16px;
+  }
+}
+
+/* Dentro de una rejilla la separación la da "gap" (sin margen extra) */
+.diseno-pedido > .bloque + .bloque {
+  margin-top: 0;
+}

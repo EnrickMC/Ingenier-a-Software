@@ -1,0 +1,45 @@
+<section class="panel resumen" aria-labelledby="titulo-resumen">
+  <h2 id="titulo-resumen">Resumen de tu pedido</h2>
+
+  <ul class="lista">
+    @for (articulo of articulos(); track articulo.id) {
+      <li class="renglon">
+        <div class="detalles">
+          <h3>{{ articulo.cantidad }} × {{ articulo.nombre }}</h3>
+          <p>{{ opciones(articulo) }}</p>
+          @if (articulo.dedicatoria !== '') {
+            <p>Mensaje: «{{ articulo.dedicatoria }}»</p>
+          }
+        </div>
+        <span class="importe">{{ subtotal(articulo) | currency: 'MXN' : 'symbol-narrow' }}</span>
+      </li>
+    }
+  </ul>
+
+  <dl class="cuentas">
+    <div>
+      <dt>Productos</dt>
+      <dd>{{ subtotalProductos() | currency: 'MXN' : 'symbol-narrow' }}</dd>
+    </div>
+    <div>
+      <dt>Envío</dt>
+      @if (!conEnvio()) {
+        <dd>Gratis (recoges en tienda)</dd>
+      } @else if (envioPendiente()) {
+        <dd>Según tu código postal</dd>
+      } @else {
+        <dd>{{ envio() | currency: 'MXN' : 'symbol-narrow' }}</dd>
+      }
+    </div>
+    <div class="total">
+      <dt>Total a pagar</dt>
+      <dd>{{ total() | currency: 'MXN' : 'symbol-narrow' }} MXN</dd>
+    </div>
+    @if (modalidadPago() === 'Anticipo') {
+      <div class="iniciar">
+        <dt>Anticipo para iniciar ({{ porcentajeAnticipo() }} %)</dt>
+        <dd>{{ montoParaIniciar() | currency: 'MXN' : 'symbol-narrow' }}</dd>
+      </div>
+    }
+  </dl>
+</section>

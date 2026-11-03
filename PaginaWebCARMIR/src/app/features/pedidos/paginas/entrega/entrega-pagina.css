@@ -1,0 +1,33 @@
+.direccion {
+  border-left: 3px solid var(--color-crema);
+  padding-left: 12px;
+  margin-bottom: 8px;
+}
+
+.reglas {
+  margin: -2px 0 10px;
+}
+
+.fecha-elegida {
+  display: block;
+  margin-top: 8px;
+}
+
+.cobertura-ok {
+  color: var(--color-exito);
+  font-weight: 600;
+}
+
+.cobertura-no {
+  color: var(--color-error);
+}
+
+.enlace-boton {
+  background: none;
+  border: none;
+  color: var(--color-titulo);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+  padding: 0 4px;
+}

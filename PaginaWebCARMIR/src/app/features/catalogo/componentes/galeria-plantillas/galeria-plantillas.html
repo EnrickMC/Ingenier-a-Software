@@ -1,0 +1,60 @@
+<div class="fondo" (click)="cerrarGaleria()" aria-hidden="true"></div>
+<div
+  #ventana
+  class="ventana panel"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="titulo-galeria"
+  tabindex="-1"
+  (keydown)="alPresionarTecla($event)"
+>
+  <div class="cabecera">
+    <h2 id="titulo-galeria">Elige una plantilla de diseño</h2>
+    <button type="button" class="cerrar" aria-label="Cerrar galería" (click)="cerrarGaleria()">×</button>
+  </div>
+  <p class="explicacion">La plantilla carga sus opciones y después puedes cambiarlas como quieras.</p>
+
+  <!-- RF-4 · Excepción paso 6: «La plantilla seleccionada ya no está disponible». -->
+  @if (mensaje() !== '') {
+    <div class="aviso error" role="alert"><p>{{ mensaje() }}</p></div>
+  }
+
+  <!-- RF-4 · Paso 4: vista previa, temática (lo que incluye) y precio de cada plantilla. -->
+  <ul class="lista">
+    @for (plantilla of plantillas(); track plantilla.idPostre) {
+      <li>
+        <button
+          type="button"
+          class="plantilla"
+          [class.elegida]="estaElegida(plantilla)"
+          [attr.aria-pressed]="estaElegida(plantilla)"
+          (click)="elegir(plantilla)"
+        >
+          <app-imagen-postre class="miniatura" [link]="plantilla.linkFotografia" [nombre]="plantilla.nombre" />
+          <span class="datos">
+            <span class="nombre">{{ plantilla.nombre }}</span>
+            <span class="incluye">{{ resumen(plantilla) }}</span>
+            <span class="precio">{{ plantilla.precio | currency: 'MXN' : 'symbol-narrow' }}</span>
+          </span>
+        </button>
+      </li>
+    }
+  </ul>
+
+  <div class="acciones">
+    <!-- RF-4 · Excepción paso 5: «Cancelar» descarta la selección. -->
+    <button type="button" class="btn btn-secundario" (click)="cerrarGaleria()">Cancelar</button>
+    <button
+      type="button"
+      class="btn btn-principal"
+      [disabled]="elegida() === null || aplicando()"
+      (click)="usarPlantilla()"
+    >
+      @if (aplicando()) {
+        Aplicando...
+      } @else {
+        Usar esta plantilla
+      }
+    </button>
+  </div>
+</div>

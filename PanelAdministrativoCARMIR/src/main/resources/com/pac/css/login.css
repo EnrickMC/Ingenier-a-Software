@@ -1,0 +1,81 @@
+/* =====================================================================
+   Pantalla de bloqueo y login del Personal (basado en Personal.html)
+   ===================================================================== */
+
+/* Fondo de la pantalla de bloqueo: degradado oscuro (más oscuro que la tarjeta de inicio de sesión) */
+.fondo-bloqueo {
+    -fx-background-color: linear-gradient(to bottom right, #231f36, #3b3358);
+}
+.fondo-login {
+    -fx-background-color: linear-gradient(to bottom right, #231f36, #3b3358);
+}
+
+/* Reloj del bloqueo */
+.reloj-hora {
+    -fx-text-fill: #f6f0fd;
+    -fx-font-size: 64px;
+    -fx-font-weight: bold;
+}
+.reloj-fecha {
+    -fx-text-fill: #cbbdf0;
+    -fx-font-size: 16px;
+}
+
+/* Tarjeta (login-box) */
+.login-box {
+    -fx-background-color: -carmir-superficie;
+    -fx-background-radius: 10;
+    -fx-border-color: -carmir-borde;
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 25, 0.1, 0, 10);
+}
+.login-header {
+    -fx-background-color: -carmir-sidebar;
+    -fx-background-radius: 10 10 0 0;
+    -fx-border-color: transparent transparent -carmir-acento transparent;
+    -fx-border-width: 0 0 4 0;
+    -fx-padding: 26 20 24 20;
+}
+.login-header-titulo {
+    -fx-text-fill: white;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+.login-header-sub {
+    -fx-text-fill: rgba(255,255,255,0.85);
+    -fx-font-size: 13px;
+}
+.login-header-icono {
+    -fx-background-color: -carmir-sidebar-oscuro;
+    -fx-background-radius: 50;
+    -fx-min-width: 54; -fx-min-height: 54;
+    -fx-max-width: 54; -fx-max-height: 54;
+}
+.login-header-icono .ikonli-font-icon {
+    -fx-icon-color: -carmir-acento;
+    -fx-icon-size: 24;
+}
+
+.login-body { -fx-padding: 30 30 26 30; }
+
+.login-label {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.btn-ingresar {
+    -fx-font-size: 15px;
+    -fx-padding: 14;
+}
+
+.login-footer {
+    -fx-background-color: -carmir-gris-claro;
+    -fx-background-radius: 0 0 10 10;
+    -fx-border-color: -carmir-borde transparent transparent transparent;
+    -fx-padding: 12 15 12 15;
+}
+.login-footer-texto {
+    -fx-text-fill: -carmir-texto-suave;
+    -fx-font-size: 11px;
+}

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Ingresos y gastos (RF-46) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.reportes.controller.IngresosGastosController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <!-- Error de conexión con "Reintentar" -->
+    <HBox fx:id="cajaError" styleClass="aviso-rojo" spacing="10" alignment="CENTER_LEFT">
+        <Label fx:id="lblError" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <graphic><FontIcon iconLiteral="bi-wifi-off"/></graphic>
+        </Label>
+        <Button text="Reintentar" styleClass="btn-azul" onAction="#onReintentar">
+            <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+        </Button>
+    </HBox>
+
+    <!-- Totales -->
+    <HBox spacing="16">
+        <VBox styleClass="kpi-card, ingresos" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label styleClass="kpi-titulo" text="INGRESOS" graphicTextGap="8">
+                <graphic><FontIcon iconLiteral="bi-arrow-down-circle-fill"/></graphic>
+            </Label>
+            <Label fx:id="lblIngresos" styleClass="kpi-valor" text="\$0.00"/>
+            <Label fx:id="lblDetalleIngresos" styleClass="kpi-detalle" wrapText="true" minHeight="-Infinity"/>
+        </VBox>
+        <VBox styleClass="kpi-card, gastos" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label styleClass="kpi-titulo" text="GASTOS" graphicTextGap="8">
+                <graphic><FontIcon iconLiteral="bi-arrow-up-circle-fill"/></graphic>
+            </Label>
+            <Label fx:id="lblGastos" styleClass="kpi-valor" text="\$0.00"/>
+            <Label fx:id="lblDetalleGastos" styleClass="kpi-detalle" wrapText="true" minHeight="-Infinity"/>
+        </VBox>
+        <VBox fx:id="cajaUtilidad" styleClass="kpi-card, utilidad" spacing="6" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+            <Label fx:id="lblTituloUtilidad" styleClass="kpi-titulo" text="UTILIDAD BRUTA" graphicTextGap="8">
+                <graphic><FontIcon iconLiteral="bi-bar-chart-line-fill"/></graphic>
+            </Label>
+            <Label fx:id="lblUtilidad" styleClass="kpi-valor" text="\$0.00"/>
+            <Label fx:id="lblDetalleUtilidad" styleClass="kpi-detalle" wrapText="true" minHeight="-Infinity"/>
+        </VBox>
+    </HBox>
+
+    <!-- Avisos: sin registros, sección faltante, pagos por reembolsar, movimientos por revisar -->
+    <VBox fx:id="cajaAvisos" styleClass="caja-avisos-reporte"/>
+
+    <HBox spacing="16" minHeight="320">
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="480">
+            <Label fx:id="lblTituloGrafica" styleClass="tarjeta-titulo" text="Ingresos y gastos"/>
+            <BarChart fx:id="graficaBarras" styleClass="grafica-carmir" animated="false" legendVisible="true"
+                      VBox.vgrow="ALWAYS" minHeight="260" categoryGap="18" barGap="3">
+                <xAxis><CategoryAxis side="BOTTOM" tickLabelRotation="0"/></xAxis>
+                <yAxis><NumberAxis side="LEFT" forceZeroInRange="true"/></yAxis>
+            </BarChart>
+        </VBox>
+        <VBox styleClass="tarjeta" spacing="8" HBox.hgrow="ALWAYS" prefWidth="560">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label styleClass="tarjeta-titulo" text="Detalle por fecha"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblConteoDias" styleClass="texto-suave"/>
+            </HBox>
+            <TableView fx:id="tblDias" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="240">
+                <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+                <columns>
+                    <TableColumn text="Fecha" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="fecha"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Cobros" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="cobros"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Reembolsos" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="reembolsos"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Compras" minWidth="85" prefWidth="85">
+                        <cellValueFactory><PropertyValueFactory property="compras"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Mermas" minWidth="75" prefWidth="75">
+                        <cellValueFactory><PropertyValueFactory property="mermas"/></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn text="Utilidad" minWidth="90" prefWidth="90">
+                        <cellValueFactory><PropertyValueFactory property="utilidad"/></cellValueFactory>
+                    </TableColumn>
+                </columns>
+                <placeholder>
+                    <Label fx:id="lblVacioDias" styleClass="tabla-vacia" text="Genera el reporte para ver el detalle"/>
+                </placeholder>
+            </TableView>
+        </VBox>
+    </HBox>
+
+    <!-- Movimientos que no se sumaron por no ser consistentes -->
+    <VBox fx:id="tarjetaRevisar" styleClass="tarjeta" spacing="8">
+        <Label styleClass="tarjeta-titulo" text="Movimientos por revisar" graphicTextGap="8">
+            <graphic><FontIcon iconLiteral="bi-exclamation-diamond-fill"/></graphic>
+        </Label>
+        <Label styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"
+               text="Estos movimientos no se sumaron a los totales porque sus datos no son consistentes. Revísalos en Pedidos o en Inventario."/>
+        <TableView fx:id="tblRevisar" styleClass="tabla-carmir" prefHeight="170" minHeight="120">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+            <columns>
+                <TableColumn text="Fecha" minWidth="120" prefWidth="120">
+                    <cellValueFactory><PropertyValueFactory property="fecha"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Origen" minWidth="70" prefWidth="70">
+                    <cellValueFactory><PropertyValueFactory property="origen"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Referencia" minWidth="140" prefWidth="140">
+                    <cellValueFactory><PropertyValueFactory property="referencia"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Monto" minWidth="90" prefWidth="90">
+                    <cellValueFactory><PropertyValueFactory property="monto"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Motivo" minWidth="300" prefWidth="300">
+                    <cellValueFactory><PropertyValueFactory property="motivo"/></cellValueFactory>
+                </TableColumn>
+            </columns>
+        </TableView>
+    </VBox>
+</VBox>

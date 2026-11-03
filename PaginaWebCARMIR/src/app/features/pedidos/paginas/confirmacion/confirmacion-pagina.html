@@ -1,0 +1,107 @@
+<div class="contenedor pagina">
+  @if (comprobante(); as comprobante) {
+    <!-- RF-11 · Paso 8: comprobante con el folio, el resumen y las instrucciones de pago. -->
+    <app-pasos-pedido [actual]="4" />
+
+    <section class="panel bloque encabezado-folio" aria-labelledby="titulo-confirmacion">
+      <p class="icono" aria-hidden="true">✓</p>
+      <h1 id="titulo-confirmacion">¡Recibimos tu pedido!</h1>
+      <p class="folio">Folio <strong>#{{ comprobante.folio }}</strong></p>
+      <!-- RF-11 · Paso 6: estado inicial «En proceso de aceptación». -->
+      <p><span class="etiqueta">{{ comprobante.estado }}</span></p>
+      <p class="texto">
+        Te avisaremos por WhatsApp al {{ comprobante.cliente.telefono }} cuando la repostería apruebe tu pedido.
+        Guarda tu folio: con él y tu teléfono puedes consultar tu pedido en «Mis pedidos».
+      </p>
+      <!-- RF-11 · Excepción paso 6: doble envío; no se creó un duplicado y se muestra el folio ya generado. -->
+      @if (comprobante.repetido) {
+        <div class="aviso" role="status"><p>Este pedido ya se había registrado; no se duplicó.</p></div>
+      }
+    </section>
+
+    <div class="diseno-pedido confirmacion">
+      <section class="panel bloque" aria-labelledby="titulo-detalle">
+        <h2 id="titulo-detalle">Detalle del pedido</h2>
+        <ul class="productos">
+          @for (producto of comprobante.productos; track $index) {
+            <li>
+              <div>
+                <strong>{{ producto.cantidad }} × {{ producto.nombre }}</strong>
+                @if (producto.dedicatoria !== '') {
+                  <span class="extra">Mensaje: «{{ producto.dedicatoria }}»</span>
+                }
+                @if (producto.comentario !== '') {
+                  <span class="extra">Indicaciones: {{ producto.comentario }}</span>
+                }
+              </div>
+              <span>{{ producto.subtotal | currency: 'MXN' : 'symbol-narrow' }}</span>
+            </li>
+          }
+        </ul>
+        <dl class="cuentas">
+          <div>
+            <dt>Productos</dt>
+            <dd>{{ comprobante.subtotalProductos | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          <div>
+            <dt>Envío</dt>
+            <dd>{{ comprobante.costoEnvio | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+          <div class="total">
+            <dt>Total</dt>
+            <dd>{{ comprobante.montoTotal | currency: 'MXN' : 'symbol-narrow' }} MXN</dd>
+          </div>
+          <div class="iniciar">
+            <dt>Para iniciar ({{ comprobante.modalidadPago }})</dt>
+            <dd>{{ comprobante.montoParaIniciar | currency: 'MXN' : 'symbol-narrow' }}</dd>
+          </div>
+        </dl>
+
+        <h3>Entrega</h3>
+        <p>{{ comprobante.entrega.modalidad }} · {{ textoFecha(comprobante) }}</p>
+        @if (comprobante.entrega.direccion; as direccion) {
+          <p>{{ textoDireccion(direccion) }}</p>
+        } @else {
+          <!-- Recoger en tienda: dirección de la tienda -->
+          <app-ubicacion-tienda titulo="Recoge tu pedido en" />
+        }
+      </section>
+
+      <!-- RF-10 · Paso 6 / RF-11 · Paso 8: instrucciones de pago según el método elegido. -->
+      <section class="panel bloque instrucciones" aria-labelledby="titulo-instrucciones">
+        <h2 id="titulo-instrucciones">Cómo pagar: {{ comprobante.instrucciones.titulo }}</h2>
+        <p class="metodo">{{ textoMetodo(comprobante) }} · {{ comprobante.montoParaIniciar | currency: 'MXN' : 'symbol-narrow' }}</p>
+        @if (esEfectivo(comprobante)) {
+          <app-ubicacion-tienda titulo="Paga en efectivo en" />
+        }
+        <ol>
+          @for (paso of comprobante.instrucciones.pasos; track $index) {
+            <li>{{ paso }}</li>
+          }
+        </ol>
+        @if (comprobante.instrucciones.datosBancarios !== '') {
+          <div class="datos-bancarios">
+            <h3>Datos bancarios</h3>
+            <p>{{ comprobante.instrucciones.datosBancarios }}</p>
+            <p class="concepto">Concepto: <strong>Pedido {{ comprobante.folio }}</strong></p>
+          </div>
+        }
+      </section>
+    </div>
+
+    <div class="barra-acciones final">
+      <a routerLink="/" class="btn btn-secundario">Seguir comprando</a>
+      <button type="button" class="btn btn-secundario" (click)="imprimir()">Imprimir comprobante</button>
+      <a routerLink="/mis-pedidos" class="btn btn-principal">Ver mi pedido</a>
+    </div>
+  } @else {
+    <app-mensaje-estado
+      tipo="info"
+      titulo="No hay un pedido reciente"
+      texto="Si ya enviaste tu pedido, puedes consultarlo con tu folio y tu teléfono."
+    >
+      <a routerLink="/mis-pedidos" class="btn btn-principal">Mis pedidos</a>
+      <a routerLink="/" class="btn btn-secundario">Ir al catálogo</a>
+    </app-mensaje-estado>
+  }
+</div>

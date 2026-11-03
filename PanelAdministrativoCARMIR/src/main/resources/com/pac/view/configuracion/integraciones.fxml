@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- RF-32: datos de las cuentas de WhatsApp y correo con las que se avisa a los clientes.
+     Va dentro de la pestaña "Respaldos y sistema" (respaldos.fxml). -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.IntegracionesController"
+      styleClass="tarjeta, seccion-config" spacing="12">
+
+    <fx:define>
+        <ToggleGroup fx:id="grupoModo"/>
+    </fx:define>
+
+    <!-- Título y botón de guardar -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label styleClass="tarjeta-titulo" text="Notificaciones al cliente (WhatsApp y correo)">
+            <graphic><FontIcon iconLiteral="bi-bell-fill"/></graphic>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="btnGuardar" text="Guardar notificaciones" minWidth="-Infinity" styleClass="btn-verde" onAction="#onGuardar">
+            <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+        </Button>
+    </HBox>
+    <Label styleClass="texto-suave" wrapText="true" maxWidth="Infinity"
+           text="Con las casillas puedes apagar un canal que no uses: no se enviará nada por él y no aparecerán fallos. Escribe aquí los datos de tus cuentas y guarda. No hace falta editar archivos: los datos se guardan en la base de datos y el token y la contraseña se guardan cifrados."/>
+
+    <Label fx:id="lblError" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+        <graphic><FontIcon iconLiteral="bi-x-circle-fill"/></graphic>
+    </Label>
+
+    <!-- Modo -->
+    <GridPane hgap="12" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="210" prefWidth="210"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label styleClass="etiqueta-config" text="Modo de envío" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <FlowPane fx:id="panelModo" hgap="18" vgap="6" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <RadioButton fx:id="rbSimulado" text="Simulado (no se envía nada, solo se registra)" toggleGroup="$grupoModo"/>
+            <RadioButton fx:id="rbReal" text="Real (se envía por WhatsApp y correo)" toggleGroup="$grupoModo"/>
+        </FlowPane>
+        <Label styleClass="etiqueta-config" text="Reintentos si falla" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <HBox spacing="10" alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <TextField fx:id="txtReintentos" styleClass="campo, campo-corto" prefWidth="110"/>
+            <Label styleClass="texto-suave" text="esperando"/>
+            <TextField fx:id="txtSegundos" styleClass="campo, campo-corto" prefWidth="110"/>
+            <Label styleClass="texto-suave" text="segundos entre cada uno"/>
+        </HBox>
+    </GridPane>
+
+    <!-- WhatsApp Business Cloud API (Meta) -->
+    <HBox spacing="14" alignment="CENTER_LEFT">
+        <Label styleClass="subtitulo-integracion" text="WhatsApp Business (Cloud API de Meta)">
+            <graphic><FontIcon iconLiteral="bi-whatsapp"/></graphic>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <CheckBox fx:id="chkWhatsApp" text="Habilitar WhatsApp" styleClass="casilla-filtro"/>
+    </HBox>
+    <GridPane hgap="12" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="210" prefWidth="210"/>
+            <ColumnConstraints minWidth="280"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label styleClass="etiqueta-config" text="ID del número de teléfono" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtWhatsAppId" styleClass="campo" prefWidth="280" promptText="Ejemplo: 123456789012345" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="En developers.facebook.com → tu app → WhatsApp → Configuración de la API. No es tu número de teléfono." GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Token de acceso" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <PasswordField fx:id="txtWhatsAppToken" styleClass="campo" prefWidth="280" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="2">
+            <Label fx:id="lblEstadoToken" styleClass="texto-ayuda" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="btnQuitarToken" text="Quitar" minWidth="-Infinity" styleClass="btn-secundario, peligro" onAction="#onQuitarToken">
+                <graphic><FontIcon iconLiteral="bi-trash-fill"/></graphic>
+            </Button>
+        </HBox>
+
+        <Label styleClass="etiqueta-config" text="Lada del país" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtLada" styleClass="campo, campo-corto" prefWidth="110" promptText="52" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Se pone antes de los teléfonos de 10 dígitos de los clientes. México = 52." GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Versión de la API" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtVersionApi" styleClass="campo, campo-corto" prefWidth="110" promptText="v20.0" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Déjala como está si no sabes cuál usar." GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Enviar prueba al teléfono" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtPruebaWhatsApp" styleClass="campo" prefWidth="280" promptText="Ej. 5512345678" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.rowIndex="4" GridPane.columnIndex="2">
+            <Button fx:id="btnProbarWhatsApp" text="Enviar prueba" minWidth="-Infinity" styleClass="btn-azul" onAction="#onProbarWhatsApp">
+                <graphic><FontIcon iconLiteral="bi-cursor-fill"/></graphic>
+            </Button>
+            <Label styleClass="texto-ayuda" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                   text="Manda la plantilla «hello_world» de Meta. Con un número de prueba de Meta, el teléfono debe estar en su lista de destinatarios."/>
+        </HBox>
+    </GridPane>
+
+    <!-- Correo SMTP -->
+    <HBox spacing="14" alignment="CENTER_LEFT">
+        <Label styleClass="subtitulo-integracion" text="Correo electrónico (SMTP)">
+            <graphic><FontIcon iconLiteral="bi-envelope-fill"/></graphic>
+        </Label>
+        <Region HBox.hgrow="ALWAYS"/>
+        <CheckBox fx:id="chkCorreo" text="Habilitar correo" styleClass="casilla-filtro"/>
+    </HBox>
+    <GridPane hgap="12" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints minWidth="210" prefWidth="210"/>
+            <ColumnConstraints minWidth="280"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label styleClass="etiqueta-config" text="Servidor SMTP" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtSmtpServidor" styleClass="campo" prefWidth="280" promptText="smtp.gmail.com" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Gmail: smtp.gmail.com · Outlook/Hotmail: smtp-mail.outlook.com" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Puerto y seguridad" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.rowIndex="1" GridPane.columnIndex="1">
+            <TextField fx:id="txtSmtpPuerto" styleClass="campo, campo-corto" prefWidth="80" promptText="587"/>
+            <ComboBox fx:id="cmbSeguridad" prefWidth="170"/>
+        </HBox>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Lo normal es 587 con STARTTLS, o 465 con SSL." GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Usuario (correo)" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtSmtpUsuario" styleClass="campo" prefWidth="280" promptText="tunegocio@gmail.com" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="La cuenta con la que se envían los correos." GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Contraseña" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <PasswordField fx:id="txtSmtpContrasena" styleClass="campo" prefWidth="280" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.rowIndex="3" GridPane.columnIndex="2">
+            <Label fx:id="lblEstadoContrasena" styleClass="texto-ayuda" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            <Button fx:id="btnQuitarContrasena" text="Quitar" minWidth="-Infinity" styleClass="btn-secundario, peligro" onAction="#onQuitarContrasena">
+                <graphic><FontIcon iconLiteral="bi-trash-fill"/></graphic>
+            </Button>
+        </HBox>
+
+        <Label styleClass="etiqueta-config" text="Remitente (opcional)" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtSmtpRemitente" styleClass="campo" prefWidth="280" promptText="Igual que el usuario" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-ayuda" wrapText="true" text="Correo que ve el cliente como remitente. Vacío = el mismo usuario." GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+
+        <Label styleClass="etiqueta-config" text="Enviar prueba al correo" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <TextField fx:id="txtPruebaCorreo" styleClass="campo" prefWidth="280" promptText="Ej. tucorreo@gmail.com" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <HBox spacing="8" alignment="CENTER_LEFT" GridPane.rowIndex="5" GridPane.columnIndex="2">
+            <Button fx:id="btnProbarCorreo" text="Enviar prueba" minWidth="-Infinity" styleClass="btn-azul" onAction="#onProbarCorreo">
+                <graphic><FontIcon iconLiteral="bi-cursor-fill"/></graphic>
+            </Button>
+            <Label styleClass="texto-ayuda" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"
+                   text="Con Gmail usa una «contraseña de aplicación» (Cuenta de Google → Seguridad → Verificación en dos pasos), no tu contraseña normal."/>
+        </HBox>
+    </GridPane>
+
+    <Label fx:id="lblResultado" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true"/>
+</VBox>

@@ -1,0 +1,77 @@
+/* Botones (colores de los diseños HTML) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radio-chico);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled,
+.btn[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Rosa: acción principal (Agregar al carrito, Personalizar) */
+.btn-principal {
+  background-color: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+.btn-principal:hover:not(:disabled) {
+  background-color: var(--color-acento-oscuro);
+}
+
+/* Crema: acción de la tarjeta (Ver y personalizar) */
+.btn-suave {
+  background-color: var(--color-crema);
+  color: var(--color-titulo);
+}
+
+.btn-suave:hover:not(:disabled) {
+  background-color: var(--color-acento);
+  color: var(--color-blanco);
+}
+
+/* Blanco con borde: acciones secundarias (Regresar, Limpiar búsqueda) */
+.btn-secundario {
+  background-color: var(--color-blanco);
+  color: var(--color-titulo);
+  border: 1px solid var(--color-encabezado);
+}
+
+.btn-secundario:hover:not(:disabled) {
+  background-color: var(--color-crema);
+}
+
+.btn-bloque {
+  width: 100%;
+}
+
+/* Enlace de texto (← Volver al catálogo) */
+.enlace-regresar {
+  display: inline-block;
+  color: var(--color-titulo);
+  text-decoration: none;
+  font-size: 0.95rem;
+  padding: 8px 0;
+}
+
+.enlace-regresar:hover {
+  text-decoration: underline;
+}

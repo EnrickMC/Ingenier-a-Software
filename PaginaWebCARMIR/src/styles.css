@@ -1,0 +1,8 @@
+/*
+ * Estilos globales de la página web de CARMIR.
+ * Están separados en archivos dentro de src/styles para que sea fácil encontrarlos.
+ */
+@import './styles/variables.css';
+@import './styles/base.css';
+@import './styles/botones.css';
+@import './styles/formularios.css';

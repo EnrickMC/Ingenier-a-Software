@@ -1,0 +1,269 @@
+import {
+  CaracteristicaPersonalizable,
+  ErrorConfiguracion,
+  Exclusion,
+  OpcionElegida,
+  OpcionPersonalizable,
+} from '../modelos/catalogo.models';
+
+/**
+ * Reglas para armar un postre en el navegador (copia de reglasConfiguracion.js de la API
+ * y de ConfiguracionPostre.java del Panel).
+ * Sirven para recalcular el precio y avisar errores al instante (RF-3, paso 4: 1 segundo).
+ * Al final la API vuelve a validar todo antes de agregar al carrito.
+ */
+
+// Margen para comparar números con decimales
+const MARGEN = 0.0001;
+
+// Una opción elegida junto con sus datos completos
+interface Eleccion {
+  opcion: OpcionPersonalizable;
+  cantidad: number;
+}
+
+// Busca una opción por id dentro de todas las características; null si no está
+export function buscarOpcion(
+  caracteristicas: CaracteristicaPersonalizable[],
+  idOpcion: number,
+): OpcionPersonalizable | null {
+  for (const caracteristica of caracteristicas) {
+    for (const opcion of caracteristica.opciones) {
+      if (opcion.idOpcion === idOpcion) {
+        return opcion;
+      }
+    }
+  }
+  return null;
+}
+
+// Junta cada opción elegida con sus datos (se ignoran las que ya no existen)
+function armarElecciones(
+  caracteristicas: CaracteristicaPersonalizable[],
+  seleccion: OpcionElegida[],
+): Eleccion[] {
+  const elecciones: Eleccion[] = [];
+  for (const elegida of seleccion) {
+    const opcion = buscarOpcion(caracteristicas, elegida.idOpcion);
+    if (opcion !== null) {
+      elecciones.push({ opcion: opcion, cantidad: elegida.cantidad });
+    }
+  }
+  return elecciones;
+}
+
+// Cuántas veces está elegida una opción (0 = no está elegida)
+export function cantidadElegida(seleccion: OpcionElegida[], idOpcion: number): number {
+  for (const elegida of seleccion) {
+    if (elegida.idOpcion === idOpcion) {
+      return elegida.cantidad;
+    }
+  }
+  return 0;
+}
+
+// Producto de los MultiplicadorPresupuesto de lo elegido (por ejemplo tamaño grande = 2)
+function factorPresupuesto(elecciones: Eleccion[]): number {
+  let factor = 1;
+  for (const eleccion of elecciones) {
+    factor = factor * eleccion.opcion.multiplicadorPresupuesto;
+  }
+  return factor;
+}
+
+// Factor de escala = producto de MultiplicadorIngredientes de las opciones que NO se escalan
+function factorEscala(elecciones: Eleccion[]): number {
+  let factor = 1;
+  for (const eleccion of elecciones) {
+    if (!eleccion.opcion.seEscala) {
+      factor = factor * eleccion.opcion.multiplicadorIngredientes;
+    }
+  }
+  return factor;
+}
+
+export function redondear(valor: number): number {
+  return Math.round((valor + Number.EPSILON) * 100) / 100;
+}
+
+// Precio de una pieza: misma cuenta que la vista vw_CostoPrecioPostre
+// RF-3 · Paso 4: precio de una pieza que se recalcula con cada cambio.
+export function calcularPrecio(
+  caracteristicas: CaracteristicaPersonalizable[],
+  seleccion: OpcionElegida[],
+): number {
+  const elecciones = armarElecciones(caracteristicas, seleccion);
+  const factor = factorEscala(elecciones);
+  let precio = 0;
+  for (const eleccion of elecciones) {
+    let precioOpcion = eleccion.opcion.precioReferencia * eleccion.cantidad;
+    if (eleccion.opcion.seEscala) {
+      precioOpcion = precioOpcion * factor;
+    }
+    precio = precio + precioOpcion;
+  }
+  return redondear(precio);
+}
+
+// Puntos que ya se usaron en una característica de selección múltiple
+export function puntosUsados(caracteristica: CaracteristicaPersonalizable, seleccion: OpcionElegida[]): number {
+  let puntos = 0;
+  for (const opcion of caracteristica.opciones) {
+    puntos = puntos + opcion.puntosSeleccion * cantidadElegida(seleccion, opcion.idOpcion);
+  }
+  return redondear(puntos);
+}
+
+// Puntos totales de una característica: presupuesto × multiplicadores de lo elegido
+// RF-3 · Paso 4: puntos disponibles de cada característica.
+export function puntosTotales(
+  caracteristicas: CaracteristicaPersonalizable[],
+  caracteristica: CaracteristicaPersonalizable,
+  seleccion: OpcionElegida[],
+): number {
+  const elecciones = armarElecciones(caracteristicas, seleccion);
+  return redondear(caracteristica.presupuestoSeleccion * factorPresupuesto(elecciones));
+}
+
+/**
+ * Si la opción no se puede elegir porque choca con otra ya elegida, regresa el motivo.
+ * Si se puede elegir, regresa texto vacío.
+ */
+// RF-3 · Paso 4: motivo por el que una opción queda deshabilitada (exclusión).
+export function motivoExclusion(idOpcion: number, seleccion: OpcionElegida[], exclusiones: Exclusion[]): string {
+  for (const exclusion of exclusiones) {
+    let otraOpcion = 0;
+    let nombreOtra = '';
+    if (exclusion.idOpcion === idOpcion) {
+      otraOpcion = exclusion.idOpcionExcluida;
+      nombreOtra = exclusion.nombreOpcionExcluida;
+    } else if (exclusion.idOpcionExcluida === idOpcion) {
+      otraOpcion = exclusion.idOpcion;
+      nombreOtra = exclusion.nombreOpcion;
+    }
+    if (otraOpcion > 0 && cantidadElegida(seleccion, otraOpcion) > 0) {
+      let motivo = 'combinación no permitida';
+      if (exclusion.motivo !== null && exclusion.motivo !== '') {
+        motivo = exclusion.motivo;
+      }
+      return 'No combina con «' + nombreOtra + '»: ' + motivo;
+    }
+  }
+  return '';
+}
+
+// Valida la configuración completa. Lista vacía = todo bien.
+// RF-3 · Paso 6: valida la configuración en el navegador antes de llamar a la API.
+export function validarConfiguracion(
+  caracteristicas: CaracteristicaPersonalizable[],
+  exclusiones: Exclusion[],
+  seleccion: OpcionElegida[],
+): ErrorConfiguracion[] {
+  const errores: ErrorConfiguracion[] = [];
+  const elecciones = armarElecciones(caracteristicas, seleccion);
+
+  // RF-3 · Excepción paso 6: no se eligió ninguna opción.
+  if (elecciones.length === 0) {
+    errores.push({ tipo: 'opciones', idCaracteristica: 0, mensaje: 'Elige al menos una opción para tu postre' });
+    return errores;
+  }
+
+  const factor = factorPresupuesto(elecciones);
+  for (const caracteristica of caracteristicas) {
+    let opcionesElegidas = 0;
+    let piezas = 0;
+    let puntos = 0;
+    for (const eleccion of elecciones) {
+      if (eleccion.opcion.idCaracteristica === caracteristica.idCaracteristica) {
+        opcionesElegidas = opcionesElegidas + 1;
+        piezas = piezas + eleccion.cantidad;
+        puntos = puntos + eleccion.opcion.puntosSeleccion * eleccion.cantidad;
+      }
+    }
+
+    // RF-3 · Excepción paso 6: característica obligatoria sin opción.
+    if (caracteristica.obligatoria && opcionesElegidas === 0) {
+      errores.push({
+        tipo: 'obligatoria',
+        idCaracteristica: caracteristica.idCaracteristica,
+        mensaje: 'Falta elegir una opción en «' + caracteristica.nombre + '» (es obligatoria)',
+      });
+    }
+
+    if (!caracteristica.seleccionMultiple) {
+      // RF-3 · Excepción paso 6: más de una opción en una característica de selección única.
+      if (piezas > 1) {
+        errores.push({
+          tipo: 'seleccionUnica',
+          idCaracteristica: caracteristica.idCaracteristica,
+          mensaje: 'En «' + caracteristica.nombre + '» solo se puede elegir una opción',
+        });
+      }
+    } else {
+      const disponibles = caracteristica.presupuestoSeleccion * factor;
+      // RF-3 · Excepción paso 6: se excede el presupuesto de selección (indica la característica y los puntos).
+      if (puntos > disponibles + MARGEN) {
+        errores.push({
+          tipo: 'presupuesto',
+          idCaracteristica: caracteristica.idCaracteristica,
+          mensaje:
+            '«' + caracteristica.nombre + '» excede su presupuesto de selección: usa ' +
+            redondear(puntos) + ' de ' + redondear(disponibles) + ' puntos disponibles',
+        });
+      }
+    }
+  }
+
+  for (const exclusion of exclusiones) {
+    const elegidaA = cantidadElegida(seleccion, exclusion.idOpcion) > 0;
+    const elegidaB = cantidadElegida(seleccion, exclusion.idOpcionExcluida) > 0;
+    // RF-3 · Excepción paso 7: opciones elegidas que se excluyen entre sí.
+    if (elegidaA && elegidaB) {
+      let motivo = 'combinación no permitida';
+      if (exclusion.motivo !== null && exclusion.motivo !== '') {
+        motivo = exclusion.motivo;
+      }
+      errores.push({
+        tipo: 'exclusion',
+        idCaracteristica: 0,
+        mensaje:
+          'No se pueden combinar «' + exclusion.nombreOpcion + '» y «' + exclusion.nombreOpcionExcluida +
+          '»: ' + motivo + '. Cambia una de las dos opciones',
+      });
+    }
+  }
+  return errores;
+}
+
+// ===================== Dedicatoria, comentario y cantidad =====================
+
+export const CANTIDAD_MAXIMA = 20;
+export const LARGO_DEDICATORIA = 150;
+export const LARGO_COMENTARIO = 255;
+
+// Mismos caracteres que acepta la API: letras, números y puntuación común (sin emojis)
+const CARACTERES_PERMITIDOS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,;:¡!¿?'"()\-&#@/%$+*\n]*$/;
+
+// Regresa el error del texto o vacío si está bien
+// RF-3 · Paso 6: valida la dedicatoria y el comentario.
+export function validarTexto(texto: string, nombreCampo: string, largoMaximo: number): string {
+  const limpio = texto.trim();
+  // RF-3 · Excepción paso 6: la dedicatoria excede el largo permitido.
+  if (limpio.length > largoMaximo) {
+    return nombreCampo + ' admite máximo ' + largoMaximo + ' caracteres';
+  }
+  // RF-3 · Excepción paso 6: la dedicatoria tiene caracteres no permitidos.
+  if (!CARACTERES_PERMITIDOS.test(limpio)) {
+    return nombreCampo + ' tiene caracteres no permitidos (no se permiten emojis ni símbolos especiales)';
+  }
+  return '';
+}
+
+// RF-3 · Paso 6: valida la cantidad de piezas.
+export function validarCantidad(cantidad: number): string {
+  // RF-3 · Excepción paso 6: cantidad fuera de rango.
+  if (!Number.isInteger(cantidad) || cantidad < 1 || cantidad > CANTIDAD_MAXIMA) {
+    return 'La cantidad debe estar entre 1 y ' + CANTIDAD_MAXIMA;
+  }
+  return '';
+}

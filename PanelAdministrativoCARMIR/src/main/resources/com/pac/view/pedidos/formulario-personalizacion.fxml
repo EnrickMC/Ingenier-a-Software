@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Personalización de un postre del pedido: mismas reglas del catálogo (ConfiguracionPostre) -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.pedidos.controller.FormularioPersonalizacionController"
+      stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
+      styleClass="formulario" spacing="12" prefWidth="620" prefHeight="640">
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="lblTitulo" styleClass="formulario-titulo"/>
+            <Label styleClass="texto-suave" wrapText="true"
+                   text="Elige las opciones del postre. Las opciones excluidas o no disponibles se marcan abajo."/>
+        </VBox>
+        <VBox styleClass="caja-precio" alignment="CENTER">
+            <Label styleClass="texto-ayuda" text="Precio por pieza"/>
+            <Label fx:id="lblPrecio" styleClass="precio-grande" text="\$0.00"/>
+        </VBox>
+    </HBox>
+
+    <ScrollPane fitToWidth="true" styleClass="scroll-detalle" VBox.vgrow="ALWAYS">
+        <VBox fx:id="contenedorCaracteristicas" spacing="10"/>
+    </ScrollPane>
+    <VBox fx:id="listaAvisos" styleClass="caja-avisos" spacing="3"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Cancelar" styleClass="btn-oscuro" cancelButton="true" onAction="#onCancelar">
+            <graphic><FontIcon iconLiteral="bi-x"/></graphic>
+        </Button>
+        <Button text="Usar esta personalización" styleClass="btn-verde" defaultButton="true" onAction="#onAceptar">
+            <graphic><FontIcon iconLiteral="bi-check2-circle"/></graphic>
+        </Button>
+    </HBox>
+</VBox>

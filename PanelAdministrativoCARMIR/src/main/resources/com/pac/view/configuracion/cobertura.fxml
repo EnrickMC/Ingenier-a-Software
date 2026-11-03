@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Pestaña Cobertura de envío: códigos postales a los que se entrega y su costo -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.CoberturaController"
+      styleClass="pestana-contenido" spacing="16">
+
+    <!-- Alta o cambio de costo -->
+    <VBox styleClass="tarjeta" spacing="10">
+        <Label styleClass="tarjeta-titulo" text="Agregar o cambiar un código postal">
+            <graphic><FontIcon iconLiteral="bi-geo-alt-fill"/></graphic>
+        </Label>
+        <!-- Si la ventana es angosta, los botones pasan a un segundo renglón -->
+        <FlowPane hgap="10" vgap="10" alignment="CENTER_LEFT">
+            <Label minWidth="-Infinity" styleClass="texto-suave" text="Código postal"/>
+            <TextField minWidth="-Infinity" fx:id="txtCodigo" styleClass="campo" prefWidth="100" promptText="5 dígitos"/>
+            <Label minWidth="-Infinity" styleClass="texto-suave" text="Costo de envío $"/>
+            <TextField minWidth="-Infinity" fx:id="txtCosto" styleClass="campo" prefWidth="100" promptText="0.00"/>
+            <Button fx:id="btnAgregar" minWidth="-Infinity" text="Agregar" styleClass="btn-verde" onAction="#onAgregar">
+                <graphic><FontIcon iconLiteral="bi-plus-circle-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnCambiarCosto" minWidth="-Infinity" text="Cambiar costo" styleClass="btn-azul" onAction="#onCambiarCosto">
+                <graphic><FontIcon iconLiteral="bi-save-fill"/></graphic>
+            </Button>
+            <Button fx:id="btnLimpiar" minWidth="-Infinity" text="Limpiar" styleClass="btn-secundario" onAction="#onLimpiar">
+                <graphic><FontIcon iconLiteral="bi-eraser-fill"/></graphic>
+            </Button>
+        </FlowPane>
+        <Label fx:id="lblError" styleClass="mensaje-error" maxWidth="Infinity" wrapText="true">
+            <graphic><FontIcon iconLiteral="bi-x-circle-fill"/></graphic>
+        </Label>
+        <Label styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity"
+               text="Elige un renglón de la tabla para cambiar su costo o quitarlo. La tienda en línea solo acepta envíos a estos códigos postales."/>
+    </VBox>
+
+    <!-- Lista de códigos postales -->
+    <VBox styleClass="tarjeta" spacing="10" VBox.vgrow="ALWAYS">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label styleClass="tarjeta-titulo" text="Códigos postales con cobertura"/>
+            <Label fx:id="lblConteo" styleClass="texto-suave"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <TextField fx:id="txtBuscar" styleClass="campo" prefWidth="160" promptText="Buscar código postal"
+                       onKeyReleased="#onBuscar"/>
+            <Button fx:id="btnEliminar" text="Quitar" styleClass="btn-rojo" onAction="#onEliminar">
+                <graphic><FontIcon iconLiteral="bi-trash-fill"/></graphic>
+            </Button>
+        </HBox>
+        <TableView fx:id="tblCobertura" styleClass="tabla-carmir" VBox.vgrow="ALWAYS" minHeight="260">
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/></columnResizePolicy>
+            <columns>
+                <TableColumn text="Código postal" minWidth="140" prefWidth="140">
+                    <cellValueFactory><PropertyValueFactory property="codigoPostal"/></cellValueFactory>
+                </TableColumn>
+                <TableColumn text="Costo de envío" minWidth="140" prefWidth="140">
+                    <cellValueFactory><PropertyValueFactory property="costo"/></cellValueFactory>
+                </TableColumn>
+            </columns>
+            <placeholder>
+                <Label styleClass="tabla-vacia" text="Todavía no hay códigos postales con cobertura"/>
+            </placeholder>
+        </TableView>
+    </VBox>
+</VBox>

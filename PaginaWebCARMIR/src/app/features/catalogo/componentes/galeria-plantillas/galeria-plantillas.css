@@ -1,0 +1,131 @@
+/* Ventana sobre la página (en celular ocupa casi toda la pantalla) */
+.fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(74, 59, 50, 0.55);
+  z-index: 40;
+}
+
+.ventana {
+  position: fixed;
+  z-index: 41;
+  left: 8px;
+  right: 8px;
+  top: 8px;
+  bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cabecera h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cerrar {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  font-size: 1.8rem;
+  color: var(--color-titulo);
+  cursor: pointer;
+}
+
+.explicacion {
+  margin: 4px 0 12px;
+  color: var(--color-texto-suave);
+  font-size: 0.9rem;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  align-content: start;
+}
+
+.plantilla {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  text-align: left;
+  padding: 10px;
+  border: 2px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-blanco);
+  font-family: inherit;
+  color: var(--color-texto);
+  cursor: pointer;
+}
+
+.plantilla.elegida {
+  border-color: var(--color-acento);
+  background: #fdf0f0;
+}
+
+.miniatura {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nombre {
+  font-weight: 700;
+}
+
+.incluye {
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-borde);
+  margin-top: 12px;
+}
+
+/* Tableta y escritorio: ventana centrada y dos columnas */
+@media (min-width: 768px) {
+  .ventana {
+    left: 50%;
+    top: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    width: 720px;
+    max-height: 85vh;
+    padding: 24px;
+  }
+
+  .lista {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

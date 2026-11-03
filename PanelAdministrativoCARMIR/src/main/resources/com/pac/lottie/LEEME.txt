@@ -1,0 +1,8 @@
+Carpeta de los iconos animados (Lottie) del panel.
+
+- Aquí van TODOS los archivos .json de Lottie que usa la aplicación.
+- Se leen con la clase com.pac.view.animacion.IconoLottie (librería Lottie4J).
+- El menú lateral usa un JSON por apartado; el nombre se indica en navigation/SeccionPanel.java
+  junto con el "cuadro de reposo" (el cuadro que se ve cuando el mouse no está encima).
+- pastel_animado.json es el pastel de 3 pisos: adorno animado en Gestión de Pedidos (panel vacío del detalle).
+- Para cambiar un icono: reemplaza el JSON de esta carpeta o cambia el nombre en SeccionPanel.

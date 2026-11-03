@@ -1,0 +1,67 @@
+/* =====================================================================
+   Módulo 6 · Reportes Financieros y apartado Configuración
+   Usa los colores de carmir-base.css (paleta pastel, RNF-10) y las clases de
+   panel.css (kpi-card, tarjeta), usuarios.css, catalogo.css e inventario.css
+   ===================================================================== */
+
+/* ---------- Barra del periodo ---------- */
+.atajo-periodo {
+    -fx-background-color: -carmir-hover;
+    -fx-text-fill: -carmir-ambar-texto;
+    -fx-background-radius: 14;
+    -fx-padding: 4 12 4 12;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+.atajo-periodo:hover { -fx-background-color: -carmir-seleccion; }
+.atajo-periodo:pressed { -fx-background-color: -carmir-durazno-borde; }
+.atajo-periodo:focus-visible { -fx-effect: dropshadow(gaussian, rgba(52,152,219,0.5), 5, 0.4, 0, 0); }
+
+/* ---------- Tarjetas de totales ---------- */
+.kpi-card.gastos   { -fx-border-color: transparent transparent transparent -carmir-naranja; }
+.kpi-card.utilidad { -fx-border-color: transparent transparent transparent -carmir-azul; }
+.kpi-card.perdida  { -fx-border-color: transparent transparent transparent -carmir-rojo; }
+.kpi-card.perdida .kpi-valor, .kpi-card.perdida .kpi-titulo { -fx-text-fill: -carmir-rojo; }
+.kpi-valor-chico {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+/* ---------- Avisos del reporte ---------- */
+.caja-avisos-reporte { -fx-spacing: 6; }
+
+/* ---------- Gráficas con colores pastel ---------- */
+.grafica-carmir { -fx-padding: 4 0 0 0; }
+.grafica-carmir .chart-plot-background { -fx-background-color: -carmir-superficie; }
+.grafica-carmir .chart-vertical-grid-lines,
+.grafica-carmir .chart-horizontal-grid-lines { -fx-stroke: -carmir-borde; }
+.grafica-carmir .chart-legend { -fx-background-color: transparent; }
+.grafica-carmir .default-color0.chart-bar { -fx-bar-fill: #a8d8b9; }
+.grafica-carmir .default-color1.chart-bar { -fx-bar-fill: #f5b7b1; }
+.grafica-carmir .default-color0.chart-legend-item-symbol { -fx-background-color: #a8d8b9; }
+.grafica-carmir .default-color1.chart-legend-item-symbol { -fx-background-color: #f5b7b1; }
+.grafica-top .default-color0.chart-bar { -fx-bar-fill: #f8c8dc; }
+
+/* ---------- Renglones de las tablas ---------- */
+/* Rojo claro: utilidad negativa o producto inactivo */
+.tabla-carmir .table-row-cell.fila-perdida { -fx-background-color: -carmir-rojo-fondo; }
+
+/* ---------- Configuración ---------- */
+.seccion-config {
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+.etiqueta-config { -fx-font-size: 13px; }
+.campo-corto { -fx-pref-width: 110; }
+.dato-sistema { -fx-font-size: 13px; -fx-text-fill: -carmir-texto; }
+/* Subtítulos de la tarjeta "Notificaciones al cliente" (WhatsApp y correo); colores por variable para el modo oscuro */
+.subtitulo-integracion {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -carmir-texto-titulo;
+    -fx-padding: 8 0 0 0;
+    -fx-graphic-text-gap: 8;
+}
+.subtitulo-integracion .ikonli-font-icon { -fx-icon-color: -carmir-acento-texto; -fx-icon-size: 17; }

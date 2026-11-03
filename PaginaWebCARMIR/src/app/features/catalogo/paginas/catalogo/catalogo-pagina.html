@@ -1,0 +1,109 @@
+<!-- Banner de bienvenida (el logo y los filtros están en el menú de arriba) -->
+<section class="banner">
+  <div class="contenedor">
+    <h1>¡Los mejores pasteles y gelatinas de la ciudad!</h1>
+    <p>Elige un postre base y personalízalo a tu gusto: tamaño, sabor, relleno y decoración.</p>
+  </div>
+</section>
+
+<div class="contenedor diseno">
+  <!-- RF-1 · Paso 5: el buscador está en el menú de arriba; las categorías, aquí junto al total. -->
+  <section class="resultados" aria-labelledby="titulo-resultados">
+    <!-- RF-1 · Excepción paso 6: «La categoría seleccionada ya no está disponible» (también avisos de otras pantallas). -->
+    @if (aviso() !== '') {
+      <div class="aviso" role="status">
+        <p>{{ aviso() }}</p>
+      </div>
+    }
+
+    <!-- Título y total a la izquierda; categorías a la derecha -->
+    <div class="encabezado-resultados">
+      <div class="titulo-total">
+        <h2 id="titulo-resultados">{{ tituloSeccion() }}</h2>
+        @if (estado() === 'listo' && productos().length > 0) {
+          <span class="total" aria-live="polite">{{ textoTotal() }}</span>
+        }
+      </div>
+
+      <!-- RF-1 · Paso 5: categorías como botones redondos («Todos» está junto al buscador de arriba) -->
+      @if (categorias().length > 0) {
+        <ul class="categorias" aria-label="Categorías">
+          @for (categoria of categorias(); track categoria.idCategoria) {
+            <li>
+              <button
+                type="button"
+                class="categoria"
+                [class.activa]="filtros().idCategoria === categoria.idCategoria"
+                [attr.aria-pressed]="filtros().idCategoria === categoria.idCategoria"
+                [title]="categoria.descripcion || categoria.nombre"
+                (click)="elegirCategoria(categoria.idCategoria)"
+              >
+                {{ categoria.nombre }} <span class="cuenta">({{ categoria.totalProductos }})</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+
+    @if (filtros().buscar !== '' && estado() !== 'error') {
+      <p class="criterio">
+        Resultados para «{{ filtros().buscar }}»
+        <button type="button" class="btn btn-secundario btn-chico" (click)="limpiarFiltros()">
+          Limpiar búsqueda
+        </button>
+      </p>
+    }
+
+    @switch (estado()) {
+      @case ('cargando') {
+        <app-cargando class="solo-lector" texto="Cargando el catálogo..." />
+        <div class="cuadricula" aria-hidden="true">
+          @for (numero of esqueletos; track numero) {
+            <div class="esqueleto panel">
+              <div class="esqueleto-foto"></div>
+              <div class="esqueleto-linea"></div>
+              <div class="esqueleto-linea corta"></div>
+            </div>
+          }
+        </div>
+      }
+
+      @case ('error') {
+        <!-- RF-1 · Excepción paso 2: sin conexión, «No fue posible cargar el catálogo» con «Reintentar». -->
+        <app-mensaje-estado
+          tipo="error"
+          titulo="No fue posible cargar el catálogo"
+          [texto]="detalleError()"
+        >
+          <button type="button" class="btn btn-principal" (click)="reintentar()">Reintentar</button>
+        </app-mensaje-estado>
+      }
+
+      @default {
+        @if (productos().length === 0) {
+          @if (hayFiltros()) {
+            <!-- RF-1 · Excepción paso 6: «No encontramos postres con ese criterio» con «Limpiar búsqueda». -->
+            <app-mensaje-estado tipo="vacio" titulo="No encontramos postres con ese criterio">
+              <button type="button" class="btn btn-secundario" (click)="limpiarFiltros()">Limpiar búsqueda</button>
+            </app-mensaje-estado>
+          } @else {
+            <!-- RF-1 · Excepción paso 3: no hay productos, «Aún no hay productos disponibles» con la cuadrícula vacía. -->
+            <app-mensaje-estado
+              tipo="vacio"
+              titulo="Aún no hay productos disponibles"
+              texto="Muy pronto tendremos postres para ti."
+            />
+          }
+        } @else {
+          <!-- RF-1 · Paso 4: cuadrícula de productos con foto, nombre y precio. -->
+          <div class="cuadricula">
+            @for (producto of productos(); track producto.idPostre) {
+              <app-tarjeta-producto [producto]="producto" />
+            }
+          </div>
+        }
+      }
+    }
+  </section>
+</div>
