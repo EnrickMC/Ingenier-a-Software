@@ -680,8 +680,8 @@
                 "y": 415
               },
               "RF-11": {
-                "x": 555,
-                "y": 575
+                "x": 535,
+                "y": 415
               },
               "RF-13": {
                 "x": 215,
@@ -696,8 +696,8 @@
                 "y": 255
               },
               "RF-12": {
-                "x": 555,
-                "y": 415
+                "x": 535,
+                "y": 575
               },
               "actor:Cliente Público": {
                 "x": 80,
@@ -1861,7 +1861,8 @@
           "diagrama": {
             "casos_con_actor": [
               "RF-15",
-              "RF-28"
+              "RF-28",
+              "RF-20"
             ],
             "posiciones": {
               "RF-15": {
@@ -1873,23 +1874,23 @@
                 "y": 635
               },
               "RF-16": {
-                "x": 215,
+                "x": 595,
                 "y": 75
               },
               "RF-17": {
-                "x": 555,
+                "x": 215,
                 "y": 75
               },
               "RF-18": {
-                "x": 555,
+                "x": 595,
                 "y": 235
               },
               "RF-29": {
-                "x": 555,
+                "x": 595,
                 "y": 675
               },
               "RF-30": {
-                "x": 555,
+                "x": 595,
                 "y": 815
               },
               "RF-31": {
@@ -1905,44 +1906,44 @@
                 "y": 640
               },
               "RF-22": {
-                "x": 555,
+                "x": 595,
                 "y": 375
               },
               "RF-23": {
-                "x": 875,
+                "x": 975,
                 "y": 455
               },
               "RF-24": {
-                "x": 875,
+                "x": 975,
                 "y": 695
               },
               "RF-25": {
-                "x": 875,
+                "x": 975,
                 "y": 575
               },
               "RF-26": {
-                "x": 555,
+                "x": 595,
                 "y": 535
               },
               "RF-21": {
-                "x": 875,
+                "x": 855,
                 "y": 315
               },
               "RF-20": {
-                "x": 875,
-                "y": 195
+                "x": 295,
+                "y": 375
               },
               "RF-19": {
-                "x": 875,
-                "y": 75
+                "x": 855,
+                "y": 195
               },
               "RF-27": {
-                "x": 875,
+                "x": 975,
                 "y": 815
               },
               "RF-32": {
-                "x": 1195,
-                "y": 315
+                "x": 975,
+                "y": 75
               }
             }
           },
@@ -3996,7 +3997,11 @@
               "titulo": "Sugerencia de nombres compatibles con la vista 3D",
               "descripcion": "El sistema debe sugerir a la administradora, al registrar o modificar categorías, características y opciones, los nombres que la página web reconoce para dibujar el postre en 3D, indicar cómo se verá cada uno y no permitir guardar una característica u opción que la página no puede dibujar en el tipo de postre de la categoría.",
               "comentarios": "Son sugerencias: se puede escribir otro nombre y se avisa que la página no lo dibujará. Las listas del panel deben coincidir con las de la página web.",
-              "dependencias": [],
+              "dependencias": [
+                "RF-19",
+                "RF-16",
+                "RF-23"
+              ],
               "relaciones": [
                 "RF-5",
                 "RF-16",
@@ -4125,88 +4130,90 @@
             "casos_con_actor": [
               "RF-33",
               "RF-49",
-              "RF-50"
+              "RF-35",
+              "RF-34",
+              "RF-43"
             ],
             "posiciones": {
               "RF-45": {
-                "x": 795,
-                "y": 635
+                "x": 815,
+                "y": 655
               },
               "RF-36": {
                 "x": 475,
-                "y": 275
+                "y": 375
               },
               "RF-33": {
                 "x": 135,
-                "y": 275
+                "y": 475
               },
               "RF-39": {
-                "x": 135,
-                "y": 455
+                "x": 475,
+                "y": 515
               },
               "RF-47": {
-                "x": 135,
-                "y": 875
+                "x": 815,
+                "y": 515
               },
               "RF-46": {
-                "x": 795,
-                "y": 875
+                "x": 655,
+                "y": 795
               },
               "RF-37": {
-                "x": 795,
+                "x": 815,
                 "y": 95
               },
               "RF-42": {
-                "x": 795,
-                "y": 455
+                "x": 475,
+                "y": 915
               },
               "RF-38": {
                 "x": 475,
-                "y": 455
+                "y": 655
               },
               "RF-41": {
-                "x": 135,
-                "y": 635
+                "x": 815,
+                "y": 375
               },
               "RF-43": {
-                "x": 795,
-                "y": 275
+                "x": 135,
+                "y": 715
               },
               "RF-44": {
-                "x": 475,
-                "y": 635
+                "x": 935,
+                "y": 795
               },
               "RF-40": {
-                "x": 475,
-                "y": 875
+                "x": 815,
+                "y": 235
               },
               "actor:Administrador": {
                 "x": 0,
-                "y": 280
+                "y": 100
               },
               "actor:Personal": {
                 "x": 0,
-                "y": 460
+                "y": 560
               },
               "RF-34": {
-                "x": 135,
-                "y": 95
-              },
-              "RF-35": {
                 "x": 475,
                 "y": 95
               },
+              "RF-35": {
+                "x": 135,
+                "y": 295
+              },
               "RF-48": {
-                "x": 1115,
-                "y": 275
+                "x": 475,
+                "y": 235
               },
               "RF-49": {
-                "x": 1115,
-                "y": 635
+                "x": 135,
+                "y": 155
               },
               "RF-50": {
-                "x": 1115,
-                "y": 455
+                "x": 135,
+                "y": 915
               }
             }
           },
@@ -6388,7 +6395,6 @@
             "casos_con_actor": [
               "RF-51",
               "RF-59",
-              "RF-60",
               "RF-55"
             ],
             "posiciones": {
@@ -6398,23 +6404,23 @@
               },
               "RF-51": {
                 "x": 215,
-                "y": 355
+                "y": 495
               },
               "RF-59": {
                 "x": 215,
-                "y": 495
+                "y": 655
               },
               "RF-60": {
                 "x": 215,
-                "y": 655
+                "y": 815
               },
               "RF-55": {
                 "x": 215,
-                "y": 795
+                "y": 1055
               },
               "RF-63": {
-                "x": 215,
-                "y": 935
+                "x": 555,
+                "y": 815
               },
               "RF-61": {
                 "x": 555,
@@ -6438,23 +6444,23 @@
               },
               "RF-57": {
                 "x": 555,
-                "y": 795
+                "y": 935
               },
               "RF-58": {
                 "x": 555,
-                "y": 935
+                "y": 1055
               },
               "actor:Administrador": {
                 "x": 80,
-                "y": 360
+                "y": 500
               },
               "actor:Personal": {
                 "x": 80,
-                "y": 800
+                "y": 820
               },
               "RF-64": {
-                "x": 895,
-                "y": 355
+                "x": 275,
+                "y": 215
               }
             }
           },
@@ -8644,45 +8650,43 @@
           },
           "diagrama": {
             "casos_con_actor": [
+              "RF-70",
               "RF-68",
               "RF-69",
-              "RF-70",
-              "RF-71",
-              "RF-72",
-              "RF-73"
+              "RF-71"
             ],
             "posiciones": {
               "actor:Administrador": {
                 "x": 80,
-                "y": 180
+                "y": 220
               },
               "actor:Personal": {
                 "x": 80,
-                "y": 380
+                "y": 360
               },
               "RF-68": {
                 "x": 215,
-                "y": 95
+                "y": 355
               },
               "RF-69": {
                 "x": 215,
-                "y": 255
+                "y": 475
               },
               "RF-70": {
                 "x": 215,
-                "y": 415
+                "y": 75
               },
               "RF-71": {
-                "x": 555,
-                "y": 95
+                "x": 215,
+                "y": 215
               },
               "RF-72": {
-                "x": 555,
-                "y": 255
+                "x": 535,
+                "y": 215
               },
               "RF-73": {
-                "x": 555,
-                "y": 415
+                "x": 535,
+                "y": 355
               }
             }
           },
@@ -9120,7 +9124,9 @@
               "titulo": "Generación de respaldos de la base de datos",
               "descripcion": "El sistema debe permitir generar un respaldo completo de la base de datos en un archivo .sql que el usuario guarda donde elija.",
               "comentarios": "Usa el programa mysqldump de la instalación de MySQL; la contraseña no se escribe en la línea de comandos. Requiere el permiso «Configurar sistema».",
-              "dependencias": [],
+              "dependencias": [
+                "RF-68"
+              ],
               "relaciones": [
                 "RF-73",
                 "RNF-8"
@@ -9659,16 +9665,16 @@
                 "y": 260
               },
               "RNF-14": {
-                "x": 215,
+                "x": 555,
                 "y": 575
               },
               "RNF-15": {
-                "x": 555,
+                "x": 215,
                 "y": 575
               },
               "actor:Personal": {
                 "x": 80,
-                "y": 580
+                "y": 460
               }
             }
           },
