@@ -1,12 +1,12 @@
 /*
- * Servicio del Portal de Pedidos (Módulo 2): reglas de negocio de RF-5 a RF-12.
+ * Servicio del Portal de Pedidos (Módulo 2): reglas de negocio de RF-6 a RF-13 y RF-14.
  *
- *  - validarCarrito:       RF-5 / RF-7 / RF-9 paso 2: revisa disponibilidad y precio de cada postre.
- *  - leerReglasEntrega:    RF-9 / RF-10: fechas, horarios, días llenos, anticipo y métodos de pago.
- *  - revisarCobertura:     RF-9 paso 7: si hay envío al código postal y cuánto cuesta.
- *  - registrarPedido:      RF-11: guarda el pedido en UNA transacción (o no guarda nada).
- *  - consultarPedido:      RF-12: seguimiento con folio + teléfono.
- *  - registrarComprobante: RF-12: el cliente envía su comprobante; queda "Pendiente" para el Panel.
+ *  - validarCarrito:       RF-6 / RF-8 / RF-10 paso 2: revisa disponibilidad y precio de cada postre.
+ *  - leerReglasEntrega:    RF-10 / RF-11: fechas, horarios, días llenos, anticipo y métodos de pago.
+ *  - revisarCobertura:     RF-10 paso 7: si hay envío al código postal y cuánto cuesta.
+ *  - registrarPedido:      RF-12: guarda el pedido en UNA transacción (o no guarda nada).
+ *  - consultarPedido:      RF-13: seguimiento con folio + teléfono o correo.
+ *  - registrarComprobante: RF-14: el cliente envía su comprobante; queda "Pendiente" para el Panel.
  *
  * Reglas de seguridad:
  *  - Los precios SIEMPRE se recalculan aquí (reglas del catálogo y vista vw_CostoPrecioPostre).
@@ -92,17 +92,17 @@ async function cotizarArticulo(articulo) {
 }
 
 /*
- * Revisa todos los artículos (RF-5 paso 4). Regresa una fila por artículo con:
+ * Revisa todos los artículos (RF-6 paso 4). Regresa una fila por artículo con:
  *   estado: 'disponible' | 'no_disponible' | 'requiere_actualizar' | 'repetido'
  *   precioUnitario vigente y si cambió respecto al que vio el cliente.
  */
-// RF-5 · Paso 4: valida en la BD que cada producto siga activo, con precio y opciones vigentes.
+// RF-6 · Paso 4: valida en la BD que cada producto siga activo, con precio y opciones vigentes.
 async function revisarArticulos(articulos) {
   const revisados = [];
   const claves = [];
   for (let i = 0; i < articulos.length; i++) {
     const articulo = articulos[i];
-    // RF-5 · Paso 4: cotiza con las mismas reglas del catálogo (RF-3).
+    // RF-6 · Paso 4: cotiza con las mismas reglas del catálogo (RF-3).
     const cotizacion = await cotizarArticulo(articulo);
     const fila = {
       posicion: articulo.posicion,
@@ -116,7 +116,7 @@ async function revisarArticulos(articulos) {
       nombre: '',
       articulo: articulo
     };
-    // RF-5 · Excepción paso 4: el producto ya no está activo, se marca «No disponible».
+    // RF-6 · Excepción paso 4: el producto ya no está activo, se marca «No disponible».
     if (cotizacion === null) {
       fila.estado = 'no_disponible';
       fila.mensaje = MSG_NO_DISPONIBLE;
@@ -125,7 +125,7 @@ async function revisarArticulos(articulos) {
       fila.nombre = cotizacion.nombreProducto;
       fila.precioUnitario = cotizacion.precioUnitario;
       fila.precioCambio = cotizacion.precioCambio;
-      // RF-5 · Excepción paso 4: opciones no disponibles o incompatibles, «Requiere actualizar personalización».
+      // RF-6 · Excepción paso 4: opciones no disponibles o incompatibles, «Requiere actualizar personalización».
       if (cotizacion.opcionesNoDisponibles.length > 0 || !cotizacion.valido) {
         fila.estado = 'requiere_actualizar';
         fila.mensaje = MSG_REQUIERE_ACTUALIZAR;
@@ -133,7 +133,7 @@ async function revisarArticulos(articulos) {
       }
     }
     // La tabla DetallePedido no permite el mismo postre dos veces en un pedido
-    // RF-5 · Excepción paso 4: el mismo postre dos veces con distinto mensaje (la tabla no lo permite).
+    // RF-6 · Excepción paso 4: el mismo postre dos veces con distinto mensaje (la tabla no lo permite).
     if (fila.estado === 'disponible') {
       if (claves.indexOf(fila.clave) >= 0) {
         fila.estado = 'repetido';
@@ -159,9 +159,9 @@ function filaPublica(fila) {
   };
 }
 
-// ===================== RF-5: validar el carrito =====================
+// ===================== RF-6: validar el carrito =====================
 
-// RF-5 (API): inicia aquí.
+// RF-6 (API): inicia aquí.
 async function validarCarrito(articulos) {
   const revisados = await revisarArticulos(articulos);
   const resultado = [];
@@ -169,11 +169,11 @@ async function validarCarrito(articulos) {
   let puedeContinuar = true;
   for (let i = 0; i < revisados.length; i++) {
     resultado.push(filaPublica(revisados[i]));
-    // RF-5 · Paso 5: calcula el subtotal de cada producto y el total.
+    // RF-6 · Paso 5: calcula el subtotal de cada producto y el total.
     if (revisados[i].estado === 'disponible') {
       total = total + revisados[i].precioUnitario * revisados[i].articulo.cantidad;
     } else {
-      // RF-5 · Excepción paso 4: el producto con problema se excluye del total y deshabilita «Continuar».
+      // RF-6 · Excepción paso 4: el producto con problema se excluye del total y deshabilita «Continuar».
       // Un producto no disponible se excluye del total y no deja continuar
       puedeContinuar = false;
     }
@@ -181,15 +181,15 @@ async function validarCarrito(articulos) {
   return { articulos: resultado, total: redondear(total), puedeContinuar: puedeContinuar };
 }
 
-// ===================== RF-9 / RF-10: reglas de entrega y pago =====================
+// ===================== RF-10 / RF-11: reglas de entrega y pago =====================
 
-// RF-9 · Paso 3 / RF-10 · Paso 3 (API): inicia aquí. Reglas para el formulario de entrega y de pago.
+// RF-10 · Paso 3 / RF-11 · Paso 3 (API): inicia aquí. Reglas para el formulario de entrega y de pago.
 async function leerReglasEntrega() {
   const reglas = await cargarReglas();
   const desde = reglasEntrega.sumarDias(reglasEntrega.hoy(), reglas.diasAnticipacionMinima);
   const hasta = reglasEntrega.sumarDias(reglasEntrega.hoy(), reglas.diasMaximosAdelante);
 
-  // RF-9 · Excepción paso 6: días sin cupo que el calendario deshabilita.
+  // RF-10 · Excepción paso 6: días sin cupo que el calendario deshabilita.
   // Días que ya llegaron a la capacidad diaria: no se ofrecen en el calendario
   const cargas = await repositorio.contarEntregasPorDia(desde, hasta);
   const fechasLlenas = [];
@@ -212,40 +212,40 @@ async function leerReglasEntrega() {
     horaCierre: reglas.horaCierre,
     horarios: reglasEntrega.horariosDisponibles(reglas),
     porcentajeAnticipo: reglas.porcentajeAnticipo,
-    // RF-10 · Excepción paso 6: sin datos bancarios solo se acepta pago en sucursal.
+    // RF-11 · Excepción paso 6: sin datos bancarios solo se acepta pago en sucursal.
     aceptaTransferencia: reglasEntrega.aceptaTransferencia(reglas),
     mensajeSoloSucursal: MSG_SOLO_SUCURSAL
   };
 }
 
-// ===================== RF-9 paso 7: cobertura =====================
+// ===================== RF-10 paso 7: cobertura =====================
 
-// RF-9 · Paso 7 (API): inicia aquí.
+// RF-10 · Paso 7 (API): inicia aquí.
 async function revisarCobertura(codigoPostal) {
   const fila = await repositorio.buscarCobertura(codigoPostal);
-  // RF-9 · Excepción paso 7: «Por el momento no tenemos envío a tu zona».
+  // RF-10 · Excepción paso 7: «Por el momento no tenemos envío a tu zona».
   if (fila === null) {
     throw new ErrorApi(404, 'SIN_COBERTURA', MSG_SIN_COBERTURA, [{ campo: 'codigoPostal', mensaje: MSG_SIN_COBERTURA }]);
   }
   return { codigoPostal: fila.CodigoPostal, costoEnvio: Number(fila.CostoEnvio) };
 }
 
-// ===================== RF-11: registrar el pedido =====================
+// ===================== RF-12: registrar el pedido =====================
 
 /*
  * Doble envío: si la misma llave ya se usó, se regresa el mismo comprobante sin guardar nada.
  * Si llega dos veces al mismo tiempo, la segunda espera a la primera.
  */
-// RF-11 · Paso 6 (API): inicia aquí el registro del pedido.
+// RF-12 · Paso 6 (API): inicia aquí el registro del pedido.
 async function registrarPedido(solicitud) {
   limpiarLlavesViejas();
   const usada = llavesUsadas.get(solicitud.llaveIdempotencia);
-  // RF-11 · Excepción paso 6: doble envío con la misma llave; se regresa el mismo comprobante sin crear duplicado.
+  // RF-12 · Excepción paso 6: doble envío con la misma llave; se regresa el mismo comprobante sin crear duplicado.
   if (usada !== undefined) {
     return copiaRepetida(usada.respuesta);
   }
   const enProceso = llavesEnProceso.get(solicitud.llaveIdempotencia);
-  // RF-11 · Excepción paso 6: doble envío al mismo tiempo; la segunda petición espera a la primera.
+  // RF-12 · Excepción paso 6: doble envío al mismo tiempo; la segunda petición espera a la primera.
   if (enProceso !== undefined) {
     const respuestaAnterior = await enProceso;
     return copiaRepetida(respuestaAnterior);
@@ -280,39 +280,39 @@ function limpiarLlavesViejas() {
   }
 }
 
-// RF-11 · Pasos 2 a 9 del registro (ya validados los datos en pedidos.validacion.js).
+// RF-12 · Pasos 2 a 9 del registro (ya validados los datos en pedidos.validacion.js).
 async function registrarPedidoNuevo(solicitud) {
   const reglas = await cargarReglas();
 
-  // RF-10 paso 6: transferencia solo si hay datos bancarios
-  // RF-10 · Excepción paso 6: transferencia sin datos bancarios configurados.
+  // RF-11 paso 6: transferencia solo si hay datos bancarios
+  // RF-11 · Excepción paso 6: transferencia sin datos bancarios configurados.
   if (solicitud.pago.metodo !== 'Efectivo' && !reglasEntrega.aceptaTransferencia(reglas)) {
     throw new ErrorApi(400, 'SOLO_SUCURSAL', MSG_SOLO_SUCURSAL, [{ campo: 'metodo', mensaje: MSG_SOLO_SUCURSAL }]);
   }
 
-  // RF-11 paso 3: productos activos y precios vigentes (reglas del catálogo)
-  // RF-11 · Paso 3: valida en la BD que los productos sigan activos y con precio vigente.
+  // RF-12 paso 3: productos activos y precios vigentes (reglas del catálogo)
+  // RF-12 · Paso 3: valida en la BD que los productos sigan activos y con precio vigente.
   const revisados = await revisarArticulos(solicitud.articulos);
   revisarDisponibilidad(revisados);
 
-  // RF-9 paso 7: costo de envío del código postal
+  // RF-10 paso 7: costo de envío del código postal
   let costoEnvio = 0;
-  // RF-9 · Paso 7: con envío a domicilio se agrega el costo de envío.
+  // RF-10 · Paso 7: con envío a domicilio se agrega el costo de envío.
   if (solicitud.entrega.modalidad === 'Envio a domicilio') {
     const cobertura = await revisarCobertura(solicitud.entrega.direccion.codigoPostal);
     costoEnvio = cobertura.costoEnvio;
   }
 
   // Todo lo que se guarda va en una sola transacción, con el candado para respetar la capacidad diaria
-  // RF-11 · Paso 6: registra el pedido en una sola transacción; si algo falla se deshace todo («No fue posible enviar tu pedido»).
+  // RF-12 · Paso 6: registra el pedido en una sola transacción; si algo falla se deshace todo («No fue posible enviar tu pedido»).
   const guardado = await baseDatos.conTransaccion(guardarPedido(solicitud, reglas, revisados, costoEnvio), CANDADO_PEDIDOS);
 
-  // RF-11 paso 9: aviso al cliente. Si falla, el pedido ya quedó registrado (no se deshace)
-  // RF-11 · Paso 9: deja el aviso por WhatsApp y correo para que el Panel lo envíe.
+  // RF-12 paso 9: aviso al cliente. Si falla, el pedido ya quedó registrado (no se deshace)
+  // RF-12 · Paso 9: deja el aviso por WhatsApp y correo para que el Panel lo envíe.
   if (!guardado.repetido) {
     await dejarAvisoDeRegistro(guardado, solicitud, costoEnvio);
   }
-  // RF-11 · Paso 8: comprobante con folio, resumen e instrucciones de pago.
+  // RF-12 · Paso 8: comprobante con folio, resumen e instrucciones de pago.
   return armarComprobante(guardado, solicitud, reglas, revisados, costoEnvio);
 }
 
@@ -324,7 +324,7 @@ function revisarDisponibilidad(revisados) {
       problemas.push(filaPublica(revisados[i]));
     }
   }
-  // RF-11 · Excepción paso 3: algún producto ya no está disponible; no se registra y regresa al carrito.
+  // RF-12 · Excepción paso 3: algún producto ya no está disponible; no se registra y regresa al carrito.
   if (problemas.length === 0) {
     return;
   }
@@ -337,7 +337,7 @@ function revisarDisponibilidad(revisados) {
     'Algunos productos de tu carrito ya no están disponibles. Revisa tu carrito.', problemas);
 }
 
-// RF-11 paso 3: el total cambió. Se manda el precio vigente de cada postre para que el carrito se actualice
+// RF-12 paso 3: el total cambió. Se manda el precio vigente de cada postre para que el carrito se actualice
 function errorPrecioCambio(lineas, costoEnvio, total) {
   const articulos = [];
   for (let i = 0; i < lineas.length; i++) {
@@ -401,9 +401,9 @@ function guardarPedido(solicitud, reglas, revisados, costoEnvio) {
     }
 
     // 4. Precio congelado = precio vigente de la vista vw_CostoPrecioPostre (la misma que usa el Panel).
-    //    Si el total no es el que vio el cliente, no se guarda nada y se le avisa (RF-11 paso 3)
+    //    Si el total no es el que vio el cliente, no se guarda nada y se le avisa (RF-12 paso 3)
     pedido.montoTotal = await calcularPrecios(conexion, lineas, costoEnvio);
-    // RF-11 · Excepción paso 3: el total cambió; no se guarda nada y se avisa al cliente.
+    // RF-12 · Excepción paso 3: el total cambió; no se guarda nada y se avisa al cliente.
     if (Math.abs(pedido.montoTotal - solicitud.totalMostrado) >= 0.01) {
       throw errorPrecioCambio(lineas, costoEnvio, pedido.montoTotal);
     }
@@ -411,22 +411,22 @@ function guardarPedido(solicitud, reglas, revisados, costoEnvio) {
     if (todosExisten) {
       pedido.huellaLineas = huellaDeLineas(lineas);
       const folioAnterior = await repositorio.buscarPedidoReciente(conexion, cliente.idCliente, pedido, MINUTOS_DOBLE_ENVIO);
-      // RF-11 · Excepción paso 6: pedido idéntico reciente del mismo cliente; se regresa el folio ya generado.
+      // RF-12 · Excepción paso 6: pedido idéntico reciente del mismo cliente; se regresa el folio ya generado.
       if (folioAnterior > 0) {
         return { folio: folioAnterior, repetido: true, cliente: cliente, lineas: lineas, montoTotal: pedido.montoTotal };
       }
     }
-    // 6. Fecha, horario y capacidad del día (RF-9 paso 6), ya con el candado puesto
+    // 6. Fecha, horario y capacidad del día (RF-10 paso 6), ya con el candado puesto
     const carga = await repositorio.contarEntregasDelDia(conexion, entrega.fecha);
     const problema = reglasEntrega.revisarFechaYHorario(reglas, entrega.fecha, entrega.horario, carga);
-    // RF-9 · Excepción paso 6: la fecha ya no cumple anticipación, día laborable, horario o cupo.
+    // RF-10 · Excepción paso 6: la fecha ya no cumple anticipación, día laborable, horario o cupo.
     if (problema !== null) {
       throw validacionPedido.errorDeCampo(problema.campo, problema.mensaje);
     }
     pedido.anticipoRequerido = reglasEntrega.calcularAnticipo(reglas, pedido.montoTotal, pedido.modalidadPago);
 
     // 7. Pedido, entrega a domicilio, postres y primer registro del historial
-    // RF-11 · Paso 6: registra el pedido con folio único.
+    // RF-12 · Paso 6: registra el pedido con folio único.
     const folio = await repositorio.insertarPedido(conexion, pedido);
     if (entrega.modalidad === 'Envio a domicilio') {
       const idDireccion = await repositorio.insertarDireccion(conexion, cliente.idCliente, entrega.direccion);
@@ -443,7 +443,7 @@ function guardarPedido(solicitud, reglas, revisados, costoEnvio) {
         costoUnitario: lineas[i].costoUnitario
       });
     }
-    // RF-11 · Paso 6: estado inicial «En proceso de aceptación» en el historial.
+    // RF-12 · Paso 6: estado inicial «En proceso de aceptación» en el historial.
     await repositorio.insertarHistorialInicial(conexion, folio);
 
     return {
@@ -495,7 +495,7 @@ async function calcularPrecios(conexion, lineas, costoEnvio) {
   let total = 0;
   for (let i = 0; i < lineas.length; i++) {
     const precio = await repositorio.leerPrecioPostre(conexion, lineas[i].idPostre);
-    // RF-11 · Excepción paso 3: el postre ya no tiene precio vigente.
+    // RF-12 · Excepción paso 3: el postre ya no tiene precio vigente.
     if (precio === null || Number(precio.PrecioVenta) <= 0) {
       throw new ErrorApi(409, 'PRODUCTOS_NO_DISPONIBLES',
         'Algunos productos de tu carrito ya no están disponibles. Revisa tu carrito.',
@@ -534,7 +534,7 @@ async function dejarAvisoDeRegistro(guardado, solicitud, costoEnvio) {
   try {
     await baseDatos.conTransaccion(guardarAvisos(guardado, mensaje));
   } catch (error) {
-    // RF-11 · Excepción paso 9: si el aviso no se pudo dejar, el pedido NO se deshace.
+    // RF-12 · Excepción paso 9: si el aviso no se pudo dejar, el pedido NO se deshace.
     // El pedido NO se deshace: la Administradora lo verá sin aviso y puede contactar al cliente
     const referencia = crypto.randomUUID().substring(0, 8);
     console.error('[ERROR ' + referencia + '] No se pudo dejar el aviso del pedido ' + guardado.folio);
@@ -563,8 +563,8 @@ function guardarAvisos(guardado, mensaje) {
   };
 }
 
-// Comprobante que ve el cliente al terminar (RF-11 paso 8)
-// RF-11 · Paso 8: arma el comprobante que ve el cliente.
+// Comprobante que ve el cliente al terminar (RF-12 paso 8)
+// RF-12 · Paso 8: arma el comprobante que ve el cliente.
 function armarComprobante(guardado, solicitud, reglas, revisados, costoEnvio) {
   const productos = [];
   let subtotal = 0;
@@ -605,18 +605,19 @@ function armarComprobante(guardado, solicitud, reglas, revisados, costoEnvio) {
       horario: solicitud.entrega.horario,
       direccion: solicitud.entrega.direccion
     },
-    // RF-10 · Paso 6: instrucciones de pago según el método y la modalidad.
+    // RF-11 · Paso 6: instrucciones de pago según el método y la modalidad.
     instrucciones: mensajes.instruccionesPago(reglas, solicitud.pago.metodo, solicitud.pago.modalidad,
       guardado.montoTotal, anticipo)
   };
 }
 
-// ===================== RF-12: seguimiento =====================
+// ===================== RF-13: seguimiento =====================
 
-// RF-12 (API): inicia aquí. Paso 4: busca el pedido con folio y teléfono.
-async function consultarPedido(folio, telefono) {
-  const fila = await repositorio.buscarPedidoDeCliente(folio, telefono);
-  // RF-12 · Excepción: no hay pedido con esos datos (no se dice cuál de los dos falló).
+// RF-13 (API): inicia aquí. Paso 4: busca el pedido con folio y teléfono (o correo).
+// "contacto" = { telefono, correo }: uno de los dos trae texto.
+async function consultarPedido(folio, contacto) {
+  const fila = await repositorio.buscarPedidoDeCliente(folio, contacto);
+  // RF-13 · Excepción: no hay pedido con esos datos (no se dice cuál de los dos falló).
   if (fila === null) {
     // No se dice cuál de los dos datos falló
     throw new ErrorApi(404, 'PEDIDO_NO_ENCONTRADO', MSG_NO_ENCONTRADO);
@@ -629,7 +630,7 @@ async function consultarPedido(folio, telefono) {
   return armarSeguimiento(fila, lineas, opciones, historial, pagos, reglas);
 }
 
-// RF-12 · Pasos 5 y 6: arma el detalle (estado, productos, entrega, pagos y saldo).
+// RF-13 · Pasos 5 y 6: arma el detalle (estado, productos, entrega, pagos y saldo).
 function armarSeguimiento(fila, lineas, opciones, historial, pagos, reglas) {
   const montoTotal = Number(fila.MontoTotal);
   const totalPagado = Number(fila.TotalPagado);
@@ -683,7 +684,7 @@ function armarSeguimiento(fila, lineas, opciones, historial, pagos, reglas) {
   if (fila.FechaHoraBaja !== null) {
     seguimiento.baja = { motivo: fila.MotivoBaja, fecha: fila.FechaHoraBaja };
   }
-  // RF-12: si el pedido fue cancelado se muestra el motivo y el reembolso.
+  // RF-13: si el pedido fue cancelado se muestra el motivo y el reembolso.
   if (fila.FechaHoraCancelacion !== null) {
     seguimiento.cancelacion = {
       motivo: fila.MotivoCancelacion,
@@ -774,7 +775,7 @@ function armarPagos(pagos) {
 }
 
 // Por qué no se puede enviar un comprobante ('' = sí se puede). Mismas reglas que PagoService del Panel.
-// RF-12 · Excepción: motivos por los que no se puede enviar un comprobante.
+// RF-14 · Excepciones pasos 1 y 5: motivos por los que no se puede enviar un comprobante.
 function motivoSinComprobante(fila, porCubrir) {
   if (fila.FechaHoraBaja !== null) {
     return 'Esta solicitud fue dada de baja';
@@ -791,47 +792,52 @@ function motivoSinComprobante(fila, porCubrir) {
   return '';
 }
 
-// ===================== RF-12: enviar comprobante =====================
+// ===================== RF-14: enviar comprobante =====================
 
-// RF-12 (API): envío del comprobante de pago; queda «Pendiente» para RF-28 en el Panel.
+// RF-14 · Pasos 5 a 8 (API): registra el comprobante de pago; queda «Pendiente» para RF-42 en el Panel.
 async function registrarComprobante(datos) {
+  // RF-14 · Excepción paso 7: si algo falla, la transacción se deshace y no se registra nada.
   await baseDatos.conTransaccion(guardarComprobante(datos), CANDADO_PAGOS);
+  // RF-14 · Paso 8: mensaje de éxito y detalle actualizado con el pago «En revisión».
   return {
     mensaje: 'Recibimos tu comprobante. La repostería lo revisará y te avisaremos por WhatsApp cuando lo valide.',
-    seguimiento: await consultarPedido(datos.folio, datos.telefono)
+    seguimiento: await consultarPedido(datos.folio, { telefono: datos.telefono, correo: datos.correo })
   };
 }
 
 function guardarComprobante(datos) {
   return async function (conexion) {
-    const fila = await repositorio.buscarPedidoParaPago(conexion, datos.folio, datos.telefono);
-    // RF-12 · Excepción: el pedido no existe con esos datos.
+    // RF-14 · Paso 5: busca el pedido con el folio y el mismo teléfono o correo, y revisa que admita pagos.
+    const fila = await repositorio.buscarPedidoParaPago(conexion, datos.folio, { telefono: datos.telefono, correo: datos.correo });
+    // RF-14 · Excepción paso 5: «No encontramos un pedido con esos datos».
     if (fila === null) {
       throw new ErrorApi(404, 'PEDIDO_NO_ENCONTRADO', MSG_NO_ENCONTRADO);
     }
     const porCubrir = redondear(Number(fila.MontoTotal) - Number(fila.TotalPagado) - Number(fila.PorValidar));
     const motivo = motivoSinComprobante(fila, porCubrir);
-    // RF-12 · Excepción: el pedido no admite comprobante (baja, cancelado, sin aprobar o liquidado).
+    // RF-14 · Excepción paso 5: el pedido no admite comprobante (baja, cancelado, sin aprobar o liquidado).
     if (motivo !== '') {
       throw new ErrorApi(409, 'COMPROBANTE_NO_PERMITIDO', motivo);
     }
+    // RF-14 · Paso 6: revisa los comprobantes en revisión, el monto y la referencia.
     const pendientes = await repositorio.contarPagosPendientes(conexion, datos.folio);
-    // RF-12 · Excepción: ya hay demasiados comprobantes en revisión.
+    // RF-14 · Excepción paso 6: «Ya tienes N comprobantes en revisión…» (máximo 3).
     if (pendientes >= COMPROBANTES_PENDIENTES_MAXIMOS) {
       throw new ErrorApi(409, 'COMPROBANTE_NO_PERMITIDO',
         'Ya tienes ' + pendientes + ' comprobantes en revisión. Espera a que la repostería los revise.');
     }
-    // RF-12 · Excepción: el monto es mayor a lo que falta por pagar.
+    // RF-14 · Excepción paso 6: el monto es mayor a lo que falta por pagar.
     if (datos.monto > porCubrir + 0.004) {
       throw validacionPedido.errorDeCampo('monto',
         'El monto no puede ser mayor a lo que falta por pagar (' + mensajes.moneda(porCubrir) + ')');
     }
-    // RF-12 · Excepción: la referencia ya está registrada en otro pago.
+    // RF-14 · Excepción paso 6: la referencia ya está registrada en otro pago.
     if (await repositorio.referenciaEnUso(conexion, datos.referencia)) {
       throw validacionPedido.errorDeCampo('referencia', 'Esa referencia ya está registrada en otro pago');
     }
+    // RF-14 · Paso 7: registra el pago por transferencia como «Pendiente».
     const idPago = await repositorio.insertarPago(conexion, datos);
-    // RF-12: si el cliente subió la foto o PDF, se guarda junto al pago (misma transacción)
+    // RF-14 · Paso 7: si el cliente subió la foto o PDF, se guarda junto al pago (misma transacción)
     if (datos.archivo !== null) {
       await repositorio.insertarArchivoComprobante(conexion, idPago, datos.archivo);
     }

@@ -8,10 +8,10 @@ import com.pac.session.SesionUsuario;
  *
  * - Para entrar a "Inventario de Insumos" se necesita "Gestionar insumos" y para entrar a
  *   "Recetas" se necesita "Gestionar recetas" (lo revisa el Navegador).
- * - Alta, modificación y baja de insumos: solo la Administradora (RF-34, RF-35, RF-36).
- * - Entradas, mermas y alertas: la Administradora o el Personal con "Gestionar insumos" (RF-37, RF-38).
- * - Alta, modificación y baja de recetas: solo la Administradora (RF-42, RF-43, RF-44);
- *   el Personal las consulta (RF-41).
+ * - Alta, modificación y baja de insumos: solo la Administradora (RF-52, RF-53, RF-54).
+ * - Entradas, mermas y alertas: la Administradora o el Personal con "Gestionar insumos" (RF-59, RF-60).
+ * - Alta, modificación y baja de recetas: solo la Administradora (RF-56, RF-57, RF-58);
+ *   el Personal las consulta (RF-55).
  */
 public class PermisosInventario {
 

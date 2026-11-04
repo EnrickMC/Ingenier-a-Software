@@ -6,8 +6,10 @@ package com.pac.modulos.pedidos.model;
 public enum MetodoPago {
 
     TRANSFERENCIA("Transferencia", "Transferencia"),
-    DEPOSITO("Deposito", "Depósito"),
     EFECTIVO("Efectivo", "Efectivo");
+
+    // Valor que se quitó de la base de datos (Parte 8 de MIGRACION_COMPLETA.sql lo pasa a Transferencia)
+    private static final String VALOR_QUITADO = "Deposito";
 
     private final String valorBD;
     private final String texto;
@@ -26,6 +28,10 @@ public enum MetodoPago {
             if (metodo.valorBD.equalsIgnoreCase(valor)) {
                 return metodo;
             }
+        }
+        // Si la base todavía no tiene la Parte 8, un pago viejo se lee como transferencia
+        if (VALOR_QUITADO.equalsIgnoreCase(valor)) {
+            return TRANSFERENCIA;
         }
         throw new IllegalArgumentException("Método de pago desconocido: " + valor);
     }

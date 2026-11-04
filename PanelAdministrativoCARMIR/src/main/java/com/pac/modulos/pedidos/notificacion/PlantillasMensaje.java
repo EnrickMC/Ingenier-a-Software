@@ -5,7 +5,7 @@ import com.pac.util.ConfiguracionApp;
 import com.pac.util.Formatos;
 
 /**
- * Textos de los avisos al cliente, uno por tipo de evento (RF-32).
+ * Textos de los avisos al cliente, uno por tipo de evento (RF-47).
  * Cada mensaje lleva el folio, el estado y, según el caso, montos o motivo.
  */
 public class PlantillasMensaje {
@@ -44,7 +44,7 @@ public class PlantillasMensaje {
                     + dato("Total", Formatos.moneda(pedido.getMontoTotal()))
                     + dato("Para iniciar la preparación", Formatos.moneda(pedido.getMontoParaIniciar()) + " ("
                             + pedido.getModalidadPago().toString().toLowerCase() + ")")
-                    + "\nPuedes pagar en sucursal o por transferencia/depósito y subir tu comprobante en el portal.";
+                    + "\nPuedes pagar en sucursal o por transferencia y subir tu comprobante en el portal.";
         } else if (MODIFICACION.equals(tipoEvento)) {
             texto = "Tu pedido fue modificado.\n" + textoDetalle(detalle) + "\n" + datoFolio
                     + dato("Nuevo total", Formatos.moneda(pedido.getMontoTotal()))

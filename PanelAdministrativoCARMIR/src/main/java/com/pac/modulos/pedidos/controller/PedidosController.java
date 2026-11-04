@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Controlador de "Gestión de Pedidos" (pedidos.fxml). Módulo 4.
  *
- * - Lista de pedidos con filtros por grupo, estado, texto y fechas (RF-21, RF-22).
+ * - Lista de pedidos con filtros por grupo, estado, texto y fechas (RF-36, RF-37).
  * - El detalle de la derecha es detalle-pedido.fxml (DetallePedidoController).
  * - Cada 60 segundos revisa si entró un pedido nuevo de la web y lo avisa (observador de MonitorPedidos).
  */
@@ -98,7 +98,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         llenarFiltros(esAdministradora);
         detalleController.iniciar(this);
 
-        // RF-21: se refresca cada 60 segundos y se avisa si entró un pedido nuevo
+        // RF-36: se refresca cada 60 segundos y se avisa si entró un pedido nuevo
         MonitorPedidos monitor = MonitorPedidos.getInstancia();
         monitor.agregarObservador(this);
         monitor.revisar();
@@ -112,7 +112,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         }
     }
 
-    // RF-22 (Filtrar pedidos por estados): opciones del filtro (estados, «Cancelados» y «Dados de baja»).
+    // RF-37 (Filtrar pedidos por estados): opciones del filtro (estados, «Cancelados» y «Dados de baja»).
     private void llenarFiltros(boolean esAdministradora) {
         llenandoFiltros = true;
         cmbGrupo.getItems().clear();
@@ -159,7 +159,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
     // ----- Observer de MonitorPedidos -----
 
     @Override
-    // RF-23 · Paso 1: llegó una solicitud nueva; se avisa en la lista.
+    // RF-33 · Paso 1: llegó una solicitud nueva; se avisa en la lista.
     public void pedidosActualizados(int porRevisar, int pagosPendientes, int folioNuevo) {
         if (lstPedidos.getScene() == null) {
             dejarDeEscuchar();
@@ -187,10 +187,10 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         ApoyoVista.mostrarNodo(cajaNuevo, false);
     }
 
-    // ===================== Lista y filtros (RF-21, RF-22) =====================
+    // ===================== Lista y filtros (RF-36, RF-37) =====================
 
     @FXML
-    // RF-21 / RF-22 · Paso 1: la persona aplica la búsqueda o el filtro.
+    // RF-36 / RF-37 · Paso 1: la persona aplica la búsqueda o el filtro.
     private void onBuscar() {
         if (llenandoFiltros) {
             return;
@@ -239,7 +239,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         return filtro;
     }
 
-    // RF-21 (Historial de pedidos) y RF-22: inicia aquí en la pantalla la consulta de la lista.
+    // RF-36 (Historial de pedidos) y RF-37: inicia aquí en la pantalla la consulta de la lista.
     private void cargarPedidos() {
         FiltroPedidos filtro = leerFiltro();
 
@@ -248,7 +248,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         if (error != null) {
             ApoyoVista.marcar(dpDesde);
             ApoyoVista.marcar(dpHasta);
-            // RF-21 · Excepción paso 2: «Rango de fechas inválido»; se mantiene la lista anterior.
+            // RF-36 · Excepción paso 2: «Rango de fechas inválido»; se mantiene la lista anterior.
             Alertas.aviso(error);
             return;
         }
@@ -260,7 +260,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
             pedidos = servicio.buscar(filtro);
         } catch (DAOException e) {
             // Error de conexión: se conserva la lista y se avisa
-            // RF-21 · Excepción paso 3: sin conexión, «Error de conexión».
+            // RF-36 · Excepción paso 3: sin conexión, «Error de conexión».
             lblAviso.setText(ApoyoTransaccion.MSG_ERROR_CONEXION + ". La lista puede no estar actualizada.");
             ApoyoVista.mostrarNodo(lblAviso, true);
             if (lstPedidos.getItems().isEmpty()) {
@@ -282,7 +282,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
             lblVacio.setText(servicio.mensajeSinResultados(filtro));
         }
 
-        // Aviso de pedidos incompletos (RF-21)
+        // Aviso de pedidos incompletos (RF-36)
         int incompletos = 0;
         for (Pedido pedido : pedidos) {
             if (pedido.isActivo() && !servicio.datosFaltantes(pedido).isEmpty()) {
@@ -318,7 +318,7 @@ public class PedidosController implements ControladorSeccion, PedidosObserver, C
         mostrarSeleccionado();
     }
 
-    // RF-21 paso 6 / RF-23 paso 1: se selecciona un pedido y se abre su detalle.
+    // RF-36 paso 6 / RF-33 paso 1: se selecciona un pedido y se abre su detalle.
     private void mostrarSeleccionado() {
         Pedido pedido = lstPedidos.getSelectionModel().getSelectedItem();
         if (pedido == null) {

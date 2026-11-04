@@ -52,9 +52,9 @@ import java.util.List;
  */
 public class PanelPrincipalController implements SesionObserver, NavegacionObserver, AlertasObserver, PedidosObserver {
 
-    // RF-39 / RF-40: cada cuánto se revisan existencias y caducidades mientras el panel está abierto
+    // RF-61 / RF-62: cada cuánto se revisan existencias y caducidades mientras el panel está abierto
     private static final double HORAS_ENTRE_REVISIONES = 1;
-    // RF-21: cada cuánto se revisa si entraron pedidos o pagos nuevos desde la web
+    // RF-36: cada cuánto se revisa si entraron pedidos o pagos nuevos desde la web
     private static final double SEGUNDOS_ENTRE_PEDIDOS = 60;
     // Cada cuánto se revisa si la sesión lleva demasiado tiempo sin actividad
     private static final double SEGUNDOS_ENTRE_INACTIVIDAD = 20;
@@ -87,7 +87,7 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
         sesion.agregarObservador(this);
         navegador.agregarObservador(this);
 
-        // RF-39 / RF-40: al iniciar sesión se revisan las alertas de inventario
+        // RF-61 / RF-62: al iniciar sesión se revisan las alertas de inventario
         MonitorAlertas monitor = MonitorAlertas.getInstancia();
         monitor.revisar();
         monitor.agregarObservador(this);
@@ -117,7 +117,7 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
             }
         });
 
-        // Cierre de sesión por inactividad (parámetro "Minutos de inactividad")
+        // RNF-15: cierre de sesión por inactividad (parámetro "Minutos de inactividad", RF-68)
         MonitorInactividad.getInstancia().registrarActividad();
         iniciarRevisionInactividad();
 
@@ -141,14 +141,15 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
         navegador.irASeccion(SeccionPanel.DASHBOARD);
     }
 
-    // Botón de la esquina superior derecha: alterna entre modo claro y semi oscuro
+    // RNF-11 (Modo oscuro del panel administrativo): inicia aquí. Paso 1: botón de la esquina superior derecha,
+    // alterna entre modo claro y semi oscuro (Pasos 2 y 3 en TemaVisual)
     @FXML
     private void onCambiarTema() {
         TemaVisual.alternar();
         actualizarBotonTema();
     }
 
-    // Texto e ícono del botón: dicen a qué modo se va a cambiar
+    // RNF-11 · Paso 4: texto e ícono del botón, dicen a qué modo se va a cambiar
     private void actualizarBotonTema() {
         if (TemaVisual.esOscuro()) {
             btnTema.setText("Modo claro");
@@ -198,7 +199,7 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
         NotificacionService.getInstancia().enviarAvisosDeLaWeb();
     }
 
-    // RNF-16 · Excepción paso 7: cierre de sesión por inactividad.
+    // RNF-15 · Excepción paso 1 (también RNF-13 · Excepción paso 7): cierre de sesión por inactividad.
     // Revisa cada 20 segundos si la sesión lleva demasiado tiempo sin usarse
     private void iniciarRevisionInactividad() {
         // (JavaFX necesita la flecha "->" para indicar qué hacer cada vez que pasa el tiempo)
@@ -218,6 +219,7 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
         if (!MonitorInactividad.getInstancia().seVencio()) {
             return;
         }
+        // RNF-15 · Excepción paso 1: «La sesión se cerró por inactividad. Vuelve a iniciar sesión» (sigue en el paso 3).
         revisionInactividad.stop();
         SesionUsuario.getInstancia().cerrar();
         Navegador.getInstancia().mostrar(Vista.LOGIN_PERSONAL);
@@ -327,14 +329,15 @@ public class PanelPrincipalController implements SesionObserver, NavegacionObser
 
     // ----- Botones del pie del menú -----
 
-    // "Bloquear pantalla": vuelve a la pantalla de bloqueo
+    // RNF-15 (Cierre de sesión y bloqueo de pantalla): inicia aquí. Paso 1: «Bloquear pantalla».
+    // RNF-15 · Pasos 2 y 3: cierra la sesión y vuelve a la pantalla de bloqueo
     @FXML
     private void onBloquear() {
         SesionUsuario.getInstancia().cerrar();
         Navegador.getInstancia().mostrar(Vista.BLOQUEO);
     }
 
-    // "Cerrar sesión": vuelve al inicio de sesión del Personal
+    // RNF-15 · Paso 1: «Cerrar sesión». Pasos 2 y 3: cierra la sesión y vuelve al inicio de sesión
     @FXML
     private void onCerrarSesion() {
         SesionUsuario.getInstancia().cerrar();

@@ -1,6 +1,7 @@
-<!-- RF-3 · Paso 4: vista previa 3D del postre con las opciones elegidas -->
+<!-- RF-5 · Paso 4: vista previa 3D del postre con las opciones elegidas (se muestra en RF-3 · Paso 4) -->
 <section class="visor" aria-label="Vista previa 3D de tu postre">
   @if (sinWebgl()) {
+    <!-- RF-5 · Excepción paso 1: sin WebGL se muestra la foto del producto con el aviso -->
     <div class="sin-3d">
       <ng-content />
       <p>Tu navegador no puede mostrar la vista 3D. Puedes personalizar tu postre normalmente.</p>
@@ -12,12 +13,22 @@
       }
       <span class="ayuda-giro">Arrastra para girar · rueda o pellizca para acercar</span>
     </div>
+    <!-- RF-5 · Paso 7: el cliente gira, ve por dentro, centra o guarda la imagen -->
+    <!-- RF-5 · Excepción paso 7: «Ver por dentro» se desactiva en los postres que no lo permiten -->
     <div class="controles">
       <button type="button" class="control" [class.activo]="girando()" [attr.aria-pressed]="girando()" (click)="alternarGiro()">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4" /></svg>
         Girar
       </button>
-      <button type="button" class="control" [class.activo]="verDentro()" [attr.aria-pressed]="verDentro()" (click)="alternarDentro()">
+      <button
+        type="button"
+        class="control"
+        [class.activo]="verDentro() && puedeVerDentro()"
+        [attr.aria-pressed]="verDentro() && puedeVerDentro()"
+        [disabled]="!puedeVerDentro()"
+        [attr.title]="ayudaVerDentro()"
+        (click)="alternarDentro()"
+      >
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18l9-14 9 14zM12 4v14" /></svg>
         Ver por dentro
       </button>

@@ -40,7 +40,8 @@ public class MonitorInactividad implements EventHandler<Event> {
     }
 
     // true si pasó más tiempo del permitido sin actividad
-    // RNF-16 · Excepción paso 7: la sesión estuvo inactiva el tiempo máximo; se cierra y se pide volver a iniciar sesión.
+    // RNF-15 · Excepción paso 1 (también RNF-13 · Excepción paso 7): la sesión estuvo inactiva el tiempo máximo;
+    // se cierra y se pide volver a iniciar sesión. Con 0 minutos no se cierra sola.
     public boolean seVencio() {
         int minutos = ConfiguracionApp.getInstancia().getMinutosInactividadSesion();
         if (minutos <= 0) {

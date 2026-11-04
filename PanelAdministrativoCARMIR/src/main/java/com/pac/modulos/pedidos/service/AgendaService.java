@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Agenda de Producción (RF-30, RF-31).
+ * Agenda de Producción (RF-45, RF-46).
  * Muestra los pedidos no cancelados de «Aprobado» a «Pedido terminado» en su fecha de entrega,
  * los atrasados, los que deben pasar a preparación pronto y los insumos estimados.
  */
@@ -44,7 +44,7 @@ public class AgendaService {
     }
 
     // Primer día del periodo que contiene la fecha
-    // RF-31 (Filtrar vistas de la agenda por periodo): periodos de Día, Semana y Mes.
+    // RF-46 (Filtrar vistas de la agenda por periodo): periodos de Día, Semana y Mes.
     public static LocalDate inicioPeriodo(int vista, LocalDate fecha) {
         if (vista == VISTA_SEMANA) {
             return fecha.minusDays(fecha.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue());
@@ -78,15 +78,15 @@ public class AgendaService {
     }
 
     // Revisa un rango elegido a mano; devuelve el mensaje de error o null si está bien
-    // RF-31 · Paso 3: valida las fechas del rango personalizado.
+    // RF-46 · Paso 3: valida las fechas del rango personalizado.
     public String validarRango(LocalDate desde, LocalDate hasta) {
         if (desde == null || hasta == null || desde.isAfter(hasta)) {
-            // RF-31 · Excepción paso 3: la fecha de inicio es mayor a la fecha de fin.
+            // RF-46 · Excepción paso 3: la fecha de inicio es mayor a la fecha de fin.
             return PedidoService.MSG_RANGO_INVALIDO;
         }
         long dias = ChronoUnit.DAYS.between(desde, hasta) + 1;
         if (dias > ConfiguracionApp.getInstancia().getDiasMaximosAgenda()) {
-            // RF-31 · Excepción paso 3: «El rango de fechas es demasiado amplio».
+            // RF-46 · Excepción paso 3: «El rango de fechas es demasiado amplio».
             return MSG_RANGO_AMPLIO + " (máximo " + ConfiguracionApp.getInstancia().getDiasMaximosAgenda() + " días)";
         }
         return null;
@@ -96,13 +96,13 @@ public class AgendaService {
      * Lee la agenda del periodo. Si algo falla lanza DAOException y la pantalla
      * conserva el periodo anterior (no se muestra información parcial).
      */
-    // RF-30 (Visualización de agenda de producción) y RF-31 paso 4: consulta los pedidos no cancelados del periodo.
+    // RF-45 (Visualización de agenda de producción) y RF-46 paso 4: consulta los pedidos no cancelados del periodo.
     public AgendaPeriodo cargar(LocalDate desde, LocalDate hasta) throws DAOException {
         AgendaPeriodo agenda = new AgendaPeriodo();
         agenda.setDesde(desde);
         agenda.setHasta(hasta);
 
-        // RF-30 · Excepción paso 5: los pedidos incompletos van a «Pedidos con datos por revisar».
+        // RF-45 · Excepción paso 5: los pedidos incompletos van a «Pedidos con datos por revisar».
         // Pedidos del periodo: los incompletos van al panel "Pedidos con datos por revisar"
         for (Pedido pedido : pedidoDAO.listarAgenda(desde, hasta)) {
             if (pedidoService.datosFaltantes(pedido).isEmpty()) {
@@ -139,7 +139,7 @@ public class AgendaService {
     }
 
     // true si sigue esperando el anticipo («Pendiente de pago» en la agenda)
-    // RF-30 · Paso 6: marca «Pendiente de pago».
+    // RF-45 · Paso 6: marca «Pendiente de pago».
     public static boolean pendienteDePago(Pedido pedido) {
         return pedido.getEstado() == EstadoPedido.APROBADO;
     }

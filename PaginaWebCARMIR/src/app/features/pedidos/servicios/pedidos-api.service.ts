@@ -3,6 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ArticuloCarrito } from '../../../core/modelos/articulo-carrito';
+import { comentarioConTopper } from '../../catalogo/utilidades/reglas-configuracion';
+import { ContactoConsulta } from '../utilidades/validacion-pedido';
 import {
   ArticuloSolicitud,
   Cobertura,
@@ -25,35 +27,37 @@ export class PedidosApiService {
   private readonly http = inject(HttpClient);
   private readonly url = environment.apiUrl;
 
-  // RF-5: disponibilidad y precio vigente de cada postre del carrito
+  // RF-6: disponibilidad y precio vigente de cada postre del carrito
   validarCarrito(articulos: ArticuloCarrito[]): Promise<RevisionCarrito> {
     const cuerpo = { articulos: articulosParaApi(articulos) };
     return firstValueFrom(this.http.post<RevisionCarrito>(this.url + '/carrito/validar', cuerpo));
   }
 
-  // RF-9 y RF-10: días, horarios, cupo, anticipo y métodos de pago
+  // RF-10 y RF-11: días, horarios, cupo, anticipo y métodos de pago
   leerReglasEntrega(): Promise<ReglasEntrega> {
     return firstValueFrom(this.http.get<ReglasEntrega>(this.url + '/entrega/reglas'));
   }
 
-  // RF-9 paso 7: si hay envío al código postal y cuánto cuesta
+  // RF-10 paso 7: si hay envío al código postal y cuánto cuesta
   revisarCobertura(codigoPostal: string): Promise<Cobertura> {
     return firstValueFrom(this.http.get<Cobertura>(this.url + '/entrega/cobertura/' + encodeURIComponent(codigoPostal)));
   }
 
-  // RF-11: registra el pedido y regresa el comprobante
+  // RF-12: registra el pedido y regresa el comprobante
   registrarPedido(solicitud: SolicitudPedido): Promise<ComprobantePedido> {
     return firstValueFrom(this.http.post<ComprobantePedido>(this.url + '/pedidos', solicitud));
   }
 
-  // RF-12: seguimiento con folio y teléfono
-  consultarPedido(folio: string, telefono: string): Promise<SeguimientoPedido> {
-    return firstValueFrom(
-      this.http.post<SeguimientoPedido>(this.url + '/pedidos/consulta', { folio: folio, telefono: telefono }),
-    );
+  // RF-13: seguimiento con folio y teléfono (o con folio y correo)
+  consultarPedido(folio: string, contacto: ContactoConsulta): Promise<SeguimientoPedido> {
+    let cuerpo: Record<string, string> = { folio: folio, telefono: contacto.telefono };
+    if (contacto.telefono === '') {
+      cuerpo = { folio: folio, correo: contacto.correo };
+    }
+    return firstValueFrom(this.http.post<SeguimientoPedido>(this.url + '/pedidos/consulta', cuerpo));
   }
 
-  // RF-12: comprobante de transferencia (foto/PDF subido desde el equipo y/o enlace)
+  // RF-14 · Pasos 5 a 8: comprobante de transferencia (foto/PDF subido desde el equipo y/o enlace)
   enviarComprobante(solicitud: SolicitudComprobante): Promise<RespuestaComprobante> {
     return firstValueFrom(this.http.post<RespuestaComprobante>(this.url + '/pedidos/comprobante', solicitud));
   }
@@ -72,7 +76,8 @@ export function articulosParaApi(articulos: ArticuloCarrito[]): ArticuloSolicitu
       opciones: opciones,
       cantidad: articulo.cantidad,
       dedicatoria: articulo.dedicatoria,
-      comentario: articulo.comentario,
+      // Si el mensaje va en un topper se avisa en las indicaciones
+      comentario: comentarioConTopper(articulo.comentario, articulo.dedicatoria, articulo.mensajeEnTopper === true),
       precioUnitario: articulo.precioUnitario,
     });
   }

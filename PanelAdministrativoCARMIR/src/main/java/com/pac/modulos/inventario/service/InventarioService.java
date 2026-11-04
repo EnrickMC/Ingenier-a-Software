@@ -22,8 +22,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * Entradas (RF-37) y salidas (RF-38) de insumos, y el descuento por PEPS
- * que también usa el descuento automático de los pedidos (RF-45).
+ * Entradas (RF-59) y salidas (RF-60) de insumos, y el descuento por PEPS
+ * que también usa el descuento automático de los pedidos (RF-63).
  *
  * PEPS = primeras entradas, primeras salidas: siempre se descuenta primero
  * del lote que caduca antes, sin dejar ningún lote en negativo.
@@ -49,7 +49,7 @@ public class InventarioService {
     public static final String MSG_MERMA_FALLO = "No fue posible registrar la merma";
     public static final String MSG_PROXIMO_CADUCAR = "Este lote está próximo a caducar";
 
-    // Motivos de merma que se ofrecen en el formulario (RF-38)
+    // Motivos de merma que se ofrecen en el formulario (RF-60)
     public static final String MOTIVO_OTRO = "Otro";
     public static final String[] MOTIVOS_MERMA = {"Desperdicio", "Caducidad", "Daño", MOTIVO_OTRO};
 
@@ -97,10 +97,10 @@ public class InventarioService {
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), fecha);
     }
 
-    // ===================== Entrada de insumos (RF-37) =====================
+    // ===================== Entrada de insumos (RF-59) =====================
 
     // Paso 2: antes de abrir el formulario, el insumo debe existir y estar activo
-    // RF-37 (Registro de entrada de insumos): inicia aquí. Paso 2: el insumo debe existir y estar activo.
+    // RF-59 (Registro de entrada de insumos): inicia aquí. Paso 2: el insumo debe existir y estar activo.
     public ResultadoInventario revisarParaEntrada(int idInsumo) {
         if (!PermisosInventario.puedeRegistrarMovimientos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -108,17 +108,17 @@ public class InventarioService {
         try {
             Insumo insumo = insumoDAO.buscarPorId(idInsumo);
             if (insumo == null || !insumo.isActivo()) {
-                // RF-37 · Excepción paso 2: «Insumo no disponible».
+                // RF-59 · Excepción paso 2: «Insumo no disponible».
                 return ResultadoInventario.noEncontrado(MSG_NO_DISPONIBLE);
             }
             return ResultadoInventario.correcto("");
         } catch (DAOException e) {
-            // RF-37 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-59 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
 
-    // RF-37 · Pasos 5 a 9: valida y registra la compra como un lote nuevo.
+    // RF-59 · Pasos 5 a 9: valida y registra la compra como un lote nuevo.
     public ResultadoInventario registrarEntrada(Lote datos) {
         if (!PermisosInventario.puedeRegistrarMovimientos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -136,7 +136,7 @@ public class InventarioService {
 
         // Paso 5: validaciones
         ResultadoInventario validacion = validarEntrada(datos, insumo);
-        // RF-37 · Excepción paso 5: cantidad, costo o fechas inválidas; se resalta el campo.
+        // RF-59 · Excepción paso 5: cantidad, costo o fechas inválidas; se resalta el campo.
         if (validacion != null) {
             return validacion;
         }
@@ -165,7 +165,7 @@ public class InventarioService {
 
             conexion.commit();
         } catch (SQLException e) {
-            // RF-37 · Excepción paso 6: se deshace la operación, «No fue posible registrar la entrada».
+            // RF-59 · Excepción paso 6: se deshace la operación, «No fue posible registrar la entrada».
             ApoyoMySQL.deshacer(conexion);
             return ResultadoInventario.error(MSG_ENTRADA_FALLO, ResultadoInventario.CAMPO_CONEXION);
         } catch (DAOException e) {
@@ -186,7 +186,7 @@ public class InventarioService {
 
         // Paso 8 (excepción): el lote ya está dentro del periodo de aviso
         if (datos.getFechaCaducidad() != null
-                // RF-37 · Excepción paso 8: «Este lote está próximo a caducar».
+                // RF-59 · Excepción paso 8: «Este lote está próximo a caducar».
                 && diasPara(datos.getFechaCaducidad()) <= ConfiguracionApp.getInstancia().getDiasAvisoCaducidad()) {
             resultado.setAviso(MSG_PROXIMO_CADUCAR + " (caduca el " + Formatos.fecha(datos.getFechaCaducidad()) + ")");
         }
@@ -218,10 +218,10 @@ public class InventarioService {
                 + " de las opciones que lo usan se recalcularon.");
     }
 
-    // ===================== Salida de insumos / merma (RF-38) =====================
+    // ===================== Salida de insumos / merma (RF-60) =====================
 
     // Paso 2: el insumo existe, está activo y tiene existencia
-    // RF-38 (Registro de salida de insumos / merma): inicia aquí. Paso 2: existe, está activo y tiene existencia.
+    // RF-60 (Registro de salida de insumos / merma): inicia aquí. Paso 2: existe, está activo y tiene existencia.
     public ResultadoInventario revisarParaMerma(int idInsumo) {
         if (!PermisosInventario.puedeRegistrarMovimientos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -229,16 +229,16 @@ public class InventarioService {
         try {
             Insumo insumo = insumoDAO.buscarPorId(idInsumo);
             if (insumo == null || !insumo.isActivo()) {
-                // RF-38 · Excepción paso 2: «Insumo no disponible».
+                // RF-60 · Excepción paso 2: «Insumo no disponible».
                 return ResultadoInventario.noEncontrado(MSG_NO_DISPONIBLE);
             }
             if (insumo.getExistencia() <= 0) {
-                // RF-38 · Excepción paso 2: «El insumo no tiene existencias para registrar una merma».
+                // RF-60 · Excepción paso 2: «El insumo no tiene existencias para registrar una merma».
                 return ResultadoInventario.error(MSG_SIN_EXISTENCIAS, null);
             }
             return ResultadoInventario.correcto("");
         } catch (DAOException e) {
-            // RF-38 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-60 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
@@ -249,7 +249,7 @@ public class InventarioService {
      * @param detalle texto libre (obligatorio si el motivo es "Otro")
      * @param idLote  lote del que se descuenta; 0 = por PEPS (los que caducan primero)
      */
-    // RF-38 · Pasos 5 a 9: valida y registra la merma.
+    // RF-60 · Pasos 5 a 9: valida y registra la merma.
     public ResultadoInventario registrarMerma(int idInsumo, double cantidad, String motivo, String detalle, int idLote) {
         if (!PermisosInventario.puedeRegistrarMovimientos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -257,11 +257,11 @@ public class InventarioService {
 
         // Paso 5: validaciones de captura
         if (cantidad <= 0 || cantidad > MAX_CANTIDAD) {
-            // RF-38 · Excepción paso 5: la cantidad debe ser mayor a cero.
+            // RF-60 · Excepción paso 5: la cantidad debe ser mayor a cero.
             return ResultadoInventario.error(MSG_CANTIDAD_INVALIDA, ResultadoInventario.CAMPO_CANTIDAD);
         }
         if (ValidacionCatalogo.estaVacio(motivo)) {
-            // RF-38 · Excepción paso 5: «Indica el motivo de la merma».
+            // RF-60 · Excepción paso 5: «Indica el motivo de la merma».
             return ResultadoInventario.error(MSG_SIN_MOTIVO, ResultadoInventario.CAMPO_MOTIVO);
         }
         if (MOTIVO_OTRO.equals(motivo) && ValidacionCatalogo.estaVacio(detalle)) {
@@ -294,7 +294,7 @@ public class InventarioService {
 
             // Se revisa la existencia dentro de la transacción (otra persona pudo descontar antes)
             double disponible = loteDAO.sumarExistencia(conexion, idInsumo);
-            // RF-38 · Paso 6: descuenta del lote indicado o, si no se indicó, de los que caducan primero (PEPS).
+            // RF-60 · Paso 6: descuenta del lote indicado o, si no se indicó, de los que caducan primero (PEPS).
             if (idLote > 0) {
                 Lote lote = loteDAO.buscarPorId(idLote);
                 if (lote == null || lote.getIdInsumo() != idInsumo || lote.getExistencia() <= 0) {
@@ -304,7 +304,7 @@ public class InventarioService {
                 disponible = lote.getExistencia();
             }
             if (cantidad > disponible + 0.0005) {
-                // RF-38 · Excepción paso 5: «La cantidad no puede ser mayor a la existencia disponible».
+                // RF-60 · Excepción paso 5: «La cantidad no puede ser mayor a la existencia disponible».
                 ApoyoMySQL.deshacer(conexion);
                 return ResultadoInventario.error(MSG_SUPERA_EXISTENCIA + " (" + Formatos.cantidad(disponible) + " "
                         + insumo.getUnidad().getValorBD() + ")", ResultadoInventario.CAMPO_CANTIDAD);
@@ -313,7 +313,7 @@ public class InventarioService {
             descontarPEPS(conexion, idInsumo, cantidad, TipoMovimiento.MERMA, 0, textoMotivo, idLote);
             conexion.commit();
         } catch (SQLException e) {
-            // RF-38 · Excepción paso 6: se deshace la operación, «No fue posible registrar la merma».
+            // RF-60 · Excepción paso 6: se deshace la operación, «No fue posible registrar la merma».
             ApoyoMySQL.deshacer(conexion);
             return ResultadoInventario.error(MSG_MERMA_FALLO, ResultadoInventario.CAMPO_CONEXION);
         } catch (DAOException e) {
@@ -333,7 +333,7 @@ public class InventarioService {
         return resultado;
     }
 
-    // ===================== Descuento por PEPS (lo usan la merma y RF-45) =====================
+    // ===================== Descuento por PEPS (lo usan la merma y RF-63) =====================
 
     /**
      * Descuenta una cantidad de los lotes del insumo y registra UN movimiento de salida.
@@ -343,7 +343,7 @@ public class InventarioService {
      * @return el costo de lo descontado (según el costo de compra de cada lote afectado)
      * @throws DAOException si la existencia no alcanza o falla la base de datos
      */
-    // RF-38 paso 6 y RF-45: descuento de existencias por lotes, primero los que caducan antes.
+    // RF-60 paso 6 y RF-63: descuento de existencias por lotes, primero los que caducan antes.
     public double descontarPEPS(Connection conexion, int idInsumo, double cantidad, TipoMovimiento tipo,
                                 int folio, String motivo, int idLote) throws DAOException {
         double porDescontar = Math.round(cantidad * 1000) / 1000.0;
@@ -387,20 +387,20 @@ public class InventarioService {
 
     // ===================== Apoyo =====================
 
-    // RF-37 paso 5: revisa los datos de la compra; devuelve null si todo está bien
+    // RF-59 paso 5: revisa los datos de la compra; devuelve null si todo está bien
     private ResultadoInventario validarEntrada(Lote datos, Insumo insumo) {
-        // RF-37 · Excepción paso 5: cantidad mayor a cero.
+        // RF-59 · Excepción paso 5: cantidad mayor a cero.
         if (datos.getCantidadComprada() <= 0 || datos.getCantidadComprada() > MAX_CANTIDAD) {
             return ResultadoInventario.error(MSG_CANTIDAD_INVALIDA, ResultadoInventario.CAMPO_CANTIDAD);
         }
-        // RF-37 · Excepción paso 5: costo mayor a cero.
+        // RF-59 · Excepción paso 5: costo mayor a cero.
         if (datos.getCostoCompra() <= 0 || datos.getCostoCompra() > MAX_COSTO) {
             return ResultadoInventario.error(MSG_COSTO_INVALIDO, ResultadoInventario.CAMPO_COSTO);
         }
         if (datos.getFechaCompra() == null) {
             return ResultadoInventario.error(MSG_COMPRA_VACIA, ResultadoInventario.CAMPO_FECHA_COMPRA);
         }
-        // RF-37 · Excepción paso 5: «La fecha de compra no puede ser futura».
+        // RF-59 · Excepción paso 5: «La fecha de compra no puede ser futura».
         if (datos.getFechaCompra().isAfter(LocalDate.now())) {
             return ResultadoInventario.error(MSG_COMPRA_FUTURA, ResultadoInventario.CAMPO_FECHA_COMPRA);
         }
@@ -408,7 +408,7 @@ public class InventarioService {
             return ResultadoInventario.error(MSG_CADUCIDAD_OBLIGATORIA, ResultadoInventario.CAMPO_CADUCIDAD);
         }
         if (datos.getFechaCaducidad() != null) {
-            // RF-37 · Excepción paso 5: «La fecha de caducidad debe ser posterior a hoy».
+            // RF-59 · Excepción paso 5: «La fecha de caducidad debe ser posterior a hoy».
             if (!datos.getFechaCaducidad().isAfter(LocalDate.now())) {
                 return ResultadoInventario.error(MSG_CADUCIDAD_PASADA, ResultadoInventario.CAMPO_CADUCIDAD);
             }

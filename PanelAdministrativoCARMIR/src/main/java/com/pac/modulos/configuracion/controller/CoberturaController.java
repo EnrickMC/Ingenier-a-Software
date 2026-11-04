@@ -20,7 +20,8 @@ import javafx.scene.control.TextField;
 import java.util.List;
 
 /**
- * Pestaña "Cobertura de envío": códigos postales a los que se entrega y el costo de cada uno.
+ * RF-69 (Administración de la cobertura de envío): pestaña "Cobertura de envío", códigos postales a los
+ * que se entrega y el costo de cada uno. La página web usa esta lista en RF-10 · Paso 7.
  */
 public class CoberturaController {
 
@@ -47,6 +48,7 @@ public class CoberturaController {
         tblCobertura.getSelectionModel().selectedItemProperty().addListener(new AlElegirRenglon());
     }
 
+    // RF-69 · Excepción paso 1: sin las tablas de configuración el formulario queda desactivado.
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
         txtCodigo.setDisable(!disponible);
@@ -55,7 +57,7 @@ public class CoberturaController {
         txtBuscar.setDisable(!disponible);
     }
 
-    // Se consulta la primera vez que se abre la pestaña (y después de cada cambio)
+    // RF-69: inicia aquí. Paso 1: se consulta la primera vez que se abre la pestaña (y después de cada cambio)
     public void cargar() {
         if (!disponible) {
             return;
@@ -73,6 +75,7 @@ public class CoberturaController {
         try {
             lista = servicio.buscar(inicio.trim());
         } catch (DAOException e) {
+            // RF-69 · Excepción paso 1: «Error de conexión: no fue posible leer la configuración».
             mostrarError(ConfiguracionService.MSG_ERROR_CONEXION + "\n" + e.getMessage());
             return;
         }
@@ -86,6 +89,7 @@ public class CoberturaController {
 
     // ===================== Botones =====================
 
+    // RF-69 · Paso 1: búsqueda por los primeros dígitos del código postal.
     @FXML
     private void onBuscar() {
         if (cargada) {
@@ -93,9 +97,11 @@ public class CoberturaController {
         }
     }
 
+    // RF-69 · Paso 2: el usuario capturó un código postal nuevo con su costo y eligió «Agregar».
     @FXML
     private void onAgregar() {
         limpiarMensajes();
+        // RF-69 · Paso 3: la sesión sigue activa y con el permiso «Configurar sistema».
         if (!AccesoConfiguracion.revisar()) {
             return;
         }
@@ -103,6 +109,7 @@ public class CoberturaController {
         terminar(resultado);
     }
 
+    // RF-69 · Paso 2: el usuario eligió un código de la lista y «Cambiar costo».
     @FXML
     private void onCambiarCosto() {
         limpiarMensajes();
@@ -117,6 +124,7 @@ public class CoberturaController {
         terminar(resultado);
     }
 
+    // RF-69 · Paso 2: el usuario eligió un código de la lista y «Quitar».
     @FXML
     private void onEliminar() {
         limpiarMensajes();
@@ -126,6 +134,7 @@ public class CoberturaController {
         }
         boolean seguro = Alertas.confirmar("Quitar código postal",
                 "¿Quitar el código postal " + elegida.getCodigoPostal() + " de la cobertura de envío?");
+        // RF-69 · Excepción paso 2: no confirmó; RF-69 · Excepción paso 3: sesión o permiso.
         if (!seguro || !AccesoConfiguracion.revisar()) {
             return;
         }
@@ -144,7 +153,8 @@ public class CoberturaController {
 
     // ===================== Apoyo =====================
 
-    // Muestra el resultado de agregar, cambiar o quitar
+    // RF-69 · Paso 7: muestra el resultado de agregar, cambiar o quitar, limpia el formulario y actualiza la lista
+    // RF-69 · Excepciones pasos 4 a 6: se marca el campo con error y no cambia nada
     private void terminar(ResultadoConfiguracion resultado) {
         if (!resultado.isExitoso()) {
             if (ResultadoConfiguracion.CAMPO_CODIGO_POSTAL.equals(resultado.getCampo())) {

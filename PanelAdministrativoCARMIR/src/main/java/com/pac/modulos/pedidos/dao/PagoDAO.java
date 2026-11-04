@@ -1,6 +1,7 @@
 package com.pac.modulos.pedidos.dao;
 
 import com.pac.dao.DAOException;
+import com.pac.modulos.pedidos.model.ArchivoComprobante;
 import com.pac.modulos.pedidos.model.EstadoPago;
 import com.pac.modulos.pedidos.model.Pago;
 
@@ -8,7 +9,7 @@ import java.sql.Connection;
 import java.util.List;
 
 /**
- * Operaciones sobre la tabla Pago (RF-28, RF-29).
+ * Operaciones sobre la tabla Pago (RF-42, RF-43).
  */
 public interface PagoDAO {
 
@@ -22,6 +23,9 @@ public interface PagoDAO {
 
     // true si otro pago ya usa esa referencia
     boolean referenciaEnUso(String referencia, int idPagoExcluido) throws DAOException;
+
+    // RF-50: foto o PDF del comprobante que subió el cliente; null si el pago no tiene archivo
+    ArchivoComprobante buscarArchivo(int idPago) throws DAOException;
 
     // Número de pagos pendientes de validar en pedidos sin cancelar ni dar de baja
     int contarPendientes() throws DAOException;

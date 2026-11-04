@@ -1,7 +1,7 @@
 package com.pac.modulos.pedidos.notificacion;
 
 /**
- * Datos de las integraciones de notificaciones (RF-32): modo, WhatsApp Business Cloud API y correo SMTP.
+ * Datos de las integraciones de notificaciones (RF-47): modo, WhatsApp Business Cloud API y correo SMTP.
  *
  * Los valores se guardan en la tabla ConfiguracionNotificacion (Clave → Valor) y se editan en
  * Configuración → Respaldos y sistema. Las constantes CLAVE_* son los nombres de la columna Clave.

@@ -3,7 +3,7 @@ import { ReglasEntrega } from '../../modelos/pedidos.models';
 import { DiaCalendario, NOMBRES_MESES, diasDelMes, fechaLarga, textoAFecha } from '../../utilidades/fechas';
 
 /**
- * Calendario para elegir la fecha de entrega (RF-9 pasos 4 a 6).
+ * Calendario para elegir la fecha de entrega (RF-10 pasos 4 a 6).
  * Solo deja elegir días laborables, desde la anticipación mínima y que todavía tengan cupo
  * (la misma capacidad diaria que usa la agenda del Panel). La API lo vuelve a revisar al enviar.
  */
@@ -35,7 +35,7 @@ export class CalendarioEntrega implements OnInit {
     this.mes.set(inicio.getMonth() + 1);
   }
 
-  // RF-9 · Paso 6: cada día del mes con su estado (disponible, sin cupo, no laborable o antes de la anticipación mínima).
+  // RF-10 · Paso 6: cada día del mes con su estado (disponible, sin cupo, no laborable o antes de la anticipación mínima).
   dias(): DiaCalendario[] {
     return diasDelMes(this.reglas(), this.anio(), this.mes());
   }

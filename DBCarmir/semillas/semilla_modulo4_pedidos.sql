@@ -89,7 +89,7 @@ BEGIN
       (vFolio, NULL, 'En proceso de aceptacion', 'Aprobado', NOW() - INTERVAL 3 DAY + INTERVAL 2 HOUR),
       (vFolio, 1, 'Aprobado', 'Pagado', NOW() - INTERVAL 2 DAY);
     INSERT INTO Pago (Folio, IdUsuario, MontoPago, FechaPago, MetodoPago, Referencia, LinkComprobante, EstadoValidacion)
-      VALUES (vFolio, 1, 300.00, NOW() - INTERVAL 2 DAY, 'Deposito', 'DEP-55120', NULL, 'Validado');
+      VALUES (vFolio, 1, 300.00, NOW() - INTERVAL 2 DAY, 'Transferencia', 'TRF-55120', NULL, 'Validado');
 
     -- #4 En preparación -------------------------------------------------
     INSERT INTO Cliente (NombreCliente, TelefonoWhatsApp, CorreoCliente)

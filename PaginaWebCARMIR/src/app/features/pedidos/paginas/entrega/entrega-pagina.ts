@@ -29,7 +29,7 @@ type EstadoCobertura = 'sin-revisar' | 'revisando' | 'con-envio' | 'sin-envio' |
 const MENSAJE_SIN_CONEXION = 'No fue posible cargar los días de entrega. Revisa tu conexión e inténtalo de nuevo.';
 
 /**
- * RF-9 · Datos de contacto y entrega.
+ * RF-10 · Datos de contacto y entrega.
  *  1. Se cargan las reglas de la repostería (días, horarios y cupo de cada día).
  *  2. El cliente escribe su nombre y WhatsApp, elige recoger en tienda o envío a domicilio.
  *  3. Con envío se revisa el código postal (cobertura y costo de envío).
@@ -87,9 +87,9 @@ export default class EntregaPagina implements OnInit {
   protected readonly errores = signal<Record<string, string>>({});
   private intentoContinuar = false;
 
-  // RF-9 (Registro de datos para la entrega): inicia aquí. Paso 1: el cliente eligió «Continuar con mi pedido» en el carrito.
+  // RF-10 (Registro de datos para la entrega): inicia aquí. Paso 1: el cliente eligió «Continuar con mi pedido» en el carrito.
   ngOnInit(): void {
-    // RF-9 · Excepción paso 2: el carrito está vacío; regresa al carrito («Tu carrito está vacío» e «Ir al catálogo»).
+    // RF-10 · Excepción paso 2: el carrito está vacío; regresa al carrito («Tu carrito está vacío» e «Ir al catálogo»).
     if (this.carrito.articulos().length === 0) {
       this.router.navigate(['/carrito']);
       return;
@@ -103,7 +103,7 @@ export default class EntregaPagina implements OnInit {
   }
 
   // Lo que el cliente ya había llenado antes (RNF-7)
-  // RF-9 · Paso 3: precarga lo que el cliente ya había capturado (RNF-7).
+  // RF-10 · Paso 3: precarga lo que el cliente ya había capturado (RNF-7).
   private precargar(): void {
     const guardado = this.pedido.datos();
     this.nombre.set(guardado.cliente.nombre);
@@ -119,7 +119,7 @@ export default class EntregaPagina implements OnInit {
     }
   }
 
-  // RF-9 · Paso 3: carga las reglas (días laborables, horario, anticipación y cupo) para mostrar el formulario.
+  // RF-10 · Paso 3: carga las reglas (días laborables, horario, anticipación y cupo) para mostrar el formulario.
   async cargarReglas(): Promise<void> {
     this.estado.set('cargando');
     try {
@@ -128,13 +128,13 @@ export default class EntregaPagina implements OnInit {
       this.revisarFechaGuardada(reglas);
       this.estado.set('listo');
     } catch {
-      // RF-9 · Excepción paso 3: sin conexión, no se pueden cargar los días de entrega (con «Reintentar»).
+      // RF-10 · Excepción paso 3: sin conexión, no se pueden cargar los días de entrega (con «Reintentar»).
       this.estado.set('error');
     }
   }
 
   // Si la fecha que se tenía ya no se puede (se llenó o ya pasó), se quita y se avisa
-  // RF-9 · Excepción paso 6: la fecha guardada ya no cumple la anticipación o no tiene cupo; se quita y se avisa.
+  // RF-10 · Excepción paso 6: la fecha guardada ya no cumple la anticipación o no tiene cupo; se quita y se avisa.
   private revisarFechaGuardada(reglas: ReglasEntrega): void {
     if (this.fecha() !== '' && estadoDelDia(reglas, this.fecha()) !== 'disponible') {
       this.aviso.set('La fecha que habías elegido (' + fechaLarga(this.fecha()) + ') ya no está disponible. Elige otra.');
@@ -147,7 +147,7 @@ export default class EntregaPagina implements OnInit {
 
   // ===================== Cambios del cliente =====================
 
-  // RF-9 · Paso 4: el cliente captura sus datos.
+  // RF-10 · Paso 4: el cliente captura sus datos.
   cambiarCampo(campo: string, valor: string): void {
     if (campo === 'nombre') {
       this.nombre.set(valor);
@@ -210,9 +210,9 @@ export default class EntregaPagina implements OnInit {
     }
   }
 
-  // ===================== RF-9 paso 7: cobertura =====================
+  // ===================== RF-10 paso 7: cobertura =====================
 
-  // RF-9 · Paso 7: con envío a domicilio, valida la cobertura del código postal y obtiene el costo de envío.
+  // RF-10 · Paso 7: con envío a domicilio, valida la cobertura del código postal y obtiene el costo de envío.
   async revisarCobertura(): Promise<void> {
     const codigo = this.direccion().codigoPostal;
     if (validarCodigoPostal(codigo) !== '' || this.cobertura() === 'revisando') {
@@ -227,13 +227,13 @@ export default class EntregaPagina implements OnInit {
         return;
       }
       this.codigoRevisado = codigo;
-      // RF-9 · Paso 7: el código tiene cobertura, se agrega el costo de envío.
+      // RF-10 · Paso 7: el código tiene cobertura, se agrega el costo de envío.
       this.costoEnvio.set(respuesta.costoEnvio);
       this.cobertura.set('con-envio');
     } catch (error) {
       this.codigoRevisado = codigo;
       this.costoEnvio.set(-1);
-      // RF-9 · Excepción paso 7: «Por el momento no tenemos envío a tu zona»; se ofrece recoger en tienda.
+      // RF-10 · Excepción paso 7: «Por el momento no tenemos envío a tu zona»; se ofrece recoger en tienda.
       if (tieneCodigo(error, 'SIN_COBERTURA')) {
         this.cobertura.set('sin-envio');
       } else {
@@ -245,7 +245,7 @@ export default class EntregaPagina implements OnInit {
 
   // ===================== Validación y continuar =====================
 
-  // RF-9 · Paso 5: valida campos obligatorios y formato de teléfono, correo y código postal.
+  // RF-10 · Paso 5: valida campos obligatorios y formato de teléfono, correo y código postal.
   private validarTodo(): boolean {
     const errores: Record<string, string> = {};
     agregarError(errores, 'nombre', validarNombre(this.nombre()));
@@ -260,18 +260,18 @@ export default class EntregaPagina implements OnInit {
       agregarError(errores, 'colonia', validarTextoCampo(direccion.colonia, 'la colonia', 80, true));
       agregarError(errores, 'referencias', validarTextoCampo(direccion.referencias, 'referencias', 255, false));
       let errorCodigo = validarCodigoPostal(direccion.codigoPostal);
-      // RF-9 · Excepción paso 7: código postal fuera de la zona de cobertura.
+      // RF-10 · Excepción paso 7: código postal fuera de la zona de cobertura.
       if (errorCodigo === '' && this.cobertura() === 'sin-envio') {
         errorCodigo = 'Por el momento no tenemos envío a tu zona. Puedes elegir recoger en tienda.';
       }
       agregarError(errores, 'codigoPostal', errorCodigo);
     }
 
-    // RF-9 · Excepción paso 6: falta elegir la fecha (el calendario solo deja elegir fechas válidas).
+    // RF-10 · Excepción paso 6: falta elegir la fecha (el calendario solo deja elegir fechas válidas).
     if (this.fecha() === '') {
       errores['fecha'] = 'Elige la fecha de entrega en el calendario';
     }
-    // RF-9 · Excepción paso 6: falta elegir un horario dentro del horario de atención.
+    // RF-10 · Excepción paso 6: falta elegir un horario dentro del horario de atención.
     if (this.horario() === '') {
       errores['horario'] = 'Elige el horario de entrega';
     }
@@ -296,7 +296,7 @@ export default class EntregaPagina implements OnInit {
     this.continuar();
   }
 
-  // RF-9 · Paso 4: el cliente eligió «Continuar».
+  // RF-10 · Paso 4: el cliente eligió «Continuar».
   async continuar(): Promise<void> {
     this.intentoContinuar = true;
     this.aviso.set('');
@@ -304,17 +304,17 @@ export default class EntregaPagina implements OnInit {
     if (this.modalidad() === 'Envio a domicilio' && this.cobertura() !== 'con-envio') {
       await this.revisarCobertura();
     }
-    // RF-9 · Excepción paso 5: resalta cada campo con error y conserva los demás datos (regresa al paso 4).
+    // RF-10 · Excepción paso 5: resalta cada campo con error y conserva los demás datos (regresa al paso 4).
     if (!this.validarTodo()) {
       return;
     }
-    // RF-9 · Excepción paso 7: no se pudo confirmar la cobertura por falta de conexión.
+    // RF-10 · Excepción paso 7: no se pudo confirmar la cobertura por falta de conexión.
     if (this.modalidad() === 'Envio a domicilio' && this.cobertura() !== 'con-envio') {
       this.aviso.set('No fue posible revisar tu código postal. Revisa tu conexión e inténtalo de nuevo.');
       return;
     }
 
-    // RF-9 · Paso 8: guarda los datos de entrega y muestra la selección del método de pago (RF-10).
+    // RF-10 · Paso 8: guarda los datos de entrega y muestra la selección del método de pago (RF-11).
     this.pedido.guardarCliente({
       nombre: this.nombre().trim().replace(/\s+/g, ' '),
       telefono: this.telefono(),

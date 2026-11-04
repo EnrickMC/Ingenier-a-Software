@@ -12,7 +12,7 @@ import com.pac.util.ConfiguracionApp;
 import java.util.List;
 
 /**
- * Control de acceso a los apartados del panel (RNF-15).
+ * Control de acceso a los apartados del panel (RNF-12).
  *
  * Los permisos se vuelven a leer de la base de datos cada vez que el Personal
  * abre un apartado, no solo al iniciar sesión. Así los cambios que haga la
@@ -27,11 +27,11 @@ public class ControlAcceso {
     public static final String MSG_SESION_VENCIDA = "Tu sesión terminó. Vuelve a iniciar sesión";
 
     // Revisa si la persona de la sesión puede abrir un apartado con ese permiso
-    // RNF-15 · Paso: revisa si la sesión sigue activa y si tiene el permiso del apartado.
+    // RNF-12 · Paso: revisa si la sesión sigue activa y si tiene el permiso del apartado.
     public static ResultadoAcceso revisar(String permisoRequerido) {
         SesionUsuario sesion = SesionUsuario.getInstancia();
 
-        // RNF-15 · Excepción: la sesión ya no está activa.
+        // RNF-12 · Excepción: la sesión ya no está activa.
         if (!sesion.estaActiva()) {
             return ResultadoAcceso.SESION_VENCIDA;
         }
@@ -55,17 +55,17 @@ public class ControlAcceso {
             UsuarioDAO usuarioDAO = DAOFactory.crearUsuarioDAO();
             usuarioBD = usuarioDAO.buscarPorId(usuarioSesion.getIdUsuario());
         } catch (DAOException e) {
-            // RNF-15 · Excepción: sin conexión no se pueden verificar los permisos.
+            // RNF-12 · Excepción: sin conexión no se pueden verificar los permisos.
             return ResultadoAcceso.SIN_VERIFICAR;
         }
 
-        // RNF-15 · Excepción: la cuenta fue dada de baja o inactivada.
+        // RNF-12 · Excepción: la cuenta fue dada de baja o inactivada.
         if (usuarioBD == null || usuarioBD.getEstado() != EstadoUsuario.ACTIVO) {
             return ResultadoAcceso.CUENTA_INACTIVA;
         }
 
         // Si los permisos cambiaron, la sesión se actualiza y se avisa
-        // RNF-15 · Excepción: los permisos cambiaron mientras la sesión estaba abierta.
+        // RNF-12 · Excepción: los permisos cambiaron mientras la sesión estaba abierta.
         if (!mismosPermisos(usuarioSesion.getPermisos(), usuarioBD.getPermisos())) {
             usuarioSesion.reemplazarPermisos(usuarioBD.getPermisos());
             return ResultadoAcceso.PERMISOS_CAMBIARON;
@@ -78,7 +78,7 @@ public class ControlAcceso {
         if (sesion.tienePermiso(permisoRequerido)) {
             return ResultadoAcceso.PERMITIDO;
         }
-        // RNF-15 · Excepción: no tiene el permiso, «Acceso denegado».
+        // RNF-12 · Excepción: no tiene el permiso, «Acceso denegado».
         return ResultadoAcceso.DENEGADO;
     }
 

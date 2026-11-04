@@ -13,10 +13,10 @@ public interface ReporteDAO {
 
     String MSG_FALTA_MIGRACION = "Falta ejecutar DBCarmir/migraciones/MIGRACION_COMPLETA.sql en la base de datos";
 
-    // RF-46: llena el reporte con los pagos, reembolsos, compras y mermas de su periodo
+    // RF-65: llena el reporte con los pagos, reembolsos, compras y mermas de su periodo
     void cargarIngresosGastos(ReporteIngresosGastos reporte) throws DAOException;
 
-    // RF-47: llena el reporte con las ventas agrupadas por producto, categoría y opción.
+    // RF-66: llena el reporte con las ventas agrupadas por producto, categoría y opción.
     // ordenPorUtilidad = false ordena por unidades vendidas
     void cargarVentas(ReporteVentas reporte, boolean ordenPorUtilidad) throws DAOException;
 

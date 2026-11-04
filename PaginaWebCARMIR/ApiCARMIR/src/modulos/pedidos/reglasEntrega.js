@@ -1,5 +1,5 @@
 /*
- * Reglas de la entrega (RF-9) y del pago (RF-10) que vienen de la tabla Configuracion.
+ * Reglas de la entrega (RF-10) y del pago (RF-11) que vienen de la tabla Configuracion.
  * Son los mismos parámetros que edita la Administradora en el apartado "Configuración" del Panel.
  *
  *  - DiasAnticipacionMinima: días mínimos entre hoy y la entrega.
@@ -133,7 +133,7 @@ function dosDigitos(numero) {
 }
 
 // Horarios que se ofrecen: de la apertura al cierre cada 30 minutos
-// RF-9 · Paso 6: horarios de atención que se ofrecen.
+// RF-10 · Paso 6: horarios de atención que se ofrecen.
 function horariosDisponibles(reglas) {
   const horarios = [];
   const inicio = aMinutos(reglas.horaApertura);
@@ -198,7 +198,7 @@ function esDiaLaborable(reglas, texto) {
 }
 
 // Primer día que cumple la anticipación mínima y es laborable
-// RF-9 · Paso 6: primera fecha que cumple la anticipación mínima y es laborable.
+// RF-10 · Paso 6: primera fecha que cumple la anticipación mínima y es laborable.
 function primeraFechaValida(reglas) {
   let fecha = sumarDias(hoy(), reglas.diasAnticipacionMinima);
   for (let i = 0; i < 7; i++) {
@@ -251,38 +251,38 @@ function sonDiasSeguidos(reglas, orden) {
 }
 
 /*
- * Revisa la fecha y el horario elegidos (RF-9 paso 6).
+ * Revisa la fecha y el horario elegidos (RF-10 paso 6).
  * cargaDelDia = pedidos que ya hay ese día. Regresa { campo, mensaje } o null si todo está bien.
  */
-// RF-9 · Paso 6 (API): valida la anticipación de la fecha, el día laborable, el cupo y el horario.
+// RF-10 · Paso 6 (API): valida la anticipación de la fecha, el día laborable, el cupo y el horario.
 function revisarFechaYHorario(reglas, fecha, horario, cargaDelDia) {
   const minima = primeraFechaValida(reglas);
   const mensajeFecha = 'Elige una fecha a partir del ' + fechaParaMostrar(minima) +
     ' (entregamos ' + textoDiasLaborables(reglas) + ')';
 
-  // RF-9 · Excepción paso 6: la fecha no existe.
+  // RF-10 · Excepción paso 6: la fecha no existe.
   if (textoAFecha(fecha) === null) {
     return { campo: 'fecha', mensaje: 'Indica una fecha de entrega válida' };
   }
-  // RF-9 · Excepción paso 6: «Elige una fecha a partir del…» (sin anticipación o día no laborable).
+  // RF-10 · Excepción paso 6: «Elige una fecha a partir del…» (sin anticipación o día no laborable).
   if (fecha < sumarDias(hoy(), reglas.diasAnticipacionMinima) || !esDiaLaborable(reglas, fecha)) {
     return { campo: 'fecha', mensaje: mensajeFecha };
   }
-  // RF-9 · Excepción paso 6: fecha demasiado lejana.
+  // RF-10 · Excepción paso 6: fecha demasiado lejana.
   if (fecha > sumarDias(hoy(), reglas.diasMaximosAdelante)) {
     return {
       campo: 'fecha',
       mensaje: 'Solo recibimos pedidos con hasta ' + reglas.diasMaximosAdelante + ' días de anticipación'
     };
   }
-  // RF-9 · Excepción paso 6: el día ya no tiene cupo.
+  // RF-10 · Excepción paso 6: el día ya no tiene cupo.
   if (cargaDelDia >= reglas.capacidadDiaria) {
     return {
       campo: 'fecha',
       mensaje: 'Ya no tenemos cupo para el ' + fechaParaMostrar(fecha) + '. Elige otra fecha'
     };
   }
-  // RF-9 · Excepción paso 6: horario fuera del horario de atención (se muestran los disponibles).
+  // RF-10 · Excepción paso 6: horario fuera del horario de atención (se muestran los disponibles).
   if (horariosDisponibles(reglas).indexOf(horario) < 0) {
     return {
       campo: 'horario',
@@ -295,13 +295,13 @@ function revisarFechaYHorario(reglas, fecha, horario, cargaDelDia) {
 // ===================== Pago =====================
 
 // Transferencia solo si la Administradora capturó sus datos bancarios
-// RF-10 · Excepción paso 6: sin datos bancarios no se acepta transferencia.
+// RF-11 · Excepción paso 6: sin datos bancarios no se acepta transferencia.
 function aceptaTransferencia(reglas) {
   return reglas.datosBancarios !== '';
 }
 
 // Anticipo requerido según la modalidad (con 2 decimales)
-// RF-10 · Paso 3: anticipo mínimo según la modalidad.
+// RF-11 · Paso 3: anticipo mínimo según la modalidad.
 function calcularAnticipo(reglas, total, modalidadPago) {
   if (modalidadPago === 'Pago total') {
     return total;

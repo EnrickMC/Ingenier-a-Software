@@ -27,7 +27,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Controlador del dashboard principal (dashboard.fxml).
+ * RF-49 (Visualización del resumen del día): controlador del dashboard principal (dashboard.fxml).
  * Las alertas de inventario vienen del Módulo 5, los pedidos del Módulo 4
  * y los ingresos del mes del Módulo 6 (Reportes Financieros).
  */
@@ -45,17 +45,20 @@ public class DashboardController implements ControladorSeccion {
     @FXML private Label lblAlertas;
     @FXML private Label lblDetalleAlertas;
 
+    // RF-49: inicia aquí. Paso 1: el usuario inició sesión o eligió «Dashboard Principal».
     @Override
     public void inicializarSeccion(SeccionPanel seccion) {
+        // RF-49 · Pasos 2 a 7: cada tarjeta revisa su permiso, consulta y se muestra.
         mostrarIngresos();
         mostrarPedidos();
         mostrarAlertas();
     }
 
-    // Ingresos del mes en curso (Módulo 6); solo con el permiso «Ver datos financieros»
+    // RF-49 · Paso 6: ingresos del mes en curso (Módulo 6); solo con el permiso «Ver datos financieros»
     private void mostrarIngresos() {
         if (!PermisosReportes.puedeVerReportes()) {
             lblIngresos.setText("—");
+            // RF-49 · Excepción paso 2: «Sin permiso para ver datos financieros».
             lblDetalleIngresos.setText("Sin permiso para ver datos financieros");
             return;
         }
@@ -65,15 +68,17 @@ public class DashboardController implements ControladorSeccion {
                     + LocalDate.now().getDayOfMonth() + " de este mes");
         } catch (DAOException e) {
             lblIngresos.setText("—");
+            // RF-49 · Excepción paso 3: «Sin conexión a la base de datos».
             lblDetalleIngresos.setText("Sin conexión a la base de datos");
         }
     }
 
-    // Pedidos que se entregan hoy y los últimos que llegaron (Módulo 4)
+    // RF-49 · Pasos 3 y 4: pedidos que se entregan hoy y los últimos que llegaron (Módulo 4)
     private void mostrarPedidos() {
         tblPedidos.getItems().clear();
         if (!PermisosPedidos.puedeGestionar() && !PermisosPedidos.puedeVerAgenda()) {
             lblPedidosHoy.setText("—");
+            // RF-49 · Excepción paso 2: sin permiso para ver pedidos ni la agenda.
             lblDetallePedidos.setText("Sin permiso para ver pedidos");
             lblSinPedidos.setText("No tienes permiso para ver los pedidos");
             lblAyudaPedidos.setVisible(false);
@@ -93,17 +98,19 @@ public class DashboardController implements ControladorSeccion {
                     tblPedidos.getItems().add(new FilaPedido(pedidos.get(i)));
                 }
             } else {
+                // RF-49 · Excepción paso 4: sin el permiso «Gestionar pedidos» no se muestra la tabla.
                 lblSinPedidos.setText("La lista de pedidos requiere el permiso «Gestionar pedidos»");
                 lblAyudaPedidos.setVisible(false);
             }
         } catch (DAOException e) {
             lblPedidosHoy.setText("—");
+            // RF-49 · Excepción paso 3: «Sin conexión a la base de datos».
             lblDetallePedidos.setText("Sin conexión a la base de datos");
             lblSinPedidos.setText("Error de conexión");
         }
     }
 
-    // Doble clic: abre el pedido en Gestión de Pedidos
+    // RF-49 · Pasos 8 y 9: doble clic, abre el pedido en Gestión de Pedidos (Excepción paso 8: sin pedido elegido no hace nada)
     @FXML
     private void onClicPedidos(MouseEvent evento) {
         FilaPedido fila = tblPedidos.getSelectionModel().getSelectedItem();
@@ -114,13 +121,14 @@ public class DashboardController implements ControladorSeccion {
         Navegador.getInstancia().irASeccion(SeccionPanel.PEDIDOS);
     }
 
-    // Alertas de inventario pendientes, separadas por tipo
+    // RF-49 · Paso 5: alertas de inventario pendientes, separadas por tipo
     private void mostrarAlertas() {
         List<AlertaInventario> alertas;
         try {
             alertas = new AlertaService().listar(true);
         } catch (DAOException e) {
             lblAlertas.setText("—");
+            // RF-49 · Excepción paso 3: «Sin conexión a la base de datos».
             lblDetalleAlertas.setText("Sin conexión a la base de datos");
             return;
         }
@@ -135,6 +143,7 @@ public class DashboardController implements ControladorSeccion {
         }
         lblAlertas.setText(String.valueOf(alertas.size()));
         if (alertas.isEmpty()) {
+            // RF-49 · Excepción paso 5: «Inventario en orden».
             lblDetalleAlertas.setText("Inventario en orden");
         } else {
             lblDetalleAlertas.setText(existencia + " de existencia baja · " + caducidad + " de caducidad");

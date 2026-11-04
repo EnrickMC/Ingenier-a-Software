@@ -22,7 +22,8 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Integraciones de notificaciones (RF-32): datos de WhatsApp Business Cloud API y del correo SMTP.
+ * RF-71 · Pasos 3 a 6: integraciones de notificaciones, datos de WhatsApp Business Cloud API y del correo SMTP
+ * con los que se envían los avisos de RF-47.
  *
  * - Los lee de la tabla ConfiguracionNotificacion y los pasa a ConfiguracionNotificaciones (lo que usan
  *   los canales de envío).
@@ -125,22 +126,24 @@ public class IntegracionesService {
      * En "formulario" el token y la contraseña vienen vacíos si no se escribió uno nuevo (se conserva el guardado).
      * quitarToken / quitarContrasena = la persona pidió borrar el guardado.
      */
-    // RF-32 (Notificaciones): datos de las cuentas de WhatsApp y correo que usan los avisos al cliente.
+    // RF-71 · Pasos 3, 5 y 6: datos de las cuentas de WhatsApp y correo que usan los avisos al cliente (RF-47).
     public ResultadoConfiguracion guardar(DatosNotificaciones formulario, boolean quitarToken,
                                           boolean quitarContrasena) {
         // 1. Se leen los datos actuales para saber qué cambió
+        // RF-71 · Excepción paso 1: si no se puede leer la tabla no se guarda.
         if (!cargarEnAplicacion()) {
             return ResultadoConfiguracion.error(motivoError, ResultadoConfiguracion.CAMPO_CONEXION);
         }
         DatosNotificaciones completos = completarSecretos(formulario, quitarToken, quitarContrasena);
 
-        // 2. Cada valor debe ser válido
+        // 2. Cada valor debe ser válido (RF-71 · Paso 3)
+        // RF-71 · Excepción paso 3: dato no válido o modo real sin ningún canal listo.
         ResultadoConfiguracion error = validar(completos);
         if (error != null) {
             return error;
         }
 
-        // 3. Se arma la lista de lo que cambió (los secretos se cifran)
+        // 3. Se arma la lista de lo que cambió (los secretos se cifran) (RF-71 · Paso 5)
         List<String> claves = new ArrayList<String>();
         List<String> valores = new ArrayList<String>();
         List<CambioConfiguracion> bitacora = new ArrayList<CambioConfiguracion>();
@@ -174,11 +177,13 @@ public class IntegracionesService {
             bitacora.add(new CambioConfiguracion(PREFIJO_BITACORA + clave, recortar(textoAnterior),
                     recortar(textoNuevo), idUsuario));
         }
+        // RF-71 · Excepción paso 5: «No hay cambios por guardar».
         if (claves.isEmpty()) {
             return ResultadoConfiguracion.correcto(MSG_SIN_CAMBIOS);
         }
 
-        // 4. Se guardan los cambios y su bitácora en una sola transacción
+        // 4. Se guardan los cambios y su bitácora en una sola transacción (RF-71 · Paso 5)
+        // RF-71 · Excepción paso 5: si algo falla se deshace todo, «No fue posible guardar los datos de notificaciones».
         Connection conexion = null;
         try {
             conexion = ConexionBD.getInstancia().getConexion();
@@ -198,14 +203,15 @@ public class IntegracionesService {
             ApoyoMySQL.regresarAutoCommit(conexion);
         }
 
-        // 5. Los avisos usan los datos nuevos desde ahora
+        // 5. Los avisos usan los datos nuevos desde ahora (RF-71 · Paso 6)
         cargarEnAplicacion();
         return ResultadoConfiguracion.correcto(MSG_GUARDADO + " (" + claves.size() + " cambio(s))");
     }
 
     // ===================== Pruebas de envío =====================
 
-    // Envía un correo de prueba con los datos del formulario (se puede probar antes de guardar).
+    // RF-71 · Paso 4: envía un correo de prueba con los datos del formulario (se puede probar antes de guardar).
+    // RF-71 · Excepción paso 4: «No se pudo enviar el correo de prueba: …».
     // Corre en segundo plano: no toca la pantalla.
     public ResultadoConfiguracion probarCorreo(DatosNotificaciones formulario, boolean quitarContrasena,
                                                String destino) {
@@ -228,7 +234,8 @@ public class IntegracionesService {
         }
     }
 
-    // Envía la plantilla de prueba hello_world por WhatsApp con los datos del formulario.
+    // RF-71 · Paso 4: envía la plantilla de prueba hello_world por WhatsApp con los datos del formulario.
+    // RF-71 · Excepción paso 4: «No se pudo enviar el WhatsApp de prueba: …».
     public ResultadoConfiguracion probarWhatsApp(DatosNotificaciones formulario, boolean quitarToken,
                                                  String destino) {
         DatosNotificaciones datos = completarSecretos(formulario, quitarToken, false);
@@ -279,7 +286,7 @@ public class IntegracionesService {
         if (error != null) {
             return error;
         }
-        // En modo real debe quedar listo al menos un canal
+        // RF-71 · Excepción paso 3: en modo real debe quedar listo al menos un canal
         boolean whatsAppListo = datos.isWhatsAppHabilitado() && whatsAppCompleto(datos);
         boolean correoListo = datos.isCorreoHabilitado() && correoCompleto(datos);
         if (!datos.isSimulado() && !whatsAppListo && !correoListo) {

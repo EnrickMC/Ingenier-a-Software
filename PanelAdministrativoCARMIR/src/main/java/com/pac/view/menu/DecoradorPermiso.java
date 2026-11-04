@@ -28,7 +28,7 @@ public class DecoradorPermiso extends DecoradorElementoMenu {
             return nodoOriginal;
         }
 
-        // RNF-15: el menú muestra con candado los apartados sin permiso.
+        // RNF-12: el menú muestra con candado los apartados sin permiso.
         // Si no tiene permiso: se desactiva el botón y se agrega un candado a la derecha
         getBoton().setDisable(true);
         getBoton().getStyleClass().add("menu-item-bloqueado");

@@ -3,7 +3,7 @@ package com.pac.modulos.reportes.model;
 import java.time.LocalDateTime;
 
 /**
- * Movimiento que no es consistente y por eso NO se suma en el reporte (RF-46,
+ * Movimiento que no es consistente y por eso NO se suma en el reporte (RF-65,
  * excepción «Movimientos por revisar»). Por ejemplo: un pago validado de un pedido
  * dado de baja o una compra con costo en cero.
  */

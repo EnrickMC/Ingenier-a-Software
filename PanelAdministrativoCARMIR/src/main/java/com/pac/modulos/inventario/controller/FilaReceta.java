@@ -4,7 +4,7 @@ import com.pac.modulos.inventario.model.Receta;
 import com.pac.util.Formatos;
 
 /**
- * Una fila de la tabla de recetas (RF-41).
+ * Una fila de la tabla de recetas (RF-55).
  */
 public class FilaReceta {
 

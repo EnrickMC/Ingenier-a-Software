@@ -22,7 +22,7 @@ import java.io.File;
 
 /**
  * Pestaña "Respaldos y sistema": datos de la conexión, cuentas de WhatsApp y correo de las
- * notificaciones (IntegracionesController, RF-32) y respaldos de la base de datos (RNF-8).
+ * notificaciones (IntegracionesController, RF-71) y respaldos de la base de datos (RF-72 y RF-73, RNF-8).
  * Generar un respaldo requiere «Configurar sistema»; restaurarlo, ser la administradora.
  */
 public class RespaldosController {
@@ -78,7 +78,7 @@ public class RespaldosController {
         mostrarProgramas();
     }
 
-    // Indica si se encontraron mysqldump y mysql
+    // RF-72 · Paso 1: indica si se encontraron mysqldump y mysql
     private void mostrarProgramas() {
         File mysqldump = servicio.buscarPrograma("mysqldump");
         File mysql = servicio.buscarPrograma("mysql");
@@ -105,6 +105,7 @@ public class RespaldosController {
         }
     }
 
+    // RF-72 · Paso 2: elegir la carpeta "bin" de MySQL cuando no se encontraron los programas.
     @FXML
     private void onElegirCarpeta() {
         DirectoryChooser selector = new DirectoryChooser();
@@ -118,16 +119,20 @@ public class RespaldosController {
         mostrarProgramas();
     }
 
+    // RF-72 (Generación de respaldos de la base de datos): inicia aquí. Paso 2: «Generar respaldo».
     @FXML
     private void onGenerarRespaldo() {
         ApoyoVista.mostrarNodo(lblResultado, false);
+        // RF-72 · Paso 3: la sesión sigue activa y con el permiso «Configurar sistema».
         if (!AccesoConfiguracion.revisar()) {
             return;
         }
+        // RF-72 · Paso 4: cuadro para guardar con el nombre sugerido CARMIR_Respaldo_[fecha]_[hora].sql.
         FileChooser selector = new FileChooser();
         selector.setTitle("Guardar respaldo");
         selector.setInitialFileName(servicio.nombreSugerido());
         selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Respaldo SQL (*.sql)", "*.sql"));
+        // RF-72 · Paso 5: el usuario elige la carpeta y el nombre (Excepción paso 5: si cierra el cuadro no se genera).
         File destino = selector.showSaveDialog(btnGenerar.getScene().getWindow());
         if (destino == null) {
             return;
@@ -135,12 +140,15 @@ public class RespaldosController {
         if (!destino.getName().toLowerCase().endsWith(".sql")) {
             destino = new File(destino.getParentFile(), destino.getName() + ".sql");
         }
+        // RF-72 · Paso 6: mysqldump se ejecuta en segundo plano.
         ejecutarEnSegundoPlano(new TareaRespaldo(servicio, destino, false), "Generando respaldo…");
     }
 
+    // RF-73 (Restauración de respaldos de la base de datos): inicia aquí. Paso 1: «Restaurar respaldo».
     @FXML
     private void onRestaurarRespaldo() {
         ApoyoVista.mostrarNodo(lblResultado, false);
+        // RF-73 · Paso 2 y Excepción paso 2: «Solo la administradora puede restaurar un respaldo».
         if (!PermisosConfiguracion.puedeRestaurar()) {
             Alertas.error(PermisosConfiguracion.MSG_SOLO_ADMINISTRADORA);
             return;
@@ -148,15 +156,18 @@ public class RespaldosController {
         FileChooser selector = new FileChooser();
         selector.setTitle("Elegir respaldo");
         selector.getExtensionFilters().add(new FileChooser.ExtensionFilter("Respaldo SQL (*.sql)", "*.sql"));
+        // RF-73 · Pasos 3 y 4: elegir el archivo .sql (Excepción paso 4: si cierra el cuadro no se restaura).
         File origen = selector.showOpenDialog(btnRestaurar.getScene().getWindow());
         if (origen == null) {
             return;
         }
+        // RF-73 · Paso 5 y Excepción paso 5: «El archivo no es un respaldo de CARMIR_DB generado con mysqldump».
         if (!servicio.esRespaldoValido(origen)) {
             Alertas.error(RespaldoService.MSG_ARCHIVO_NO_VALIDO);
             return;
         }
-        // Doble confirmación: la restauración reemplaza todos los datos actuales
+        // RF-73 · Pasos 6 y 7: doble confirmación, la restauración reemplaza todos los datos actuales
+        // RF-73 · Excepción paso 7: si no confirma las dos veces, la base de datos no cambia.
         boolean seguro = Alertas.confirmarDoble("Restaurar respaldo",
                 "Se reemplazarán TODOS los datos actuales de " + servicio.getBaseDeDatos()
                         + " por los del archivo:\n" + origen.getName()
@@ -164,6 +175,7 @@ public class RespaldosController {
         if (!seguro) {
             return;
         }
+        // RF-73 · Paso 8: el programa mysql se ejecuta en segundo plano.
         ejecutarEnSegundoPlano(new TareaRespaldo(servicio, origen, true), "Restaurando respaldo…");
     }
 
@@ -182,7 +194,8 @@ public class RespaldosController {
         hilo.start();
     }
 
-    // Muestra el resultado al terminar (ya en el hilo de la pantalla)
+    // RF-72 · Paso 7 / RF-73 · Paso 9: muestra el resultado al terminar (ya en el hilo de la pantalla)
+    // RF-72 · Excepción paso 6 / RF-73 · Excepción paso 8: si falló se muestra el motivo
     private class AlTerminar implements EventHandler<WorkerStateEvent> {
         private final TareaRespaldo tarea;
 

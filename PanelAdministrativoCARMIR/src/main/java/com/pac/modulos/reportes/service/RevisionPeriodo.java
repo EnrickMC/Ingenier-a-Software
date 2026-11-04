@@ -3,7 +3,7 @@ package com.pac.modulos.reportes.service;
 import java.time.LocalDate;
 
 /**
- * Resultado de revisar el periodo de un reporte (paso 3 de RF-46 y RF-47).
+ * Resultado de revisar el periodo de un reporte (paso 3 de RF-65 y RF-66).
  * Si es correcto trae las fechas que se van a usar (la de fin puede venir ajustada a hoy)
  * y, si se ajustó, el aviso para mostrar. Si no, trae el mensaje y el campo que se marca.
  */

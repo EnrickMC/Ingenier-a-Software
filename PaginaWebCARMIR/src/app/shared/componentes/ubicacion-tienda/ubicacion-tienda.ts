@@ -2,7 +2,8 @@ import { Component, input } from '@angular/core';
 import { DIRECCION_TIENDA, ENLACE_MAPA_TIENDA } from '../../../core/datos-tienda';
 
 /**
- * Tarjeta con la dirección de la tienda (donde se paga en efectivo y se recogen los pedidos).
+ * RF-10 · Paso 3 / RF-12 · Paso 8: tarjeta con la dirección de la tienda y «Ver en el mapa»
+ * (donde se paga en efectivo y se recogen los pedidos).
  * Se usa en Entrega, Pago, Confirmación y Mis pedidos.
  * "titulo" cambia según la pantalla: «Recoge tu pedido en», «Paga en efectivo en», etc.
  */

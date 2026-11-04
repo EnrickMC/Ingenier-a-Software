@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Pestaña Lotes y movimientos (movimientos.fxml).
+ * RF-64 (Consulta de lotes y movimientos de insumos): pestaña Lotes y movimientos (movimientos.fxml).
  * Historial de movimientos filtrable por insumo, tipo y fechas; lotes con existencia;
- * y acceso a registrar compras (RF-37) y mermas (RF-38).
+ * y acceso a registrar compras (RF-59) y mermas (RF-60).
  */
 public class MovimientosController {
 
@@ -88,21 +88,22 @@ public class MovimientosController {
         ApoyoVista.mostrarNodo(btnMermaLote, puedeMover);
     }
 
-    // La pestaña Insumos pide ver los movimientos de un insumo
+    // RF-64 · Paso 1: la pestaña Insumos pide ver los movimientos de un insumo
     public void filtrarPorInsumo(int idInsumo) {
         idInsumoPedido = idInsumo;
     }
 
-    // Se llama cada vez que la pestaña queda visible
+    // RF-64: inicia aquí. Paso 1: se llama cada vez que la pestaña queda visible
     public void alMostrar() {
         if (!llenarInsumos()) {
+            // RF-64 · Excepción paso 2: «Error de conexión» con «Reintentar».
             mostrarErrorConexion();
             return;
         }
         cargar();
     }
 
-    // Llena los selectores de categoría e insumo (insumos también dados de baja, por su historial);
+    // RF-64 · Paso 2: llena los selectores de categoría e insumo (insumos también dados de baja, por su historial);
     // false si no hubo conexión
     private boolean llenarInsumos() {
         int idElegido = idInsumoPedido;
@@ -206,6 +207,7 @@ public class MovimientosController {
         cargar();
     }
 
+    // RF-64 · Paso 3: el usuario cambió un filtro (tipo de movimiento, insumo o fechas).
     @FXML
     private void onBuscar() {
         if (llenandoFiltros) {
@@ -221,6 +223,7 @@ public class MovimientosController {
 
     // ===================== Historial y lotes =====================
 
+    // RF-64 · Pasos 4 a 7: valida las fechas, consulta y muestra movimientos, totales y lotes.
     private void cargar() {
         tblMovimientos.getItems().clear();
         tblLotes.getItems().clear();
@@ -242,12 +245,14 @@ public class MovimientosController {
         LocalDate desde = dpDesde.getValue();
         LocalDate hasta = dpHasta.getValue();
         if (desde != null && hasta != null && desde.isAfter(hasta)) {
+            // RF-64 · Excepción paso 4: «La fecha inicial no puede ser posterior a la final»; no se consulta.
             lblAviso.setText("La fecha inicial no puede ser posterior a la final");
             ApoyoVista.mostrarNodo(lblAviso, true);
             lblVacio.setText("Corrige las fechas del filtro");
             return;
         }
 
+        // RF-64 · Paso 5: consulta los movimientos y los lotes que cumplen los filtros.
         List<Movimiento> movimientos;
         List<Lote> lotes;
         try {
@@ -258,6 +263,7 @@ public class MovimientosController {
                 lotes = servicio.listarLotesConExistencia();
             }
         } catch (DAOException e) {
+            // RF-64 · Excepción paso 2: «Error de conexión» (también al consultar).
             mostrarErrorConexion();
             return;
         }
@@ -280,7 +286,7 @@ public class MovimientosController {
             lotes = lotesDeLaCategoria;
         }
 
-        // Movimientos y totales en dinero por tipo
+        // RF-64 · Paso 6: movimientos, cuántos son y totales en dinero por tipo
         double compras = 0;
         double mermas = 0;
         double produccion = 0;
@@ -296,6 +302,7 @@ public class MovimientosController {
         }
         lblConteo.setText(movimientos.size() + " movimiento(s)");
         if (movimientos.isEmpty()) {
+            // RF-64 · Excepción paso 6: no hay movimientos (con o sin filtros).
             if (hayFiltro()) {
                 lblVacio.setText("No hay movimientos con esos filtros");
             } else {
@@ -306,7 +313,7 @@ public class MovimientosController {
                     + "   ·   Usado en producción: " + Formatos.moneda(produccion));
         }
 
-        // Lotes: del insumo elegido o de todos
+        // RF-64 · Paso 7: lotes del insumo elegido o todos los que tienen existencia
         for (Lote lote : lotes) {
             tblLotes.getItems().add(new FilaLote(lote));
         }
@@ -335,7 +342,7 @@ public class MovimientosController {
         lblTotales.setText("");
     }
 
-    // ===================== Compras y mermas =====================
+    // ===================== Compras y mermas (RF-59 y RF-60 desde RF-64) =====================
 
     @FXML
     private void onEntrada() {

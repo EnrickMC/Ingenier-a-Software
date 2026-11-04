@@ -1,5 +1,5 @@
 /*
- * Revisión del archivo de comprobante que el cliente sube desde «Mis pedidos» (RF-12).
+ * Revisión del archivo de comprobante que el cliente sube desde «Mis pedidos» (RF-14 · Paso 4).
  * La página manda el archivo en JSON: { nombre, tipo, contenidoBase64 }.
  *
  * Seguridad (nunca se confía en el navegador):
@@ -99,7 +99,7 @@ function extensionDe(tipo) {
  * Lee y revisa el archivo. Regresa null si no se mandó archivo,
  * o { nombre, tipo, tamano, contenido (Buffer) } si es válido.
  */
-// RF-12 (API): revisa la foto o PDF del comprobante subido desde los archivos del cliente.
+// RF-14 · Paso 4 (API): revisa la foto o PDF del comprobante subido desde los archivos del cliente.
 function leerArchivo(valor) {
   if (valor === undefined || valor === null) {
     return null;
@@ -108,7 +108,7 @@ function leerArchivo(valor) {
     throw errorArchivo('El archivo del comprobante no es válido');
   }
   const base64 = valor.contenidoBase64.trim();
-  // RF-12 · Excepción: el archivo pesa más de 5 MB (se revisa antes de convertirlo).
+  // RF-14 · Excepción paso 4: el archivo pesa más de 5 MB (se revisa antes de convertirlo).
   if (base64.length > Math.ceil((TAMANO_MAXIMO * 4) / 3) + 4) {
     throw errorArchivo('El archivo pesa más de ' + TEXTO_TAMANO_MAXIMO + '. Toma una foto más ligera o recórtala.');
   }
@@ -122,7 +122,7 @@ function leerArchivo(valor) {
   if (contenido.length > TAMANO_MAXIMO) {
     throw errorArchivo('El archivo pesa más de ' + TEXTO_TAMANO_MAXIMO + '. Toma una foto más ligera o recórtala.');
   }
-  // RF-12 · Excepción: el archivo no es imagen JPG/PNG/WEBP ni PDF (se revisa su contenido real).
+  // RF-14 · Excepción paso 4: el archivo no es imagen JPG/PNG/WEBP ni PDF (se revisa su contenido real).
   const tipo = detectarTipo(contenido);
   if (tipo === '') {
     throw errorArchivo('Solo se aceptan fotos JPG, PNG o WEBP, o un PDF');

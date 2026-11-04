@@ -114,7 +114,7 @@ public class Insumo {
         return stockMinimo > 0;
     }
 
-    // RF-39: hay alerta si la existencia es igual o menor al stock mínimo
+    // RF-61: hay alerta si la existencia es igual o menor al stock mínimo
     public boolean estaBajoMinimo() {
         if (!tieneStockMinimo()) {
             return false;

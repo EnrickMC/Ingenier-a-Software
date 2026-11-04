@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Parámetros del negocio (Prompt 8.2): los lee de la tabla Configuracion, revisa cada valor,
+ * RF-68 · Pasos 4 a 7: parámetros del negocio (Prompt 8.2). Los lee de la tabla Configuracion, revisa cada valor,
  * guarda los que cambiaron con su bitácora (quién y cuándo) y los aplica de inmediato al panel
  * a través de ConfiguracionApp.
  */
@@ -63,6 +63,7 @@ public class ConfiguracionService {
         }
     }
 
+    // RF-70 · Paso 3: los últimos 300 cambios de configuración.
     public List<CambioConfiguracion> historial() throws DAOException {
         return configuracionDAO.listarCambios(CAMBIOS_EN_HISTORIAL);
     }
@@ -74,14 +75,15 @@ public class ConfiguracionService {
      * Si un valor no es válido no se guarda nada y se indica qué campo corregir.
      */
     public ResultadoConfiguracion guardar(List<Parametro> nuevos) {
-        // 1. Cada valor debe ser válido
+        // RF-68 · Paso 4: cada valor debe ser válido (obligatorio, rango, hora HH:mm, días laborables y largo)
+        // RF-68 · Excepción paso 4: el primer valor no válido se regresa con su campo y no se guarda nada.
         for (Parametro parametro : nuevos) {
             String error = validar(parametro.getClave(), parametro.getValor());
             if (error != null) {
                 return ResultadoConfiguracion.error(error, parametro.getClave());
             }
         }
-        // 2. Reglas entre dos valores: la hora de cierre después de la de apertura
+        // RF-68 · Paso 4: reglas entre dos valores, la hora de cierre después de la de apertura
         String apertura = valorDe(nuevos, ClavesConfiguracion.HORA_APERTURA);
         String cierre = valorDe(nuevos, ClavesConfiguracion.HORA_CIERRE);
         if (apertura != null && cierre != null) {
@@ -93,7 +95,7 @@ public class ConfiguracionService {
             }
         }
 
-        // 3. Se comparan con lo guardado para saber qué cambió
+        // RF-68 · Paso 5: se comparan con lo guardado para saber qué cambió
         List<Parametro> actuales;
         try {
             actuales = configuracionDAO.listar();
@@ -112,11 +114,13 @@ public class ConfiguracionService {
                 bitacora.add(new CambioConfiguracion(nuevo.getClave(), anterior, valorNuevo, idUsuario));
             }
         }
+        // RF-68 · Excepción paso 5: «No hay cambios por guardar».
         if (cambiados.isEmpty()) {
             return ResultadoConfiguracion.correcto(MSG_SIN_CAMBIOS);
         }
 
-        // 4. Se guardan los cambios y su bitácora en una sola transacción
+        // RF-68 · Paso 6: se guardan los cambios y su bitácora en una sola transacción
+        // RF-68 · Excepción paso 6: si algo falla se deshace todo, «No fue posible guardar la configuración».
         Connection conexion = null;
         try {
             conexion = ConexionBD.getInstancia().getConexion();
@@ -136,14 +140,14 @@ public class ConfiguracionService {
             ApoyoMySQL.regresarAutoCommit(conexion);
         }
 
-        // 5. El panel usa los valores nuevos desde ahora
+        // RF-68 · Paso 7: el panel usa los valores nuevos desde ahora
         cargarEnAplicacion();
         return ResultadoConfiguracion.correcto(MSG_GUARDADO + " (" + cambiados.size() + " cambio(s))");
     }
 
     // ===================== Validación de cada parámetro =====================
 
-    // Devuelve el mensaje de error del valor, o null si es válido
+    // RF-68 · Paso 4: devuelve el mensaje de error del valor, o null si es válido
     public String validar(String clave, String valor) {
         String texto = "";
         if (valor != null) {

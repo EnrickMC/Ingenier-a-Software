@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Pestaña "Más vendidos" (RF-47).
+ * Pestaña "Más vendidos" (RF-66).
  * Muestra el top de productos, las ventas por categoría y por opción de personalización,
  * con filtro por categoría y orden por unidades o por utilidad.
  */
@@ -118,7 +118,7 @@ public class MasVendidosController implements PestanaReporte {
     // ===================== Generar =====================
 
     @Override
-    // RF-47 (Generación de reporte de productos más vendidos): inicia aquí la pestaña. Pasos 3 a 7.
+    // RF-66 (Generación de reporte de productos más vendidos): inicia aquí la pestaña. Pasos 3 a 7.
     public boolean generar(LocalDate desde, LocalDate hasta) {
         ApoyoVista.mostrarNodo(cajaError, false);
         int idCategoria = idCategoriaElegida();
@@ -126,7 +126,7 @@ public class MasVendidosController implements PestanaReporte {
         try {
             // Paso 3: la categoría elegida pudo borrarse mientras la pantalla estaba abierta
             if (!servicio.existeCategoria(idCategoria)) {
-                // RF-47 · Excepción paso 3: «La categoría seleccionada ya no existe» y se quita el filtro.
+                // RF-66 · Excepción paso 3: «La categoría seleccionada ya no existe» y se quita el filtro.
                 Alertas.aviso(ReporteService.MSG_CATEGORIA_NO_EXISTE);
                 cargarCategorias();
                 cambiandoFiltros = true;
@@ -139,7 +139,7 @@ public class MasVendidosController implements PestanaReporte {
         } catch (DAOException e) {
             reporte = null;
             limpiar();
-            // RF-47 · Excepción paso 4: «Error de conexión: no fue posible generar el reporte» con «Reintentar».
+            // RF-66 · Excepción paso 4: «Error de conexión: no fue posible generar el reporte» con «Reintentar».
             lblError.setText(ReporteService.MSG_ERROR_CONEXION + "\n" + e.getMessage());
             ApoyoVista.mostrarNodo(cajaError, true);
             return false;
@@ -202,7 +202,7 @@ public class MasVendidosController implements PestanaReporte {
         graficaTop.getData().add(serie);
     }
 
-    // RF-47 · Paso 7: muestra el ranking y el resumen por categoría y personalización.
+    // RF-66 · Paso 7: muestra el ranking y el resumen por categoría y personalización.
     private void mostrarTablas() {
         ObservableList<FilaVenta> productos = FXCollections.observableArrayList();
         int posicion = 1;
@@ -214,7 +214,7 @@ public class MasVendidosController implements PestanaReporte {
         lblConteoProductos.setText(productos.size() + " producto(s)");
         ApoyoVista.mostrarNodo(lblVacioProductos, productos.isEmpty());
         if (productos.isEmpty()) {
-            // RF-47 · Excepción paso 5: «Sin registros de ventas en el periodo».
+            // RF-66 · Excepción paso 5: «Sin registros de ventas en el periodo».
             lblVacioProductos.setText(ReporteService.MSG_SIN_VENTAS);
         }
 

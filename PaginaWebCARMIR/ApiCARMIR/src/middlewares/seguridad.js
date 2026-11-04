@@ -66,40 +66,45 @@ function crearLimitePorMinutos(peticiones, minutos, codigo, mensaje) {
   });
 }
 
-// Minutos que faltan para que se libere el bloqueo (al menos 1)
-function minutosDeEspera(peticion) {
-  let minutos = 1;
+// RF-13 · Excepción paso 5: búsqueda de pedidos. Intentos fallidos permitidos (12) y segundos de espera (30)
+// al llegar al límite
+const INTENTOS_CONSULTA = 12;
+const SEGUNDOS_BLOQUEO_CONSULTA = 30;
+
+// Segundos que faltan para que se libere el bloqueo (al menos 1)
+function segundosDeEspera(peticion) {
+  let segundos = 1;
   if (peticion.rateLimit && peticion.rateLimit.resetTime) {
     const milisegundos = peticion.rateLimit.resetTime.getTime() - Date.now();
-    minutos = Math.ceil(milisegundos / 60000);
+    segundos = Math.ceil(milisegundos / 1000);
   }
-  if (minutos < 1) {
-    minutos = 1;
+  if (segundos < 1) {
+    segundos = 1;
   }
-  return minutos;
+  return segundos;
 }
 
-// RF-12: búsqueda de pedidos. Solo cuentan los intentos FALLIDOS (folio y teléfono que no coinciden);
-// a los 5 fallos se bloquea 15 minutos y se dice cuánto falta (sin decir qué dato falló).
-// RF-12 · Excepción paso 5: búsqueda bloqueada por intentos fallidos; se indica el tiempo de espera.
+// RF-13: búsqueda de pedidos. Solo cuentan los intentos FALLIDOS (folio y teléfono o correo que no coinciden);
+// a los 12 fallos se bloquea 30 segundos y se dice cuánto falta (sin decir qué dato falló).
+// RF-13 · Excepción paso 5: búsqueda bloqueada por intentos fallidos; se indica el tiempo de espera.
 function bloqueoPorIntentos(peticion, respuesta) {
-  const minutos = minutosDeEspera(peticion);
+  const segundos = segundosDeEspera(peticion);
   respuesta.status(429).json({
     codigo: 'BUSQUEDA_BLOQUEADA',
-    mensaje: 'Hiciste demasiados intentos. Espera ' + minutos + ' minuto(s) para volver a buscar tu pedido.',
-    detalles: { minutosEspera: minutos }
+    mensaje: 'Hiciste demasiados intentos. Espera ' + segundos + ' segundos para volver a buscar tu pedido.',
+    detalles: { segundosEspera: segundos }
   });
 }
 
-// Solo es "intento fallido" cuando el folio y el teléfono no coinciden (404).
+// Solo es "intento fallido" cuando el folio y el teléfono (o correo) no coinciden (404).
 // Un error de formato o un monto mal escrito en el comprobante no gasta intentos.
 function noFueIntentoFallido(peticion, respuesta) {
   return respuesta.statusCode !== 404;
 }
 
 const limiteConsultaPedido = limiteDePeticiones({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
+  windowMs: SEGUNDOS_BLOQUEO_CONSULTA * 1000,
+  limit: INTENTOS_CONSULTA,
   skipSuccessfulRequests: true,
   requestWasSuccessful: noFueIntentoFallido,
   standardHeaders: 'draft-7',
@@ -119,7 +124,7 @@ module.exports = {
   // Registrar pedidos: 10 por hora desde la misma conexión (evita pedidos falsos en masa)
   limiteRegistrarPedido: crearLimitePorMinutos(configuracion.servidor.pedidosPorHora, 60, 'DEMASIADOS_PEDIDOS',
     'Hiciste demasiados pedidos seguidos. Espera un momento o comunícate con la repostería.'),
-  // Subir comprobantes: 10 por hora
+  // RF-14 · Excepción paso 5: subir comprobantes, 10 por hora («Hiciste demasiadas solicitudes…»)
   limiteComprobante: crearLimitePorMinutos(10, 60, 'DEMASIADAS_PETICIONES',
     'Hiciste demasiadas solicitudes. Espera un momento e intenta de nuevo.'),
   limiteConsultaPedido: limiteConsultaPedido

@@ -1,7 +1,7 @@
 package com.pac.modulos.usuarios.service;
 
 /**
- * Respuestas posibles cuando alguien intenta abrir un apartado del panel (RNF-15).
+ * Respuestas posibles cuando alguien intenta abrir un apartado del panel (RNF-12).
  */
 public enum ResultadoAcceso {
 

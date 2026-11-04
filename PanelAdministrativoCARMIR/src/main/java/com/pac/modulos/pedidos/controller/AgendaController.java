@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Controlador de la "Agenda de Producción" (agenda.fxml). Módulo 4, RF-30 y RF-31.
+ * Controlador de la "Agenda de Producción" (agenda.fxml). Módulo 4, RF-45 y RF-46.
  *
  * Vistas: día, semana, mes (por defecto) y rango de fechas, con anterior / hoy / siguiente.
  * Cada pedido es una tarjeta con el color de su estado; los atrasados van en rojo y se marcan
@@ -84,14 +84,15 @@ public class AgendaController implements ControladorSeccion {
 
     // El Navegador llama a este método al abrir el apartado
     @Override
-    // RF-30 (Visualización de agenda de producción): inicia aquí. Paso 1: se entra a la agenda (semana actual).
+    // RF-45 (Visualización de agenda de producción): inicia aquí. Paso 1: se entra a la agenda (mes actual).
     public void inicializarSeccion(SeccionPanel seccion) {
         // La primera vista es el mes completo
         btnMes.setSelected(true);
         ApoyoVista.mostrarNodo(cajaRango, false);
         ApoyoVista.mostrarNodo(lblAviso, false);
 
-        // Botones de estado: cada uno filtra el calendario (otra pulsación vuelve a "Todos")
+        // RF-45 · Paso 7: botones de estado, «Atrasado» y «Preparar pronto»; cada uno filtra el calendario
+        // (otra pulsación vuelve a "Todos")
         barraEstados.agregar(EstadoPedido.APROBADO.toString(), EstilosPedidos.textoCorto(EstadoPedido.APROBADO),
                 EstadoPedido.APROBADO.getClaseCss());
         barraEstados.agregar(EstadoPedido.PAGADO.toString(), EstilosPedidos.textoCorto(EstadoPedido.PAGADO),
@@ -163,7 +164,7 @@ public class AgendaController implements ControladorSeccion {
     // ===================== Navegación =====================
 
     @FXML
-    // RF-31 (Filtrar vistas de la agenda por periodo): inicia aquí. Paso 1: elige Día, Semana, Mes o Rango.
+    // RF-46 (Filtrar vistas de la agenda por periodo): inicia aquí. Paso 1: elige Día, Semana, Mes o Rango.
     private void onCambioVista() {
         int nueva = vistaElegida();
         boolean esRango = nueva == AgendaService.VISTA_RANGO;
@@ -210,11 +211,11 @@ public class AgendaController implements ControladorSeccion {
     }
 
     @FXML
-    // RF-31 · Paso 2: aplica el rango personalizado.
+    // RF-46 · Paso 2: aplica el rango personalizado.
     private void onAplicarRango() {
         String error = servicio.validarRango(dpDesde.getValue(), dpHasta.getValue());
         if (error != null) {
-            // RF-31 · Excepción paso 3: fechas inválidas o rango demasiado amplio; no se aplica el filtro.
+            // RF-46 · Excepción paso 3: fechas inválidas o rango demasiado amplio; no se aplica el filtro.
             Alertas.aviso(error);
             return;
         }
@@ -235,7 +236,7 @@ public class AgendaController implements ControladorSeccion {
     }
 
     // Lee la agenda; si falla se conserva el periodo anterior (no se muestra información parcial)
-    // RF-30 pasos 3 y 4 / RF-31 paso 4: consulta los pedidos del periodo.
+    // RF-45 pasos 3 y 4 / RF-46 paso 4: consulta los pedidos del periodo.
     private void cargar(int nuevaVista, LocalDate nuevaReferencia, LocalDate nuevoDesde, LocalDate nuevoHasta) {
         AgendaPeriodo leida;
         try {
@@ -244,11 +245,11 @@ public class AgendaController implements ControladorSeccion {
             System.out.println("Agenda: " + e.getMessage());
             if (agenda == null) {
                 contenedorCalendario.getChildren().clear();
-                // RF-30 · Excepción paso 3: «No fue posible cargar la agenda» con «Reintentar».
+                // RF-45 · Excepción paso 3: «No fue posible cargar la agenda» con «Reintentar».
                 lblVacio.setText(AgendaService.MSG_NO_CARGADA);
                 ApoyoVista.mostrarNodo(cajaVacia, true);
             } else {
-                // RF-31 · Excepción paso 4: sin conexión; se conserva el periodo anterior.
+                // RF-46 · Excepción paso 4: sin conexión; se conserva el periodo anterior.
                 Alertas.error(ApoyoTransaccion.MSG_ERROR_CONEXION + ". Se conserva el periodo anterior.");
             }
             seleccionarBoton(vista);
@@ -274,7 +275,7 @@ public class AgendaController implements ControladorSeccion {
 
     // ===================== Dibujar =====================
 
-    // RF-30 paso 7 / RF-31 paso 6: dibuja el calendario en la vista elegida.
+    // RF-45 paso 7 / RF-46 paso 6: dibuja el calendario en la vista elegida.
     private void dibujar() {
         lblPeriodo.setText(textoPeriodo());
         contenedorCalendario.getChildren().clear();
@@ -287,12 +288,13 @@ public class AgendaController implements ControladorSeccion {
             crearLista();
         }
 
-        // RF-30 · Excepción paso 4 / RF-31 · Excepción paso 5: «Sin pedidos programados para este periodo».
+        // RF-45 · Excepción paso 4 / RF-46 · Excepción paso 5: «Sin pedidos programados para este periodo».
         boolean vacia = contarFiltrados() == 0;
         lblVacio.setText(AgendaService.MSG_SIN_PEDIDOS);
         if (hayFiltro()) {
             lblFiltro.setText(contarFiltrados() + " de " + agenda.getPedidos().size() + " pedido(s) con el filtro");
             if (vacia) {
+                // RF-45 · Excepción paso 7: «Ningún pedido cumple el filtro de este periodo».
                 lblVacio.setText("Ningún pedido cumple el filtro de este periodo");
             }
         } else {
@@ -305,7 +307,7 @@ public class AgendaController implements ControladorSeccion {
         }
 
         // Avisos y panel lateral
-        // RF-30 · Excepción paso 5: pedidos en «Pedidos con datos por revisar».
+        // RF-45 · Excepción paso 5: pedidos en «Pedidos con datos por revisar».
         if (!agenda.getPorRevisar().isEmpty()) {
             lblAviso.setText(AgendaService.MSG_INFO_INCOMPLETA + " (" + agenda.getPorRevisar().size()
                     + "). Están en «Pedidos con datos por revisar».");
@@ -445,7 +447,7 @@ public class AgendaController implements ControladorSeccion {
     private VBox crearTarjeta(Pedido pedido, boolean completa) {
         VBox tarjeta = new VBox(2);
         tarjeta.getStyleClass().add("agenda-tarjeta");
-        // RF-30 · Paso 6: color por estado del pedido.
+        // RF-45 · Paso 6: color por estado del pedido.
         EstilosPedidos.aplicarClase(tarjeta, pedido.getEstado().getClaseCss());
         tarjeta.getStyleClass().remove(EstilosPedidos.ESTILO_BASE);
 
@@ -466,7 +468,7 @@ public class AgendaController implements ControladorSeccion {
         }
 
         FlowPane marcas = new FlowPane(4, 4);
-        // RF-30 · Excepción paso 6: entrega vencida, se resalta en rojo como «Atrasado».
+        // RF-45 · Excepción paso 6: entrega vencida, se resalta en rojo como «Atrasado».
         if (pedido.isAtrasado()) {
             tarjeta.getStyleClass().add("tarjeta-atrasada");
             marcas.getChildren().add(EstilosPedidos.crearEtiqueta("Atrasado", EstilosPedidos.ATRASADO));
@@ -487,7 +489,7 @@ public class AgendaController implements ControladorSeccion {
     }
 
     // Resumen: número de pedidos, atrasados, datos por revisar e insumos estimados
-    // RF-30 · Paso 8: resumen del pedido seleccionado.
+    // RF-45 · Paso 7: resumen del periodo (pedidos, pendientes de pago, atrasados, datos por revisar e insumos).
     private void llenarResumen() {
         lblResumen.setText(agenda.getPedidos().size() + " pedido(s) programado(s)\n"
                 + agenda.contarPendientesDePago() + " pendiente(s) de pago\n"
@@ -547,11 +549,12 @@ public class AgendaController implements ControladorSeccion {
         lista.getChildren().add(linea);
     }
 
-    // Abre el detalle; si el pedido ya no existe o fue cancelado se avisa y se actualiza la agenda
+    // RF-45 · Paso 8: abre el pedido en Gestión de Pedidos (o en una ventana sin el permiso «Gestionar pedidos»);
+    // si el pedido ya no existe o fue cancelado se avisa y se actualiza la agenda
     private void abrirPedido(int folio) {
         try {
             if (!pedidoService.sigueDisponible(folio)) {
-                // RF-30 · Excepción paso 8: «El pedido ya no está disponible» y se actualiza el calendario.
+                // RF-45 · Excepción paso 8: «El pedido ya no está disponible» y se actualiza el calendario.
                 Alertas.aviso(PedidoService.MSG_YA_NO_DISPONIBLE);
                 onActualizar();
                 return;

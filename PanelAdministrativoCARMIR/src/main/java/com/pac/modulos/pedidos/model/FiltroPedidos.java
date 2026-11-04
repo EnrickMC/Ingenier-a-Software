@@ -3,7 +3,7 @@ package com.pac.modulos.pedidos.model;
 import java.time.LocalDate;
 
 /**
- * Criterios de búsqueda de la lista de pedidos (RF-21, RF-22).
+ * Criterios de búsqueda de la lista de pedidos (RF-36, RF-37).
  */
 public class FiltroPedidos {
 

@@ -14,8 +14,8 @@ import com.pac.util.Formatos;
 import java.util.List;
 
 /**
- * Reglas de las recetas: Visualización (RF-41), Registro (RF-42),
- * Modificación (RF-43) y Eliminación (RF-44).
+ * Reglas de las recetas: Visualización (RF-55), Registro (RF-56),
+ * Modificación (RF-57) y Eliminación (RF-58).
  *
  * Cada opción del catálogo tiene como máximo una receta. Cuando la receta está activa,
  * el catálogo calcula con ella el costo y el precio de la opción y de los productos.
@@ -58,9 +58,9 @@ public class RecetaService {
         insumoDAO = DAOFactory.crearInsumoDAO();
     }
 
-    // ===================== Consultas (Visualización RF-41) =====================
+    // ===================== Consultas (Visualización RF-55) =====================
 
-    // RF-41 (Visualización de recetas): inicia aquí. Paso 2: consulta las opciones que ya tienen receta.
+    // RF-55 (Visualización de recetas): inicia aquí. Paso 2: consulta las opciones que ya tienen receta.
     public List<Receta> listar(boolean incluirInactivas) throws DAOException {
         return recetaDAO.listar(incluirInactivas);
     }
@@ -80,13 +80,13 @@ public class RecetaService {
         return insumoDAO.listar(false);
     }
 
-    // RF-42 paso 2: opciones disponibles que aún no tienen receta activa
+    // RF-56 · Paso 2: opciones disponibles de características que permiten receta y que aún no tienen receta activa
     public List<OpcionReceta> listarOpcionesSinReceta() throws DAOException {
         return recetaDAO.listarOpcionesSinRecetaActiva();
     }
 
     // true si la receta coincide con el texto (nombre, opción, característica, categoría o insumo)
-    // RF-41 · Paso 4: búsqueda. Excepción: si nada coincide, «No hay recetas que coincidan con la búsqueda».
+    // RF-55 · Paso 4: búsqueda. Excepción: si nada coincide, «No hay recetas que coincidan con la búsqueda».
     public boolean coincide(Receta receta, String texto) {
         if (texto == null || texto.isBlank()) {
             return true;
@@ -97,7 +97,7 @@ public class RecetaService {
     }
 
     // Costo = suma de cantidad × costo unitario de cada insumo (igual que vw_CostoReceta)
-    // RF-41 paso 6 y RF-42/RF-43 paso 7: costo estimado de la receta.
+    // RF-55 paso 6 y RF-56/RF-57 paso 7: costo estimado de la receta.
     public static double calcularCosto(List<IngredienteReceta> ingredientes) {
         double total = 0;
         for (IngredienteReceta ingrediente : ingredientes) {
@@ -106,27 +106,27 @@ public class RecetaService {
         return Math.round(total * 100) / 100.0;
     }
 
-    // ===================== Registro (RF-42) =====================
+    // ===================== Registro (RF-56) =====================
 
     // Paso 2: antes de abrir el formulario debe haber opciones sin receta
-    // RF-42 (Registro de nueva receta): inicia aquí la regla de negocio.
+    // RF-56 (Registro de nueva receta): inicia aquí la regla de negocio.
     public ResultadoInventario revisarParaAlta() {
         if (!PermisosInventario.puedeEditarRecetas()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
         }
         try {
             if (recetaDAO.listarOpcionesSinRecetaActiva().isEmpty()) {
-                // RF-42 · Excepción paso 2: «No hay opciones pendientes de receta».
+                // RF-56 · Excepción paso 2: «No hay opciones pendientes de receta».
                 return ResultadoInventario.error(MSG_SIN_OPCIONES, null);
             }
             return ResultadoInventario.correcto("");
         } catch (DAOException e) {
-            // RF-42 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-56 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
 
-    // RF-42 · Pasos 5 a 8: valida y guarda la receta nueva.
+    // RF-56 · Pasos 5 a 8: valida y guarda la receta nueva.
     public ResultadoInventario registrar(Receta datos) {
         if (!PermisosInventario.puedeEditarRecetas()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -135,7 +135,7 @@ public class RecetaService {
             return ResultadoInventario.error(MSG_ELIGE_OPCION, ResultadoInventario.CAMPO_OPCION);
         }
         ResultadoInventario validacion = validarCampos(datos);
-        // RF-42 · Excepción paso 5: datos incompletos o insumos inválidos; se resalta el error.
+        // RF-56 · Excepción paso 5: datos incompletos o insumos inválidos; se resalta el error.
         if (validacion != null) {
             return validacion;
         }
@@ -145,21 +145,21 @@ public class RecetaService {
             // Paso 6: la opción sigue activa y no tiene receta activa
             OpcionReceta opcion = recetaDAO.buscarOpcion(datos.getIdOpcion());
             if (opcion == null || !opcion.isDisponible()) {
-                // RF-42 · Excepción paso 6: «La opción ya no está disponible».
+                // RF-56 · Excepción paso 6: «La opción ya no está disponible».
                 return ResultadoInventario.error(MSG_OPCION_NO_DISPONIBLE, ResultadoInventario.CAMPO_OPCION);
             }
             if (!opcion.isPermiteReceta()) {
-                // La característica está marcada como «sin receta» en el catálogo.
+                // RF-56 · Excepción paso 6: la característica está marcada como «sin receta» en el catálogo.
                 return ResultadoInventario.error(MSG_OPCION_SIN_RECETA, ResultadoInventario.CAMPO_OPCION);
             }
             existente = recetaDAO.buscarPorOpcion(datos.getIdOpcion());
             if (existente != null && existente.isActiva()) {
-                // RF-42 · Excepción paso 6: «Esta opción ya tiene una receta registrada»; se ofrece consultarla.
+                // RF-56 · Excepción paso 6: «Esta opción ya tiene una receta registrada»; se ofrece consultarla.
                 return ResultadoInventario.existente(MSG_OPCION_CON_RECETA, existente.getIdReceta(),
                         ResultadoInventario.CAMPO_OPCION);
             }
             ResultadoInventario insumos = revisarInsumosActivos(datos);
-            // RF-42 · Excepción paso 6: «El insumo ya no está disponible»; se quita de la receta.
+            // RF-56 · Excepción paso 6: «El insumo ya no está disponible»; se quita de la receta.
             if (insumos != null) {
                 return insumos;
             }
@@ -177,7 +177,7 @@ public class RecetaService {
                 recetaDAO.insertar(datos);
             }
         } catch (DAOException e) {
-            // RF-42 · Excepción paso 7: «No fue posible registrar la receta».
+            // RF-56 · Excepción paso 7: «No fue posible registrar la receta».
             return ResultadoInventario.error(MSG_NO_REGISTRADA, ResultadoInventario.CAMPO_CONEXION);
         }
 
@@ -192,10 +192,10 @@ public class RecetaService {
         return resultado;
     }
 
-    // ===================== Modificación (RF-43) =====================
+    // ===================== Modificación (RF-57) =====================
 
     // Paso 2: la receta existe y está activa
-    // RF-43 (Modificación de receta): inicia aquí. Paso 2: la receta existe y está activa.
+    // RF-57 (Modificación de receta): inicia aquí. Paso 2: la receta existe y está activa.
     public ResultadoInventario revisarParaModificar(int idReceta) {
         if (!PermisosInventario.puedeEditarRecetas()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -203,23 +203,23 @@ public class RecetaService {
         try {
             Receta receta = recetaDAO.buscarPorId(idReceta);
             if (receta == null || !receta.isActiva()) {
-                // RF-43 · Excepción paso 2: «La receta ya no está disponible».
+                // RF-57 · Excepción paso 2: «La receta ya no está disponible».
                 return ResultadoInventario.noEncontrado(MSG_NO_DISPONIBLE);
             }
             return ResultadoInventario.correcto("");
         } catch (DAOException e) {
-            // RF-43 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-57 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
 
-    // RF-43 · Pasos 5 a 8: valida y actualiza la receta.
+    // RF-57 · Pasos 5 a 8: valida y actualiza la receta.
     public ResultadoInventario modificar(Receta datos) {
         if (!PermisosInventario.puedeEditarRecetas()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
         }
         ResultadoInventario validacion = validarCampos(datos);
-        // RF-43 · Excepción paso 5: datos incompletos o insumos inválidos.
+        // RF-57 · Excepción paso 5: datos incompletos o insumos inválidos.
         if (validacion != null) {
             return validacion;
         }
@@ -227,12 +227,12 @@ public class RecetaService {
             // Paso 6: la receta sigue existiendo y los insumos siguen activos
             Receta actual = recetaDAO.buscarPorId(datos.getIdReceta());
             if (actual == null || !actual.isActiva()) {
-                // RF-43 · Excepción paso 6: «La receta ya no existe».
+                // RF-57 · Excepción paso 6: «La receta ya no existe».
                 return ResultadoInventario.noEncontrado(MSG_YA_NO_EXISTE);
             }
             datos.setIdOpcion(actual.getIdOpcion());
             ResultadoInventario insumos = revisarInsumosActivos(datos);
-            // RF-43 · Excepción paso 6: «El insumo ya no está disponible»; se quita de la receta.
+            // RF-57 · Excepción paso 6: «El insumo ya no está disponible»; se quita de la receta.
             if (insumos != null) {
                 return insumos;
             }
@@ -243,20 +243,20 @@ public class RecetaService {
         try {
             recetaDAO.actualizar(datos);
         } catch (DAOException e) {
-            // RF-43 · Excepción paso 7: «No fue posible actualizar la receta».
+            // RF-57 · Excepción paso 7: «No fue posible actualizar la receta».
             return ResultadoInventario.error(MSG_NO_ACTUALIZADA, ResultadoInventario.CAMPO_CONEXION);
         }
-        // RF-43 · Paso 8: informa el éxito y el nuevo costo estimado.
+        // RF-57 · Paso 8: informa el éxito y el nuevo costo estimado.
         return ResultadoInventario.correcto("La receta «" + datos.getNombre() + "» se actualizó. Costo estimado: "
                 + Formatos.moneda(calcularCosto(datos.getIngredientes()))
                 + ".\nSe aplicará a los pedidos que entren a preparación; los que ya están en preparación"
                 + " conservan su descuento.");
     }
 
-    // ===================== Baja (RF-44) =====================
+    // ===================== Baja (RF-58) =====================
 
     // Pasos 2 a 4: revisa si se puede dar de baja y arma el mensaje de confirmación
-    // RF-44 (Eliminación de receta): inicia aquí.
+    // RF-58 (Eliminación de receta): inicia aquí.
     public ResultadoInventario prepararBaja(int idReceta) {
         if (!PermisosInventario.puedeEditarRecetas()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -264,20 +264,20 @@ public class RecetaService {
         try {
             Receta receta = recetaDAO.buscarPorId(idReceta);
             if (receta == null || !receta.isActiva()) {
-                // RF-44 · Excepción paso 2: «La receta ya no está disponible».
+                // RF-58 · Excepción paso 2: «La receta ya no está disponible».
                 return ResultadoInventario.noEncontrado(MSG_NO_DISPONIBLE);
             }
 
             // Paso 3: pedidos pendientes de preparar con esa opción
             List<Integer> folios = recetaDAO.listarFoliosPorPreparar(receta.getIdOpcion());
             if (!folios.isEmpty()) {
-                // RF-44 · Excepción paso 3: «La receta se necesita para pedidos en curso» con los folios.
+                // RF-58 · Excepción paso 3: «La receta se necesita para pedidos en curso» con los folios.
                 return ResultadoInventario.error(MSG_EN_PEDIDOS + ": " + ValidacionCatalogo.unirFolios(folios), null);
             }
 
             String mensaje = "Receta: " + receta.getNombre() + "\nOpción: " + receta.getDescripcionOpcion()
                     + "\n\nUna receta dada de baja ya no descuenta insumos del inventario.";
-            // RF-44 · Excepción paso 4: la opción sigue a la venta; se avisa que no descontará insumos.
+            // RF-58 · Excepción paso 4: la opción sigue a la venta; se avisa que no descontará insumos.
             if (receta.isOpcionDisponible()) {
                 mensaje = mensaje + "\n\nAVISO: la opción sigue disponible para los clientes. Sus próximos pedidos"
                         + " no descontarán insumos y en el catálogo su precio aparecerá como «Sin receta».";
@@ -291,10 +291,10 @@ public class RecetaService {
                 mensaje = mensaje + "\n\nLa opción no se ha usado en pedidos, así que la receta se ELIMINARÁ."
                         + " Esta acción no se puede deshacer.";
             }
-            // RF-44 · Paso 4: mensaje de confirmación.
+            // RF-58 · Paso 4: mensaje de confirmación.
             return ResultadoInventario.bajaPosible(mensaje, !enPedidos);
         } catch (DAOException e) {
-            // RF-44 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-58 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
@@ -306,7 +306,7 @@ public class RecetaService {
             return revision;
         }
         try {
-            // RF-44 · Paso 6: inhabilita la receta (o la elimina si nunca se usó).
+            // RF-58 · Paso 6: inhabilita la receta (o la elimina si nunca se usó).
             if (revision.isSeEliminara()) {
                 recetaDAO.eliminar(idReceta);
                 return ResultadoInventario.correcto("La receta se eliminó correctamente");
@@ -314,7 +314,7 @@ public class RecetaService {
             recetaDAO.inhabilitar(idReceta);
             return ResultadoInventario.correcto("La receta se dio de baja (inhabilitada) correctamente");
         } catch (DAOException e) {
-            // RF-44 · Excepción paso 6: «No fue posible dar de baja la receta».
+            // RF-58 · Excepción paso 6: «No fue posible dar de baja la receta».
             return ResultadoInventario.error(MSG_NO_DADA_DE_BAJA, null);
         }
     }
@@ -333,7 +333,7 @@ public class RecetaService {
             return ResultadoInventario.error(MSG_PASOS_VACIOS, ResultadoInventario.CAMPO_PASOS);
         }
         List<IngredienteReceta> ingredientes = datos.getIngredientes();
-        // RF-42 / RF-43 · Excepción paso 5: debe haber al menos un insumo con cantidad mayor a cero.
+        // RF-56 / RF-57 · Excepción paso 5: debe haber al menos un insumo con cantidad mayor a cero.
         if (ingredientes.isEmpty()) {
             return ResultadoInventario.error(MSG_SIN_INGREDIENTES, ResultadoInventario.CAMPO_INGREDIENTES);
         }
@@ -344,7 +344,7 @@ public class RecetaService {
                         ResultadoInventario.CAMPO_INGREDIENTES);
             }
             for (int j = i + 1; j < ingredientes.size(); j++) {
-                // RF-42 / RF-43 · Excepción paso 5: insumo repetido.
+                // RF-56 / RF-57 · Excepción paso 5: insumo repetido.
                 if (ingredientes.get(j).getIdInsumo() == ingrediente.getIdInsumo()) {
                     return ResultadoInventario.error(MSG_INGREDIENTE_REPETIDO + ": " + ingrediente.getNombreInsumo(),
                             ResultadoInventario.CAMPO_INGREDIENTES);
@@ -357,7 +357,7 @@ public class RecetaService {
         return null;
     }
 
-    // RF-42 / RF-43 paso 6: cada insumo de la receta debe seguir activo.
+    // RF-56 / RF-57 paso 6: cada insumo de la receta debe seguir activo.
     // Si alguno no, se devuelve el error con su id para que el formulario lo quite.
     private ResultadoInventario revisarInsumosActivos(Receta datos) throws DAOException {
         for (IngredienteReceta ingrediente : datos.getIngredientes()) {

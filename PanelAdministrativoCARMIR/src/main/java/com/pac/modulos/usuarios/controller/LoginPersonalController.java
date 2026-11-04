@@ -33,14 +33,15 @@ public class LoginPersonalController {
 
     // Botón "Ingresar" o Enter en la contraseña
     @FXML
-    // RNF-15 · Paso 1: el Personal inicia sesión con usuario y contraseña.
+    // RNF-14 · Paso 1: el Personal inicia sesión con usuario y contraseña.
+    // (Pantalla anterior: Vista.LOGIN_PERSONAL ahora abre bloqueo.fxml, el inicio de sesión único.)
     private void onIngresar() {
         ocultarMensaje();
         String usuario = txtUsuario.getText();
         String contrasena = pwdContrasena.getText();
         ResultadoAutenticacion resultado = autenticacion.iniciarSesionPersonal(usuario, contrasena);
 
-        // RNF-15 · Excepciones paso 2 y 3: credenciales, cuenta inactiva o bloqueada, sin permisos o sin conexión.
+        // RNF-14 · Excepciones pasos 2 a 6: credenciales, cuenta inactiva o bloqueada, sin permisos o sin conexión.
         if (!resultado.isExitoso()) {
             mostrarMensaje(resultado.getMensaje());
             pwdContrasena.clear();

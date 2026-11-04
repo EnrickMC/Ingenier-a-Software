@@ -59,7 +59,7 @@ function manejarErrores(error, peticion, respuesta, siguiente) {
     return;
   }
   if (error && error.type === 'entity.too.large') {
-    // RF-12 · Excepción: la foto o PDF del comprobante es demasiado grande
+    // RF-14 · Excepción paso 4: la foto o PDF del comprobante es demasiado grande
     if (peticion.originalUrl.indexOf('/comprobante') >= 0) {
       const mensaje = 'El archivo pesa más de 5 MB. Toma una foto más ligera o recórtala.';
       respuesta.status(413).json({
@@ -78,7 +78,7 @@ function manejarErrores(error, peticion, respuesta, siguiente) {
   console.error('[ERROR ' + referencia + '] ' + peticion.method + ' ' + peticion.originalUrl);
   console.error(error);
 
-  // Excepción «sin conexión con la base de datos» (RF-1, RF-2, RF-3, RF-4, RF-5, RF-11, RF-12 paso 2): responde 503.
+  // Excepción «sin conexión con la base de datos» (RF-1, RF-2, RF-3, RF-4, RF-6, RF-12, RF-13 paso 2, RF-14 paso 5): responde 503.
   if (esErrorDeConexion(error)) {
     respuesta.status(503).json({
       codigo: 'SIN_CONEXION_BD',

@@ -65,17 +65,17 @@ public class ModificacionPedidoService {
     }
 
     // Motivo por el que el pedido no se puede modificar, o null si sí se puede
-    // RF «Modificación de pedidos» · Paso 2: revisa si el pedido se puede modificar.
+    // RF-34 · Paso 2: revisa si el pedido se puede modificar.
     public String motivoNoModificable(Pedido pedido) {
         if (!PermisosPedidos.esAdministradora()) {
             return PermisosPedidos.MSG_SOLO_ADMINISTRADORA;
         }
         if (pedido.isCancelado() || pedido.isDadoDeBaja()) {
-            // RF «Modificación de pedidos» · Excepción paso 2: «Este pedido ya no admite cambios».
+            // RF-34 · Excepción paso 2: «Este pedido ya no admite cambios».
             return MSG_NO_ADMITE_CAMBIOS;
         }
         if (!pedido.getEstado().esAnteriorA(EstadoPedido.EN_PREPARACION)) {
-            // RF «Modificación de pedidos» · Excepción paso 2: el pedido ya entró a producción.
+            // RF-34 · Excepción paso 2: el pedido ya entró a producción.
             return MSG_YA_EN_PRODUCCION;
         }
         return null;
@@ -85,7 +85,7 @@ public class ModificacionPedidoService {
      * Lee el pedido para el formulario: el detalle completo y las opciones de cada postre
      * (para poder cambiar su personalización).
      */
-    // RF «Modificación de pedidos»: inicia aquí. Pasos 2 y 3: lee el pedido para mostrar el formulario.
+    // RF-34 (Modificación de pedidos): inicia aquí. Pasos 2 y 3: lee el pedido para mostrar el formulario.
     public ResultadoPedido prepararModificacion(int folio) {
         ResultadoPedido lectura = pedidoService.cargarDetalle(folio);
         if (!lectura.isExitoso()) {
@@ -104,7 +104,7 @@ public class ModificacionPedidoService {
                 }
             }
         } catch (DAOException e) {
-            // RF «Modificación de pedidos» · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-34 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             return ResultadoPedido.error(ApoyoTransaccion.MSG_ERROR_CONEXION, ResultadoPedido.CAMPO_CONEXION);
         }
         return lectura;
@@ -120,10 +120,10 @@ public class ModificacionPedidoService {
      * cuya personalización cambió y el nuevo total y anticipo.
      * Si todo está bien, el mensaje trae el resumen "antes → después" y los avisos de pagos.
      */
-    // RF «Modificación de pedidos» · Pasos 5 a 7: valida los cambios y recalcula el total.
+    // RF-34 · Pasos 5 a 7: valida los cambios y recalcula el total.
     public ResultadoPedido revisarCambios(Pedido original, Pedido cambios) {
         ResultadoPedido error = validarDatos(original, cambios);
-        // RF «Modificación de pedidos» · Excepción paso 5: datos inválidos; se resalta el campo.
+        // RF-34 · Excepción paso 5: datos inválidos; se resalta el campo.
         if (error != null) {
             return error;
         }
@@ -132,12 +132,12 @@ public class ModificacionPedidoService {
         } catch (DAOException e) {
             return ResultadoPedido.error(ApoyoTransaccion.MSG_ERROR_CONEXION, ResultadoPedido.CAMPO_CONEXION);
         }
-        // RF «Modificación de pedidos» · Excepción paso 6: opciones no disponibles o incompatibles.
+        // RF-34 · Excepción paso 6: opciones no disponibles o incompatibles.
         if (error != null) {
             return error;
         }
 
-        // RF «Modificación de pedidos» · Paso 7: nuevo total y anticipo.
+        // RF-34 · Paso 7: nuevo total y anticipo.
         // Nuevo total y anticipo (se conserva la proporción del anticipo original)
         double total = 0;
         for (LineaPedido linea : cambios.getLineas()) {
@@ -171,7 +171,7 @@ public class ModificacionPedidoService {
             if (cambios.getFechaEntrega() != null && !cambios.getFechaEntrega().equals(original.getFechaEntrega())) {
                 int carga = pedidoService.cargaDelDia(cambios.getFechaEntrega(), original.getFolio());
                 if (carga >= ConfiguracionApp.getInstancia().getCapacidadDiaria()) {
-                    // RF-23 · Excepción paso 5: «Agenda saturada para esa fecha» en la nueva fecha.
+                    // RF-33 · Excepción paso 5: «Agenda saturada para esa fecha» en la nueva fecha.
                     resultado.agregarAviso(PedidoService.MSG_AGENDA_SATURADA + ".");
                 }
             }
@@ -185,7 +185,7 @@ public class ModificacionPedidoService {
     /**
      * Guarda la modificación en una sola transacción y avisa al cliente.
      */
-    // RF «Modificación de pedidos» · Pasos 9 a 11: guarda los cambios (después de que la administradora confirma, paso 8).
+    // RF-34 · Pasos 9 a 11: guarda los cambios (después de que la administradora confirma, paso 8).
     public ResultadoPedido modificar(Pedido original, Pedido cambios) {
         String motivo = motivoNoModificable(original);
         if (motivo != null) {
@@ -220,7 +220,7 @@ public class ModificacionPedidoService {
             String impedimento = motivoNoModificable(actual);
             if (impedimento != null) {
                 ApoyoTransaccion.deshacer(conexion);
-                // RF «Modificación de pedidos» · Excepción paso 9: el pedido fue actualizado por otro usuario; se recarga.
+                // RF-34 · Excepción paso 9: el pedido fue actualizado por otro usuario; se recarga.
                 return ResultadoPedido.recargar(impedimento);
             }
 
@@ -256,17 +256,17 @@ public class ModificacionPedidoService {
                 pedidoDAO.reemplazarLineas(conexion, actual.getFolio(), cambios.getLineas());
             }
 
-            // RF «Modificación de pedidos» · Paso 9: registra en el historial qué cambió, la fecha y el usuario.
+            // RF-34 · Paso 9: registra en el historial qué cambió, la fecha y el usuario.
             // 5. Bitácora de la modificación
             bitacoraDAO.registrarModificacion(conexion, actual.getFolio(), PermisosPedidos.idUsuarioSesion(),
                     textos[0], textos[1]);
             conexion.commit();
         } catch (DAOException e) {
-            // RF «Modificación de pedidos» · Excepción paso 9: se deshace la operación, «No fue posible modificar el pedido».
+            // RF-34 · Excepción paso 9: se deshace la operación, «No fue posible modificar el pedido».
             ApoyoTransaccion.deshacer(conexion);
             return ResultadoPedido.error(ApoyoTransaccion.mensajeFallo(MSG_NO_MODIFICADO, e), null);
         } catch (SQLException e) {
-            // RF «Modificación de pedidos» · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-34 · Excepción paso 2: sin conexión, «Error de conexión».
             ApoyoTransaccion.deshacer(conexion);
             return ResultadoPedido.error(ApoyoTransaccion.MSG_ERROR_CONEXION, ResultadoPedido.CAMPO_CONEXION);
         } finally {
@@ -285,7 +285,7 @@ public class ModificacionPedidoService {
 
     // ===================== Validaciones =====================
 
-    // RF «Modificación de pedidos» · Paso 5: campos obligatorios, fecha futura y formato de teléfono y correo.
+    // RF-34 · Paso 5: campos obligatorios, fecha futura y formato de teléfono y correo.
     private ResultadoPedido validarDatos(Pedido original, Pedido cambios) {
         // Cliente
         Cliente cliente = cambios.getCliente();
@@ -377,7 +377,7 @@ public class ModificacionPedidoService {
      * Para cada postre con la personalización cambiada: valida las opciones con ConfiguracionPostre,
      * calcula su precio y costo y busca si ya existe un postre con esa configuración.
      */
-    // RF «Modificación de pedidos» · Paso 6: valida la personalización (opciones, exclusiones y presupuesto).
+    // RF-34 · Paso 6: valida la personalización (opciones, exclusiones y presupuesto).
     private ResultadoPedido prepararLineas(Pedido cambios) throws DAOException {
         List<String> claves = new ArrayList<String>();
         for (LineaPedido linea : cambios.getLineas()) {
@@ -551,7 +551,7 @@ public class ModificacionPedidoService {
     }
 
     // Avisos de pagos después del cambio de total
-    // RF «Modificación de pedidos» · Excepciones paso 7: reembolso pendiente o anticipo sin cubrir con el nuevo total.
+    // RF-34 · Excepciones paso 7: reembolso pendiente o anticipo sin cubrir con el nuevo total.
     private void agregarAvisosDePago(ResultadoPedido resultado, Pedido original, Pedido cambios) {
         double diferencia = PedidoService.redondear(cambios.getMontoTotal() - original.getMontoTotal());
         if (Math.abs(diferencia) < 0.005) {

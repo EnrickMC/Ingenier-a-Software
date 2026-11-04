@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Módulo 6 · Reportes Financieros: ingresos y gastos (RF-46), más vendidos (RF-47) y exportación (RF-48) -->
+<!-- Módulo 6 · Reportes Financieros: ingresos y gastos (RF-65), más vendidos (RF-66) y exportación (RF-67) -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.reportes.controller.ReportesController"
       stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/reportes.css"

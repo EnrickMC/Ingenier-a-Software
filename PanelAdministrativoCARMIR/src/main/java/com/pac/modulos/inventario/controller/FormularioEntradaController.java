@@ -23,7 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Ventana "Registrar compra / entrada" (RF-37) (formulario-entrada.fxml).
+ * Ventana "Registrar compra / entrada" (RF-59) (formulario-entrada.fxml).
  */
 public class FormularioEntradaController {
 
@@ -56,13 +56,13 @@ public class FormularioEntradaController {
      * Llena el selector con los insumos activos y elige el indicado (puede ser null).
      * Devuelve false si no hubo conexión o no hay insumos.
      */
-    // RF-37 (Registro de entrada de insumos): inicia aquí en la pantalla. Paso 3: muestra el formulario de compra.
+    // RF-59 (Registro de entrada de insumos): inicia aquí en la pantalla. Paso 3: muestra el formulario de compra.
     public boolean preparar(Insumo insumo) {
         List<Insumo> activos;
         try {
             activos = new InsumoService().listar(false);
         } catch (DAOException e) {
-            // RF-37 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-59 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             Alertas.error(InventarioService.MSG_ERROR_CONEXION);
             return false;
         }
@@ -127,7 +127,7 @@ public class FormularioEntradaController {
     }
 
     @FXML
-    // RF-37 · Paso 4: la persona elige «Registrar».
+    // RF-59 · Paso 4: la persona elige «Registrar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
@@ -138,7 +138,7 @@ public class FormularioEntradaController {
             return;
         }
         if (!ValidacionCatalogo.esDecimal(txtCantidad.getText())) {
-            // RF-37 · Excepción paso 5: cantidad o costo sin capturar o no mayores a cero.
+            // RF-59 · Excepción paso 5: cantidad o costo sin capturar o no mayores a cero.
             mostrarError(InventarioService.MSG_CANTIDAD_INVALIDA, txtCantidad);
             return;
         }
@@ -156,12 +156,12 @@ public class FormularioEntradaController {
         datos.setProveedor(txtProveedor.getText());
 
         ResultadoInventario resultado = servicio.registrarEntrada(datos);
-        // RF-37 · Paso 9: informa el éxito y la nueva existencia.
+        // RF-59 · Paso 9: informa el éxito y la nueva existencia.
         if (resultado.isExitoso()) {
             guardado = true;
             String mensaje = resultado.getMensaje();
             if (resultado.getAviso() != null) {
-                // RF-37 · Excepción paso 8: el lote está próximo a caducar, se muestra el aviso.
+                // RF-59 · Excepción paso 8: el lote está próximo a caducar, se muestra el aviso.
                 Alertas.aviso(mensaje + "\n\n" + resultado.getAviso());
             } else {
                 Alertas.info(mensaje);
@@ -171,7 +171,7 @@ public class FormularioEntradaController {
             return;
         }
         if (resultado.isRecargarLista()) {
-            // RF-37 · Excepción pasos 5 y 6: se muestra el error y no se registra la entrada.
+            // RF-59 · Excepción pasos 5 y 6: se muestra el error y no se registra la entrada.
             Alertas.aviso(resultado.getMensaje());
             recargarLista = true;
             cerrar();
@@ -220,7 +220,7 @@ public class FormularioEntradaController {
     }
 
     @FXML
-    // RF-37 · Excepción paso 4: «Cancelar» descarta los datos; la existencia no cambia.
+    // RF-59 · Excepción paso 4: «Cancelar» descarta los datos; la existencia no cambia.
     private void onCancelar() {
         cerrar();
     }

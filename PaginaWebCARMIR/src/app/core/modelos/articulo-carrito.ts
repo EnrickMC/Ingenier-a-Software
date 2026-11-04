@@ -18,6 +18,8 @@ export interface ArticuloCarrito {
   opciones: OpcionDelArticulo[];
   cantidad: number;
   dedicatoria: string;
+  // ¿El mensaje va en un topper (letrero de pie)? Los carritos guardados antes no lo tienen (= no)
+  mensajeEnTopper?: boolean;
   comentario: string;
   // Precio de una pieza confirmado por la API (se actualiza si cambia en la base de datos)
   precioUnitario: number;

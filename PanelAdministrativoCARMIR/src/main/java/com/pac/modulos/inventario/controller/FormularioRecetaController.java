@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ventana "Registrar receta" (RF-42) / "Modificar receta" (RF-43) (formulario-receta.fxml).
+ * Ventana "Registrar receta" (RF-56) / "Modificar receta" (RF-57) (formulario-receta.fxml).
  * El costo y el precio base se recalculan en vivo al agregar o quitar ingredientes.
  */
 public class FormularioRecetaController {
@@ -70,7 +70,7 @@ public class FormularioRecetaController {
      * Receta nueva. Si idOpcion es mayor a cero, esa opción queda elegida.
      * Devuelve false si no se puede abrir (sin conexión, sin opciones o sin insumos).
      */
-    // RF-42 · Pasos 2 y 3: carga las opciones sin receta y muestra el formulario.
+    // RF-56 · Pasos 2 y 3: carga las opciones sin receta y muestra el formulario.
     public boolean prepararNueva(int idOpcion) {
         editada = null;
         lblTitulo.setText("Registrar receta");
@@ -80,12 +80,12 @@ public class FormularioRecetaController {
         try {
             opciones = servicio.listarOpcionesSinReceta();
         } catch (DAOException e) {
-            // RF-42 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-56 · Excepción paso 2: sin conexión, «Error de conexión».
             Alertas.error(RecetaService.MSG_ERROR_CONEXION);
             return false;
         }
         if (opciones.isEmpty()) {
-            // RF-42 · Excepción paso 2: «No hay opciones pendientes de receta».
+            // RF-56 · Excepción paso 2: «No hay opciones pendientes de receta».
             Alertas.aviso(RecetaService.MSG_SIN_OPCIONES);
             return false;
         }
@@ -114,7 +114,7 @@ public class FormularioRecetaController {
     }
 
     // Receta existente: la opción no se puede cambiar
-    // RF-43 · Paso 3: muestra el formulario con los datos actuales de la receta.
+    // RF-57 · Paso 3: muestra el formulario con los datos actuales de la receta.
     public boolean prepararEdicion(Receta receta) {
         Receta actual;
         try {
@@ -124,7 +124,7 @@ public class FormularioRecetaController {
             return false;
         }
         if (actual == null || !actual.isActiva()) {
-            // RF-43 · Excepción paso 2: «La receta ya no está disponible».
+            // RF-57 · Excepción paso 2: «La receta ya no está disponible».
             Alertas.aviso(RecetaService.MSG_NO_DISPONIBLE);
             recargarLista = true;
             return false;
@@ -139,7 +139,7 @@ public class FormularioRecetaController {
         multiplicador = actual.getMultiplicadorCosto();
         llenarCampos(actual);
 
-        // RF-43: si tiene insumos dados de baja se pide cambiarlos
+        // RF-57: si tiene insumos dados de baja se pide cambiarlos
         if (actual.requiereRevision()) {
             mostrarError(RecetaService.MSG_REQUIERE_REVISION + ": quita los insumos dados de baja"
                     + " y agrega los que los reemplazan.", tblIngredientes);
@@ -339,13 +339,13 @@ public class FormularioRecetaController {
     // ===================== Guardar =====================
 
     @FXML
-    // RF-42 · Paso 4 / RF-43 · Paso 4: la administradora elige «Guardar».
+    // RF-56 · Paso 4 / RF-57 · Paso 4: la administradora elige «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
 
         if (editada == null && cmbOpcion.getValue() == null) {
-            // RF-42 · Excepción paso 5: falta elegir la opción.
+            // RF-56 · Excepción paso 5: falta elegir la opción.
             mostrarError(RecetaService.MSG_ELIGE_OPCION, cmbOpcion);
             return;
         }
@@ -380,7 +380,7 @@ public class FormularioRecetaController {
             cerrar();
             return;
         }
-        // RF-42: la opción ya tiene receta → se cierra y se muestra la existente
+        // RF-56: la opción ya tiene receta → se cierra y se muestra la existente
         if (resultado.isOfrecerAbrir()) {
             Alertas.aviso(resultado.getMensaje() + ". Se mostrará la receta registrada.");
             idExistente = resultado.getIdRelacionado();
@@ -388,13 +388,13 @@ public class FormularioRecetaController {
             return;
         }
         if (resultado.isRecargarLista()) {
-            // RF-42 / RF-43 · Excepciones pasos 6 y 7: se muestra el error y no se guarda.
+            // RF-56 / RF-57 · Excepciones pasos 6 y 7: se muestra el error y no se guarda.
             Alertas.aviso(resultado.getMensaje());
             recargarLista = true;
             cerrar();
             return;
         }
-        // RF-42 / RF-43: un insumo se dio de baja mientras se capturaba → se quita de la lista
+        // RF-56 / RF-57: un insumo se dio de baja mientras se capturaba → se quita de la lista
         if (resultado.getIdRelacionado() > 0 && ResultadoInventario.CAMPO_INGREDIENTES.equals(resultado.getCampo())) {
             quitarInsumo(resultado.getIdRelacionado());
         }
@@ -421,7 +421,7 @@ public class FormularioRecetaController {
     }
 
     @FXML
-    // RF-42 / RF-43 · Excepción paso 4: «Cancelar» descarta los datos y cierra el formulario.
+    // RF-56 / RF-57 · Excepción paso 4: «Cancelar» descarta los datos y cierra el formulario.
     private void onCancelar() {
         cerrar();
     }

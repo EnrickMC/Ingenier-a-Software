@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Respuesta del descuento automático de insumos de un pedido (RF-45).
+ * Respuesta del descuento automático de insumos de un pedido (RF-63).
  * El Gestor de Pedidos la revisa para decidir si el pedido pasa a "En preparación".
  */
 public class ResultadoDescuento {

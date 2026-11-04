@@ -241,6 +241,32 @@ export const CANTIDAD_MAXIMA = 20;
 export const LARGO_DEDICATORIA = 150;
 export const LARGO_COMENTARIO = 255;
 
+// Aviso que se agrega a las indicaciones cuando el mensaje va en un topper (así lo ve la repostería en el pedido)
+export const AVISO_TOPPER = 'Mensaje en topper.';
+
+/**
+ * Indicaciones que se mandan a la API: si el mensaje va en un topper se avisa al inicio.
+ * No hace falta cambiar la base de datos: la repostería lo lee en las indicaciones del pedido.
+ */
+export function comentarioConTopper(comentario: string, dedicatoria: string, mensajeEnTopper: boolean): string {
+  const limpio = comentario.trim();
+  if (!mensajeEnTopper || dedicatoria.trim() === '') {
+    return limpio;
+  }
+  if (limpio === '') {
+    return AVISO_TOPPER;
+  }
+  return AVISO_TOPPER + ' ' + limpio;
+}
+
+// Largo que le queda al cliente para sus indicaciones (el aviso del topper también ocupa lugar)
+export function largoComentarioPermitido(dedicatoria: string, mensajeEnTopper: boolean): number {
+  if (!mensajeEnTopper || dedicatoria.trim() === '') {
+    return LARGO_COMENTARIO;
+  }
+  return LARGO_COMENTARIO - AVISO_TOPPER.length - 1;
+}
+
 // Mismos caracteres que acepta la API: letras, números y puntuación común (sin emojis)
 const CARACTERES_PERMITIDOS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9 .,;:¡!¿?'"()\-&#@/%$+*\n]*$/;
 

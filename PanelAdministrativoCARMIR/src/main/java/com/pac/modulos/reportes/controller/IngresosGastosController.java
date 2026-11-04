@@ -25,7 +25,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Pestaña "Ingresos y gastos" (RF-46).
+ * Pestaña "Ingresos y gastos" (RF-65).
  * Muestra los totales, los avisos, la gráfica por semana o mes, el detalle por día
  * y los movimientos que no se sumaron por no ser consistentes.
  */
@@ -76,7 +76,7 @@ public class IngresosGastosController implements PestanaReporte {
     // ===================== Generar =====================
 
     @Override
-    // RF-46 (Generación de reporte de ingresos y gastos): inicia aquí la pestaña. Pasos 4 a 7.
+    // RF-65 (Generación de reporte de ingresos y gastos): inicia aquí la pestaña. Pasos 4 a 7.
     public boolean generar(LocalDate desde, LocalDate hasta) {
         ApoyoVista.mostrarNodo(cajaError, false);
         try {
@@ -85,7 +85,7 @@ public class IngresosGastosController implements PestanaReporte {
             // Error de conexión: se avisa y se ofrece "Reintentar"
             reporte = null;
             limpiar();
-            // RF-46 · Excepción paso 4: «Error de conexión: no fue posible generar el reporte» con «Reintentar».
+            // RF-65 · Excepción paso 4: «Error de conexión: no fue posible generar el reporte» con «Reintentar».
             lblError.setText(ReporteService.MSG_ERROR_CONEXION + "\n" + e.getMessage());
             ApoyoVista.mostrarNodo(cajaError, true);
             return false;
@@ -97,7 +97,7 @@ public class IngresosGastosController implements PestanaReporte {
         return true;
     }
 
-    // RF-46 · Paso 7: muestra totales de ingresos, gastos y utilidad.
+    // RF-65 · Paso 7: muestra totales de ingresos, gastos y utilidad.
     private void mostrarTotales() {
         lblIngresos.setText(Formatos.moneda(reporte.getIngresos()));
         String detalle = "Anticipos " + Formatos.moneda(reporte.getAnticipos())
@@ -119,7 +119,7 @@ public class IngresosGastosController implements PestanaReporte {
         lblUtilidad.setText(Formatos.moneda(reporte.getUtilidad()));
         cajaUtilidad.getStyleClass().remove("perdida");
         if (reporte.esPerdida()) {
-            // RF-46 · Excepción paso 6: los gastos superan a los ingresos, «Pérdida en el periodo».
+            // RF-65 · Excepción paso 6: los gastos superan a los ingresos, «Pérdida en el periodo».
             lblTituloUtilidad.setText("PÉRDIDA");
             cajaUtilidad.getStyleClass().add("perdida");
         } else {
@@ -175,7 +175,7 @@ public class IngresosGastosController implements PestanaReporte {
         lblConteoDias.setText(filas.size() + " día(s) con movimientos");
         ApoyoVista.mostrarNodo(lblVacioDias, filas.isEmpty());
         if (filas.isEmpty()) {
-            // RF-46 · Excepción paso 5: sin registros; totales en $0.00 y «Exportar» deshabilitado.
+            // RF-65 · Excepción paso 5: sin registros; totales en $0.00 y «Exportar» deshabilitado.
             lblVacioDias.setText(ReporteService.MSG_SIN_REGISTROS);
         }
 

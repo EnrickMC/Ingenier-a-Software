@@ -16,7 +16,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Archivo de Excel (.xlsx) o CSV con una o varias hojas (RF-48, RNF-9).
+ * Archivo de Excel (.xlsx) o CSV con una o varias hojas (RF-67, RNF-9).
  *
  * Un archivo .xlsx es un ZIP con varios archivos XML adentro (formato Office Open XML).
  * Esta clase escribe esos XML directamente con java.util.zip, así no hace falta

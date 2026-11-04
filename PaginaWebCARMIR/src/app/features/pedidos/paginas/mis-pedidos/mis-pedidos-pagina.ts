@@ -23,9 +23,10 @@ import {
   tipoDeArchivo,
   validarArchivoComprobante,
   validarEnlace,
+  contactoConsulta,
+  validarContactoConsulta,
   validarFolio,
   validarMontoComprobante,
-  validarTelefono,
   validarTextoCampo,
 } from '../../utilidades/validacion-pedido';
 
@@ -35,13 +36,13 @@ const CAMPOS_COMPROBANTE = ['monto', 'referencia', 'enlace', 'archivo'];
 const MENSAJE_COMPROBANTE_FALLO = 'No fue posible enviar tu comprobante. Revisa tu conexión e inténtalo de nuevo.';
 
 /**
- * RF-12 · Mis pedidos: seguimiento con folio y teléfono (sin cuenta ni contraseña).
+ * RF-13 · Mis pedidos: seguimiento con folio y teléfono o correo (sin cuenta ni contraseña).
  *  - Barra de avance con los estados del pedido y la fecha de cada uno.
  *  - Productos, entrega, pagos registrados y saldo.
- *  - Si el pedido ya fue aprobado y se paga por transferencia, el cliente sube la foto o PDF
+ *  - RF-14: si el pedido ya fue aprobado y se paga por transferencia, el cliente sube la foto o PDF
  *    de su comprobante desde sus archivos o pega un enlace; queda «Pendiente» hasta que el Panel lo valide.
  *  - El efectivo se paga en la tienda (se muestra su dirección).
- * La API bloquea la búsqueda unos minutos después de varios intentos fallidos.
+ * RF-13 · Excepción paso 5: la API bloquea la búsqueda 30 segundos después de 12 intentos fallidos.
  */
 @Component({
   selector: 'app-mis-pedidos-pagina',
@@ -56,9 +57,10 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
 
   // Búsqueda
   protected readonly folio = signal('');
-  protected readonly telefono = signal('');
+  // Teléfono de WhatsApp o correo (si trae @ es correo)
+  protected readonly contacto = signal('');
   protected readonly errorFolio = signal('');
-  protected readonly errorTelefono = signal('');
+  protected readonly errorContacto = signal('');
   protected readonly buscando = signal(false);
   protected readonly errorBusqueda = signal('');
   protected readonly seguimiento = signal<SeguimientoPedido | null>(null);
@@ -79,17 +81,17 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
   protected readonly mensajeComprobante = signal('');
   protected readonly errorComprobante = signal('');
 
-  // RF-12 (Visualización de pedidos realizados): inicia aquí. Pasos 1 y 2: el cliente abrió «Mis pedidos» y se le pide folio y teléfono.
+  // RF-13 (Visualización de pedidos realizados): inicia aquí. Pasos 1 y 2: el cliente abrió «Mis pedidos» y se le pide folio y teléfono o correo.
   ngOnInit(): void {
     // Se llenan solos con el último pedido enviado (o con ?folio= de un enlace)
     const ultima = this.pedido.datos().ultimaConsulta;
     this.folio.set(ultima.folio);
-    this.telefono.set(ultima.telefono);
+    this.contacto.set(ultima.contacto);
     const folioEnlace = this.ruta.snapshot.queryParamMap.get('folio');
     if (folioEnlace !== null && validarFolio(folioEnlace) === '') {
       this.folio.set(folioEnlace);
     }
-    if (this.folio() !== '' && this.telefono() !== '') {
+    if (this.folio() !== '' && this.contacto() !== '') {
       this.buscar();
     }
   }
@@ -101,15 +103,15 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
 
   // ===================== Búsqueda =====================
 
-  // RF-12 · Paso 3: el cliente captura el folio y el teléfono.
+  // RF-13 · Paso 3: el cliente captura el folio y su teléfono o correo.
   cambiarFolio(texto: string): void {
     this.folio.set(texto.replace(/[^0-9#]/g, ''));
     this.errorFolio.set('');
   }
 
-  cambiarTelefono(texto: string): void {
-    this.telefono.set(texto.replace(/[^0-9]/g, ''));
-    this.errorTelefono.set('');
+  cambiarContacto(texto: string): void {
+    this.contacto.set(texto);
+    this.errorContacto.set('');
   }
 
   alBuscar(evento: Event): void {
@@ -117,28 +119,28 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     this.buscar();
   }
 
-  // RF-12 · Paso 3: el cliente eligió «Buscar».
+  // RF-13 · Paso 3: el cliente eligió «Buscar».
   async buscar(): Promise<void> {
     if (this.buscando()) {
       return;
     }
-    // RF-12 · Paso 4: valida que el folio y el teléfono tengan formato correcto.
+    // RF-13 · Paso 4: valida que el folio y el teléfono (o el correo) tengan formato correcto.
     this.errorFolio.set(validarFolio(this.folio()));
-    this.errorTelefono.set(validarTelefono(this.telefono()));
-    // RF-12 · Excepción paso 4: resalta el campo con error y conserva lo capturado.
-    if (this.errorFolio() !== '' || this.errorTelefono() !== '') {
+    this.errorContacto.set(validarContactoConsulta(this.contacto()));
+    // RF-13 · Excepción paso 4: resalta el campo con error y conserva lo capturado.
+    if (this.errorFolio() !== '' || this.errorContacto() !== '') {
       return;
     }
     this.buscando.set(true);
     this.errorBusqueda.set('');
     const folio = this.folio().replace('#', '');
     try {
-      // RF-12 · Pasos 5 y 6: la API busca el pedido con folio y teléfono y recupera su detalle.
-      const seguimiento = await this.api.consultarPedido(folio, this.telefono());
+      // RF-13 · Pasos 5 y 6: la API busca el pedido con folio y teléfono (o correo) y recupera su detalle.
+      const seguimiento = await this.api.consultarPedido(folio, contactoConsulta(this.contacto()));
       this.usarSeguimiento(seguimiento);
-      this.pedido.guardarConsulta(folio, this.telefono());
+      this.pedido.guardarConsulta(folio, this.contacto().trim());
     } catch (error) {
-      // RF-12 · Excepciones paso 5: «No encontramos un pedido con esos datos», búsqueda bloqueada por intentos o sin conexión («No fue posible consultar tu pedido»).
+      // RF-13 · Excepciones paso 5: «No encontramos un pedido con esos datos», búsqueda bloqueada por intentos o sin conexión («No fue posible consultar tu pedido»).
       this.seguimiento.set(null);
       this.errorBusqueda.set(mensajeDeError(error, MENSAJE_SIN_CONEXION));
     } finally {
@@ -146,7 +148,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     }
   }
 
-  // RF-12 · Paso 7: muestra el detalle con la barra de avance.
+  // RF-13 · Paso 7: muestra el detalle con la barra de avance.
   private usarSeguimiento(seguimiento: SeguimientoPedido): void {
     this.seguimiento.set(seguimiento);
     this.formularioAbierto.set(false);
@@ -156,7 +158,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     this.monto.set(String(this.montoSugerido(seguimiento)));
   }
 
-  // RF-12 · Excepción paso 3: «Buscar otro pedido» limpia el resultado.
+  // RF-13 · Excepción paso 3: «Buscar otro pedido» limpia el resultado.
   otraBusqueda(): void {
     this.seguimiento.set(null);
     this.mensajeComprobante.set('');
@@ -218,19 +220,21 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     return pago.estado;
   }
 
-  // ===================== Comprobante de pago =====================
+  // ===================== Comprobante de pago (RF-14) =====================
 
-  // RF-12: el cliente abre el formulario para enviar su comprobante de pago (después lo valida RF-28 en el Panel).
+  // RF-14 (Envío de comprobante de pago): inicia aquí. Paso 1: el cliente eligió «Enviar comprobante de transferencia».
+  // RF-14 · Paso 2: muestra el formulario con el monto sugerido (después lo valida RF-42 en el Panel).
   abrirFormulario(): void {
     this.mensajeComprobante.set('');
     this.formularioAbierto.set(true);
   }
 
+  // RF-14 · Excepción paso 3: «Cancelar» cierra el formulario sin registrar nada.
   cerrarFormulario(): void {
     this.formularioAbierto.set(false);
   }
 
-  // RF-12: el cliente elige si sube un archivo o pega un enlace
+  // RF-14 · Paso 3: el cliente elige si sube un archivo o pega un enlace
   elegirModoComprobante(modo: 'archivo' | 'enlace'): void {
     this.modoComprobante.set(modo);
     const errores = { ...this.erroresComprobante() };
@@ -239,7 +243,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     this.erroresComprobante.set(errores);
   }
 
-  // RF-12: el cliente eligió una foto o PDF de sus archivos; se revisa tipo y tamaño antes de aceptarlo.
+  // RF-14 · Pasos 3 y 4: el cliente eligió una foto o PDF de sus archivos; se revisa tipo y tamaño antes de aceptarlo.
   alElegirArchivo(campo: HTMLInputElement): void {
     const errores = { ...this.erroresComprobante() };
     delete errores['archivo'];
@@ -249,7 +253,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     }
     const elegido = campo.files[0];
     const error = validarArchivoComprobante(tipoDeArchivo(elegido.name, elegido.type), elegido.size);
-    // RF-12 · Excepción: el archivo no es imagen/PDF o pesa más de 5 MB.
+    // RF-14 · Excepción paso 4: «Solo se aceptan fotos JPG, PNG o WEBP, o un PDF» o «El archivo pesa más de 5 MB…».
     if (error !== '') {
       errores['archivo'] = error;
       this.erroresComprobante.set(errores);
@@ -316,7 +320,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     return mensaje;
   }
 
-  // RF-12: valida monto, referencia y el archivo o el enlace del comprobante.
+  // RF-14 · Paso 4: valida monto, referencia y el archivo o el enlace del comprobante.
   private validarComprobante(seguimiento: SeguimientoPedido): boolean {
     const errores: Record<string, string> = {};
     const errorMonto = validarMontoComprobante(Number(this.monto()), this.porCubrir(seguimiento));
@@ -328,7 +332,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
       errores['referencia'] = errorReferencia;
     }
     if (this.modoComprobante() === 'archivo') {
-      // RF-12 · Excepción: no eligió ningún archivo.
+      // RF-14 · Excepción paso 4: «Elige la foto o el PDF de tu comprobante».
       if (this.archivo() === null) {
         errores['archivo'] = 'Elige la foto o el PDF de tu comprobante';
       }
@@ -347,13 +351,14 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
     this.enviarComprobante();
   }
 
-  // RF-12: envía el comprobante a la API.
+  // RF-14 · Paso 3: el cliente eligió «Enviar comprobante»; se valida (Paso 4) y se envía a la API (Pasos 5 a 7).
   async enviarComprobante(): Promise<void> {
     const seguimiento = this.seguimiento();
     if (seguimiento === null || this.enviandoComprobante()) {
       return;
     }
     this.errorComprobante.set('');
+    // RF-14 · Excepción paso 4: resalta el campo con error y conserva lo capturado.
     if (!this.validarComprobante(seguimiento)) {
       return;
     }
@@ -364,15 +369,19 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
       if (this.modoComprobante() === 'enlace') {
         enlace = this.enlace().trim();
       }
+      // El comprobante se manda con el mismo dato con el que se encontró el pedido
+      const contacto = contactoConsulta(this.contacto());
       const respuesta = await this.api.enviarComprobante({
         folio: seguimiento.folio,
-        telefono: this.telefono(),
+        telefono: contacto.telefono,
+        correo: contacto.correo,
         monto: redondear(Number(this.monto())),
         metodo: 'Transferencia',
         referencia: this.referencia().trim(),
         linkComprobante: enlace,
         archivo: archivo,
       });
+      // RF-14 · Paso 8: «Recibimos tu comprobante…» y el detalle se actualiza con el pago «En revisión».
       this.usarSeguimiento(respuesta.seguimiento);
       this.referencia.set('');
       this.enlace.set('');
@@ -380,7 +389,8 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
       this.liberarVistaPrevia();
       this.mensajeComprobante.set(respuesta.mensaje);
     } catch (error) {
-      // RF-12 · Excepción: errores del comprobante (monto mayor al saldo, referencia repetida, sin conexión).
+      // RF-14 · Excepciones pasos 5 y 6: pedido no encontrado o que ya no admite pagos, 3 comprobantes en revisión,
+      // monto mayor a lo que falta, referencia repetida o sin conexión.
       // Errores de un campo (monto mayor al saldo, referencia repetida...) se marcan en rojo
       const campos = erroresDeCampo(error);
       if (campos.length > 0) {
@@ -393,7 +403,7 @@ export default class MisPedidosPagina implements OnInit, OnDestroy {
           if (CAMPOS_COMPROBANTE.indexOf(nombre) >= 0) {
             errores[nombre] = campo.mensaje;
           } else {
-            // Folio o teléfono: no son campos de este formulario, se muestra arriba del botón
+            // Folio, teléfono o correo: no son campos de este formulario, se muestra arriba del botón
             this.errorComprobante.set(campo.mensaje);
           }
         }

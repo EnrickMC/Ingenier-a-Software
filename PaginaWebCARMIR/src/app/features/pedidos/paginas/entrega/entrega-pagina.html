@@ -5,7 +5,7 @@
   @if (estado() === 'cargando') {
     <app-cargando texto="Cargando días de entrega..." />
   } @else if (estado() === 'error') {
-    <!-- RF-9 · Excepción paso 3: sin conexión no se pueden cargar las reglas de entrega. -->
+    <!-- RF-10 · Excepción paso 3: sin conexión no se pueden cargar las reglas de entrega. -->
     <app-mensaje-estado tipo="error" titulo="No fue posible continuar" [texto]="mensajeSinConexion">
       <button type="button" class="btn btn-principal" (click)="cargarReglas()">Reintentar</button>
       <a routerLink="/carrito" class="btn btn-secundario">Volver al carrito</a>
@@ -15,11 +15,11 @@
       <div class="diseno-pedido">
         <app-resumen-pedido [articulos]="carrito.articulos()" [conEnvio]="conEnvio()" [costoEnvio]="costoEnvio()" />
 
-        <!-- RF-9 · Paso 3: formulario de entrega (contacto, método, dirección, fecha y horario). -->
+        <!-- RF-10 · Paso 3: formulario de entrega (contacto, método, dirección, fecha y horario). -->
         <form class="panel bloque" (submit)="alEnviar($event)" novalidate>
           <h2>Datos de entrega y contacto</h2>
 
-          <!-- RF-9 · Excepción paso 6: la fecha que había elegido ya no está disponible (y otros avisos). -->
+          <!-- RF-10 · Excepción paso 6: la fecha que había elegido ya no está disponible (y otros avisos). -->
           @if (aviso() !== '') {
             <div class="aviso" role="status"><p>{{ aviso() }}</p></div>
           }
@@ -39,7 +39,7 @@
               [attr.aria-invalid]="errorDe('nombre') !== ''"
               aria-describedby="error-nombre"
             />
-            <!-- RF-9 · Excepción paso 5: nombre faltante o inválido. -->
+            <!-- RF-10 · Excepción paso 5: nombre faltante o inválido. -->
             @if (errorDe('nombre') !== '') {
               <span class="mensaje-error" id="error-nombre">{{ errorDe('nombre') }}</span>
             }
@@ -62,7 +62,7 @@
                 aria-describedby="ayuda-telefono error-telefono"
               />
               <span class="ayuda" id="ayuda-telefono">Te avisaremos por WhatsApp. También sirve para consultar tu pedido.</span>
-              <!-- RF-9 · Excepción paso 5: teléfono de WhatsApp con formato inválido. -->
+              <!-- RF-10 · Excepción paso 5: teléfono de WhatsApp con formato inválido. -->
               @if (errorDe('telefono') !== '') {
                 <span class="mensaje-error" id="error-telefono">{{ errorDe('telefono') }}</span>
               }
@@ -82,7 +82,7 @@
                 [attr.aria-invalid]="errorDe('correo') !== ''"
                 aria-describedby="error-correo"
               />
-              <!-- RF-9 · Excepción paso 5: correo con formato inválido. -->
+              <!-- RF-10 · Excepción paso 5: correo con formato inválido. -->
               @if (errorDe('correo') !== '') {
                 <span class="mensaje-error" id="error-correo">{{ errorDe('correo') }}</span>
               }
@@ -90,7 +90,7 @@
           </div>
 
           <!-- Modalidad de entrega -->
-          <!-- RF-9 · Paso 4: método de entrega (recoger en tienda o envío a domicilio). -->
+          <!-- RF-10 · Paso 4: método de entrega (recoger en tienda o envío a domicilio). -->
           <fieldset class="opciones-tarjeta">
             <legend>¿Cómo quieres recibir tu pedido?</legend>
             <label class="opcion-tarjeta" [class.elegida]="modalidad() === 'Recoger en tienda'">
@@ -123,13 +123,13 @@
             </label>
           </fieldset>
 
-          <!-- Al recoger en tienda se muestra la dirección completa con su mapa -->
+          <!-- RF-10 · Paso 3: al recoger en la tienda se muestra la dirección completa con «Ver en el mapa» -->
           @if (!conEnvio()) {
             <app-ubicacion-tienda titulo="Recoge tu pedido en nuestra tienda" />
           }
 
           <!-- Dirección (solo con envío) -->
-          <!-- RF-9 · Paso 7: dirección y código postal solo con envío a domicilio. -->
+          <!-- RF-10 · Paso 7: dirección y código postal solo con envío a domicilio. -->
           @if (conEnvio()) {
             <div class="direccion">
               <div class="campo" [class.con-error]="errorDe('codigoPostal') !== ''">
@@ -158,7 +158,7 @@
                     <button type="button" class="enlace-boton" (click)="revisarCobertura()">Reintentar</button>
                   }
                 </span>
-                <!-- RF-9 · Excepción pasos 5 y 7: código postal inválido o «Por el momento no tenemos envío a tu zona». -->
+                <!-- RF-10 · Excepción pasos 5 y 7: código postal inválido o «Por el momento no tenemos envío a tu zona». -->
                 @if (errorDe('codigoPostal') !== '') {
                   <span class="mensaje-error" id="error-codigoPostal">{{ errorDe('codigoPostal') }}</span>
                 }
@@ -250,7 +250,7 @@
           <div class="campo" [class.con-error]="errorDe('fecha') !== ''">
             <span class="titulo-campo" id="titulo-fecha">Fecha de entrega</span>
             <span class="ayuda reglas">{{ textoReglas(reglas) }}</span>
-            <!-- RF-9 · Paso 6: calendario que deshabilita las fechas sin anticipación, no laborables o sin cupo. -->
+            <!-- RF-10 · Paso 6: calendario que deshabilita las fechas sin anticipación, no laborables o sin cupo. -->
             <app-calendario-entrega
               [reglas]="reglas"
               [seleccionada]="fecha()"
@@ -260,7 +260,7 @@
             @if (fecha() !== '') {
               <span class="fecha-elegida" aria-live="polite">Elegiste: <strong>{{ fechaElegidaTexto() }}</strong></span>
             }
-            <!-- RF-9 · Excepción paso 6: «Elige una fecha a partir del…». -->
+            <!-- RF-10 · Excepción paso 6: «Elige una fecha a partir del…». -->
             @if (errorDe('fecha') !== '') {
               <span class="mensaje-error">{{ errorDe('fecha') }}</span>
             }
@@ -270,24 +270,24 @@
             <label for="horario">Horario</label>
             <select #campoHorario id="horario" [value]="horario()" (change)="elegirHorario(campoHorario.value)">
               <option value="" [selected]="horario() === ''">Elige un horario</option>
-              <!-- RF-9 · Paso 6: solo se muestran los horarios de atención. -->
+              <!-- RF-10 · Paso 6: solo se muestran los horarios de atención. -->
               @for (hora of reglas.horarios; track hora) {
                 <option [value]="hora" [selected]="hora === horario()">{{ hora }} h</option>
               }
             </select>
-            <!-- RF-9 · Excepción paso 6: falta el horario. -->
+            <!-- RF-10 · Excepción paso 6: falta el horario. -->
             @if (errorDe('horario') !== '') {
               <span class="mensaje-error">{{ errorDe('horario') }}</span>
             }
           </div>
 
-          <!-- RF-9 · Excepción paso 5: se resaltan los campos con error. -->
+          <!-- RF-10 · Excepción paso 5: se resaltan los campos con error. -->
           @if (hayErrores()) {
             <div class="aviso error" role="alert"><p>Revisa los campos marcados en rojo.</p></div>
           }
 
           <div class="barra-acciones">
-            <!-- RF-9 · Excepción paso 4: «Volver al carrito» conserva los datos capturados. -->
+            <!-- RF-10 · Excepción paso 4: «Volver al carrito» conserva los datos capturados. -->
             <a routerLink="/carrito" class="btn btn-secundario">Volver al carrito</a>
             <button type="submit" class="btn btn-principal" [disabled]="cobertura() === 'revisando'">Continuar al pago</button>
           </div>

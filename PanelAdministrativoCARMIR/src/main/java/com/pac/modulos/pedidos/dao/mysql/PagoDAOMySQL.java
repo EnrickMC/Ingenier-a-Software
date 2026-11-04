@@ -5,6 +5,7 @@ import com.pac.dao.conexion.ConexionBD;
 import com.pac.modulos.catalogo.dao.mysql.ApoyoMySQL;
 import com.pac.modulos.pedidos.dao.BitacoraPedidoDAO;
 import com.pac.modulos.pedidos.dao.PagoDAO;
+import com.pac.modulos.pedidos.model.ArchivoComprobante;
 import com.pac.modulos.pedidos.model.EstadoPago;
 import com.pac.modulos.pedidos.model.EstadoPedido;
 import com.pac.modulos.pedidos.model.MetodoPago;
@@ -28,11 +29,14 @@ public class PagoDAOMySQL implements PagoDAO {
             "SELECT pg.IdPago, pg.Folio, pg.IdUsuario, u.NombreUsuario, pg.MontoPago, pg.FechaPago, pg.MetodoPago, "
             + "pg.Referencia, pg.LinkComprobante, pg.EstadoValidacion, pg.MotivoRechazo, "
             + "c.NombreCliente, p.EstadoPedido, "
-            + "(SELECT COUNT(*) FROM Cancelacion cx WHERE cx.Folio = p.Folio) AS Cancelado "
+            + "(SELECT COUNT(*) FROM Cancelacion cx WHERE cx.Folio = p.Folio) AS Cancelado, "
+            // Solo el tipo del archivo del comprobante (el archivo se lee aparte, al verlo)
+            + "ca.TipoContenido AS TipoArchivo "
             + "FROM Pago pg "
             + "JOIN Pedido p ON p.Folio = pg.Folio "
             + "JOIN Cliente c ON c.IdCliente = p.IdCliente "
-            + "LEFT JOIN Usuario u ON u.IdUsuario = pg.IdUsuario ";
+            + "LEFT JOIN Usuario u ON u.IdUsuario = pg.IdUsuario "
+            + "LEFT JOIN ComprobanteArchivo ca ON ca.IdPago = pg.IdPago ";
 
     @Override
     public List<Pago> listarPorFolio(int folio) throws DAOException {
@@ -121,6 +125,34 @@ public class PagoDAOMySQL implements PagoDAO {
             return numero > 0;
         } catch (SQLException e) {
             throw new DAOException("Error al revisar la referencia del pago", e);
+        }
+    }
+
+    // RF-50 · Paso 2: lee el archivo del comprobante que subió el cliente
+    @Override
+    public ArchivoComprobante buscarArchivo(int idPago) throws DAOException {
+        String sql = "SELECT IdPago, NombreArchivo, TipoContenido, TamanoBytes, Contenido, FechaSubida "
+                + "FROM ComprobanteArchivo WHERE IdPago = ?";
+        try {
+            Connection conexion = ConexionBD.getInstancia().getConexion();
+            PreparedStatement consulta = conexion.prepareStatement(sql);
+            consulta.setInt(1, idPago);
+            ResultSet resultado = consulta.executeQuery();
+            ArchivoComprobante archivo = null;
+            if (resultado.next()) {
+                archivo = new ArchivoComprobante();
+                archivo.setIdPago(resultado.getInt("IdPago"));
+                archivo.setNombreArchivo(resultado.getString("NombreArchivo"));
+                archivo.setTipoContenido(resultado.getString("TipoContenido"));
+                archivo.setTamanoBytes(resultado.getInt("TamanoBytes"));
+                archivo.setContenido(resultado.getBytes("Contenido"));
+                archivo.setFechaSubida(ApoyoPedidosMySQL.leerFechaHora(resultado, "FechaSubida"));
+            }
+            resultado.close();
+            consulta.close();
+            return archivo;
+        } catch (SQLException e) {
+            throw new DAOException("Error al leer el comprobante del pago " + idPago, e);
         }
     }
 
@@ -242,6 +274,7 @@ public class PagoDAOMySQL implements PagoDAO {
             pago.setMetodo(MetodoPago.desdeBD(resultado.getString("MetodoPago")));
             pago.setReferencia(resultado.getString("Referencia"));
             pago.setLinkComprobante(resultado.getString("LinkComprobante"));
+            pago.setTipoArchivo(resultado.getString("TipoArchivo"));
             pago.setEstado(EstadoPago.desdeBD(resultado.getString("EstadoValidacion")));
             pago.setMotivoRechazo(resultado.getString("MotivoRechazo"));
             pago.setNombreCliente(resultado.getString("NombreCliente"));

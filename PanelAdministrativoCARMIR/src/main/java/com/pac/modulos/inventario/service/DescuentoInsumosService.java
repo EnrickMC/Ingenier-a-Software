@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Descuento automático de insumos cuando un pedido pasa de "Pagado" a "En preparación" (RF-45).
+ * Descuento automático de insumos cuando un pedido pasa de "Pagado" a "En preparación" (RF-63).
  *
  * Cómo lo usa el Gestor de Pedidos (Módulo 4):
  *   1. Abre la transacción del cambio de estado.
@@ -63,31 +63,31 @@ public class DescuentoInsumosService {
      *
      * @param continuarSinReceta true = la Administradora ya aceptó continuar aunque haya opciones sin receta activa
      */
-    // RF-45 (Descuento automático de insumos en inventario): inicia aquí. Paso 1: recibe el folio del pedido que pasa a «En preparación».
+    // RF-63 (Descuento automático de insumos en inventario): inicia aquí. Paso 1: recibe el folio del pedido que pasa a «En preparación».
     public ResultadoDescuento descontarPorPedido(int folio, Connection conexion, boolean continuarSinReceta) {
         try {
             // Paso 2: el pedido existe, no está cancelado y está en "Pagado"
             String estado = consumoDAO.buscarEstado(conexion, folio);
             if (estado == null || consumoDAO.estaCancelado(conexion, folio)) {
-                // RF-45 · Excepción paso 2: el pedido no existe o está cancelado.
+                // RF-63 · Excepción paso 2: el pedido no existe o está cancelado.
                 return new ResultadoDescuento(ResultadoDescuento.PEDIDO_NO_DISPONIBLE, MSG_NO_DISPONIBLE);
             }
             if (!ESTADO_PAGADO.equalsIgnoreCase(estado)) {
-                // RF-45 · Excepción paso 2: el estado previo no es «Pagado»; se bloquea el cambio.
+                // RF-63 · Excepción paso 2: el estado previo no es «Pagado»; se bloquea el cambio.
                 return new ResultadoDescuento(ResultadoDescuento.ESTADO_INVALIDO,
                         MSG_NO_PAGADO + " (estado actual: " + estado + ")");
             }
             // Paso 2: no se descuenta dos veces
             if (movimientoDAO.existeProduccionDeFolio(conexion, folio)) {
                 System.out.println("Aviso: el pedido #" + folio + " ya tenía insumos descontados");
-                // RF-45 · Excepción paso 2: ya se descontaron insumos; no se repite y se permite continuar.
+                // RF-63 · Excepción paso 2: ya se descontaron insumos; no se repite y se permite continuar.
                 return new ResultadoDescuento(ResultadoDescuento.YA_DESCONTADO, MSG_YA_DESCONTADO);
             }
 
             // Paso 3: opciones del pedido y sus recetas activas
             List<OpcionPedido> opciones = consumoDAO.listarOpciones(conexion, folio);
             List<String> sinReceta = opcionesSinReceta(opciones);
-            // RF-45 · Excepción paso 3: «La opción [nombre] no tiene receta activa»; la administradora decide si continúa.
+            // RF-63 · Excepción paso 3: «La opción [nombre] no tiene receta activa»; la administradora decide si continúa.
             if (!sinReceta.isEmpty() && !continuarSinReceta) {
                 String mensaje = "";
                 for (String nombre : sinReceta) {
@@ -110,7 +110,7 @@ public class DescuentoInsumosService {
                     faltantes.add(necesidad);
                 }
             }
-            // RF-45 · Excepción paso 5: no alcanzan las existencias; no se descuenta nada y el pedido sigue en «Pagado».
+            // RF-63 · Excepción paso 5: no alcanzan las existencias; no se descuenta nada y el pedido sigue en «Pagado».
             if (!faltantes.isEmpty()) {
                 String mensaje = MSG_FALTAN + ". Faltan:";
                 for (NecesidadInsumo faltante : faltantes) {
@@ -157,7 +157,7 @@ public class DescuentoInsumosService {
             conexion = ConexionBD.getInstancia().getConexion();
             conexion.setAutoCommit(false);
             resultado = descontarPorPedido(folio, conexion, continuarSinReceta);
-            // RF-45 · Paso 9: confirma el descuento.
+            // RF-63 · Paso 9: confirma el descuento.
             if (resultado.getResultado() == ResultadoDescuento.DESCONTADO) {
                 conexion.commit();
             } else {
@@ -165,13 +165,13 @@ public class DescuentoInsumosService {
             }
         } catch (SQLException e) {
             ApoyoMySQL.deshacer(conexion);
-            // RF-45 · Excepción paso 2: sin conexión, «Error de conexión»; el pedido sigue en «Pagado».
+            // RF-63 · Excepción paso 2: sin conexión, «Error de conexión»; el pedido sigue en «Pagado».
             return new ResultadoDescuento(ResultadoDescuento.ERROR, MSG_ERROR_CONEXION);
         } finally {
             ApoyoMySQL.regresarAutoCommit(conexion);
         }
 
-        // RF-45 · Excepción paso 8: si la alerta falla se mantiene el descuento y se genera en la siguiente revisión.
+        // RF-63 · Excepción paso 8: si la alerta falla se mantiene el descuento y se genera en la siguiente revisión.
         // Paso 8: con el descuento ya guardado se revisan las alertas (si falla, el descuento se mantiene)
         if (resultado.getResultado() == ResultadoDescuento.DESCONTADO) {
             MonitorAlertas.getInstancia().revisar();
@@ -180,7 +180,7 @@ public class DescuentoInsumosService {
     }
 
     /**
-     * Estimación de insumos para la Agenda de Producción (RF-31): suma lo que necesitan los pedidos
+     * Estimación de insumos para la Agenda de Producción (RF-46): suma lo que necesitan los pedidos
      * indicados y le pone a cada insumo su existencia actual. No descuenta nada.
      * Las opciones sin receta activa no se cuentan.
      */
@@ -221,7 +221,7 @@ public class DescuentoInsumosService {
     }
 
     // Suma lo que necesita cada insumo, postre por postre
-    // RF-45 · Paso 4: total de cada insumo según recetas, unidades pedidas y multiplicadores.
+    // RF-63 · Paso 4: total de cada insumo según recetas, unidades pedidas y multiplicadores.
     private List<NecesidadInsumo> calcularNecesidades(Connection conexion, List<OpcionPedido> opciones)
             throws DAOException {
         List<NecesidadInsumo> necesidades = new ArrayList<NecesidadInsumo>();

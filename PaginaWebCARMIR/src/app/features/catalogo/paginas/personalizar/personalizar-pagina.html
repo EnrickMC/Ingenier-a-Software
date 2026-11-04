@@ -30,7 +30,7 @@
       <div class="diseno">
         <!-- Columna del modelo 3D y del precio (fija al bajar en escritorio) -->
         <aside class="columna-visor" aria-labelledby="titulo-precio">
-          <!-- RF-3 · Paso 4: el pastel 3D cambia con cada opción elegida (tamaño, forma, sabor, decoración...). -->
+          <!-- RF-3 · Paso 4 / RF-5: el postre 3D cambia con cada opción elegida (tamaño, forma, sabor, decoración...). -->
           <app-visor-pastel3d [diseno]="diseno3d()" [nombre]="info.producto.nombre">
             <app-imagen-postre class="foto-respaldo" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
           </app-visor-pastel3d>
@@ -134,6 +134,23 @@
                 (input)="cambiarDedicatoria(campoDedicatoria.value)"
               ></textarea>
               <span class="ayuda">{{ dedicatoria().length }} de {{ largoDedicatoria }} caracteres. Sin emojis.</span>
+              <!-- RF-3 · Paso 3: dónde va el mensaje (casilla «Ponerlo en un topper»): el cliente elige, o el postre solo admite una forma -->
+              @if (lugarMensaje() === 'elegir') {
+                <label class="casilla-topper">
+                  <input
+                    #casillaTopper
+                    type="checkbox"
+                    [checked]="mensajeEnTopper()"
+                    (change)="cambiarMensajeEnTopper(casillaTopper.checked)"
+                  />
+                  <span>
+                    Ponerlo en un topper
+                    <small>Letrero dorado de pie. Si no lo marcas, el mensaje se escribe sobre el postre.</small>
+                  </span>
+                </label>
+              } @else if (lugarMensaje() === 'topper') {
+                <span class="ayuda">En este postre el mensaje va en un topper (letrero dorado de pie).</span>
+              }
               <!-- RF-3 · Excepción paso 6: la dedicatoria no cumple el largo o los caracteres; se conserva el texto. -->
               @if (errorDedicatoria() !== '') {
                 <span class="mensaje-error">{{ errorDedicatoria() }}</span>
@@ -146,12 +163,12 @@
                 #campoComentario
                 id="comentario"
                 rows="3"
-                [attr.maxlength]="largoComentario"
+                [attr.maxlength]="largoComentario()"
                 placeholder="Ej. Sin nuez, por favor"
                 [value]="comentario()"
                 (input)="cambiarComentario(campoComentario.value)"
               ></textarea>
-              <span class="ayuda">{{ comentario().length }} de {{ largoComentario }} caracteres.</span>
+              <span class="ayuda">{{ comentario().length }} de {{ largoComentario() }} caracteres.</span>
               @if (errorComentario() !== '') {
                 <span class="mensaje-error">{{ errorComentario() }}</span>
               }

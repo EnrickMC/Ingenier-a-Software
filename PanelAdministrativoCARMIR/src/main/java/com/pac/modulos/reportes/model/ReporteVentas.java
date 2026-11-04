@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reporte de productos más vendidos de un periodo (RF-47).
+ * Reporte de productos más vendidos de un periodo (RF-66).
  * Solo cuenta pedidos pagados (Pagado o un estado posterior) que no están cancelados
  * ni dados de baja. La fecha que se usa es la de la solicitud del pedido.
  */

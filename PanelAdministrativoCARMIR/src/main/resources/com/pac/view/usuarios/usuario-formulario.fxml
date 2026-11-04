@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Ventana para registrar (RNF-11) o modificar (RNF-14) un usuario del personal -->
+<!-- Ventana para registrar (RNF-16) o modificar (RNF-19) un usuario del personal -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.usuarios.controller.FormularioUsuarioController"
       stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css"

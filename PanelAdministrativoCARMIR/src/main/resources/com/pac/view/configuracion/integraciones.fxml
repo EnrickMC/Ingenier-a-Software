@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- RF-32: datos de las cuentas de WhatsApp y correo con las que se avisa a los clientes.
+<!-- RF-47: datos de las cuentas de WhatsApp y correo con las que se avisa a los clientes.
      Va dentro de la pestaña "Respaldos y sistema" (respaldos.fxml). -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.configuracion.controller.IntegracionesController"

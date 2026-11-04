@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Trabajo que corre en un hilo aparte (segundo plano) para no congelar la pantalla (RF-32).
+ * Trabajo que corre en un hilo aparte (segundo plano) para no congelar la pantalla (RF-47).
  * Guarda cada aviso como "Pendiente", lo intenta enviar y lo deja "Enviado" o "Fallido".
  * Si falla, reintenta varias veces esperando entre cada intento.
  * Usa su propia conexión a la base de datos para no mezclarse con las transacciones de la pantalla.
@@ -27,7 +27,7 @@ public class EnvioNotificaciones implements Runnable {
     }
 
     @Override
-    // RF-32 · Paso 5: envío en segundo plano por WhatsApp y correo.
+    // RF-47 · Paso 5: envío en segundo plano por WhatsApp y correo.
     public void run() {
         NotificacionDAO dao = DAOFactory.crearNotificacionDAO();
         ConfiguracionNotificaciones config = ConfiguracionNotificaciones.getInstancia();
@@ -49,7 +49,7 @@ public class EnvioNotificaciones implements Runnable {
                            Notificacion aviso) {
         try {
             // Los avisos que ya no se pueden enviar (destino no válido) solo se registran
-            // RF-32 · Excepción paso 3: canal omitido por no tener datos válidos; solo se registra.
+            // RF-47 · Excepción paso 3: canal omitido por no tener datos válidos; solo se registra.
             if (Notificacion.FALLIDO.equals(aviso.getResultado())) {
                 dao.insertar(conexion, aviso);
                 return;
@@ -66,23 +66,23 @@ public class EnvioNotificaciones implements Runnable {
             CanalEnvio canal = crearCanal(aviso.getCanal(), config);
             int intentos = config.getReintentos() + 1;
             String motivo = null;
-            // RF-32 · Paso 6: intenta enviar y espera la confirmación del servicio externo.
+            // RF-47 · Paso 6: intenta enviar y espera la confirmación del servicio externo.
             for (int intento = 1; intento <= intentos; intento++) {
                 try {
                     canal.enviar(aviso.getDestino(), asunto, aviso.getMensaje());
                     dao.actualizarResultado(conexion, aviso.getIdNotificacion(), Notificacion.ENVIADO, null);
-                    // RF-32 · Paso 7: se registró como «Enviada» en la bitácora.
+                    // RF-47 · Paso 7: se registró como «Enviada» en la bitácora.
                     return;
                 } catch (ErrorEnvio error) {
                     motivo = error.getMessage();
                     System.out.println("Notificación #" + aviso.getIdNotificacion() + " intento " + intento
                             + " falló: " + motivo);
                     // Si no fue por la red, reintentar no ayuda (por ejemplo, falta configurar el canal)
-                    // RF-32 · Excepción paso 6: el servicio rechazó el mensaje; se marca «Fallida» con su motivo.
+                    // RF-47 · Excepción paso 6: el servicio rechazó el mensaje; se marca «Fallida» con su motivo.
                     if (!error.isSinRed()) {
                         break;
                     }
-                    // RF-32 · Excepción paso 5: sin red, queda «Pendiente de reenvío» y se reintenta más tarde.
+                    // RF-47 · Excepción paso 5: sin red, queda «Pendiente de reenvío» y se reintenta más tarde.
                     if (intento < intentos) {
                         dao.actualizarResultado(conexion, aviso.getIdNotificacion(), Notificacion.PENDIENTE,
                                 "Pendiente de reenvío: " + motivo);
@@ -91,7 +91,7 @@ public class EnvioNotificaciones implements Runnable {
                 }
             }
             // 3. Tras los reintentos sigue sin enviarse
-            // RF-32 · Excepción paso 6: sigue sin enviarse tras los reintentos; queda «Fallida».
+            // RF-47 · Excepción paso 6: sigue sin enviarse tras los reintentos; queda «Fallida».
             dao.actualizarResultado(conexion, aviso.getIdNotificacion(), Notificacion.FALLIDO, motivo);
         } catch (DAOException e) {
             System.out.println("Notificaciones: no se pudo registrar el aviso: " + e.getMessage());

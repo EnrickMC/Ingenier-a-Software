@@ -112,7 +112,7 @@ public class AlertaInventario {
         this.existenciaLote = existenciaLote;
     }
 
-    // RF-39: una alerta de existencia baja con existencia en cero se muestra como "Agotado"
+    // RF-61: una alerta de existencia baja con existencia en cero se muestra como "Agotado"
     public boolean estaAgotado() {
         return tipo == TipoAlerta.EXISTENCIA_BAJA && existenciaEnAlerta <= 0.0005;
     }

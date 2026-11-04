@@ -15,7 +15,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Ventana de aprobación (RF-24): muestra folio, cliente, total, fecha de entrega y la carga del día,
+ * Ventana de aprobación (RF-38): muestra folio, cliente, total, fecha de entrega y la carga del día,
  * y deja ajustar el anticipo requerido antes de aprobar.
  */
 public class FormularioAprobacionController {
@@ -31,7 +31,7 @@ public class FormularioAprobacionController {
     private Pedido pedido;
     private ResultadoPedido resultado;
 
-    // RF-24 · Paso 4: muestra la confirmación con folio, cliente, total, fecha y anticipo requerido.
+    // RF-38 · Paso 4: muestra la confirmación con folio, cliente, total, fecha y anticipo requerido.
     public void preparar(Pedido pedido, int cargaDelDia) {
         this.pedido = pedido;
         String hora = "";
@@ -43,11 +43,11 @@ public class FormularioAprobacionController {
                 + "\nTotal: " + Formatos.moneda(pedido.getMontoTotal())
                 + "\nEntrega: " + Formatos.fecha(pedido.getFechaEntrega()) + hora + " · " + pedido.getModalidadEntrega());
 
-        // Carga del día de entrega (RF-23)
+        // Carga del día de entrega (RF-33)
         int capacidad = ConfiguracionApp.getInstancia().getCapacidadDiaria();
         String carga = "Ese día hay " + cargaDelDia + " pedido(s) más por entregar (capacidad: " + capacidad + ").";
         if (cargaDelDia >= capacidad) {
-            // RF-23 · Excepción paso 5: «Agenda saturada para esa fecha» (no bloquea la aprobación).
+            // RF-33 · Excepción paso 5: «Agenda saturada para esa fecha» (no bloquea la aprobación).
             carga = carga + "\n" + PedidoService.MSG_AGENDA_SATURADA + ": puedes aprobarlo, pero revisa la producción.";
             lblCarga.getStyleClass().setAll("aviso-amarillo");
         }
@@ -71,7 +71,7 @@ public class FormularioAprobacionController {
     }
 
     @FXML
-    // RF-24 · Paso 5: la administradora confirma la aprobación.
+    // RF-38 · Paso 5: la administradora confirma la aprobación.
     private void onAprobar() {
         ApoyoVista.desmarcar(txtAnticipo);
         String texto = txtAnticipo.getText();
@@ -88,7 +88,7 @@ public class FormularioAprobacionController {
         }
 
         // Confirmación doble
-        // RF-24 · Excepción paso 5: si no confirma, el pedido sigue «En proceso de aceptación».
+        // RF-38 · Excepción paso 5: si no confirma, el pedido sigue «En proceso de aceptación».
         if (!Alertas.confirmarDoble("¿Aprobar el pedido #" + pedido.getFolio() + "?",
                 "Total: " + Formatos.moneda(pedido.getMontoTotal()) + "\nAnticipo requerido: " + Formatos.moneda(anticipo)
                         + "\nSe avisará al cliente por WhatsApp y correo.")) {
@@ -100,7 +100,7 @@ public class FormularioAprobacionController {
             ApoyoVista.marcar(txtAnticipo);
             return;
         }
-        // RF-24 · Excepciones pasos 2, 3 y 6: se muestra el motivo y no se aprueba.
+        // RF-38 · Excepciones pasos 2, 3 y 6: se muestra el motivo y no se aprueba.
         if (!respuesta.isExitoso() && !respuesta.isRecargar()) {
             mostrarError(respuesta.getMensaje());
             return;
@@ -110,7 +110,7 @@ public class FormularioAprobacionController {
     }
 
     @FXML
-    // RF-24 · Excepción paso 5: «Cancelar» cierra la ventana sin cambios.
+    // RF-38 · Excepción paso 5: «Cancelar» cierra la ventana sin cambios.
     private void onCancelar() {
         cerrar();
     }

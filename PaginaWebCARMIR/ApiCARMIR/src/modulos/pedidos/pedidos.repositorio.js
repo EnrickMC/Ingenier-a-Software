@@ -219,7 +219,7 @@ async function insertarHistorialInicial(conexion, folio) {
 }
 
 /*
- * Doble envío (RF-11): busca un pedido IGUAL del mismo cliente registrado en los últimos minutos
+ * Doble envío (RF-12): busca un pedido IGUAL del mismo cliente registrado en los últimos minutos
  * (misma entrega, mismo total y aún sin revisar). Sirve aunque la API se haya reiniciado.
  * Regresa el folio o 0.
  */
@@ -250,7 +250,7 @@ async function buscarPedidoReciente(conexion, idCliente, pedido, minutos) {
   return 0;
 }
 
-// ===================== Notificaciones (RF-32) =====================
+// ===================== Notificaciones (RF-47) =====================
 
 /*
  * Deja el aviso en la bitácora como "Pendiente": el Panel (que tiene las credenciales de WhatsApp
@@ -265,7 +265,7 @@ async function insertarNotificacion(conexion, aviso) {
   );
 }
 
-// ===================== Seguimiento (RF-12, lectura) =====================
+// ===================== Seguimiento (RF-13, lectura) =====================
 
 const SELECT_PEDIDO_CLIENTE =
   'SELECT p.Folio, p.FechaSolicitud, p.FechaEntrega, p.HorarioEntrega, p.ModalidadEntrega, p.ModalidadPago, ' +
@@ -284,12 +284,19 @@ const SELECT_PEDIDO_CLIENTE =
   'LEFT JOIN EntregaDomicilio ed ON ed.Folio = p.Folio ' +
   'LEFT JOIN Direccion dir ON dir.IdDireccion = ed.IdDireccion ';
 
-// El pedido solo se encuentra si el folio Y el teléfono coinciden (RF-12)
-async function buscarPedidoDeCliente(folio, telefono) {
-  const filas = await baseDatos.consultar(SELECT_PEDIDO_CLIENTE + 'WHERE p.Folio = ? AND c.TelefonoWhatsApp = ?', [
-    folio,
-    telefono
-  ]);
+// Condición del dato de contacto: teléfono de WhatsApp o correo (el correo sin importar mayúsculas)
+function condicionContacto(contacto) {
+  if (contacto.telefono !== '') {
+    return { sql: 'WHERE p.Folio = ? AND c.TelefonoWhatsApp = ?', valor: contacto.telefono };
+  }
+  return { sql: 'WHERE p.Folio = ? AND LOWER(c.CorreoCliente) = LOWER(?)', valor: contacto.correo };
+}
+
+// El pedido solo se encuentra si el folio Y el teléfono (o el correo) coinciden (RF-13)
+// "contacto" = { telefono, correo }: se usa el que traiga texto
+async function buscarPedidoDeCliente(folio, contacto) {
+  const condicion = condicionContacto(contacto);
+  const filas = await baseDatos.consultar(SELECT_PEDIDO_CLIENTE + condicion.sql, [folio, condicion.valor]);
   return primera(filas);
 }
 
@@ -333,11 +340,9 @@ async function listarPagos(folio) {
 // ===================== Comprobante de pago (dentro de la transacción) =====================
 
 // Datos del pedido para registrar un pago; FOR UPDATE no se usa: el candado con nombre ya ordena las peticiones
-async function buscarPedidoParaPago(conexion, folio, telefono) {
-  const filas = await baseDatos.ejecutar(conexion, SELECT_PEDIDO_CLIENTE + 'WHERE p.Folio = ? AND c.TelefonoWhatsApp = ?', [
-    folio,
-    telefono
-  ]);
+async function buscarPedidoParaPago(conexion, folio, contacto) {
+  const condicion = condicionContacto(contacto);
+  const filas = await baseDatos.ejecutar(conexion, SELECT_PEDIDO_CLIENTE + condicion.sql, [folio, condicion.valor]);
   return primera(filas);
 }
 
@@ -371,8 +376,9 @@ async function insertarPago(conexion, pago) {
   return resultado.insertId;
 }
 
-// RF-12: foto o PDF del comprobante que el cliente subió desde sus archivos.
-// Se guarda en la BD (no en una carpeta pública) con el mismo IdPago; el Panel lo abre en «Validación de pagos».
+// RF-14 · Paso 7: foto o PDF del comprobante que el cliente subió desde sus archivos.
+// Se guarda en la BD (no en una carpeta pública) con el mismo IdPago. El Panel todavía no muestra este
+// archivo en «Validación de pagos» (solo el enlace).
 async function insertarArchivoComprobante(conexion, idPago, archivo) {
   await baseDatos.ejecutar(
     conexion,

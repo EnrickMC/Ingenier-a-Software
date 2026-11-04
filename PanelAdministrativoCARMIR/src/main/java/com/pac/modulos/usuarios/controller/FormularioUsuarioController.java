@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * Controlador de la ventana "Nuevo usuario" / "Modificar usuario" (usuario-formulario.fxml).
- * RNF-11 (registro) y RNF-14 (modificación).
+ * RNF-16 (registro) y RNF-19 (modificación).
  */
 public class FormularioUsuarioController {
 
@@ -66,7 +66,7 @@ public class FormularioUsuarioController {
     // ===================== Preparar la ventana =====================
 
     // Formulario vacío para registrar un usuario nuevo
-    // RNF-11 · Paso 2: formulario vacío (nombre, usuario, contraseña, confirmación y permisos).
+    // RNF-16 · Paso 2: formulario vacío (nombre, usuario, contraseña, confirmación y permisos).
     public void prepararNuevo(List<Permiso> permisos) {
         usuarioEditado = null;
         lblTitulo.setText("Nuevo usuario");
@@ -78,7 +78,7 @@ public class FormularioUsuarioController {
     }
 
     // Formulario con los datos del usuario (sin la contraseña)
-    // RNF-14 · Paso 3: formulario con los datos actuales (sin la contraseña).
+    // RNF-19 · Paso 3: formulario con los datos actuales (sin la contraseña).
     public void prepararEdicion(Usuario usuario, List<Permiso> permisos) {
         usuarioEditado = usuario;
         lblTitulo.setText("Modificar usuario");
@@ -124,7 +124,7 @@ public class FormularioUsuarioController {
 
     // Botón "Guardar"
     @FXML
-    // RNF-11 · Paso 3 / RNF-14 · Paso 4: la Administradora eligió «Guardar».
+    // RNF-16 · Paso 3 / RNF-19 · Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ocultarMensaje();
@@ -138,7 +138,7 @@ public class FormularioUsuarioController {
             resultado = servicio.registrar(datos, contrasena, confirmacion);
 
             // El nombre de usuario es de una cuenta dada de baja: se ofrece reactivarla
-            // RNF-11 · Excepción paso 5: cuenta dada de baja con ese usuario; se ofrece reactivarla.
+            // RNF-16 · Excepción paso 5: cuenta dada de baja con ese usuario; se ofrece reactivarla.
             if (resultado.isOfrecerReactivar()) {
                 boolean reactivar = Alertas.confirmar("Cuenta dada de baja", resultado.getMensaje());
                 if (!reactivar) {
@@ -159,7 +159,7 @@ public class FormularioUsuarioController {
         }
 
         // El usuario ya no existe: se avisa y se recarga la lista
-        // RNF-14 · Excepción paso 2: el usuario ya no existe.
+        // RNF-19 · Excepción paso 2: el usuario ya no existe.
         if (resultado.isRecargarLista()) {
             Alertas.aviso(resultado.getMensaje());
             recargarLista = true;
@@ -172,7 +172,7 @@ public class FormularioUsuarioController {
 
     // Botón "Cancelar": se descartan los datos y la lista no cambia
     @FXML
-    // RNF-11 · Excepción paso 3 / RNF-14 · Excepción paso 4: «Cancelar» descarta los datos.
+    // RNF-16 · Excepción paso 3 / RNF-19 · Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         cerrarVentana();
     }
@@ -204,7 +204,7 @@ public class FormularioUsuarioController {
     }
 
     // Muestra el mensaje y resalta el campo que tiene el problema
-    // RNF-11 / RNF-14 · Excepciones pasos 4 a 6: resalta el campo con error.
+    // RNF-16 / RNF-19 · Excepciones pasos 4 a 6: resalta el campo con error.
     private void mostrarError(ResultadoOperacion resultado) {
         mostrarMensaje(resultado.getMensaje());
         String campo = resultado.getCampo();

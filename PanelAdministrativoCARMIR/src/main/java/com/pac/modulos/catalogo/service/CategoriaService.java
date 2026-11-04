@@ -9,7 +9,7 @@ import com.pac.modulos.catalogo.model.EstadoRegistro;
 import java.util.List;
 
 /**
- * Reglas de las categorías (RF-13 a RF-16).
+ * Reglas de las categorías (RF-15 a RF-18).
  * Los mensajes son los de los casos de uso del archivo "Requerimientos del sistema CARMIR.json".
  */
 public class CategoriaService {
@@ -38,10 +38,10 @@ public class CategoriaService {
         categoriaDAO = DAOFactory.crearCategoriaDAO();
     }
 
-    // ===================== Consultas (RF-13) =====================
+    // ===================== Consultas (RF-15) =====================
 
     // Busca categorías por nombre o descripción; estado null = todas
-    // RF-13 (Visualización de categorías): inicia aquí la consulta. Pasos 3 y 6: consulta las categorías (con búsqueda y filtro de estado).
+    // RF-15 (Visualización de categorías): inicia aquí la consulta. Pasos 3 y 6: consulta las categorías (con búsqueda y filtro de estado).
     public List<Categoria> buscar(String texto, EstadoRegistro estado) throws DAOException {
         return categoriaDAO.buscar(texto, estado);
     }
@@ -62,35 +62,35 @@ public class CategoriaService {
     }
 
     // Una categoría tiene datos completos si tiene nombre
-    // RF-13 · Paso 4: valida que los datos de la categoría estén completos.
+    // RF-15 · Paso 4: valida que los datos de la categoría estén completos.
     public boolean datosCompletos(Categoria categoria) {
         return !ValidacionCatalogo.estaVacio(categoria.getNombre());
     }
 
-    // ===================== Registro (RF-14) =====================
+    // ===================== Registro (RF-16) =====================
 
-    // RF-14 (Registro de categorías): inicia aquí la regla de negocio.
+    // RF-16 (Registro de categorías): inicia aquí la regla de negocio.
     public ResultadoCatalogo registrar(Categoria datos) {
-        // Excepción (RNF-15): solo la Administradora edita el catálogo; el personal solo consulta.
+        // Excepción (RNF-12): solo la Administradora edita el catálogo; el personal solo consulta.
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         // Paso 4: campos obligatorios y formato
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF-14 · Excepción paso 4: campos incompletos o con formato inválido; se resalta el campo.
+        // RF-16 · Excepción paso 4: campos incompletos o con formato inválido; se resalta el campo.
         if (validacion != null) {
             return validacion;
         }
 
         try {
             // Paso 5: nombre repetido
-            // RF-14 · Excepción paso 5: «La categoría ya existe».
+            // RF-16 · Excepción paso 5: «La categoría ya existe».
             if (categoriaDAO.buscarPorNombre(datos.getNombre()) != null) {
                 return ResultadoCatalogo.error(MSG_YA_EXISTE, ResultadoCatalogo.CAMPO_NOMBRE);
             }
         } catch (DAOException e) {
-            // RF-14 · Excepción paso 5: sin conexión, «Error de conexión».
+            // RF-16 · Excepción paso 5: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
@@ -98,24 +98,24 @@ public class CategoriaService {
         try {
             categoriaDAO.insertar(datos);
         } catch (DAOException e) {
-            // RF-14 · Excepción paso 6: «No fue posible guardar la categoría».
+            // RF-16 · Excepción paso 6: «No fue posible guardar la categoría».
             return ResultadoCatalogo.error(MSG_NO_GUARDADA, ResultadoCatalogo.CAMPO_CONEXION);
         }
-        // RF-14 · Paso 6: informa el éxito.
+        // RF-16 · Paso 6: informa el éxito.
         return ResultadoCatalogo.correcto("La categoría «" + datos.getNombre() + "» se registró correctamente");
     }
 
-    // ===================== Modificación (RF-15) =====================
+    // ===================== Modificación (RF-17) =====================
 
     // confirmado = la administradora ya aceptó inactivar la categoría
-    // RF-15 (Modificación de categorías): inicia aquí la regla de negocio.
+    // RF-17 (Modificación de categorías): inicia aquí la regla de negocio.
     public ResultadoCatalogo modificar(Categoria datos, boolean confirmado) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF-15 · Excepción paso 5: campos incompletos o con formato inválido.
+        // RF-17 · Excepción paso 5: campos incompletos o con formato inválido.
         if (validacion != null) {
             return validacion;
         }
@@ -124,27 +124,27 @@ public class CategoriaService {
         List<String> productosActivos;
         try {
             actual = categoriaDAO.buscarPorId(datos.getIdCategoria());
-            // RF-15 · Excepción paso 2: «Categoría no encontrada».
+            // RF-17 · Excepción paso 2: «Categoría no encontrada».
             if (actual == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADA);
             }
 
             // Paso 6: el nombre no debe ser de otra categoría
             Categoria conMismoNombre = categoriaDAO.buscarPorNombre(datos.getNombre());
-            // RF-15 · Excepción paso 6: «Ya existe otra categoría con ese nombre».
+            // RF-17 · Excepción paso 6: «Ya existe otra categoría con ese nombre».
             if (conMismoNombre != null && conMismoNombre.getIdCategoria() != datos.getIdCategoria()) {
                 return ResultadoCatalogo.error(MSG_OTRA_CON_NOMBRE, ResultadoCatalogo.CAMPO_NOMBRE);
             }
 
             productosActivos = categoriaDAO.listarProductosActivos(datos.getIdCategoria());
         } catch (DAOException e) {
-            // RF-15 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-17 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
         // Paso 7: si pasa a Inactiva, se pide confirmar y se dicen los productos afectados
         boolean seInactiva = actual.estaActiva() && !datos.estaActiva();
-        // RF-15 · Paso 7: se pide confirmar la inactivación (si no confirma, el formulario vuelve a Activa).
+        // RF-17 · Paso 7: se pide confirmar la inactivación (si no confirma, el formulario vuelve a Activa).
         if (seInactiva && !confirmado) {
             String mensaje = "Al inactivar la categoría, sus productos dejarán de verse en la tienda web.";
             if (productosActivos.isEmpty()) {
@@ -160,31 +160,31 @@ public class CategoriaService {
         try {
             categoriaDAO.actualizar(datos);
         } catch (DAOException e) {
-            // RF-15 · Excepción paso 8: «No fue posible actualizar la categoría».
+            // RF-17 · Excepción paso 8: «No fue posible actualizar la categoría».
             return ResultadoCatalogo.error(MSG_NO_ACTUALIZADA, ResultadoCatalogo.CAMPO_CONEXION);
         }
-        // RF-15 · Paso 8: informa el éxito.
+        // RF-17 · Paso 8: informa el éxito.
         return ResultadoCatalogo.correcto("La categoría «" + datos.getNombre() + "» se actualizó correctamente");
     }
 
-    // ===================== Baja (RF-16) =====================
+    // ===================== Baja (RF-18) =====================
 
     // Pasos 2 y 3: revisa si se puede dar de baja y arma el mensaje de confirmación
-    // RF-16 (Eliminación de categorías): inicia aquí la regla de negocio.
+    // RF-18 (Eliminación de categorías): inicia aquí la regla de negocio.
     public ResultadoCatalogo prepararBaja(int idCategoria) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
         try {
             Categoria categoria = categoriaDAO.buscarPorId(idCategoria);
-            // RF-16 · Excepción paso 2: «Categoría no encontrada».
+            // RF-18 · Excepción paso 2: «Categoría no encontrada».
             if (categoria == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADA);
             }
 
             // Con productos activos no se permite
             List<String> activos = categoriaDAO.listarProductosActivos(idCategoria);
-            // RF-16 · Excepción paso 3: tiene productos activos; se bloquea la baja y se listan.
+            // RF-18 · Excepción paso 3: tiene productos activos; se bloquea la baja y se listan.
             if (!activos.isEmpty()) {
                 return ResultadoCatalogo.error("No se puede dar de baja la categoría «" + categoria.getNombre()
                         + "» porque tiene productos activos:\n" + ValidacionCatalogo.unir(activos)
@@ -201,23 +201,23 @@ public class CategoriaService {
                 mensaje = mensaje + "La categoría no tiene relaciones, así que se ELIMINARÁ junto con sus"
                         + " características, opciones y exclusiones. Esta acción no se puede deshacer.";
             }
-            // RF-16 · Paso 4: mensaje de la ventana de confirmación con las consecuencias.
+            // RF-18 · Paso 4: mensaje de la ventana de confirmación con las consecuencias.
             return ResultadoCatalogo.bajaPosible(mensaje, !historial);
         } catch (DAOException e) {
-            // RF-16 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-18 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
     }
 
     // Paso 6: registra la baja (inhabilita o elimina)
-    // RF-16 · Paso 6 (después de que la Administradora confirmó en el paso 5).
+    // RF-18 · Paso 6 (después de que la Administradora confirmó en el paso 5).
     public ResultadoCatalogo darDeBaja(int idCategoria) {
         ResultadoCatalogo revision = prepararBaja(idCategoria);
         if (!revision.isExitoso()) {
             return revision;
         }
         try {
-            // RF-16 · Paso 6: sin historial se elimina; con historial se inhabilita (con sus características y opciones).
+            // RF-18 · Paso 6: sin historial se elimina; con historial se inhabilita (con sus características y opciones).
             if (revision.isSeEliminara()) {
                 categoriaDAO.eliminar(idCategoria);
                 return ResultadoCatalogo.correcto("La categoría se eliminó correctamente");
@@ -225,7 +225,7 @@ public class CategoriaService {
             categoriaDAO.inhabilitar(idCategoria);
             return ResultadoCatalogo.correcto("La categoría se inhabilitó correctamente");
         } catch (DAOException e) {
-            // RF-16 · Excepción paso 6: «No fue posible dar de baja la categoría».
+            // RF-18 · Excepción paso 6: «No fue posible dar de baja la categoría».
             return ResultadoCatalogo.error(MSG_NO_DADA_DE_BAJA, null);
         }
     }
@@ -233,7 +233,7 @@ public class CategoriaService {
     // ===================== Apoyo =====================
 
     // Revisa los campos del formulario; devuelve null si todo está bien
-    // RF-14 · Paso 4 / RF-15 · Paso 5: valida campos obligatorios y formato.
+    // RF-16 · Paso 4 / RF-17 · Paso 5: valida campos obligatorios y formato.
     private ResultadoCatalogo validarCampos(Categoria datos) {
         if (!ValidacionCatalogo.nombreValido(datos.getNombre(), MAX_NOMBRE)) {
             return ResultadoCatalogo.error(MSG_NOMBRE_INVALIDO, ResultadoCatalogo.CAMPO_NOMBRE);

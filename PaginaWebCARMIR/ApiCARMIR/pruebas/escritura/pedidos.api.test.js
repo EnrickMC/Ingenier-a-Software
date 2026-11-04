@@ -323,7 +323,7 @@ prueba.test('capacidad diaria llena: rechaza la fecha y deshace todo (rollback)'
   assert.ok(reglasWeb.fechasLlenas.indexOf(libre.fecha) >= 0);
 });
 
-prueba.test('seguimiento con folio y teléfono, y comprobante solo después de aprobar', async function () {
+prueba.test('seguimiento con folio y teléfono o correo, y comprobante solo después de aprobar', async function () {
   const plantilla = await opcionesDe(1);
   const libre = await fechaConLugar(18, 1);
   const telefono = telefonoNuevo();
@@ -336,6 +336,14 @@ prueba.test('seguimiento con folio y teléfono, y comprobante solo después de a
   assert.strictEqual(consulta.cuerpo.pasos[0].actual, true);
   assert.strictEqual(consulta.cuerpo.saldo, plantilla.precio);
   assert.strictEqual(consulta.cuerpo.puedeEnviarComprobante, false);
+
+  // También se encuentra con el correo (sin importar mayúsculas)
+  const conCorreo = await enviar('/pedidos/consulta', { folio: String(folio), correo: 'Prueba@Correo.com' });
+  assert.strictEqual(conCorreo.estado, 200, JSON.stringify(conCorreo.cuerpo));
+  assert.strictEqual(conCorreo.cuerpo.folio, folio);
+  // Correo mal escrito: error de formato (no gasta intentos)
+  const correoMalo = await enviar('/pedidos/consulta', { folio: String(folio), correo: 'prueba@' });
+  assert.strictEqual(correoMalo.estado, 400);
 
   const comprobante = {
     folio: folio,
@@ -350,8 +358,8 @@ prueba.test('seguimiento con folio y teléfono, y comprobante solo después de a
   assert.strictEqual(await contar('SELECT COUNT(*) AS Total FROM Pago WHERE Folio = ?', [folio]), 0);
 });
 
-// RF-12: foto del comprobante subida desde los archivos del cliente (necesita la PARTE 7 de MIGRACION_COMPLETA.sql)
-// Va antes de la prueba de bloqueo: después de 5 intentos fallidos la API frena las consultas y los comprobantes.
+// RF-13: foto del comprobante subida desde los archivos del cliente (necesita la PARTE 7 de MIGRACION_COMPLETA.sql)
+// Va antes de la prueba de bloqueo: después de 12 intentos fallidos la API frena las consultas y los comprobantes.
 prueba.test('comprobante con foto: se guarda el archivo, se rechazan depósito y archivos falsos', async function (contexto) {
   // Un pedido aprobado de la semilla 4 que todavía acepte comprobantes
   const candidatos = await baseDatos.consultar(
@@ -403,15 +411,16 @@ prueba.test('comprobante con foto: se guarda el archivo, se rechazan depósito y
   assert.strictEqual(pagos[0].EstadoValidacion, 'Pendiente');
 });
 
-prueba.test('seguimiento: datos que no coinciden y bloqueo tras 5 intentos', async function () {
+prueba.test('seguimiento: datos que no coinciden y bloqueo tras 12 intentos', async function () {
   let ultima = null;
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 13; i++) {
     ultima = await enviar('/pedidos/consulta', { folio: '1', telefono: '0000000000' });
-    if (i < 5) {
+    if (i < 12) {
       assert.strictEqual(ultima.estado, 404);
       assert.strictEqual(ultima.cuerpo.mensaje, 'No encontramos un pedido con esos datos');
     }
   }
   assert.strictEqual(ultima.estado, 429);
-  assert.match(ultima.cuerpo.mensaje, /Espera \d+ minuto/);
+  assert.match(ultima.cuerpo.mensaje, /Espera \d+ segundos/);
+  assert.ok(ultima.cuerpo.detalles.segundosEspera <= 30);
 });

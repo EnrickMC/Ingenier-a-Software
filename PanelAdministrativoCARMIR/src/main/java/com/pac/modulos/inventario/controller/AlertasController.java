@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Pestaña Alertas (alertas.fxml): existencia baja / agotado (RF-39) y caducidad (RF-40).
+ * Pestaña Alertas (alertas.fxml): existencia baja / agotado (RF-61) y caducidad (RF-62).
  * Desde aquí se atiende la alerta: registrar compra, merma del lote o marcarla como atendida.
  */
 public class AlertasController {
@@ -55,7 +55,7 @@ public class AlertasController {
     }
 
     // Se llama cada vez que la pestaña queda visible
-    // RF-39 / RF-40 · Paso 7 (RF-39) y paso 6 (RF-40): muestra las alertas de stock bajo y de caducidad.
+    // RF-61 / RF-62 · Paso 7 (RF-61) y paso 6 (RF-62): muestra las alertas de stock bajo y de caducidad.
     public void alMostrar() {
         cargar();
     }
@@ -68,7 +68,7 @@ public class AlertasController {
     // Vuelve a revisar existencias y caducidades en este momento
     @FXML
     private void onRevisar() {
-        // RF-39 / RF-40 · Paso 1: revisión manual de existencias y caducidades.
+        // RF-61 / RF-62 · Paso 1: revisión manual de existencias y caducidades.
         boolean revisado = MonitorAlertas.getInstancia().revisar();
         if (!revisado) {
             mostrarErrorConexion();
@@ -105,7 +105,7 @@ public class AlertasController {
 
     private void mostrarErrorConexion() {
         tblAlertas.getItems().clear();
-        // RF-40 · Excepción paso 2: sin conexión no se pudo revisar.
+        // RF-62 · Excepción paso 2: sin conexión no se pudo revisar.
         lblVacio.setText(AlertaService.MSG_ERROR_CONEXION);
         lblConteo.setText("");
         actualizarBotones();
@@ -155,7 +155,7 @@ public class AlertasController {
 
     // Caducidad: abre la merma con el lote y el motivo "Caducidad" ya elegidos
     @FXML
-    // RF-40 · Excepción paso 4: lote caducado; se sugiere registrarlo como merma (RF-38).
+    // RF-62 · Excepción paso 4: lote caducado; se sugiere registrarlo como merma (RF-60).
     private void onMermaLote() {
         FilaAlerta fila = tblAlertas.getSelectionModel().getSelectedItem();
         if (fila == null) {

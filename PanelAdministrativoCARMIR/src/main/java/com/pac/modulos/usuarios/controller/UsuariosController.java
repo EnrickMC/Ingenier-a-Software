@@ -34,9 +34,9 @@ import java.util.List;
 /**
  * Controlador del apartado "Usuarios y Permisos" (usuarios.fxml). Módulo 7.
  *
- * - RNF-13 Visualización: lista con búsqueda, filtro por estado y detalle.
- * - RNF-11 Registro y RNF-14 Modificación: abren usuario-formulario.fxml.
- * - RNF-12 Baja: confirmación doble y baja lógica.
+ * - RNF-18 Visualización: lista con búsqueda, filtro por estado y detalle.
+ * - RNF-16 Registro y RNF-19 Modificación: abren usuario-formulario.fxml.
+ * - RNF-17 Baja: confirmación doble y baja lógica.
  */
 public class UsuariosController implements ControladorSeccion {
 
@@ -69,7 +69,7 @@ public class UsuariosController implements ControladorSeccion {
 
     // El Navegador llama a este método al abrir el apartado
     @Override
-    // RNF-13 (Visualización de usuarios): inicia aquí. Paso 1: se abre el apartado (el permiso se revisó en el paso 2, Navegador).
+    // RNF-18 (Visualización de usuarios): inicia aquí. Paso 1: se abre el apartado (el permiso se revisó en el paso 2, Navegador).
     public void inicializarSeccion(SeccionPanel seccion) {
         // Botones de estado: cada uno filtra la lista
         barraEstados.agregar(EstadoUsuario.ACTIVO.getValorBD(), "Activo", "estado-terminado", "bi-check-circle-fill");
@@ -84,10 +84,10 @@ public class UsuariosController implements ControladorSeccion {
         cargarUsuarios();
     }
 
-    // ===================== Lista de usuarios (RNF-13) =====================
+    // ===================== Lista de usuarios (RNF-18) =====================
 
     // Consulta la base de datos con el texto y el estado elegidos y llena la tabla
-    // RNF-13 · Pasos 3 a 5: consulta y muestra la lista (sin contraseñas).
+    // RNF-18 · Pasos 3 a 5: consulta y muestra la lista (sin contraseñas).
     private void cargarUsuarios() {
         String texto = txtBuscar.getText();
         EstadoUsuario estado = leerFiltroEstado();
@@ -99,7 +99,7 @@ public class UsuariosController implements ControladorSeccion {
         try {
             usuarios = servicio.buscar(texto, estado);
         } catch (DAOException e) {
-            // RNF-13 · Excepción paso 3: «Error de conexión» con «Reintentar», sin información parcial.
+            // RNF-18 · Excepción paso 3: «Error de conexión» con «Reintentar», sin información parcial.
             // Sin conexión no se muestra información parcial
             lblVacio.setText("Error de conexión");
             lblConteo.setText("");
@@ -114,10 +114,10 @@ public class UsuariosController implements ControladorSeccion {
         // Mensajes cuando la tabla queda vacía
         if (usuarios.isEmpty()) {
             if (hayFiltro()) {
-                // RNF-13 · Excepción paso 4 / RNF-12 y RNF-14 · Excepción paso 1: «No se encontraron usuarios con ese criterio».
+                // RNF-18 · Excepción paso 4 / RNF-17 y RNF-19 · Excepción paso 1: «No se encontraron usuarios con ese criterio».
                 lblVacio.setText("No se encontraron usuarios con ese criterio");
             } else {
-                // RNF-13 · Excepción paso 4: «Aún no hay usuarios del personal registrados» (con «+ Nuevo usuario»).
+                // RNF-18 · Excepción paso 4: «Aún no hay usuarios del personal registrados» (con «+ Nuevo usuario»).
                 lblVacio.setText("Aún no hay usuarios del personal registrados");
             }
         }
@@ -162,7 +162,7 @@ public class UsuariosController implements ControladorSeccion {
 
     // Clic sobre la tabla: un clic muestra el detalle, doble clic abre "Modificar"
     @FXML
-    // RNF-13 · Paso 6: la Administradora selecciona un usuario.
+    // RNF-18 · Paso 6: la Administradora selecciona un usuario.
     private void onClicTabla(MouseEvent evento) {
         boolean seleccionado = mostrarSeleccionado();
         if (seleccionado && evento.getClickCount() == 2) {
@@ -191,11 +191,11 @@ public class UsuariosController implements ControladorSeccion {
         try {
             usuario = servicio.buscarPorId(id);
         } catch (DAOException e) {
-            // RNF-13 · Excepción paso 6: sin conexión.
+            // RNF-18 · Excepción paso 6: sin conexión.
             Alertas.error(UsuarioService.MSG_ERROR_CONEXION);
             return false;
         }
-        // RNF-13 · Excepción paso 6: «Usuario no encontrado»; se recarga la lista.
+        // RNF-18 · Excepción paso 6: «Usuario no encontrado»; se recarga la lista.
         if (usuario == null) {
             Alertas.aviso(UsuarioService.MSG_NO_ENCONTRADO);
             cargarUsuarios();
@@ -242,34 +242,34 @@ public class UsuariosController implements ControladorSeccion {
         btnDarDeBaja.setDisable(usuario.getEstado() == EstadoUsuario.INACTIVO);
     }
 
-    // ===================== Registro y modificación (RNF-11, RNF-14) =====================
+    // ===================== Registro y modificación (RNF-16, RNF-19) =====================
 
     // Botón "+ Nuevo usuario"
     @FXML
-    // RNF-11 (Registro de usuarios): inicia aquí. Paso 1: «+ Nuevo usuario».
+    // RNF-16 (Registro de usuarios): inicia aquí. Paso 1: «+ Nuevo usuario».
     private void onNuevo() {
         abrirFormulario(null);
     }
 
     // Botón "Modificar" o doble clic en la tabla
     @FXML
-    // RNF-14 (Modificación de usuarios): inicia aquí. Paso 1: selecciona al usuario y pide modificarlo.
+    // RNF-19 (Modificación de usuarios): inicia aquí. Paso 1: selecciona al usuario y pide modificarlo.
     private void onEditar() {
         if (usuarioSeleccionado == null) {
             Alertas.info("Selecciona un usuario de la lista");
             return;
         }
 
-        // Paso 2 de RNF-14: se valida que siga existiendo y se leen sus datos actuales
+        // Paso 2 de RNF-19: se valida que siga existiendo y se leen sus datos actuales
         Usuario usuario;
         try {
             usuario = servicio.buscarPorId(usuarioSeleccionado.getIdUsuario());
         } catch (DAOException e) {
-            // RNF-14 · Excepción paso 2: «Error de conexión»; no se abre el formulario.
+            // RNF-19 · Excepción paso 2: «Error de conexión»; no se abre el formulario.
             Alertas.error(UsuarioService.MSG_ERROR_CONEXION);
             return;
         }
-        // RNF-14 · Excepción paso 2: «Usuario no encontrado».
+        // RNF-19 · Excepción paso 2: «Usuario no encontrado».
         if (usuario == null) {
             Alertas.aviso(UsuarioService.MSG_NO_ENCONTRADO);
             cargarUsuarios();
@@ -310,7 +310,7 @@ public class UsuariosController implements ControladorSeccion {
         // Ventana modal: mientras esté abierta no se puede usar el panel
         ApoyoVista.mostrarModal(raiz, tblUsuarios.getScene().getWindow(), titulo);
 
-        // RNF-11 · Paso 7 / RNF-14 · Paso 8: informa el éxito y actualiza la lista.
+        // RNF-16 · Paso 7 / RNF-19 · Paso 8: informa el éxito y actualiza la lista.
         if (formulario.seGuardo()) {
             Alertas.info(formulario.getMensajeExito());
             cargarUsuarios();
@@ -319,11 +319,11 @@ public class UsuariosController implements ControladorSeccion {
         }
     }
 
-    // ===================== Baja (RNF-12) =====================
+    // ===================== Baja (RNF-17) =====================
 
     // Botón "Dar de baja"
     @FXML
-    // RNF-12 (Eliminación de usuarios): inicia aquí. Paso 1: selecciona al usuario y pide darlo de baja.
+    // RNF-17 (Eliminación de usuarios): inicia aquí. Paso 1: selecciona al usuario y pide darlo de baja.
     private void onDarDeBaja() {
         if (usuarioSeleccionado == null) {
             Alertas.info("Selecciona un usuario de la lista");
@@ -332,7 +332,7 @@ public class UsuariosController implements ControladorSeccion {
 
         // Paso 2: revisar que exista, que esté activo y que no sea la propia cuenta
         ResultadoOperacion revision = servicio.prepararBaja(usuarioSeleccionado.getIdUsuario());
-        // RNF-12 · Excepciones paso 2: sin conexión, no existe, ya inactiva o es la propia cuenta.
+        // RNF-17 · Excepciones paso 2: sin conexión, no existe, ya inactiva o es la propia cuenta.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -347,14 +347,14 @@ public class UsuariosController implements ControladorSeccion {
                 + "\nUsuario: " + usuario.getNombreUsuario()
                 + "\nPermisos: " + usuario.getTextoPermisos()
                 + "\n\nYa no podrá entrar al sistema. Su historial de pedidos y movimientos se conserva.";
-        // RNF-12 · Excepción paso 4: canceló; el usuario conserva su acceso y permisos.
+        // RNF-17 · Excepción paso 4: canceló; el usuario conserva su acceso y permisos.
         if (!Alertas.confirmarDoble("¿Dar de baja a este usuario?", mensaje)) {
             return;
         }
 
         // Paso 5: baja lógica
         ResultadoOperacion resultado = servicio.darDeBaja(usuario);
-        // RNF-12 · Paso 6: informa el éxito y actualiza la lista. Si falla, excepción paso 5.
+        // RNF-17 · Paso 6: informa el éxito y actualiza la lista. Si falla, excepción paso 5.
         if (resultado.isExitoso()) {
             Alertas.info(resultado.getMensaje());
         } else {

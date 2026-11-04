@@ -29,6 +29,9 @@
         <Label styleClass="formulario-etiqueta" text="Nombre *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
 <graphic><IconoAyuda texto="Valor que el cliente puede elegir dentro de la característica, por ejemplo Grande, Tres leches o Moño."/></graphic></Label>
         <ComboBox fx:id="cmbNombre" styleClass="combo-carmir" editable="true" maxWidth="Infinity" promptText="Ej. Grande, Tres leches, Moño"/>
+        <Label fx:id="lblVista3d" styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity" minHeight="-Infinity">
+            <graphic><FontIcon iconLiteral="bi-box"/></graphic>
+        </Label>
     </VBox>
     <VBox spacing="4">
         <Label styleClass="formulario-etiqueta" text="Descripción"/>

@@ -18,7 +18,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Respaldos de la base de datos (RNF-8, Prompt 8.1).
+ * Respaldos de la base de datos (RF-72 generar y RF-73 restaurar; RNF-8, Prompt 8.1).
+ * Los respaldos solo se hacen cuando el usuario los pide en Configuración (no hay copias automáticas).
  *
  * - Generar respaldo: ejecuta mysqldump y guarda toda CARMIR_DB en un archivo .sql.
  * - Restaurar respaldo: ejecuta mysql con ese archivo (reemplaza los datos actuales).
@@ -47,7 +48,7 @@ public class RespaldoService {
 
     // ===================== Datos de la conexión =====================
 
-    // Nombre sugerido del respaldo: CARMIR_Respaldo_2026-11-01_1830.sql
+    // RF-72 · Paso 4: nombre sugerido del respaldo, CARMIR_Respaldo_2026-11-01_1830.sql
     public String nombreSugerido() {
         return "CARMIR_Respaldo_" + FECHA_ARCHIVO.format(LocalDateTime.now()) + ".sql";
     }
@@ -161,9 +162,10 @@ public class RespaldoService {
 
     // ===================== Generar y restaurar =====================
 
-    // Guarda toda la base de datos en el archivo indicado
+    // RF-72 · Paso 6: guarda toda la base de datos en el archivo indicado
     public ResultadoConfiguracion generarRespaldo(File destino) {
         File mysqldump = buscarPrograma("mysqldump");
+        // RF-72 · Excepción paso 6: «No se encontró mysqldump. Elige la carpeta "bin" de tu instalación de MySQL».
         if (mysqldump == null) {
             return ResultadoConfiguracion.error(String.format(MSG_SIN_PROGRAMA, "mysqldump"), null);
         }
@@ -187,12 +189,14 @@ public class RespaldoService {
             comando.add(getBaseDeDatos());
 
             String salida = ejecutar(comando, null);
+            // RF-72 · Excepción paso 6: «No fue posible generar el respaldo» con el motivo.
             if (salida != null) {
                 return ResultadoConfiguracion.error(MSG_RESPALDO_ERROR + ": " + salida, null);
             }
             if (!destino.isFile() || destino.length() == 0) {
                 return ResultadoConfiguracion.error(MSG_RESPALDO_ERROR, null);
             }
+            // RF-72 · Paso 7: «Respaldo generado: [ruta del archivo]».
             return ResultadoConfiguracion.correcto(MSG_RESPALDO_OK + ": " + destino.getAbsolutePath());
         } catch (IOException e) {
             return ResultadoConfiguracion.error(MSG_RESPALDO_ERROR + ": " + e.getMessage(), null);
@@ -201,7 +205,7 @@ public class RespaldoService {
         }
     }
 
-    // Revisa que el archivo parezca un respaldo de mysqldump de esta base
+    // RF-73 · Paso 5: revisa que el archivo parezca un respaldo de mysqldump de esta base
     public boolean esRespaldoValido(File archivo) {
         try {
             BufferedReader lector = new BufferedReader(
@@ -228,7 +232,8 @@ public class RespaldoService {
         }
     }
 
-    // Ejecuta el archivo .sql del respaldo con el programa mysql
+    // RF-73 · Paso 8: ejecuta el archivo .sql del respaldo con el programa mysql
+    // (vuelve a revisar que sea la administradora y que el archivo sea válido)
     public ResultadoConfiguracion restaurarRespaldo(File origen) {
         if (!PermisosConfiguracion.puedeRestaurar()) {
             return ResultadoConfiguracion.error(PermisosConfiguracion.MSG_SOLO_ADMINISTRADORA, null);
@@ -238,6 +243,7 @@ public class RespaldoService {
         }
         File mysql = buscarPrograma("mysql");
         if (mysql == null) {
+            // RF-73 · Excepción paso 8: «No se encontró mysql…».
             return ResultadoConfiguracion.error(String.format(MSG_SIN_PROGRAMA, "mysql"), null);
         }
         File credenciales = null;
@@ -252,13 +258,14 @@ public class RespaldoService {
             comando.add("--protocol=TCP");
             comando.add("--default-character-set=utf8mb4");
 
-            // La conexión del panel se cierra para no chocar con la restauración
+            // RF-73 · Paso 8: la conexión del panel se cierra para no chocar con la restauración
             ConexionBD.getInstancia().cerrar();
             String salida = ejecutar(comando, origen);
             if (salida != null) {
+                // RF-73 · Excepción paso 8: «No fue posible restaurar el respaldo» con el motivo.
                 return ResultadoConfiguracion.error(MSG_RESTAURAR_ERROR + ": " + salida, null);
             }
-            // Los parámetros pudieron cambiar con el respaldo
+            // RF-73 · Paso 9: los parámetros pudieron cambiar con el respaldo; se vuelven a cargar
             new ConfiguracionService().cargarEnAplicacion();
             return ResultadoConfiguracion.correcto(MSG_RESTAURAR_OK);
         } catch (IOException e) {

@@ -24,7 +24,7 @@ public interface PestanaReporte {
 
     LocalDate getHasta();
 
-    // Arma el archivo con la misma información de la pantalla (RF-48)
+    // Arma el archivo con la misma información de la pantalla (RF-67)
     LibroExcel armarLibro();
 
     // Tipo para el nombre del archivo: "IngresosGastos" o "MasVendidos"

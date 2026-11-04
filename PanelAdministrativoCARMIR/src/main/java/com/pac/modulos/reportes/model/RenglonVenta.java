@@ -1,7 +1,7 @@
 package com.pac.modulos.reportes.model;
 
 /**
- * Un renglón del reporte de productos más vendidos (RF-47):
+ * Un renglón del reporte de productos más vendidos (RF-66):
  * un producto, una categoría o una opción de personalización.
  */
 public class RenglonVenta {
@@ -72,7 +72,7 @@ public class RenglonVenta {
         this.oculto = oculto;
     }
 
-    // Texto del estado de un producto: «Producto inactivo» (RF-47), «Oculto en tienda» o «Activo»
+    // Texto del estado de un producto: «Producto inactivo» (RF-66), «Oculto en tienda» o «Activo»
     public String getEstadoProducto() {
         if (inactivo) {
             return "Producto inactivo";

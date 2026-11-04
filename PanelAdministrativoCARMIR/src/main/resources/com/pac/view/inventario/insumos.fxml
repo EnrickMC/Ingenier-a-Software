@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Pestaña Insumos (RF-33 a RF-36) -->
+<!-- Pestaña Insumos (RF-51 a RF-54) -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.inventario.controller.InsumosController"
       stylesheets="@../../css/pedidos.css"

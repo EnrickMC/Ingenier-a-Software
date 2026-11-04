@@ -42,7 +42,7 @@ public class CanalWhatsApp implements CanalEnvio {
         return Notificacion.CANAL_WHATSAPP;
     }
 
-    // RF-32 · Paso 6: envía el aviso como texto libre por WhatsApp Business Cloud API.
+    // RF-47 · Paso 6: envía el aviso como texto libre por WhatsApp Business Cloud API.
     @Override
     public void enviar(String destino, String asunto, String mensaje) throws ErrorEnvio {
         String cuerpo = "{\"messaging_product\":\"whatsapp\",\"to\":\"" + numeroCompleto(destino) + "\","

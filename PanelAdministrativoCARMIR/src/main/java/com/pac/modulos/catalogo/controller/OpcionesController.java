@@ -81,7 +81,7 @@ public class OpcionesController {
     }
 
     // Se llama cada vez que la pestaña queda visible
-    // RF «Visualización de opciones de característica»: inicia aquí. Paso 1: se abre la pestaña Opciones.
+    // RF-26 (Visualización de opciones de característica): inicia aquí. Paso 1: se abre la pestaña Opciones.
     public void alMostrar() {
         llenandoSelectores = true;
         boolean conectado = catalogo.llenarCategorias(cmbCategoria);
@@ -89,7 +89,7 @@ public class OpcionesController {
             conectado = llenarCaracteristicas();
         }
         llenandoSelectores = false;
-        // RF «Visualización de opciones de característica» · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
+        // RF-26 · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
         if (!conectado) {
             mostrarErrorConexion();
             return;
@@ -156,13 +156,13 @@ public class OpcionesController {
     }
 
     @FXML
-    // RF «Visualización de opciones de característica» · Paso 1: el usuario escribe un criterio de búsqueda.
+    // RF-26 · Paso 1: el usuario escribe un criterio de búsqueda.
     private void onBuscar() {
         cargarOpciones();
     }
 
     @FXML
-    // RF «Visualización de opciones de característica» · Excepción paso 6: «Limpiar filtro».
+    // RF-26 · Excepción paso 6: «Limpiar filtro».
     private void onLimpiarFiltro() {
         txtBuscar.clear();
         cargarOpciones();
@@ -175,7 +175,7 @@ public class OpcionesController {
 
     // ===================== Lista (Visualización de opciones) =====================
 
-    // RF «Visualización de opciones de característica» · Pasos 2 a 6: consulta y despliega las opciones de la característica.
+    // RF-26 · Pasos 2 a 6: consulta y despliega las opciones de la característica.
     private void cargarOpciones() {
         int idAntes = 0;
         if (seleccionada != null) {
@@ -201,7 +201,7 @@ public class OpcionesController {
         try {
             // Paso 2: la característica sigue existiendo
             if (servicio.buscarCaracteristica(caracteristica.getIdCaracteristica()) == null) {
-                // RF «Visualización de opciones de característica» · Excepción paso 2: «Característica no encontrada»; regresa al listado de características.
+                // RF-26 · Excepción paso 2: «Característica no encontrada»; regresa al listado de características.
                 Alertas.aviso(OpcionService.MSG_CARACTERISTICA_NO_ENCONTRADA);
                 catalogo.setIdCaracteristicaActual(0);
                 alMostrar();
@@ -210,12 +210,12 @@ public class OpcionesController {
             opciones = servicio.listarPorCaracteristica(caracteristica.getIdCaracteristica());
             exclusiones = exclusionService.listarPorCategoria(caracteristica.getIdCategoria());
         } catch (DAOException e) {
-            // RF «Visualización de opciones de característica» · Excepción paso 3: sin conexión.
+            // RF-26 · Excepción paso 3: sin conexión.
             mostrarErrorConexion();
             return;
         }
 
-        // RF «Visualización de opciones de característica» · Excepción paso 4: «Esta característica no tiene opciones registradas» (con «+ Nueva opción»).
+        // RF-26 · Excepción paso 4: «Esta característica no tiene opciones registradas» (con «+ Nueva opción»).
         if (opciones.isEmpty()) {
             lblVacio.setText(OpcionService.MSG_SIN_OPCIONES);
             lblConteo.setText("0 opción(es)");
@@ -235,13 +235,13 @@ public class OpcionesController {
                 tblOpciones.getItems().add(new FilaOpcion(opcion, contarExclusiones(exclusiones, opcion)));
             }
         }
-        // RF «Visualización de opciones de característica» · Excepción paso 4: «Algunas opciones no pudieron cargarse».
+        // RF-26 · Excepción paso 4: «Algunas opciones no pudieron cargarse».
         if (incompletas > 0) {
             lblAviso.setText(OpcionService.MSG_INCOMPLETAS);
             ApoyoVista.mostrarNodo(lblAviso, true);
         }
         lblConteo.setText(tblOpciones.getItems().size() + " opción(es)");
-        // RF «Visualización de opciones de característica» · Excepción paso 6: «Sin resultados para el criterio ingresado».
+        // RF-26 · Excepción paso 6: «Sin resultados para el criterio ingresado».
         if (tblOpciones.getItems().isEmpty() && hayFiltro()) {
             lblVacio.setText(OpcionService.MSG_SIN_RESULTADOS);
         }
@@ -379,7 +379,7 @@ public class OpcionesController {
     }
 
     @FXML
-    // RF «Exclusiones entre opciones de características» · Paso 1: la Administradora pide administrar las exclusiones de la opción.
+    // RF-27 · Paso 1: la Administradora pide administrar las exclusiones de la opción.
     private void onExclusiones() {
         if (seleccionada != null && cmbCategoria.getValue() != null) {
             catalogo.irAExclusiones(seleccionada, cmbCategoria.getValue().getIdCategoria());
@@ -389,7 +389,7 @@ public class OpcionesController {
     // ===================== Registro y modificación =====================
 
     @FXML
-    // RF «Registro de opción de característica»: inicia aquí. Paso 1: «+ Nueva opción».
+    // RF-23 (Registro de opción de característica): inicia aquí. Paso 1: «+ Nueva opción».
     private void onNueva() {
         Caracteristica caracteristica = cmbCaracteristica.getValue();
         if (caracteristica == null) {
@@ -398,7 +398,7 @@ public class OpcionesController {
         }
         // Paso 2: la característica sigue existiendo y disponible
         ResultadoCatalogo revision = servicio.revisarCaracteristicaParaAlta(caracteristica.getIdCaracteristica());
-        // RF «Registro de opción de característica» · Excepción paso 2: la característica ya no está disponible o no hay conexión.
+        // RF-23 · Excepción paso 2: la característica ya no está disponible o no hay conexión.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -410,7 +410,7 @@ public class OpcionesController {
     }
 
     @FXML
-    // RF «Modificación de opción de característica»: inicia aquí. Paso 1: selecciona una opción y pide «Editar».
+    // RF-25 (Modificación de opción de característica): inicia aquí. Paso 1: selecciona una opción y pide «Editar».
     private void onModificar() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una opción de la lista");
@@ -418,16 +418,16 @@ public class OpcionesController {
         }
         Opcion opcion;
         Caracteristica caracteristica;
-        // RF «Modificación de opción de característica» · Paso 2: valida que la opción exista y recupera sus datos.
+        // RF-25 · Paso 2: valida que la opción exista y recupera sus datos.
         try {
             opcion = servicio.buscarPorId(seleccionada.getIdOpcion());
             caracteristica = servicio.buscarCaracteristica(seleccionada.getIdCaracteristica());
         } catch (DAOException e) {
-            // RF «Modificación de opción de característica» · Excepción paso 2: «Error de conexión».
+            // RF-25 · Excepción paso 2: «Error de conexión».
             Alertas.error(OpcionService.MSG_ERROR_CONEXION);
             return;
         }
-        // RF «Modificación de opción de característica» · Excepción paso 2: «Opción no encontrada».
+        // RF-25 · Excepción paso 2: «Opción no encontrada».
         if (opcion == null || caracteristica == null) {
             Alertas.aviso(OpcionService.MSG_NO_ENCONTRADA);
             cargarOpciones();
@@ -453,7 +453,7 @@ public class OpcionesController {
         Parent raiz = cargador.getRoot();
         ApoyoVista.mostrarModal(raiz, tblOpciones.getScene().getWindow(), titulo);
 
-        // RF «Registro de opción de característica» · Paso 8 / RF «Modificación de opción de característica» · Paso 9: informa el éxito y actualiza el listado.
+        // RF-23 · Paso 8 / RF-25 · Paso 9: informa el éxito y actualiza el listado.
         if (formulario.seGuardo()) {
             Alertas.info(formulario.getMensajeExito());
         }
@@ -466,14 +466,14 @@ public class OpcionesController {
     // ===================== Baja (Eliminación de opción) =====================
 
     @FXML
-    // RF «Eliminación de opción de característica»: inicia aquí. Paso 1: selecciona una opción y pide darla de baja.
+    // RF-24 (Eliminación de opción de característica): inicia aquí. Paso 1: selecciona una opción y pide darla de baja.
     private void onDarDeBaja() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una opción de la lista");
             return;
         }
         ResultadoCatalogo revision = servicio.prepararBaja(seleccionada.getIdOpcion());
-        // RF «Eliminación de opción de característica» · Excepciones pasos 2 y 3: no existe, sin conexión o está en pedidos en curso.
+        // RF-24 · Excepciones pasos 2 y 3: no existe, sin conexión o está en pedidos en curso.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -481,12 +481,12 @@ public class OpcionesController {
             }
             return;
         }
-        // RF «Eliminación de opción de característica» · Pasos 5 y 6: confirmación doble; si cancela, la opción queda sin cambios.
+        // RF-24 · Pasos 5 y 6: confirmación doble; si cancela, la opción queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja esta opción?", revision.getMensaje())) {
             return;
         }
         ResultadoCatalogo resultado = servicio.darDeBaja(seleccionada.getIdOpcion());
-        // RF «Eliminación de opción de característica» · Paso 8: informa el éxito y actualiza el listado. Si falla, excepción paso 7.
+        // RF-24 · Paso 8: informa el éxito y actualiza el listado. Si falla, excepción paso 7.
         if (resultado.isExitoso()) {
             Alertas.info(resultado.getMensaje());
         } else {

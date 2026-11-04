@@ -15,13 +15,14 @@ import javafx.stage.Stage;
 
 /**
  * Ventana "Nueva categoría" / "Modificar categoría" (formulario-categoria.fxml).
- * RF-14 (registro) y RF-15 (modificación).
+ * RF-16 (registro) y RF-17 (modificación).
  */
 public class FormularioCategoriaController {
 
     @FXML private Label lblTitulo;
     @FXML private Label lblSubtitulo;
     @FXML private ComboBox<String> cmbNombre;
+    @FXML private Label lblVista3d;
     @FXML private ComboBox<String> cmbEstado;
     @FXML private TextArea txtDescripcion;
     @FXML private Label lblMensaje;
@@ -42,20 +43,29 @@ public class FormularioCategoriaController {
             cmbEstado.getItems().add(estado.getValorBD());
         }
         cmbEstado.setValue(EstadoRegistro.ACTIVA.getValorBD());
-        // Nombres sugeridos (se puede escribir otro)
+        // RF-32 · Paso 2: nombres sugeridos (se puede escribir otro)
         PresetsCatalogo.llenar(cmbNombre, PresetsCatalogo.categorias());
         ApoyoVista.mostrarNodo(lblMensaje, false);
+        // Cada vez que cambia el nombre se explica cómo se verá en el 3D de la página web
+        // (listener de JavaFX: la flecha es la forma corta de escribirlo)
+        cmbNombre.getEditor().textProperty().addListener((observable, antes, ahora) -> actualizarVista3d());
+        actualizarVista3d();
     }
 
-    // Formulario en blanco (paso 2 de RF-14)
-    // RF-14 · Paso 2: despliega el formulario en blanco.
+    // RF-32 · Paso 3: dice cómo dibuja la página web los productos de esta categoría
+    private void actualizarVista3d() {
+        lblVista3d.setText(PresetsCatalogo.vista3dCategoria(PresetsCatalogo.texto(cmbNombre)));
+    }
+
+    // Formulario en blanco (paso 2 de RF-16)
+    // RF-16 · Paso 2: despliega el formulario en blanco.
     public void prepararNueva() {
         editada = null;
         lblTitulo.setText("Nueva categoría");
     }
 
-    // Formulario con los datos actuales (paso 3 de RF-15)
-    // RF-15 · Paso 3: muestra el formulario con los datos actuales.
+    // Formulario con los datos actuales (paso 3 de RF-17)
+    // RF-17 · Paso 3: muestra el formulario con los datos actuales.
     public void prepararEdicion(Categoria categoria) {
         editada = categoria;
         lblTitulo.setText("Modificar categoría");
@@ -66,14 +76,14 @@ public class FormularioCategoriaController {
     }
 
     @FXML
-    // RF-14 / RF-15 · Paso 3 / Paso 4: la Administradora eligió «Guardar».
+    // RF-16 / RF-17 · Paso 3 / Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
 
         Categoria datos = leerFormulario();
         ResultadoCatalogo resultado;
-        // RF-14 · Pasos 4 a 6 (registro) o RF-15 · Pasos 5 a 8 (modificación) en CategoriaService.
+        // RF-16 · Pasos 4 a 6 (registro) o RF-17 · Pasos 5 a 8 (modificación) en CategoriaService.
         if (editada == null) {
             resultado = servicio.registrar(datos);
         } else {
@@ -83,7 +93,7 @@ public class FormularioCategoriaController {
                 if (Alertas.confirmar("¿Inactivar la categoría?", resultado.getMensaje())) {
                     resultado = servicio.modificar(datos, true);
                 } else {
-                    // RF-15 · Excepción paso 7: no confirmó la inactivación.
+                    // RF-17 · Excepción paso 7: no confirmó la inactivación.
                     // Se restablece el estado a Activa sin guardar
                     cmbEstado.setValue(EstadoRegistro.ACTIVA.getValorBD());
                     return;
@@ -97,7 +107,7 @@ public class FormularioCategoriaController {
             cerrar();
             return;
         }
-        // RF-15 · Excepción paso 2: la categoría ya no existe.
+        // RF-17 · Excepción paso 2: la categoría ya no existe.
         if (resultado.isRecargarLista()) {
             Alertas.aviso(resultado.getMensaje());
             recargarLista = true;
@@ -109,7 +119,7 @@ public class FormularioCategoriaController {
 
     // Cancelar: se descartan los datos y la lista no cambia
     @FXML
-    // RF-14 · Excepción paso 3 / RF-15 · Excepción paso 4: «Cancelar» descarta los datos.
+    // RF-16 · Excepción paso 3 / RF-17 · Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         cerrar();
     }
@@ -126,7 +136,7 @@ public class FormularioCategoriaController {
     }
 
     // Muestra el mensaje y resalta el campo con error; conserva lo capturado
-    // RF-14 · Excepción paso 4 / RF-15 · Excepción paso 5: resalta el campo con error y conserva lo capturado.
+    // RF-16 · Excepción paso 4 / RF-17 · Excepción paso 5: resalta el campo con error y conserva lo capturado.
     private void mostrarError(ResultadoCatalogo resultado) {
         lblMensaje.setText(resultado.getMensaje());
         ApoyoVista.mostrarNodo(lblMensaje, true);

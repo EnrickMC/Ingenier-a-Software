@@ -13,8 +13,8 @@ export interface PedidoEnCurso {
   llaveIdempotencia: string;
   // Último comprobante recibido (pantalla de confirmación)
   ultimoComprobante: ComprobantePedido | null;
-  // Folio y teléfono para abrir «Mis pedidos» ya llenos
-  ultimaConsulta: { folio: string; telefono: string };
+  // Folio y teléfono (o correo) para abrir «Mis pedidos» ya llenos
+  ultimaConsulta: { folio: string; contacto: string };
 }
 
 /**
@@ -51,7 +51,7 @@ export class PedidoEnCursoService {
   }
 
   /**
-   * RF-11 paso 7: el pedido quedó registrado.
+   * RF-12 paso 7: el pedido quedó registrado.
    * Se guarda el comprobante, se prepara «Mis pedidos» y se olvida la fecha y el pago
    * (los datos de contacto y la dirección se conservan para el siguiente pedido).
    */
@@ -63,12 +63,12 @@ export class PedidoEnCursoService {
       entrega: entrega,
       llaveIdempotencia: '',
       ultimoComprobante: comprobante,
-      ultimaConsulta: { folio: String(comprobante.folio), telefono: comprobante.cliente.telefono },
+      ultimaConsulta: { folio: String(comprobante.folio), contacto: comprobante.cliente.telefono },
     });
   }
 
-  guardarConsulta(folio: string, telefono: string): void {
-    this.cambiar({ ...this.datos(), ultimaConsulta: { folio: folio, telefono: telefono } });
+  guardarConsulta(folio: string, contacto: string): void {
+    this.cambiar({ ...this.datos(), ultimaConsulta: { folio: folio, contacto: contacto } });
   }
 
   // ===================== Consultas =====================
@@ -108,7 +108,7 @@ export class PedidoEnCursoService {
         pago: leerPago(guardado.pago, vacio.pago),
         llaveIdempotencia: textoOVacio(guardado.llaveIdempotencia),
         ultimoComprobante: leerComprobante(guardado.ultimoComprobante),
-        ultimaConsulta: { ...vacio.ultimaConsulta, ...soloTextos(guardado.ultimaConsulta) },
+        ultimaConsulta: leerUltimaConsulta(guardado.ultimaConsulta),
       };
     } catch {
       // Datos dañados: se empieza de cero
@@ -132,7 +132,7 @@ export function pedidoVacio(): PedidoEnCurso {
     pago: { metodo: 'Efectivo', modalidad: 'Anticipo' },
     llaveIdempotencia: '',
     ultimoComprobante: null,
-    ultimaConsulta: { folio: '', telefono: '' },
+    ultimaConsulta: { folio: '', contacto: '' },
   };
 }
 
@@ -156,6 +156,22 @@ function textoOVacio(valor: unknown): string {
 }
 
 // Copia solo las propiedades de texto de un objeto guardado
+// Última búsqueda de «Mis pedidos» (antes se guardaba como "telefono")
+function leerUltimaConsulta(valor: unknown): { folio: string; contacto: string } {
+  const textos = soloTextos(valor);
+  let contacto = '';
+  if (textos['contacto'] !== undefined) {
+    contacto = textos['contacto'];
+  } else if (textos['telefono'] !== undefined) {
+    contacto = textos['telefono'];
+  }
+  let folio = '';
+  if (textos['folio'] !== undefined) {
+    folio = textos['folio'];
+  }
+  return { folio: folio, contacto: contacto };
+}
+
 function soloTextos(valor: unknown): Record<string, string> {
   const resultado: Record<string, string> = {};
   if (valor === null || typeof valor !== 'object') {
@@ -198,10 +214,6 @@ function leerPago(valor: unknown, vacio: DatosPago): DatosPago {
   const pago: DatosPago = { ...vacio };
   if (guardado.metodo === 'Efectivo' || guardado.metodo === 'Transferencia') {
     pago.metodo = guardado.metodo;
-  }
-  // Un pedido guardado antes de quitar «Depósito» se pasa a transferencia
-  if ((guardado.metodo as string) === 'Deposito') {
-    pago.metodo = 'Transferencia';
   }
   if (guardado.modalidad === 'Anticipo' || guardado.modalidad === 'Pago total') {
     pago.modalidad = guardado.modalidad;

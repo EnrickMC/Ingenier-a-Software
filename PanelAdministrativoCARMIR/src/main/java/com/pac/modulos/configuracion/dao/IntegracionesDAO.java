@@ -6,7 +6,7 @@ import java.sql.Connection;
 import java.util.Properties;
 
 /**
- * Acceso a la tabla ConfiguracionNotificacion: datos de WhatsApp y correo (RF-32).
+ * Acceso a la tabla ConfiguracionNotificacion: datos de WhatsApp y correo (RF-71; los usan los avisos de RF-47).
  * Los secretos (token y contraseña) llegan y salen cifrados; el servicio es quien los cifra.
  * La página web no tiene permiso de leer esta tabla.
  */

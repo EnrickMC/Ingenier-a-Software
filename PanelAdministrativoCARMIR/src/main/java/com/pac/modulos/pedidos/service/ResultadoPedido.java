@@ -35,7 +35,7 @@ public class ResultadoPedido {
     private boolean recargar;                // el pedido ya no existe o cambió: recargar la lista
     private boolean ofrecerPago;             // ofrecer "Registrar pago"
     private boolean ofrecerRevision;         // ofrecer abrir la revisión del pedido
-    private boolean preguntarSinReceta;      // RF-45: hay opciones sin receta, preguntar si se continúa
+    private boolean preguntarSinReceta;      // RF-63: hay opciones sin receta, preguntar si se continúa
     private Pedido pedido;                   // pedido leído (en las revisiones previas)
     private List<String> avisos = new ArrayList<String>();  // mensajes extra después del éxito
 

@@ -23,7 +23,7 @@ import javafx.scene.input.MouseEvent;
 import java.util.List;
 
 /**
- * Controlador de "Validación de Pagos" (pagos.fxml). Módulo 4, RF-28 y RF-29.
+ * Controlador de "Validación de Pagos" (pagos.fxml). Módulo 4, RF-42 y RF-43.
  * Lista los pagos (por defecto los pendientes que subieron los clientes) para validarlos o rechazarlos.
  */
 public class PagosController implements ControladorSeccion {
@@ -88,14 +88,14 @@ public class PagosController implements ControladorSeccion {
         return null;
     }
 
-    // RF-28 (Validación de pagos): lista de pagos por validar.
+    // RF-42 (Validación de pagos): lista de pagos por validar.
     private void cargarPagos() {
         List<Pago> pagos;
         try {
             pagos = servicio.listar(estadoElegido(), txtBuscar.getText());
         } catch (DAOException e) {
             tblPagos.getItems().clear();
-            // RF-28 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-42 · Excepción paso 2: sin conexión, «Error de conexión».
             lblVacio.setText(ApoyoTransaccion.MSG_ERROR_CONEXION);
             lblConteo.setText("");
             actualizarBotones();
@@ -136,11 +136,12 @@ public class PagosController implements ControladorSeccion {
         btnValidar.setDisable(fila == null || fila.getPago().getEstado() != EstadoPago.PENDIENTE);
     }
 
+    // RF-50 · Paso 1: «Ver comprobante» del pago elegido (foto, PDF o enlace)
     @FXML
     private void onAbrirComprobante() {
         FilaPago fila = tblPagos.getSelectionModel().getSelectedItem();
         if (fila != null && fila.getPago().tieneComprobante()) {
-            DetallePedidoController.abrirComprobante(fila.getPago().getLinkComprobante());
+            VisorComprobante.abrirVentana(fila.getPago(), tblPagos.getScene().getWindow());
         }
     }
 
@@ -155,9 +156,9 @@ public class PagosController implements ControladorSeccion {
         }
     }
 
-    // RF-28: validar o rechazar el pago pendiente elegido
+    // RF-42: validar o rechazar el pago pendiente elegido
     @FXML
-    // RF-28: inicia aquí la validación de un pago pendiente desde la sección de pagos.
+    // RF-42: inicia aquí la validación de un pago pendiente desde la sección de pagos.
     private void onValidar() {
         FilaPago fila = tblPagos.getSelectionModel().getSelectedItem();
         if (fila == null || fila.getPago().getEstado() != EstadoPago.PENDIENTE) {
@@ -166,7 +167,7 @@ public class PagosController implements ControladorSeccion {
         }
         ResultadoPedido lectura = pedidoService.cargarDetalle(fila.getPago().getFolio());
         if (!lectura.isExitoso()) {
-            // RF-28 · Excepción paso 2: el pedido no permite pagos.
+            // RF-42 · Excepción paso 2: el pedido no permite pagos.
             Alertas.aviso(lectura.getMensaje());
             cargarPagos();
             return;
@@ -186,7 +187,7 @@ public class PagosController implements ControladorSeccion {
             return;
         }
         if (resultado.isExitoso()) {
-            // RF-28 · Paso 9: informa que el pago se validó y el saldo actualizado.
+            // RF-42 · Paso 9: informa que el pago se validó y el saldo actualizado.
             Alertas.info(resultado.getMensajeCompleto());
         } else if (resultado.isRecargar()) {
             Alertas.aviso(resultado.getMensaje());

@@ -46,7 +46,7 @@ src/main/java/com/pac/
     │   ├── dao/         PedidoDAO, ClienteDAO, PagoDAO, BitacoraPedidoDAO, NotificacionDAO
     │   │   └── mysql/   sus implementaciones JDBC + ApoyoPedidosMySQL
     │   ├── service/     PedidoService (lista, detalle, aprobar, cancelar, baja), EstadoPedidoService
-    │   │                (avance de estados + RF-45), PagoService, ModificacionPedidoService, AgendaService,
+    │   │                (avance de estados + RF-63), PagoService, ModificacionPedidoService, AgendaService,
     │   │                MonitorPedidos (Singleton + Observer), PedidosObserver, PermisosPedidos,
     │   │                ApoyoTransaccion, ResultadoPedido
     │   ├── notificacion/ NotificacionService (Singleton), CanalEnvio ← Strategy (CanalSimulado,
@@ -59,7 +59,7 @@ src/main/java/com/pac/
     │   ├── dao/         InsumoDAO, LoteDAO, MovimientoDAO, AlertaDAO, RecetaDAO, ConsumoPedidoDAO
     │   │   └── mysql/   sus implementaciones JDBC
     │   ├── service/     InsumoService, InventarioService (compras, mermas, PEPS), AlertaService,
-    │   │                MonitorAlertas (Singleton + Observer), RecetaService, DescuentoInsumosService (RF-45),
+    │   │                MonitorAlertas (Singleton + Observer), RecetaService, DescuentoInsumosService (RF-63),
     │   │                PermisosInventario, ResultadoInventario, ResultadoDescuento, AlertasObserver
     │   └── controller/  Inventario (pestañas), Insumos, Movimientos, Alertas, Recetas,
     │                    FormularioInsumo/Entrada/Merma/Receta, Fila*, Renglon*, EstilosInventario
@@ -101,7 +101,7 @@ src/main/resources/com/pac/
    no aparece en la lista de usuarios y no se puede modificar ni dar de baja.
 2. Enlace a **Acceso del Personal**: solo usuarios de la tabla Usuario.
 3. **Panel principal** con menú lateral; cada apartado carga su FXML dentro del panel.
-   Antes de abrirlo, `ControlAcceso` vuelve a leer los permisos de la BD (RNF-15).
+   Antes de abrirlo, `ControlAcceso` vuelve a leer los permisos de la BD (RNF-12).
 
 ## Base de datos
 Solo hacen falta **dos scripts**, en este orden:
@@ -132,12 +132,12 @@ El apartado "Usuarios y Permisos" siempre usa MySQL.
 ## Módulo 7 · Gestión de Usuarios (qué hace)
 | Requerimiento | Dónde |
 |---|---|
-| RNF-11 Registro de usuarios | `FormularioUsuarioController` + `UsuarioService.registrar` (ofrece reactivar cuentas dadas de baja) |
-| RNF-12 Baja de usuarios | `UsuariosController.onDarDeBaja` (confirmación doble) + `UsuarioService.darDeBaja` (baja lógica) |
-| RNF-13 Visualización | `UsuariosController` (búsqueda, filtro por estado, detalle, mensajes de lista vacía) |
-| RNF-14 Modificación | `FormularioUsuarioController` + `UsuarioService.modificar` (restablecer contraseña, no quitarse el propio permiso) |
-| RNF-15 Control de acceso | `AutenticacionService` (bloqueo tras los intentos de Configuración → Parámetros) + `ControlAcceso` + `DecoradorPermiso` |
-| RNF-16 Sesión única | **Pendiente**: necesita la tabla `SesionUsuario` (migración nueva en `DBCarmir/migraciones`) |
+| RNF-16 Registro de usuarios | `FormularioUsuarioController` + `UsuarioService.registrar` (ofrece reactivar cuentas dadas de baja) |
+| RNF-17 Baja de usuarios | `UsuariosController.onDarDeBaja` (confirmación doble) + `UsuarioService.darDeBaja` (baja lógica) |
+| RNF-18 Visualización | `UsuariosController` (búsqueda, filtro por estado, detalle, mensajes de lista vacía) |
+| RNF-19 Modificación | `FormularioUsuarioController` + `UsuarioService.modificar` (restablecer contraseña, no quitarse el propio permiso) |
+| RNF-12 Control de acceso | `AutenticacionService` (bloqueo tras los intentos de Configuración → Parámetros) + `ControlAcceso` + `DecoradorPermiso` |
+| RNF-13 Sesión única | **Pendiente**: necesita la tabla `SesionUsuario` (migración nueva en `DBCarmir/migraciones`) |
 
 ## Módulo 3 · Catálogo de Personalización (qué hace)
 Apartado **Catálogo de Postres** con 5 pestañas.
@@ -162,12 +162,12 @@ Apartados **Inventario de Insumos** (3 pestañas) y **Recetas**.
 
 | Requerimiento | Dónde |
 |---|---|
-| RF-33 a RF-36 Insumos (ver, registrar, modificar, baja) | `InsumosController`, `FormularioInsumoController`, `InsumoService` |
-| RF-37 Entrada (compra) | `FormularioEntradaController`, `InventarioService.registrarEntrada` (cada compra es un lote) |
-| RF-38 Salida (merma) | `FormularioMermaController`, `InventarioService.registrarMerma` (PEPS o un lote elegido) |
-| RF-39 / RF-40 Alertas | `AlertaService.revisar`, `MonitorAlertas`, `AlertasController`; contador en el menú y en el dashboard |
-| RF-41 a RF-44 Recetas | `RecetasController`, `FormularioRecetaController`, `RecetaService` |
-| RF-45 Descuento automático | `DescuentoInsumosService` (lo llama `EstadoPedidoService` del Módulo 4) |
+| RF-51 a RF-54 Insumos (ver, registrar, modificar, baja) | `InsumosController`, `FormularioInsumoController`, `InsumoService` |
+| RF-59 Entrada (compra) | `FormularioEntradaController`, `InventarioService.registrarEntrada` (cada compra es un lote) |
+| RF-60 Salida (merma) | `FormularioMermaController`, `InventarioService.registrarMerma` (PEPS o un lote elegido) |
+| RF-61 / RF-62 Alertas | `AlertaService.revisar`, `MonitorAlertas`, `AlertasController`; contador en el menú y en el dashboard |
+| RF-55 a RF-58 Recetas | `RecetasController`, `FormularioRecetaController`, `RecetaService` |
+| RF-63 Descuento automático | `DescuentoInsumosService` (lo llama `EstadoPedidoService` del Módulo 4) |
 
 Reglas importantes:
 - **Permisos**: Inventario pide "Gestionar insumos" y Recetas pide "Gestionar recetas". Compras, mermas y alertas: cualquiera con "Gestionar insumos". Alta, cambios y bajas de insumos y recetas: solo la Administradora; el personal consulta.
@@ -176,22 +176,22 @@ Reglas importantes:
 - **Receta**: una por opción. Su costo = Σ cantidad × costo del insumo; **precio base de la opción** = costo × multiplicador de costo. El catálogo ya lo muestra (columna "Precio base" y botón "Ver / Registrar receta" en Opciones).
 - "Requiere revisión" se calcula: una receta la requiere si usa algún insumo dado de baja (no hace falta columna nueva).
 - **Bajas**: insumo o receta con historial se inhabilita; sin historial se elimina. Una receta no se da de baja si hay pedidos por preparar con esa opción.
-- **RF-45**: `descontarPorPedido(folio, conexion, continuarSinReceta)` va dentro de la transacción del cambio "Pagado" → "En preparacion". No descuenta dos veces, avisa de opciones sin receta y si falta algo no descuenta nada.
+- **RF-63**: `descontarPorPedido(folio, conexion, continuarSinReceta)` va dentro de la transacción del cambio "Pagado" → "En preparacion". No descuenta dos veces, avisa de opciones sin receta y si falta algo no descuenta nada.
 
 ## Módulo 4 · Gestor de Pedidos y Producción (qué hace)
 Apartados **Pedidos**, **Agenda de Producción** y **Validación de Pagos**. El dashboard muestra los pedidos de hoy y los últimos 10.
 
 | Requerimiento | Dónde |
 |---|---|
-| RF-21 / RF-22 Lista, filtros y pedidos nuevos | `PedidosController`, `PedidoService.buscar` ("#12" busca solo por folio), `MonitorPedidos` |
-| RF-23 / RF-24 Detalle, revisión y aprobación | `DetallePedidoController`, `FormularioAprobacionController`, `PedidoService.aprobar` (capacidad diaria) |
-| RF-25 Cancelación | `FormularioMotivoController`, `PedidoService.cancelar` (motivo y reembolso) |
-| RF-26 / RF-27 Estados | `EstadoPedidoService.avanzar` (solo el estado siguiente) |
-| RF-28 / RF-29 Pagos | `PagosController`, `FormularioPagoController`, `PagoService` (validar, rechazar, registrar) |
-| RF-30 / RF-31 Agenda | `AgendaController`, `AgendaService` (día, semana, mes o rango; insumos estimados) |
-| RF-32 Notificaciones | `NotificacionService` (WhatsApp/correo; si falla queda "Pendiente" y se reintenta) |
-| RF-45 Descuento de insumos | al pasar "Pagado" → "En preparación", en la misma transacción |
-| RF-49 Sin pago no se prepara | `EstadoPedidoService.revisarAvance` |
+| RF-36 / RF-37 Lista, filtros y pedidos nuevos | `PedidosController`, `PedidoService.buscar` ("#12" busca solo por folio), `MonitorPedidos` |
+| RF-33 / RF-38 Detalle, revisión y aprobación | `DetallePedidoController`, `FormularioAprobacionController`, `PedidoService.aprobar` (capacidad diaria) |
+| RF-39 Cancelación | `FormularioMotivoController`, `PedidoService.cancelar` (motivo y reembolso) |
+| RF-40 / RF-41 Estados | `EstadoPedidoService.avanzar` (solo el estado siguiente) |
+| RF-42 / RF-43 Pagos | `PagosController`, `FormularioPagoController`, `PagoService` (validar, rechazar, registrar) |
+| RF-45 / RF-46 Agenda | `AgendaController`, `AgendaService` (día, semana, mes o rango; insumos estimados) |
+| RF-47 Notificaciones | `NotificacionService` (WhatsApp/correo; si falla queda "Pendiente" y se reintenta) |
+| RF-63 Descuento de insumos | al pasar "Pagado" → "En preparación", en la misma transacción |
+| RF-44 Sin pago no se prepara | `EstadoPedidoService.revisarAvance` |
 | Modificación y baja | `FormularioModificacionController`, `ModificacionPedidoService`, `PedidoService.darDeBaja` |
 
 Reglas importantes:
@@ -205,9 +205,9 @@ Apartado **Reportes Financieros** con 2 pestañas que comparten el periodo (por 
 
 | Requerimiento | Dónde |
 |---|---|
-| RF-46 Ingresos y gastos | `IngresosGastosController`, `ReporteService.generarIngresosGastos`, `ReporteDAOMySQL` |
-| RF-47 Más vendidos | `MasVendidosController`, `ReporteService.generarVentas` (filtro por categoría, orden por unidades o utilidad) |
-| RF-48 Exportar a Excel | `ReportesController.onExportar`, `ExportadorReportes` (.xlsx o .csv con el mismo contenido de la pantalla) |
+| RF-65 Ingresos y gastos | `IngresosGastosController`, `ReporteService.generarIngresosGastos`, `ReporteDAOMySQL` |
+| RF-66 Más vendidos | `MasVendidosController`, `ReporteService.generarVentas` (filtro por categoría, orden por unidades o utilidad) |
+| RF-67 Exportar a Excel | `ReportesController.onExportar`, `ExportadorReportes` (.xlsx o .csv con el mismo contenido de la pantalla) |
 | Dashboard | tarjeta "Ingresos del mes" (`ReporteService.ingresosDelMes`) |
 
 Reglas importantes:
@@ -215,7 +215,7 @@ Reglas importantes:
 - **Ingresos** = pagos validados (por fecha de pago) clasificados en anticipo, liquidación o pago total, menos los
   reembolsos ya hechos (por fecha de cancelación). Los pagos de pedidos cancelados con reembolso pendiente se muestran
   aparte y no se suman.
-- **Gastos** = compras + mermas del inventario. El consumo de producción (RF-45) se muestra como dato informativo
+- **Gastos** = compras + mermas del inventario. El consumo de producción (RF-63) se muestra como dato informativo
   porque el insumo ya se pagó en la compra.
 - **Movimientos por revisar**: pagos de pedidos dados de baja, compras con cantidad o costo en cero y mermas con
   signo incorrecto. No se suman y se listan para corregirlos.

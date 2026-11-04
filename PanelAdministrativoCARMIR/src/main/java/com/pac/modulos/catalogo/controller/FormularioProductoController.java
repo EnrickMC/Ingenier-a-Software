@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * Ventana "Nuevo Postre" / "Editar detalles del producto" (formulario-producto.fxml).
- * RF-18 (registro) y RF-19 (modificación).
+ * RF-29 (registro) y RF-30 (modificación).
  *
  * Por cada característica de la categoría (en su orden de muestra) se arman los controles
  * para elegir sus opciones. Cada cambio recalcula el precio, el costo y los avisos con
@@ -84,8 +84,8 @@ public class FormularioProductoController {
 
     // ===================== Preparar la ventana =====================
 
-    // Formulario en blanco (paso 3 de RF-18)
-    // RF-18 · Paso 3: despliega el formulario de registro.
+    // Formulario en blanco (paso 3 de RF-29)
+    // RF-29 · Paso 3: despliega el formulario de registro.
     public void prepararNuevo(List<Categoria> activas) {
         editado = null;
         lblTitulo.setText("Nuevo Postre");
@@ -97,8 +97,8 @@ public class FormularioProductoController {
         construirOpciones(null);
     }
 
-    // Formulario con los datos actuales (paso 3 de RF-19)
-    // RF-19 · Paso 3: formulario con los datos actuales.
+    // Formulario con los datos actuales (paso 3 de RF-30)
+    // RF-30 · Paso 3: formulario con los datos actuales.
     public void prepararEdicion(Producto producto, List<Categoria> activas) {
         editado = producto;
         lblTitulo.setText("Editar detalles del producto");
@@ -142,7 +142,7 @@ public class FormularioProductoController {
     // ===================== Controles de las opciones =====================
 
     // Arma los controles de cada característica; "elegidas" marca las que ya tiene el producto
-    // RF-18 / RF-19 · Paso 4: características de la categoría con sus opciones para marcar.
+    // RF-29 / RF-30 · Paso 4: características de la categoría con sus opciones para marcar.
     private void construirOpciones(List<OpcionElegida> elegidas) {
         contenedorCaracteristicas.getChildren().clear();
         selectores.clear();
@@ -295,7 +295,7 @@ public class FormularioProductoController {
     }
 
     // Precio, costo y avisos en vivo
-    // RF-18 / RF-19: precio, costo y avisos de reglas en vivo.
+    // RF-29 / RF-30: precio, costo y avisos de reglas en vivo.
     private void recalcular() {
         List<OpcionElegida> elegidas = leerElegidas();
         lblPrecio.setText(Formatos.moneda(ConfiguracionPostre.calcularPrecio(elegidas)));
@@ -331,7 +331,7 @@ public class FormularioProductoController {
             ApoyoVista.cargarImagen(imgFoto, lblSinImagen, null);
             return;
         }
-        // RF-18 · Excepción paso 5: «Formato o tamaño de imagen no permitido».
+        // RF-29 · Excepción paso 5: «Formato o tamaño de imagen no permitido».
         if (!ValidacionCatalogo.imagenValida(enlace)) {
             ApoyoVista.marcar(txtFoto);
             mostrarError(ProductoService.MSG_IMAGEN_NO_PERMITIDA);
@@ -351,7 +351,7 @@ public class FormularioProductoController {
     // ===================== Guardar =====================
 
     @FXML
-    // RF-18 / RF-19 · Paso 4: la Administradora eligió «Guardar».
+    // RF-29 / RF-30 · Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
@@ -370,14 +370,14 @@ public class FormularioProductoController {
         datos.setOpciones(leerElegidas());
 
         ResultadoCatalogo resultado;
-        // RF-18 · Pasos 5 a 7 (registro) o RF-19 · Pasos 5 a 8 (modificación) en ProductoService.
+        // RF-29 · Pasos 5 a 7 (registro) o RF-30 · Pasos 5 a 8 (modificación) en ProductoService.
         if (editado == null) {
             resultado = servicio.registrar(datos);
         } else {
             resultado = servicio.modificar(datos, false);
             // Paso 7: cambia el precio y hay pedidos vigentes
             if (resultado.isPideConfirmacion()) {
-                // RF-19 · Excepción paso 7: no confirmó el cambio de precio; regresa al formulario.
+                // RF-30 · Excepción paso 7: no confirmó el cambio de precio; regresa al formulario.
                 if (!Alertas.confirmar("Cambio de precio", resultado.getMensaje())) {
                     return;
                 }
@@ -414,7 +414,7 @@ public class FormularioProductoController {
             ApoyoVista.marcar(campo);
         }
         // La categoría ya no está disponible: se recarga la lista de categorías activas
-        // RF-18 / RF-19 · Excepción paso 6: la categoría ya no está disponible; se recarga la lista.
+        // RF-29 / RF-30 · Excepción paso 6: la categoría ya no está disponible; se recarga la lista.
         if (ResultadoCatalogo.CAMPO_CATEGORIA.equals(resultado.getCampo())) {
             recargarCategorias();
         }
@@ -457,7 +457,7 @@ public class FormularioProductoController {
     }
 
     @FXML
-    // RF-18 / RF-19 · Excepción paso 4: «Cancelar» descarta los datos.
+    // RF-29 / RF-30 · Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         cerrar();
     }

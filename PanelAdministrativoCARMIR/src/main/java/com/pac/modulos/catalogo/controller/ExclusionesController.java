@@ -77,12 +77,13 @@ public class ExclusionesController {
     }
 
     // Se llama cada vez que la pestaña queda visible
-    // RF «Exclusiones entre opciones de características»: inicia aquí. Pasos 1 a 3: la pestaña muestra las exclusiones y las opciones de la categoría.
+    // RF-27 (Exclusiones entre opciones de características):
+    // inicia aquí. Pasos 1 a 3: la pestaña muestra las exclusiones y las opciones de la categoría.
     public void alMostrar() {
         llenandoSelectores = true;
         boolean conectado = catalogo.llenarCategorias(cmbCategoria);
         llenandoSelectores = false;
-        // RF «Exclusiones entre opciones de características» · Excepción paso 2: sin conexión, «Error de conexión».
+        // RF-27 ·Excepción paso 2: sin conexión, «Error de conexión».
         if (!conectado) {
             mostrarErrorConexion();
             return;
@@ -125,7 +126,7 @@ public class ExclusionesController {
     // ===================== Lista =====================
 
     // Lee las exclusiones y las opciones de la categoría elegida
-    // RF «Exclusiones entre opciones de características» · Pasos 2 y 3: lee las exclusiones registradas y las opciones de la categoría.
+    // RF-27 ·Pasos 2 y 3: lee las exclusiones registradas y las opciones de la categoría.
     private void cargarCategoria() {
         tblExclusiones.getItems().clear();
         lblConteo.setText("");
@@ -188,7 +189,7 @@ public class ExclusionesController {
 
     // La segunda opción debe ser de otra característica de la misma categoría
     @FXML
-    // RF «Exclusiones entre opciones de características» · Paso 3: la opción incompatible solo puede ser de otra característica de la misma categoría.
+    // RF-27 ·Paso 3: la opción incompatible solo puede ser de otra característica de la misma categoría.
     private void onCambioOpcionA() {
         Opcion elegida = cmbOpcionA.getValue();
         cmbOpcionB.getItems().clear();
@@ -204,7 +205,7 @@ public class ExclusionesController {
     }
 
     @FXML
-    // RF «Exclusiones entre opciones de características» · Paso 4: la Administradora eligió «Guardar».
+    // RF-27 ·Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         ApoyoVista.desmarcar(cmbOpcionA);
         ApoyoVista.desmarcar(cmbOpcionB);
@@ -222,7 +223,7 @@ public class ExclusionesController {
         datos.setEstado(EstadoRegistro.desdeBD(cmbEstado.getValue()));
 
         ResultadoCatalogo resultado = servicio.registrar(datos);
-        // RF «Exclusiones entre opciones de características» · Pasos 7 y 8: informa el éxito y actualiza el listado.
+        // RF-27 ·Pasos 7 y 8: informa el éxito y actualiza el listado.
         if (resultado.isExitoso()) {
             Alertas.info(resultado.getMensaje());
             limpiarAlta();
@@ -234,7 +235,7 @@ public class ExclusionesController {
             cargarCategoria();
             return;
         }
-        // RF «Exclusiones entre opciones de características» · Excepciones pasos 5 y 6: resalta el campo con error y conserva los datos.
+        // RF-27 ·Excepciones pasos 5 y 6: resalta el campo con error y conserva los datos.
         // Se resalta el campo con error y se conservan los datos
         lblMensaje.setText(resultado.getMensaje());
         ApoyoVista.mostrarNodo(lblMensaje, true);
@@ -250,7 +251,7 @@ public class ExclusionesController {
 
     // Cancelar: se descartan los datos; las exclusiones no cambian
     @FXML
-    // RF «Exclusiones entre opciones de características» · Excepción paso 4: «Cancelar» descarta los datos.
+    // RF-27 ·Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         limpiarAlta();
     }
@@ -269,7 +270,7 @@ public class ExclusionesController {
     // ===================== Cambio de estado y eliminación =====================
 
     @FXML
-    // RF «Exclusiones entre opciones de características» · Paso 4: cambiar el estado de una exclusión (con confirmación).
+    // RF-27 ·Paso 4: cambiar el estado de una exclusión (con confirmación).
     private void onCambiarEstado() {
         FilaExclusion fila = tblExclusiones.getSelectionModel().getSelectedItem();
         if (fila == null) {

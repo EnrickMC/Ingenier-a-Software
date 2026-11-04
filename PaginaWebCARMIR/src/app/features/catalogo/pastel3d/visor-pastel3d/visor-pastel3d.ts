@@ -4,11 +4,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { PastelConstruido, construirPastel, liberarPastel } from '../constructor-pastel';
 import { DisenoPastel } from '../diseno-pastel';
+import { construirOtroPostre, permiteVerDentro } from '../otros-postres';
 
 /**
- * Visor del pastel 3D (RF-3 · Paso 4): se vuelve a armar cada vez que el cliente cambia una opción.
+ * RF-5 (Vista previa 3D del postre personalizado): inicia aquí. Se muestra dentro de RF-3 · Paso 4.
+ * Visor del postre 3D: se vuelve a armar cada vez que el cliente cambia una opción.
  * El cliente puede girarlo con el mouse o el dedo, acercarlo, ver el corte por dentro y guardar una imagen.
- * Si el navegador no tiene WebGL, se muestra la foto de la plantilla (la página sigue funcionando).
+ * RF-5 · Excepción paso 1: si el navegador no tiene WebGL, se muestra la foto de la plantilla (la página sigue funcionando).
  */
 @Component({
   selector: 'app-visor-pastel3d',
@@ -49,13 +51,16 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    // RF-5 · Paso 1: verifica que el navegador pueda mostrar gráficos 3D (WebGL) al crear la escena.
     try {
       this.iniciarEscena();
     } catch {
-      // RF-3 · Excepción: sin WebGL se muestra la foto; la personalización funciona igual
+      // RF-5 · Excepción paso 1: sin WebGL se muestra la foto con «Tu navegador no puede mostrar la vista 3D…»;
+      // la personalización funciona igual
       this.sinWebgl.set(true);
       return;
     }
+    // RF-5 · Paso 4: dibuja el postre por primera vez.
     this.armar();
     this.cuadro = requestAnimationFrame(this.dibujar.bind(this));
   }
@@ -180,6 +185,8 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
 
   // ===================== Armado =====================
 
+  // RF-5 · Paso 6: el cliente cambió una opción, el mensaje o la casilla del topper (Paso 5);
+  // si el diseño es distinto, se vuelve a armar sin recargar la página.
   private alCambiarDiseno(): void {
     const diseno = this.diseno();
     const verDentro = this.verDentro();
@@ -201,7 +208,14 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
       this.escena.remove(anterior.grupo);
       liberarPastel(anterior.grupo);
     }
-    const nuevo = construirPastel(diseno, verDentro);
+    // RF-5 · Paso 4: dibuja el postre en 3D. Pastel y gelatina se arman en constructor-pastel;
+    // pay, cheesecake, cupcakes, roscas, galletas, brownies, donas y macarons en otros-postres
+    let nuevo: PastelConstruido;
+    if (diseno.tipo === 'pastel' || diseno.tipo === 'gelatina') {
+      nuevo = construirPastel(diseno, verDentro);
+    } else {
+      nuevo = construirOtroPostre(diseno, verDentro && permiteVerDentro(diseno));
+    }
     if (anterior !== null) {
       cambioTamano = Math.abs(anterior.alturaTotal - nuevo.alturaTotal) > 0.5 || Math.abs(anterior.anchoTotal - nuevo.anchoTotal) > 0.5;
     }
@@ -294,7 +308,7 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     this.renderizador.render(this.escena, this.camara);
   }
 
-  // Pisos que se muestran sobre el 3D (las gelatinas no llevan este texto)
+  // RF-5 · Paso 4: número de pisos que se muestra sobre el 3D (solo el pastel lleva este texto)
   textoPisos(): string {
     const diseno = this.diseno();
     if (diseno.tipo !== 'pastel') {
@@ -306,8 +320,9 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     return diseno.pisos + ' pisos';
   }
 
-  // ===================== Botones =====================
+  // ===================== Botones (RF-5 pasos 7 y 8) =====================
 
+  // RF-5 · Paso 8: «Girar» detiene o reanuda el giro automático.
   alternarGiro(): void {
     this.girando.set(!this.girando());
     if (this.controles !== null) {
@@ -315,7 +330,25 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     }
   }
 
+  // RF-5 · Excepción paso 7: cupcakes, galletas, brownies y donas se ven completos: el botón se desactiva
+  puedeVerDentro(): boolean {
+    return permiteVerDentro(this.diseno());
+  }
+
+  // RF-5 · Excepción paso 7: «Disponible en pasteles, gelatinas y pays» explica por qué el botón está
+  // desactivado (null = sin explicación)
+  ayudaVerDentro(): string | null {
+    if (this.puedeVerDentro()) {
+      return null;
+    }
+    return 'Disponible en pasteles, gelatinas y pays';
+  }
+
+  // RF-5 · Paso 8: «Ver por dentro» muestra el corte con sus capas y relleno.
   alternarDentro(): void {
+    if (!this.puedeVerDentro()) {
+      return;
+    }
     this.verDentro.set(!this.verDentro());
     if (this.verDentro()) {
       // Para ver el corte se detiene el giro y se mira de frente
@@ -327,11 +360,12 @@ export class VisorPastel3d implements AfterViewInit, OnDestroy {
     }
   }
 
+  // RF-5 · Paso 8: «Centrar» regresa la cámara al centro del postre.
   centrar(): void {
     this.encuadrar();
   }
 
-  // Descarga una imagen PNG de cómo se ve el postre
+  // RF-5 · Paso 8: «Guardar imagen» descarga una imagen PNG (mi-postre-carmir.png) de cómo se ve el postre
   guardarImagen(): void {
     if (this.renderizador === null) {
       return;

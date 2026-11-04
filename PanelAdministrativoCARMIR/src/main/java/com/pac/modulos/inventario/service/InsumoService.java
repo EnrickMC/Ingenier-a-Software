@@ -13,8 +13,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
- * Reglas de los insumos: Visualización (RF-33), Registro (RF-34),
- * Modificación (RF-35) y Eliminación (RF-36).
+ * Reglas de los insumos: Visualización (RF-51), Registro (RF-52),
+ * Modificación (RF-53) y Eliminación (RF-54).
  */
 public class InsumoService {
 
@@ -59,9 +59,9 @@ public class InsumoService {
         insumoDAO = DAOFactory.crearInsumoDAO();
     }
 
-    // ===================== Consultas (Visualización RF-33) =====================
+    // ===================== Consultas (Visualización RF-51) =====================
 
-    // RF-33 (Visualización de datos de insumos): inicia aquí. Paso 3: consulta los insumos activos (o todos).
+    // RF-51 (Visualización de datos de insumos): inicia aquí. Paso 3: consulta los insumos activos (o todos).
     public List<Insumo> listar(boolean incluirInactivos) throws DAOException {
         return insumoDAO.listar(incluirInactivos);
     }
@@ -76,7 +76,7 @@ public class InsumoService {
     }
 
     // true si el insumo coincide con el texto (nombre, clave o categoría) y con la categoría elegida
-    // RF-33 · Paso 1: búsqueda por nombre, clave o categoría. Excepción paso 4: si nada coincide, «No se encontraron insumos con ese criterio».
+    // RF-51 · Paso 1: búsqueda por nombre, clave o categoría. Excepción paso 4: si nada coincide, «No se encontraron insumos con ese criterio».
     public boolean coincide(Insumo insumo, String texto, String categoria) {
         if (categoria != null && !categoria.isBlank() && !categoria.equalsIgnoreCase(insumo.getCategoria())) {
             return false;
@@ -94,8 +94,8 @@ public class InsumoService {
         return insumo.getCategoria().toLowerCase().contains(criterio);
     }
 
-    // RF-33 paso 4: un insumo con costo en cero o sin categoría está incompleto
-    // RF-33 · Excepción paso 4: datos incompletos; el insumo se marca «Revisar datos» y se muestran los demás.
+    // RF-51 paso 4: un insumo con costo en cero o sin categoría está incompleto
+    // RF-51 · Excepción paso 4: datos incompletos; el insumo se marca «Revisar datos» y se muestran los demás.
     public boolean datosCompletos(Insumo insumo) {
         if (ValidacionCatalogo.estaVacio(insumo.getCategoria())) {
             return false;
@@ -112,8 +112,8 @@ public class InsumoService {
         return (int) ChronoUnit.DAYS.between(LocalDate.now(), caducidad);
     }
 
-    // Estado que se muestra en la tabla (RF-33, RF-39, RF-40), del más grave al menos grave
-    // RF-33 · Paso 5: compara existencia con stock mínimo y revisa caducidad de los lotes.
+    // Estado que se muestra en la tabla (RF-51, RF-61, RF-62), del más grave al menos grave
+    // RF-51 · Paso 5: compara existencia con stock mínimo y revisa caducidad de los lotes.
     public String estadoDe(Insumo insumo) {
         if (!insumo.isActivo()) {
             return ESTADO_INACTIVO;
@@ -134,22 +134,22 @@ public class InsumoService {
         if (dias <= ConfiguracionApp.getInstancia().getDiasAvisoCaducidad()) {
             return ESTADO_PROXIMO_CADUCAR;
         }
-        // RF-33 · Excepción paso 5: sin stock mínimo configurado, se muestra «Sin stock mínimo» sin generar alerta.
+        // RF-51 · Excepción paso 5: sin stock mínimo configurado, se muestra «Sin stock mínimo» sin generar alerta.
         if (!insumo.tieneStockMinimo()) {
             return ESTADO_SIN_MINIMO;
         }
         return ESTADO_NORMAL;
     }
 
-    // ===================== Registro (RF-34) =====================
+    // ===================== Registro (RF-52) =====================
 
-    // RF-34 (Registro de datos de insumos): inicia aquí la regla de negocio.
+    // RF-52 (Registro de datos de insumos): inicia aquí la regla de negocio.
     public ResultadoInventario registrar(Insumo datos) {
         if (!PermisosInventario.puedeAdministrarInsumos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
         }
         ResultadoInventario validacion = validarCampos(datos);
-        // RF-34 · Paso 4 / Excepción: campos incompletos o inválidos; se resalta el campo y no se guarda.
+        // RF-52 · Paso 4 / Excepción: campos incompletos o inválidos; se resalta el campo y no se guarda.
         if (validacion != null) {
             return validacion;
         }
@@ -157,18 +157,18 @@ public class InsumoService {
         // Paso 5: nombre repetido (activo o dado de baja)
         try {
             Insumo existente = insumoDAO.buscarPorNombre(datos.getNombre());
-            // RF-34 · Excepción paso 5: «El insumo ya está registrado».
+            // RF-52 · Excepción paso 5: «El insumo ya está registrado».
             if (existente != null && existente.isActivo()) {
                 return ResultadoInventario.error(MSG_YA_REGISTRADO, ResultadoInventario.CAMPO_NOMBRE);
             }
-            // RF-34 · Excepción paso 5: el nombre es de un insumo dado de baja; se ofrece reactivarlo.
+            // RF-52 · Excepción paso 5: el nombre es de un insumo dado de baja; se ofrece reactivarlo.
             if (existente != null) {
                 return ResultadoInventario.reactivable("El insumo «" + existente.getNombre() + "» ya existe, pero"
                         + " fue dado de baja.\n\n¿Deseas reactivarlo en lugar de crear uno nuevo?"
                         + " Conservará sus datos e historial; después podrás modificarlo.", existente.getIdInsumo());
             }
         } catch (DAOException e) {
-            // RF-34 · Excepción paso 5: sin conexión, «Error de conexión»; el formulario conserva los datos.
+            // RF-52 · Excepción paso 5: sin conexión, «Error de conexión»; el formulario conserva los datos.
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
 
@@ -176,7 +176,7 @@ public class InsumoService {
         try {
             insumoDAO.insertar(datos);
         } catch (DAOException e) {
-            // RF-34 · Excepción paso 6: «No fue posible registrar el insumo».
+            // RF-52 · Excepción paso 6: «No fue posible registrar el insumo».
             return ResultadoInventario.error(MSG_NO_REGISTRADO, ResultadoInventario.CAMPO_CONEXION);
         }
         ResultadoInventario resultado = ResultadoInventario.correcto("El insumo «" + datos.getNombre()
@@ -186,7 +186,7 @@ public class InsumoService {
         return resultado;
     }
 
-    // RF-34 excepción: reactivar el insumo dado de baja en lugar de crear uno nuevo
+    // RF-52 excepción: reactivar el insumo dado de baja en lugar de crear uno nuevo
     public ResultadoInventario reactivar(int idInsumo) {
         if (!PermisosInventario.puedeAdministrarInsumos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -207,31 +207,31 @@ public class InsumoService {
         }
     }
 
-    // ===================== Modificación (RF-35) =====================
+    // ===================== Modificación (RF-53) =====================
 
     // Paso 2: antes de abrir el formulario, el insumo debe existir y estar activo
-    // RF-35 (Modificación de datos de insumos): inicia aquí. Paso 2: el insumo debe existir y estar activo.
+    // RF-53 (Modificación de datos de insumos): inicia aquí. Paso 2: el insumo debe existir y estar activo.
     public ResultadoInventario revisarParaModificar(int idInsumo) {
         try {
             Insumo insumo = insumoDAO.buscarPorId(idInsumo);
             if (insumo == null || !insumo.isActivo()) {
-                // RF-35 · Excepción paso 2: «Insumo no encontrado».
+                // RF-53 · Excepción paso 2: «Insumo no encontrado».
                 return ResultadoInventario.noEncontrado(MSG_NO_ENCONTRADO);
             }
             return ResultadoInventario.correcto("");
         } catch (DAOException e) {
-            // RF-35 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-53 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
 
-    // RF-35 · Pasos 5 a 8: valida y guarda los cambios del insumo.
+    // RF-53 · Pasos 5 a 8: valida y guarda los cambios del insumo.
     public ResultadoInventario modificar(Insumo datos) {
         if (!PermisosInventario.puedeAdministrarInsumos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
         }
         ResultadoInventario validacion = validarCampos(datos);
-        // RF-35 · Excepción paso 5: campos incompletos o inválidos; se resalta el campo.
+        // RF-53 · Excepción paso 5: campos incompletos o inválidos; se resalta el campo.
         if (validacion != null) {
             return validacion;
         }
@@ -245,12 +245,12 @@ public class InsumoService {
             // Paso 6: nombre de otro insumo
             Insumo conMismoNombre = insumoDAO.buscarPorNombre(datos.getNombre());
             if (conMismoNombre != null && conMismoNombre.getIdInsumo() != datos.getIdInsumo()) {
-                // RF-35 · Excepción paso 6: «Ya existe otro insumo con ese nombre».
+                // RF-53 · Excepción paso 6: «Ya existe otro insumo con ese nombre».
                 return ResultadoInventario.error(MSG_OTRO_CON_NOMBRE, ResultadoInventario.CAMPO_NOMBRE);
             }
             // Paso 6: cambio de unidad con existencias o recetas
             if (actual.getUnidad() != datos.getUnidad() && insumoDAO.tieneLotesORecetas(datos.getIdInsumo())) {
-                // RF-35 · Excepción paso 6: no se permite cambiar la unidad si tiene existencias o recetas.
+                // RF-53 · Excepción paso 6: no se permite cambiar la unidad si tiene existencias o recetas.
                 ResultadoInventario error = ResultadoInventario.error(MSG_CAMBIO_UNIDAD, ResultadoInventario.CAMPO_UNIDAD);
                 error.setIdRelacionado(actual.getIdInsumo());
                 return error;
@@ -262,7 +262,7 @@ public class InsumoService {
         try {
             insumoDAO.actualizar(datos);
         } catch (DAOException e) {
-            // RF-35 · Excepción paso 7: «No fue posible actualizar el insumo».
+            // RF-53 · Excepción paso 7: «No fue posible actualizar el insumo».
             return ResultadoInventario.error(MSG_NO_ACTUALIZADO, ResultadoInventario.CAMPO_CONEXION);
         }
 
@@ -274,7 +274,7 @@ public class InsumoService {
         if (Math.abs(actual.getCostoUnitario() - datos.getCostoUnitario()) > 0.0005) {
             mensaje = mensaje + ".\nEl costo de las recetas que lo usan y el precio de sus opciones se recalcularon.";
         }
-        // RF-35 · Paso 8: informa el éxito.
+        // RF-53 · Paso 8: informa el éxito.
         return ResultadoInventario.correcto(mensaje);
     }
 
@@ -283,10 +283,10 @@ public class InsumoService {
         return insumoDAO.buscarPorId(idInsumo);
     }
 
-    // ===================== Baja (RF-36) =====================
+    // ===================== Baja (RF-54) =====================
 
     // Pasos 2 a 4: revisa si se puede dar de baja y arma el mensaje de confirmación
-    // RF-36 (Eliminación de insumo del inventario): inicia aquí.
+    // RF-54 (Eliminación de insumo del inventario): inicia aquí.
     public ResultadoInventario prepararBaja(int idInsumo) {
         if (!PermisosInventario.puedeAdministrarInsumos()) {
             return ResultadoInventario.error(PermisosInventario.MSG_SOLO_CONSULTA, null);
@@ -294,11 +294,11 @@ public class InsumoService {
         try {
             Insumo insumo = insumoDAO.buscarPorId(idInsumo);
             if (insumo == null) {
-                // RF-36 · Excepción paso 2: «Insumo no encontrado».
+                // RF-54 · Excepción paso 2: «Insumo no encontrado».
                 return ResultadoInventario.noEncontrado(MSG_NO_ENCONTRADO);
             }
             if (!insumo.isActivo()) {
-                // RF-36 · Excepción paso 2: «El insumo ya fue dado de baja».
+                // RF-54 · Excepción paso 2: «El insumo ya fue dado de baja».
                 return ResultadoInventario.noEncontrado(MSG_YA_DADO_DE_BAJA);
             }
 
@@ -307,7 +307,7 @@ public class InsumoService {
 
             // Paso 3: recetas activas que lo usan
             List<String> recetas = insumoDAO.listarRecetasActivas(idInsumo);
-            // RF-36 · Excepción paso 3: se agregan a la confirmación las recetas que lo usan (quedarán «requiere revisión»).
+            // RF-54 · Excepción paso 3: se agregan a la confirmación las recetas que lo usan (quedarán «requiere revisión»).
             if (!recetas.isEmpty()) {
                 mensaje = mensaje + "\n\nSe usa en estas recetas activas:\n" + ValidacionCatalogo.unirLineas(recetas)
                         + "\nLas recetas no se modifican, pero quedarán marcadas «Esta receta requiere revisión».";
@@ -320,10 +320,10 @@ public class InsumoService {
             } else {
                 mensaje = mensaje + "\n\nNo tiene movimientos, así que se ELIMINARÁ. Esta acción no se puede deshacer.";
             }
-            // RF-36 · Paso 4: mensaje de confirmación (inhabilitar o eliminar).
+            // RF-54 · Paso 4: mensaje de confirmación (inhabilitar o eliminar).
             return ResultadoInventario.bajaPosible(mensaje, !historial);
         } catch (DAOException e) {
-            // RF-36 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-54 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoInventario.error(MSG_ERROR_CONEXION, ResultadoInventario.CAMPO_CONEXION);
         }
     }
@@ -335,18 +335,18 @@ public class InsumoService {
             return revision;
         }
         try {
-            // RF-36 · Paso 6: sin movimientos se elimina; con historial se inhabilita.
+            // RF-54 · Paso 6: sin movimientos se elimina; con historial se inhabilita.
             if (revision.isSeEliminara()) {
                 insumoDAO.eliminar(idInsumo);
                 return ResultadoInventario.correcto("El insumo se eliminó correctamente");
             }
             insumoDAO.inhabilitar(idInsumo);
         } catch (DAOException e) {
-            // RF-36 · Excepción paso 6: «No fue posible dar de baja el insumo».
+            // RF-54 · Excepción paso 6: «No fue posible dar de baja el insumo».
             return ResultadoInventario.error(MSG_NO_DADO_DE_BAJA, null);
         }
         MonitorAlertas.getInstancia().revisar();
-        // RF-36 · Paso 7: informa el éxito.
+        // RF-54 · Paso 7: informa el éxito.
         return ResultadoInventario.correcto("El insumo se dio de baja (inhabilitado) correctamente");
     }
 

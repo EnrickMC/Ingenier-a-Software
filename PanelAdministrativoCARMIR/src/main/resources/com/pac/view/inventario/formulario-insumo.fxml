@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Ventana para registrar (RF-34) o modificar (RF-35) un insumo -->
+<!-- Ventana para registrar (RF-52) o modificar (RF-53) un insumo -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.inventario.controller.FormularioInsumoController"
       stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css"

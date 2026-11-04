@@ -14,8 +14,8 @@ function cuerpoValido(cuerpo) {
   return cuerpo;
 }
 
-// POST /api/carrito/validar  { articulos: [...] }   (RF-5: disponibilidad y precio vigente)
-// RF-5 (API): inicia aquí. Paso 4: valida en la BD cada producto, su precio y sus opciones.
+// POST /api/carrito/validar  { articulos: [...] }   (RF-6: disponibilidad y precio vigente)
+// RF-6 (API): inicia aquí. Paso 4: valida en la BD cada producto, su precio y sus opciones.
 async function validarCarrito(peticion, respuesta, siguiente) {
   try {
     const cuerpo = cuerpoValido(peticion.body);
@@ -27,8 +27,8 @@ async function validarCarrito(peticion, respuesta, siguiente) {
   }
 }
 
-// GET /api/entrega/reglas   (RF-9 y RF-10: fechas, horarios, anticipo y métodos de pago)
-// RF-9 · Paso 3 / RF-10 · Paso 3 (API): reglas de entrega y de pago.
+// GET /api/entrega/reglas   (RF-10 y RF-11: fechas, horarios, anticipo y métodos de pago)
+// RF-10 · Paso 3 / RF-11 · Paso 3 (API): reglas de entrega y de pago.
 async function leerReglas(peticion, respuesta, siguiente) {
   try {
     const reglas = await servicio.leerReglasEntrega();
@@ -38,8 +38,8 @@ async function leerReglas(peticion, respuesta, siguiente) {
   }
 }
 
-// GET /api/entrega/cobertura/:cp   (RF-9 paso 7)
-// RF-9 · Paso 7 (API): cobertura del código postal y costo de envío.
+// GET /api/entrega/cobertura/:cp   (RF-10 paso 7)
+// RF-10 · Paso 7 (API): cobertura del código postal y costo de envío.
 async function revisarCobertura(peticion, respuesta, siguiente) {
   try {
     const codigoPostal = validacionPedido.leerCodigoPostal(peticion.params.cp);
@@ -50,13 +50,13 @@ async function revisarCobertura(peticion, respuesta, siguiente) {
   }
 }
 
-// POST /api/pedidos   (RF-11: registrar el pedido)
-// RF-11 (API): inicia aquí. Paso 2: revisa que vengan carrito, datos de entrega y método de pago.
+// POST /api/pedidos   (RF-12: registrar el pedido)
+// RF-12 (API): inicia aquí. Paso 2: revisa que vengan carrito, datos de entrega y método de pago.
 async function registrarPedido(peticion, respuesta, siguiente) {
   try {
     const solicitud = validacionPedido.leerSolicitudPedido(peticion.body);
     const comprobante = await servicio.registrarPedido(solicitud);
-    // RF-11 · Excepción paso 6: doble envío; se regresa el comprobante con el folio ya generado.
+    // RF-12 · Excepción paso 6: doble envío; se regresa el comprobante con el folio ya generado.
     // 201 = se creó el pedido; 200 = ya existía (doble envío) y se regresa el mismo folio
     if (comprobante.repetido) {
       respuesta.status(200).json(comprobante);
@@ -68,20 +68,20 @@ async function registrarPedido(peticion, respuesta, siguiente) {
   }
 }
 
-// POST /api/pedidos/consulta  { folio, telefono }   (RF-12: seguimiento)
-// RF-12 (API): inicia aquí. Paso 3: valida folio y teléfono.
+// POST /api/pedidos/consulta  { folio, telefono } o { folio, correo }   (RF-13: seguimiento)
+// RF-13 (API): inicia aquí. Paso 3: valida folio y teléfono (o correo).
 async function consultarPedido(peticion, respuesta, siguiente) {
   try {
     const datos = validacionPedido.leerConsulta(peticion.body);
-    const seguimiento = await servicio.consultarPedido(datos.folio, datos.telefono);
+    const seguimiento = await servicio.consultarPedido(datos.folio, { telefono: datos.telefono, correo: datos.correo });
     respuesta.json(seguimiento);
   } catch (error) {
     siguiente(error);
   }
 }
 
-// POST /api/pedidos/comprobante  { folio, telefono, monto, metodo, referencia, linkComprobante }
-// RF-12 · Envío del comprobante de pago desde «Mis pedidos».
+// POST /api/pedidos/comprobante  { folio, telefono o correo, monto, metodo, referencia, linkComprobante }
+// RF-14 (Envío de comprobante de pago) (API): inicia aquí. Paso 4: valida los datos enviados desde «Mis pedidos».
 async function registrarComprobante(peticion, respuesta, siguiente) {
   try {
     const datos = validacionPedido.leerComprobante(peticion.body);

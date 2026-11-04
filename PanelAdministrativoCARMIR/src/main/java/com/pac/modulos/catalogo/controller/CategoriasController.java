@@ -22,9 +22,9 @@ import java.util.List;
 
 /**
  * Pestaña Categorías (categorias.fxml).
- * - RF-13 Visualización: lista con búsqueda, filtro por estado y detalle.
- * - RF-14 Registro y RF-15 Modificación: abren formulario-categoria.fxml.
- * - RF-16 Baja: revisa productos activos, confirmación doble, inhabilita o elimina.
+ * - RF-15 Visualización: lista con búsqueda, filtro por estado y detalle.
+ * - RF-16 Registro y RF-17 Modificación: abren formulario-categoria.fxml.
+ * - RF-18 Baja: revisa productos activos, confirmación doble, inhabilita o elimina.
  */
 public class CategoriasController {
 
@@ -54,7 +54,7 @@ public class CategoriasController {
     private boolean puedeEditar;
 
     // Lo llama CatalogoController al abrir el apartado
-    // RF-13 · Paso 1: la Administradora o el personal entran a la pestaña Categorías (el permiso se revisa en CatalogoController, paso 2).
+    // RF-15 · Paso 1: la Administradora o el personal entran a la pestaña Categorías (el permiso se revisa en CatalogoController, paso 2).
     public void iniciar(CatalogoController catalogo) {
         this.catalogo = catalogo;
         // Botones de estado: cada uno filtra la lista
@@ -79,9 +79,9 @@ public class CategoriasController {
         cargarCategorias();
     }
 
-    // ===================== Lista (RF-13) =====================
+    // ===================== Lista (RF-15) =====================
 
-    // RF-13 (Visualización de categorías): inicia aquí en la pantalla. Paso 3: consulta las categorías.
+    // RF-15 (Visualización de categorías): inicia aquí en la pantalla. Paso 3: consulta las categorías.
     private void cargarCategorias() {
         int idAntes = 0;
         if (seleccionada != null) {
@@ -96,7 +96,7 @@ public class CategoriasController {
         try {
             categorias = servicio.buscar(txtBuscar.getText(), leerFiltroEstado());
         } catch (DAOException e) {
-            // RF-13 · Excepción paso 3: sin conexión, «Error de conexión, intente de nuevo» (con «Reintentar»).
+            // RF-15 · Excepción paso 3: sin conexión, «Error de conexión, intente de nuevo» (con «Reintentar»).
             lblVacio.setText(CategoriaService.MSG_ERROR_CONEXION_LISTA);
             lblConteo.setText("");
             return;
@@ -111,20 +111,20 @@ public class CategoriasController {
                 incompletas++;
             }
         }
-        // RF-13 · Excepción paso 4: «Algunas categorías no pudieron cargarse».
+        // RF-15 · Excepción paso 4: «Algunas categorías no pudieron cargarse».
         if (incompletas > 0) {
             lblAviso.setText("Algunas categorías no pudieron cargarse");
             ApoyoVista.mostrarNodo(lblAviso, true);
         }
         lblConteo.setText(tblCategorias.getItems().size() + " categoría(s)");
 
-        // RF-13 · Paso 5: despliega el listado (nombre, descripción, estado y número de productos).
+        // RF-15 · Paso 5: despliega el listado (nombre, descripción, estado y número de productos).
         if (tblCategorias.getItems().isEmpty()) {
             if (hayFiltro()) {
-                // RF-13 · Excepción paso 6: «Sin resultados para el criterio ingresado» (con «Limpiar filtro»). También RF-15/RF-16 paso 1.
+                // RF-15 · Excepción paso 6: «Sin resultados para el criterio ingresado» (con «Limpiar filtro»). También RF-17/RF-18 paso 1.
                 lblVacio.setText(CategoriaService.MSG_SIN_RESULTADOS);
             } else {
-                // RF-13 · Excepción paso 4: «No hay categorías registradas» (con «+ Nueva categoría»).
+                // RF-15 · Excepción paso 4: «No hay categorías registradas» (con «+ Nueva categoría»).
                 lblVacio.setText(CategoriaService.MSG_SIN_CATEGORIAS);
             }
         }
@@ -152,7 +152,7 @@ public class CategoriasController {
     }
 
     @FXML
-    // RF-13 · Paso 6: aplica la búsqueda o el filtro.
+    // RF-15 · Paso 6: aplica la búsqueda o el filtro.
     private void onBuscar() {
         cargarCategorias();
     }
@@ -218,31 +218,31 @@ public class CategoriasController {
         }
     }
 
-    // ===================== Registro y modificación (RF-14, RF-15) =====================
+    // ===================== Registro y modificación (RF-16, RF-17) =====================
 
     @FXML
-    // RF-14 (Registro de categorías): inicia aquí. Paso 1: la Administradora pide una nueva categoría.
+    // RF-16 (Registro de categorías): inicia aquí. Paso 1: la Administradora pide una nueva categoría.
     private void onNueva() {
         abrirFormulario(null);
     }
 
     @FXML
-    // RF-15 (Modificación de categorías): inicia aquí. Paso 1: selecciona la categoría y pide modificarla.
+    // RF-17 (Modificación de categorías): inicia aquí. Paso 1: selecciona la categoría y pide modificarla.
     private void onModificar() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una categoría de la lista");
             return;
         }
-        // Paso 2 de RF-15: se valida que siga existiendo y se leen sus datos actuales
+        // Paso 2 de RF-17: se valida que siga existiendo y se leen sus datos actuales
         Categoria categoria;
         try {
             categoria = servicio.buscarPorId(seleccionada.getIdCategoria());
         } catch (DAOException e) {
-            // RF-15 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-17 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             Alertas.error(CategoriaService.MSG_ERROR_CONEXION);
             return;
         }
-        // RF-15 · Excepción paso 2: «Categoría no encontrada»; se recarga el listado.
+        // RF-17 · Excepción paso 2: «Categoría no encontrada»; se recarga el listado.
         if (categoria == null) {
             Alertas.aviso(CategoriaService.MSG_NO_ENCONTRADA);
             cargarCategorias();
@@ -268,7 +268,7 @@ public class CategoriasController {
         Parent raiz = cargador.getRoot();
         ApoyoVista.mostrarModal(raiz, tblCategorias.getScene().getWindow(), titulo);
 
-        // RF-14 / RF-15 · Paso 7 / Paso 9: cierra el formulario, informa el éxito y actualiza el listado.
+        // RF-16 / RF-17 · Paso 7 / Paso 9: cierra el formulario, informa el éxito y actualiza el listado.
         if (formulario.seGuardo()) {
             Alertas.info(formulario.getMensajeExito());
         }
@@ -277,10 +277,10 @@ public class CategoriasController {
         }
     }
 
-    // ===================== Baja (RF-16) =====================
+    // ===================== Baja (RF-18) =====================
 
     @FXML
-    // RF-16 (Eliminación de categorías): inicia aquí. Paso 1: selecciona la categoría y pide darla de baja.
+    // RF-18 (Eliminación de categorías): inicia aquí. Paso 1: selecciona la categoría y pide darla de baja.
     private void onDarDeBaja() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una categoría de la lista");
@@ -289,7 +289,7 @@ public class CategoriasController {
 
         // Pasos 2 y 3: existe y no tiene productos activos
         ResultadoCatalogo revision = servicio.prepararBaja(seleccionada.getIdCategoria());
-        // RF-16 · Excepciones pasos 2 y 3: no existe, sin conexión o tiene productos activos.
+        // RF-18 · Excepciones pasos 2 y 3: no existe, sin conexión o tiene productos activos.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -299,13 +299,13 @@ public class CategoriasController {
         }
 
         // Pasos 4 y 5: confirmación con las consecuencias
-        // RF-16 · Excepción paso 5: la Administradora canceló; la categoría queda sin cambios.
+        // RF-18 · Excepción paso 5: la Administradora canceló; la categoría queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja esta categoría?", revision.getMensaje())) {
             return;
         }
 
         ResultadoCatalogo resultado = servicio.darDeBaja(seleccionada.getIdCategoria());
-        // RF-16 · Paso 7: informa el éxito y actualiza el listado. Si falla, excepción paso 6.
+        // RF-18 · Paso 7: informa el éxito y actualiza el listado. Si falla, excepción paso 6.
         if (resultado.isExitoso()) {
             Alertas.info(resultado.getMensaje());
         } else {

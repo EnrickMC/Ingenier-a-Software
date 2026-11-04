@@ -22,7 +22,8 @@ import javafx.scene.layout.FlowPane;
 
 /**
  * Tarjeta "Notificaciones al cliente" de la pestaña Respaldos y sistema (integraciones.fxml).
- * RF-32: aquí se escriben los datos de WhatsApp Business Cloud API y del correo SMTP
+ * RF-71 (Configuración de las cuentas de notificaciones): aquí se escriben los datos de WhatsApp
+ * Business Cloud API y del correo SMTP (los usan los avisos de RF-47)
  * con los que el panel avisa a los clientes, se elige el modo (simulado o real) y se envían pruebas.
  *
  * El token y la contraseña nunca se muestran: el campo queda vacío y solo se indica si hay uno guardado.
@@ -81,7 +82,7 @@ public class IntegracionesController {
         ApoyoVista.mostrarNodo(lblResultado, false);
     }
 
-    // RF-32 (Notificaciones): inicia aquí. Muestra los datos guardados de WhatsApp y correo.
+    // RF-71: inicia aquí. Paso 1: muestra los datos guardados de WhatsApp y correo (sin el token ni la contraseña).
     public void cargar() {
         limpiarMarcas();
         ApoyoVista.mostrarNodo(lblError, false);
@@ -89,6 +90,7 @@ public class IntegracionesController {
         quitarContrasena = false;
 
         hayTabla = servicio.cargarEnAplicacion();
+        // RF-71 · Excepción paso 1: no se pudo leer la tabla; se usan los valores de notificaciones.properties.
         if (!hayTabla) {
             lblError.setText("No se pueden guardar estos datos: " + servicio.getMotivoError()
                     + ". Mientras tanto se usan los de config/notificaciones.properties.");
@@ -129,11 +131,13 @@ public class IntegracionesController {
 
     // ===================== Botones =====================
 
+    // RF-71 · Paso 2: el usuario modificó los datos y eligió «Guardar».
     @FXML
     private void onGuardar() {
         limpiarMarcas();
         ApoyoVista.mostrarNodo(lblError, false);
         ApoyoVista.mostrarNodo(lblResultado, false);
+        // RF-71 · Paso 3: la sesión sigue activa y con el permiso «Configurar sistema».
         if (!AccesoConfiguracion.revisar()) {
             return;
         }
@@ -141,6 +145,7 @@ public class IntegracionesController {
         if (datos == null) {
             return;
         }
+        // RF-71 · Pasos 3, 5 y 6: valida, guarda y aplica los datos nuevos (IntegracionesService).
         ResultadoConfiguracion resultado = servicio.guardar(datos, quitarToken, quitarContrasena);
         if (!resultado.isExitoso()) {
             mostrarError(resultado);
@@ -150,6 +155,7 @@ public class IntegracionesController {
         cargar();
     }
 
+    // RF-71 · Paso 2: pide quitar el token guardado (se borra al guardar).
     @FXML
     private void onQuitarToken() {
         quitarToken = true;
@@ -176,7 +182,8 @@ public class IntegracionesController {
 
     // ===================== Pruebas en segundo plano =====================
 
-    // La prueba usa lo que está escrito en el formulario (no hace falta guardar antes)
+    // RF-71 · Paso 2: el usuario eligió «Enviar prueba»; RF-71 · Paso 4: la prueba usa lo que está escrito
+    // en el formulario (no hace falta guardar antes) y se envía en segundo plano
     private void iniciarPrueba(boolean esWhatsApp) {
         limpiarMarcas();
         ApoyoVista.mostrarNodo(lblError, false);
@@ -205,7 +212,7 @@ public class IntegracionesController {
         hilo.start();
     }
 
-    // Muestra el resultado de la prueba (ya en el hilo de la pantalla)
+    // RF-71 · Paso 4 y Excepción paso 4: muestra el resultado de la prueba (ya en el hilo de la pantalla)
     private class AlTerminarPrueba implements EventHandler<WorkerStateEvent> {
         private final TareaPrueba tarea;
 
@@ -264,7 +271,7 @@ public class IntegracionesController {
 
     // ===================== Apoyo =====================
 
-    // Arma los datos con lo escrito; devuelve null (y marca el campo) si un número no es válido
+    // RF-71 · Excepción paso 3: arma los datos con lo escrito; devuelve null (y marca el campo) si un número no es válido
     private DatosNotificaciones leerFormulario() {
         DatosNotificaciones datos = new DatosNotificaciones();
         if (rbReal.isSelected()) {
@@ -328,7 +335,8 @@ public class IntegracionesController {
         return -1;
     }
 
-    // Texto junto al token y la contraseña: si hay uno guardado (sin mostrarlo)
+    // RF-71 · Paso 1: texto junto al token y la contraseña, si hay uno guardado (sin mostrarlo)
+    // RF-71 · Excepción paso 1: si se guardó en otra computadora no se puede leer y hay que escribirlo de nuevo
     private void mostrarEstadoSecretos() {
         String[] textosToken = {
                 "Todavía no hay un token guardado.",

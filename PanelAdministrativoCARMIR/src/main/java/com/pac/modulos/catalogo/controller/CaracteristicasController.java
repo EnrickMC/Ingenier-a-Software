@@ -64,12 +64,12 @@ public class CaracteristicasController {
     }
 
     // Se llama cada vez que la pestaña queda visible
-    // RF «Visualización de características»: inicia aquí. Paso 1: se abre la pestaña Características (permiso revisado en el paso 2 al abrir el apartado).
+    // RF-22 (Visualización de características): inicia aquí. Paso 1: se abre la pestaña Características (permiso revisado en el paso 2 al abrir el apartado).
     public void alMostrar() {
         llenandoSelector = true;
         boolean conectado = catalogo.llenarCategorias(cmbCategoria);
         llenandoSelector = false;
-        // RF «Visualización de características» · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
+        // RF-22 · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
         if (!conectado) {
             mostrarErrorConexion();
             return;
@@ -78,7 +78,7 @@ public class CaracteristicasController {
     }
 
     @FXML
-    // RF «Visualización de características» · Paso 1: el usuario elige la categoría de producto.
+    // RF-22 · Paso 1: el usuario elige la categoría de producto.
     private void onCambioCategoria() {
         if (llenandoSelector) {
             return;
@@ -98,7 +98,7 @@ public class CaracteristicasController {
 
     // ===================== Lista (Visualización de características) =====================
 
-    // RF «Visualización de características» · Pasos 3 a 5: consulta y despliega las características de la categoría.
+    // RF-22 · Pasos 3 a 5: consulta y despliega las características de la categoría.
     private void cargarCaracteristicas() {
         int idAntes = catalogo.getIdCaracteristicaActual();
         tblCaracteristicas.getItems().clear();
@@ -106,7 +106,7 @@ public class CaracteristicasController {
         lblConteo.setText("");
 
         Categoria categoria = cmbCategoria.getValue();
-        // RF «Visualización de características» · Excepción paso 3: no hay categorías que elegir.
+        // RF-22 · Excepción paso 3: no hay categorías que elegir.
         if (categoria == null) {
             lblVacio.setText("No hay categorías registradas. Registra una en la pestaña Categorías.");
             return;
@@ -117,7 +117,7 @@ public class CaracteristicasController {
             // Paso 3: la lista de categorías se acaba de leer de la BD, así que la categoría existe
             lista = servicio.listarPorCategoria(categoria.getIdCategoria());
         } catch (DAOException e) {
-            // RF «Visualización de características» · Excepción paso 3: sin conexión.
+            // RF-22 · Excepción paso 3: sin conexión.
             mostrarErrorConexion();
             return;
         }
@@ -126,7 +126,7 @@ public class CaracteristicasController {
             tblCaracteristicas.getItems().add(new FilaCaracteristica(caracteristica));
         }
         lblConteo.setText(lista.size() + " característica(s)");
-        // RF «Visualización de características» · Excepción paso 4: «Esta categoría no tiene características registradas» (con «+ Nueva característica»).
+        // RF-22 · Excepción paso 4: «Esta categoría no tiene características registradas» (con «+ Nueva característica»).
         if (lista.isEmpty()) {
             lblVacio.setText(CaracteristicaService.MSG_SIN_CARACTERISTICAS);
         }
@@ -150,7 +150,7 @@ public class CaracteristicasController {
     // ===================== Detalle =====================
 
     @FXML
-    // RF «Visualización de características» · Paso 6: el usuario selecciona una característica para ver su detalle.
+    // RF-22 · Paso 6: el usuario selecciona una característica para ver su detalle.
     private void onClicTabla(MouseEvent evento) {
         boolean hay = mostrarSeleccionada();
         if (hay && evento.getClickCount() == 2 && puedeEditar) {
@@ -173,11 +173,11 @@ public class CaracteristicasController {
         try {
             caracteristica = servicio.buscarConOpciones(fila.getCaracteristica().getIdCaracteristica());
         } catch (DAOException e) {
-            // RF «Visualización de características» · Excepción paso 7: sin conexión.
+            // RF-22 · Excepción paso 7: sin conexión.
             Alertas.error(CaracteristicaService.MSG_ERROR_CONEXION);
             return false;
         }
-        // RF «Visualización de características» · Excepción paso 7: «Característica no encontrada»; se recarga el listado.
+        // RF-22 · Excepción paso 7: «Característica no encontrada»; se recarga el listado.
         if (caracteristica == null) {
             Alertas.aviso(CaracteristicaService.MSG_NO_ENCONTRADA);
             cargarCaracteristicas();
@@ -282,7 +282,7 @@ public class CaracteristicasController {
     // ===================== Registro y modificación =====================
 
     @FXML
-    // RF «Registro de característica»: inicia aquí. Paso 1: «+ Nueva característica».
+    // RF-19 (Registro de característica): inicia aquí. Paso 1: «+ Nueva característica».
     private void onNueva() {
         Categoria categoria = cmbCategoria.getValue();
         if (categoria == null) {
@@ -291,7 +291,7 @@ public class CaracteristicasController {
         }
         // Paso 2: la categoría sigue existiendo y activa
         ResultadoCatalogo revision = servicio.revisarCategoriaParaAlta(categoria.getIdCategoria());
-        // RF «Registro de característica» · Excepción paso 2: la categoría ya no está disponible o no hay conexión.
+        // RF-19 · Excepción paso 2: la categoría ya no está disponible o no hay conexión.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -303,7 +303,7 @@ public class CaracteristicasController {
         try {
             orden = servicio.siguienteOrden(categoria.getIdCategoria());
         } catch (DAOException e) {
-            // RF «Registro de característica» · Excepción paso 2: «Error de conexión»; no abre el formulario.
+            // RF-19 · Excepción paso 2: «Error de conexión»; no abre el formulario.
             Alertas.error(CaracteristicaService.MSG_ERROR_CONEXION);
             return;
         }
@@ -311,22 +311,22 @@ public class CaracteristicasController {
     }
 
     @FXML
-    // RF «Modificación de característica»: inicia aquí. Paso 1: selecciona una característica y pide «Editar».
+    // RF-20 (Modificación de característica): inicia aquí. Paso 1: selecciona una característica y pide «Editar».
     private void onModificar() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una característica de la lista");
             return;
         }
         Caracteristica caracteristica;
-        // RF «Modificación de característica» · Paso 2: valida que la característica exista y recupera sus datos y opciones.
+        // RF-20 · Paso 2: valida que la característica exista y recupera sus datos y opciones.
         try {
             caracteristica = servicio.buscarConOpciones(seleccionada.getIdCaracteristica());
         } catch (DAOException e) {
-            // RF «Modificación de característica» · Excepción paso 2: «Error de conexión».
+            // RF-20 · Excepción paso 2: «Error de conexión».
             Alertas.error(CaracteristicaService.MSG_ERROR_CONEXION);
             return;
         }
-        // RF «Modificación de característica» · Excepción paso 2: «Característica no encontrada».
+        // RF-20 · Excepción paso 2: «Característica no encontrada».
         if (caracteristica == null) {
             Alertas.aviso(CaracteristicaService.MSG_NO_ENCONTRADA);
             cargarCaracteristicas();
@@ -352,7 +352,7 @@ public class CaracteristicasController {
         Parent raiz = cargador.getRoot();
         ApoyoVista.mostrarModal(raiz, tblCaracteristicas.getScene().getWindow(), titulo);
 
-        // RF «Registro de característica» · Paso 8 / RF «Modificación de característica» · Paso 9: cierra el formulario, informa el éxito y actualiza el listado.
+        // RF-19 · Paso 8 / RF-20 · Paso 9: cierra el formulario, informa el éxito y actualiza el listado.
         if (formulario.seGuardo()) {
             Alertas.info(formulario.getMensajeExito());
         }
@@ -364,14 +364,14 @@ public class CaracteristicasController {
     // ===================== Baja (Eliminación de característica) =====================
 
     @FXML
-    // RF «Eliminación de característica»: inicia aquí. Paso 1: selecciona una característica y pide darla de baja.
+    // RF-21 (Eliminación de característica): inicia aquí. Paso 1: selecciona una característica y pide darla de baja.
     private void onDarDeBaja() {
         if (seleccionada == null) {
             Alertas.info("Selecciona una característica de la lista");
             return;
         }
         ResultadoCatalogo revision = servicio.prepararBaja(seleccionada.getIdCaracteristica());
-        // RF «Eliminación de característica» · Excepciones pasos 2 y 3: no existe, sin conexión o está en pedidos en curso.
+        // RF-21 · Excepciones pasos 2 y 3: no existe, sin conexión o está en pedidos en curso.
         if (!revision.isExitoso()) {
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
@@ -379,12 +379,12 @@ public class CaracteristicasController {
             }
             return;
         }
-        // RF «Eliminación de característica» · Pasos 4 y 5: confirmación doble; si cancela, la característica queda sin cambios.
+        // RF-21 · Pasos 4 y 5: confirmación doble; si cancela, la característica queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja esta característica?", revision.getMensaje())) {
             return;
         }
         ResultadoCatalogo resultado = servicio.darDeBaja(seleccionada.getIdCaracteristica());
-        // RF «Eliminación de característica» · Paso 7: informa el éxito y actualiza el listado. Si falla, excepción paso 6.
+        // RF-21 · Paso 7: informa el éxito y actualiza el listado. Si falla, excepción paso 6.
         if (resultado.isExitoso()) {
             Alertas.info(resultado.getMensaje());
         } else {

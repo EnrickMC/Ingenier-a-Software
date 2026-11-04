@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 
 /**
  * Controlador de la pantalla de bloqueo (bloqueo.fxml).
- * Pantalla de inicio de sesión única: entran la Administradora y el Personal con su usuario y contraseña.
+ * RNF-14: pantalla de inicio de sesión única; entran la Administradora y el Personal con su usuario y contraseña.
  */
 public class BloqueoController {
 
@@ -61,20 +61,22 @@ public class BloqueoController {
 
     // Botón "Desbloquear" o Enter en la contraseña
     @FXML
-    // RNF-15 · Paso 1: inicio de sesión desde la pantalla de bloqueo (Administradora o Personal).
+    // RNF-14 · Paso 1: inicio de sesión desde la pantalla de bloqueo (Administradora o Personal).
     private void onDesbloquear() {
         ocultarMensaje();
         String contrasena = pwdContrasena.getText();
         // Un solo inicio de sesión: el sistema decide si es la Administradora o el Personal
         ResultadoAutenticacion resultado = autenticacion.iniciarSesion(txtUsuario.getText(), contrasena);
 
-        // RNF-15 · Excepciones paso 2: credenciales incorrectas, cuenta bloqueada o inactiva.
+        // RNF-14 · Excepciones pasos 2 a 6: datos vacíos, credenciales incorrectas, cuenta bloqueada o inactiva,
+        // sin módulos asignados o sin conexión.
         if (!resultado.isExitoso()) {
             mostrarMensaje(resultado.getMensaje());
             pwdContrasena.clear();
             return;
         }
 
+        // RNF-14 · Pasos 7 y 8: abre la sesión y muestra el panel principal con los módulos permitidos (RNF-12).
         reloj.stop();
         SesionUsuario.getInstancia().iniciar(resultado.getUsuario(), resultado.getTipoAcceso());
         Navegador.getInstancia().mostrar(Vista.PANEL_PRINCIPAL);

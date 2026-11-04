@@ -2,7 +2,7 @@
  * Módulo 5 · Inventario y Recetas.
  * Apartados "Inventario de Insumos" (insumos, lotes y movimientos, alertas)
  * y "Recetas" del panel. También tiene el descuento automático de insumos
- * que usará el Gestor de Pedidos (RF-45).
+ * que usará el Gestor de Pedidos (RF-63).
  *
  *   model/       clases que representan las tablas (Insumo, Lote, Movimiento, Alerta, Receta, ...)
  *   dao/         interfaces de acceso a datos (y dao/mysql/ con su implementación JDBC)

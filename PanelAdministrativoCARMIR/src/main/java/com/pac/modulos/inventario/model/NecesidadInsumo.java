@@ -1,7 +1,7 @@
 package com.pac.modulos.inventario.model;
 
 /**
- * Cantidad total de un insumo que necesita un pedido (RF-45),
+ * Cantidad total de un insumo que necesita un pedido (RF-63),
  * junto con la existencia que hay en el inventario.
  */
 public class NecesidadInsumo {

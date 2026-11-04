@@ -26,6 +26,7 @@ public class FormularioCaracteristicaController {
     @FXML private Label lblTitulo;
     @FXML private Label lblCategoria;
     @FXML private ComboBox<String> cmbNombre;
+    @FXML private Label lblVista3d;
     @FXML private TextField txtOrden;
     @FXML private TextArea txtDescripcion;
     @FXML private RadioButton rbUnica;
@@ -42,6 +43,8 @@ public class FormularioCaracteristicaController {
     private CaracteristicaService servicio = new CaracteristicaService();
     private Caracteristica editada;
     private int idCategoria;
+    // Nombre de la categoría (para avisar si la característica no sirve en ese postre)
+    private String nombreCategoria = "";
 
     private boolean guardado = false;
     private boolean recargarLista = false;
@@ -49,26 +52,45 @@ public class FormularioCaracteristicaController {
 
     @FXML
     private void initialize() {
-        // Nombres sugeridos (se puede escribir otro)
+        // RF-32 · Paso 2: nombres sugeridos (se puede escribir otro)
         PresetsCatalogo.llenar(cmbNombre, PresetsCatalogo.caracteristicas());
         ApoyoVista.mostrarNodo(lblMensaje, false);
+        // Cada vez que cambia el nombre se explica qué cambia en el 3D de la página web
+        // (listener de JavaFX: la flecha es la forma corta de escribirlo)
+        cmbNombre.getEditor().textProperty().addListener((observable, antes, ahora) -> actualizarVista3d());
+        actualizarVista3d();
+    }
+
+    // RF-32 · Paso 3: dice qué cambia esta característica en el 3D de la página web
+    private void actualizarVista3d() {
+        lblVista3d.setText(PresetsCatalogo.vista3dCaracteristica(PresetsCatalogo.texto(cmbNombre), nombreCategoria));
+    }
+
+    // RF-32 · Pasos 1 y 2: solo se sugieren las características que sirven para el tipo de postre de la categoría
+    private void sugerirPara(Categoria categoria) {
+        if (categoria != null) {
+            nombreCategoria = categoria.getNombre();
+            PresetsCatalogo.llenar(cmbNombre, PresetsCatalogo.caracteristicas(categoria.getNombre()));
+        }
     }
 
     // Formulario en blanco con el siguiente orden libre
-    // RF «Registro de característica» · Paso 3: despliega el formulario en blanco con el siguiente orden libre.
+    // RF-19 · Paso 3: despliega el formulario en blanco con el siguiente orden libre.
     public void prepararNueva(Categoria categoria, int ordenSugerido) {
         editada = null;
         idCategoria = categoria.getIdCategoria();
         lblTitulo.setText("Nueva característica");
         lblCategoria.setText("Categoría: " + categoria.getNombre());
+        sugerirPara(categoria);
         txtOrden.setText(String.valueOf(ordenSugerido));
+        actualizarVista3d();
         txtPresupuesto.setText("1");
         rbUnica.setSelected(true);
         onCambioSeleccion();
     }
 
     // Formulario con los datos actuales
-    // RF «Modificación de característica» · Paso 3: formulario con los datos actuales.
+    // RF-20 · Paso 3: formulario con los datos actuales.
     public void prepararEdicion(Caracteristica caracteristica, Categoria categoria) {
         editada = caracteristica;
         idCategoria = caracteristica.getIdCategoria();
@@ -76,7 +98,9 @@ public class FormularioCaracteristicaController {
         if (categoria != null) {
             lblCategoria.setText("Categoría: " + categoria.getNombre());
         }
+        sugerirPara(categoria);
         PresetsCatalogo.poner(cmbNombre, caracteristica.getNombre());
+        actualizarVista3d();
         txtDescripcion.setText(ApoyoVista.texto(caracteristica.getDescripcion()));
         txtOrden.setText(String.valueOf(caracteristica.getOrdenMostrar()));
         txtPresupuesto.setText(ValidacionCatalogo.numero(caracteristica.getPresupuestoSeleccion()));
@@ -100,25 +124,32 @@ public class FormularioCaracteristicaController {
     }
 
     @FXML
-    // RF «Registro de característica» · Paso 4 / RF «Modificación de característica» · Paso 4: la Administradora eligió «Guardar».
+    // RF-19 · Paso 4 / RF-20 · Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
 
         // Los números se revisan aquí para poder marcar el campo exacto
-        // RF «Registro de característica» / RF «Modificación de característica» · Excepción paso 5: el orden de muestra no es un entero válido.
+        // RF-19 (Registro de característica) / RF-20 · Excepción paso 5: el orden de muestra no es un entero válido.
         if (!ValidacionCatalogo.esEntero(txtOrden.getText())) {
             mostrarError(CaracteristicaService.MSG_ORDEN_INVALIDO, txtOrden);
             return;
         }
         double presupuesto = 1;
         if (rbMultiple.isSelected()) {
-            // RF «Registro de característica» / RF «Modificación de característica» · Excepción paso 5: el presupuesto de selección no es válido.
+            // RF-19 (Registro de característica) / RF-20 · Excepción paso 5: el presupuesto de selección no es válido.
             if (!ValidacionCatalogo.esDecimal(txtPresupuesto.getText())) {
                 mostrarError(CaracteristicaService.MSG_PRESUPUESTO_INVALIDO, txtPresupuesto);
                 return;
             }
             presupuesto = ValidacionCatalogo.aDecimal(txtPresupuesto.getText());
+        }
+
+        // RF-19 (Registro de característica) / RF-20 · Excepción paso 5: la característica no se puede mostrar en este postre (por ejemplo pisos en galletas); se marca el nombre (RF-32 · Paso 4).
+        String incompatible = PresetsCatalogo.incompatibilidadCaracteristica(PresetsCatalogo.texto(cmbNombre), nombreCategoria);
+        if (!incompatible.isEmpty()) {
+            mostrarError(incompatible, cmbNombre);
+            return;
         }
 
         Caracteristica datos = new Caracteristica();
@@ -141,7 +172,7 @@ public class FormularioCaracteristicaController {
         } else {
             resultado = servicio.modificar(datos, false);
             // Paso 7: cambio que afecta los carritos; si no confirma, se queda en el formulario
-            // RF «Modificación de característica» · Excepción paso 7: no confirmó el cambio; regresa al formulario sin guardar.
+            // RF-20 · Excepción paso 7: no confirmó el cambio; regresa al formulario sin guardar.
             if (resultado.isPideConfirmacion()) {
                 if (!Alertas.confirmar("Confirmar cambio", resultado.getMensaje())) {
                     return;
@@ -178,7 +209,7 @@ public class FormularioCaracteristicaController {
     }
 
     @FXML
-    // RF «Registro de característica» / RF «Modificación de característica» · Excepción paso 4: «Cancelar» descarta los datos.
+    // RF-19 (Registro de característica) / RF-20 · Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         cerrar();
     }

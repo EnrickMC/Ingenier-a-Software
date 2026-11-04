@@ -1,5 +1,6 @@
 package com.pac.modulos.pedidos.controller;
 
+import com.pac.modulos.pedidos.model.ArchivoComprobante;
 import com.pac.modulos.pedidos.model.EstadoPago;
 import com.pac.modulos.pedidos.model.Pago;
 import com.pac.util.Formatos;
@@ -47,9 +48,16 @@ public class FilaPago {
         return pago.getReferencia();
     }
 
+    // Qué comprobante tiene: la foto o el PDF que subió el cliente, un enlace o nada
     public String getComprobante() {
-        if (pago.tieneComprobante()) {
-            return "Sí";
+        if (pago.tieneArchivo()) {
+            if (ArchivoComprobante.TIPO_PDF.equals(pago.getTipoArchivo())) {
+                return "PDF";
+            }
+            return "Foto";
+        }
+        if (pago.tieneEnlace()) {
+            return "Enlace";
         }
         return "No";
     }

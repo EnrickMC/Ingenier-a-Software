@@ -42,7 +42,8 @@ public class ConfiguracionController implements ControladorSeccion {
 
     @Override
     public void inicializarSeccion(SeccionPanel seccion) {
-        // Si la tabla Configuracion no existe se avisa y solo se puede consultar
+        // RF-68 · Paso 1: verifica que existan las tablas de configuración.
+        // RF-68 · Excepción paso 1: si la tabla Configuracion no existe se avisa (MIGRACION_COMPLETA.sql) y solo se puede consultar
         boolean hayTablas = true;
         String motivo = null;
         try {

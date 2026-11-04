@@ -84,7 +84,7 @@ BEGIN
     INSERT INTO Pago (Folio, IdUsuario, MontoPago, FechaPago, MetodoPago, Referencia, EstadoValidacion, MotivoRechazo) VALUES
       (vFolio, NULL, 300.00, '2026-08-04 09:30:00', 'Transferencia', 'REP-0001', 'Validado', NULL),
       (vFolio, NULL, 300.00, '2026-08-04 09:10:00', 'Transferencia', 'REP-0000', 'Rechazado', 'Comprobante ilegible'),
-      (vFolio, NULL, 50.00,  '2026-08-05 09:10:00', 'Deposito', 'REP-0002', 'Pendiente', NULL);
+      (vFolio, NULL, 50.00,  '2026-08-05 09:10:00', 'Transferencia', 'REP-0002', 'Pendiente', NULL);
 
     -- C: cancelado con reembolso REALIZADO. Anticipo $250 el 05/08, reembolso $250 el 07/08 ---------
     INSERT INTO Pedido (IdCliente, FechaSolicitud, FechaEntrega, HorarioEntrega, ModalidadEntrega, ModalidadPago,

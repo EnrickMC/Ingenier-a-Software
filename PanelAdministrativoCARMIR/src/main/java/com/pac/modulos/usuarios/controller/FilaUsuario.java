@@ -32,7 +32,7 @@ public class FilaUsuario {
         return usuario.getNombreUsuario();
     }
 
-    // Columna "Estado". Si a un usuario activo le faltan datos, se marca "Revisar datos" (RNF-13)
+    // Columna "Estado". Si a un usuario activo le faltan datos, se marca "Revisar datos" (RNF-18)
     public String getEstado() {
         String texto = usuario.getEstado().getValorBD();
         if (necesitaRevision()) {

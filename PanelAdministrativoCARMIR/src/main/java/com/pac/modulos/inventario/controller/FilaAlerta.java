@@ -6,7 +6,7 @@ import com.pac.modulos.inventario.service.AlertaService;
 import com.pac.util.Formatos;
 
 /**
- * Una fila de la tabla de alertas (RF-39 existencia baja, RF-40 caducidad).
+ * Una fila de la tabla de alertas (RF-61 existencia baja, RF-62 caducidad).
  */
 public class FilaAlerta {
 

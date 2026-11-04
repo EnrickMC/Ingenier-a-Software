@@ -55,7 +55,7 @@ public class InventarioController implements ControladorSeccion, AlertasObserver
         // Aviso para el personal: puede registrar compras y mermas, pero no cambiar insumos
         ApoyoVista.mostrarNodo(lblModoConsulta, !PermisosInventario.puedeAdministrarInsumos());
 
-        // RF-40: al abrir el inventario se revisan existencias y caducidades
+        // RF-62: al abrir el inventario se revisan existencias y caducidades
         MonitorAlertas monitor = MonitorAlertas.getInstancia();
         monitor.agregarObservador(this);
         boolean revisado = monitor.revisar();
@@ -112,7 +112,7 @@ public class InventarioController implements ControladorSeccion, AlertasObserver
 
     // ===================== Formularios compartidos =====================
 
-    // Abre "Registrar compra / entrada" (RF-37); devuelve true si se registró
+    // Abre "Registrar compra / entrada" (RF-59); devuelve true si se registró
     public boolean abrirEntrada(Insumo insumo) {
         if (insumo != null) {
             ResultadoInventario revision = new InventarioService().revisarParaEntrada(insumo.getIdInsumo());
@@ -135,7 +135,7 @@ public class InventarioController implements ControladorSeccion, AlertasObserver
         return formulario.seGuardo() || formulario.debeRecargarLista();
     }
 
-    // Abre "Registrar merma" (RF-38); lote y motivo pueden ser null. Devuelve true si se registró
+    // Abre "Registrar merma" (RF-60); lote y motivo pueden ser null. Devuelve true si se registró
     public boolean abrirMerma(Insumo insumo, Lote lote, String motivo) {
         if (insumo != null) {
             ResultadoInventario revision = new InventarioService().revisarParaMerma(insumo.getIdInsumo());

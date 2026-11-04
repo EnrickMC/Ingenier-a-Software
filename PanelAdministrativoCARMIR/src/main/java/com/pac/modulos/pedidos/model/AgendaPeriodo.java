@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Lo que muestra la Agenda de Producción para un periodo (RF-30, RF-31):
+ * Lo que muestra la Agenda de Producción para un periodo (RF-45, RF-46):
  * pedidos programados, los que tienen datos por revisar, los atrasados y los insumos estimados.
  */
 public class AgendaPeriodo {

@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.util.List;
 
 /**
- * Consultas del pedido que necesita el descuento automático de insumos (RF-45).
+ * Consultas del pedido que necesita el descuento automático de insumos (RF-63).
  * Todas reciben la conexión porque corren dentro de la transacción del cambio de estado.
  */
 public interface ConsumoPedidoDAO {

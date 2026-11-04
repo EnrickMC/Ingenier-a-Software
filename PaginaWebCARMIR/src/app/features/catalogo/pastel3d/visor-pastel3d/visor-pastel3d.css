@@ -105,6 +105,16 @@
   color: var(--color-acento-oscuro);
 }
 
+.control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.control:disabled:hover {
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
 .control.activo {
   background: var(--color-acento);
   border-color: var(--color-acento);

@@ -42,10 +42,9 @@ const CAMPOS_DE_ENTREGA = [
 const CODIGOS_DE_CARRITO = ['PRODUCTOS_NO_DISPONIBLES', 'POSTRE_REPETIDO', 'CARRITO_VACIO'];
 
 /**
- * RF-10 · Método y modalidad de pago, y RF-11 · Enviar el pedido.
+ * RF-11 · Método y modalidad de pago, y RF-12 · Enviar el pedido.
  *  1. Se cargan el porcentaje de anticipo y si hay datos bancarios (si no, solo pago en sucursal).
  *  2. El cliente elige método (efectivo en la tienda o transferencia) y modalidad (anticipo o total).
- *     La opción «Depósito» se quitó a pedido de la repostería.
  *  3. Confirma en una ventana (RNF-5) y se envía el pedido con una llave contra doble envío.
  *  4. La API recalcula precios, revisa el cupo del día y guarda todo en una transacción.
  */
@@ -84,14 +83,14 @@ export default class PagoPagina implements OnInit {
   protected readonly mensajeSinConexion = MENSAJE_SIN_CONEXION;
   protected readonly direccionTienda = DIRECCION_TIENDA;
 
-  // RF-10 (Selección de modalidad de pago): inicia aquí. Paso 1: el cliente continuó desde los datos de entrega.
+  // RF-11 (Selección de modalidad de pago): inicia aquí. Paso 1: el cliente continuó desde los datos de entrega.
   ngOnInit(): void {
-    // RF-10 · Excepción paso 2: el carrito está vacío; regresa al carrito («Tu carrito está vacío»).
+    // RF-11 · Excepción paso 2: el carrito está vacío; regresa al carrito («Tu carrito está vacío»).
     if (this.carrito.articulos().length === 0) {
       this.router.navigate(['/carrito']);
       return;
     }
-    // RF-10 · Excepción paso 2: faltan los datos de entrega; redirige al formulario de entrega.
+    // RF-11 · Excepción paso 2: faltan los datos de entrega; redirige al formulario de entrega.
     if (!this.pedido.entregaCompleta()) {
       this.router.navigate(['/pedido/entrega']);
       return;
@@ -102,30 +101,30 @@ export default class PagoPagina implements OnInit {
     this.cargarReglas();
   }
 
-  // RF-10 · Paso 3: carga el porcentaje de anticipo y si hay datos bancarios para mostrar las modalidades.
+  // RF-11 · Paso 3: carga el porcentaje de anticipo y si hay datos bancarios para mostrar las modalidades.
   async cargarReglas(): Promise<void> {
     this.estado.set('cargando');
     try {
       const reglas = await this.api.leerReglasEntrega();
       this.reglas.set(reglas);
-      // Sin datos bancarios solo se puede pagar en sucursal (RF-10 paso 3)
-      // RF-10 · Excepción paso 6: sin datos bancarios configurados, solo queda el pago en sucursal.
+      // Sin datos bancarios solo se puede pagar en sucursal (RF-11 paso 3)
+      // RF-11 · Excepción paso 6: sin datos bancarios configurados, solo queda el pago en sucursal.
       if (!reglas.aceptaTransferencia && this.metodo() !== 'Efectivo') {
         this.metodo.set('Efectivo');
       }
       this.estado.set('listo');
     } catch {
-      // RF-10 · Excepción paso 3: sin conexión, no se pueden cargar las formas de pago.
+      // RF-11 · Excepción paso 3: sin conexión, no se pueden cargar las formas de pago.
       this.estado.set('error');
     }
   }
 
   // ===================== Elecciones del cliente =====================
 
-  // RF-10 · Paso 4: el cliente selecciona el método de pago.
+  // RF-11 · Paso 4: el cliente selecciona el método de pago.
   elegirMetodo(metodo: MetodoPago): void {
     const reglas = this.reglas();
-    // RF-10 · Excepción paso 6: la transferencia está deshabilitada sin datos bancarios.
+    // RF-11 · Excepción paso 6: la transferencia está deshabilitada sin datos bancarios.
     if (metodo !== 'Efectivo' && (reglas === null || !reglas.aceptaTransferencia)) {
       return;
     }
@@ -133,13 +132,13 @@ export default class PagoPagina implements OnInit {
     this.guardarPago();
   }
 
-  // RF-10 · Paso 4: el cliente selecciona la modalidad (anticipo o pago total).
+  // RF-11 · Paso 4: el cliente selecciona la modalidad (anticipo o pago total).
   elegirModalidad(modalidad: ModalidadPago): void {
     this.modalidadPago.set(modalidad);
     this.guardarPago();
   }
 
-  // RF-10 · Paso 6: asocia la modalidad al pedido en curso (las instrucciones se generan al registrarlo).
+  // RF-11 · Paso 6: asocia la modalidad al pedido en curso (las instrucciones se generan al registrarlo).
   private guardarPago(): void {
     this.mensajeError.set('');
     this.pedido.guardarPago({ metodo: this.metodo(), modalidad: this.modalidadPago() });
@@ -155,7 +154,7 @@ export default class PagoPagina implements OnInit {
     return this.pedido.datos().entrega.modalidad === 'Envio a domicilio';
   }
 
-  // RF-10 · Paso 3: desglose del total (productos más envío) y anticipo mínimo.
+  // RF-11 · Paso 3: desglose del total (productos más envío) y anticipo mínimo.
   total(): number {
     let envio = 0;
     if (this.conEnvio()) {
@@ -196,26 +195,26 @@ export default class PagoPagina implements OnInit {
     return texto + ', ' + direccion.colonia + ', C.P. ' + direccion.codigoPostal;
   }
 
-  // ===================== RF-11: enviar el pedido =====================
+  // ===================== RF-12: enviar el pedido =====================
 
-  // RF-11 (Confirmación y envío de solicitud del pedido): inicia aquí. Paso 1: el cliente pidió «Confirmar pedido».
+  // RF-12 (Confirmación y envío de solicitud del pedido): inicia aquí. Paso 1: el cliente pidió «Confirmar pedido».
   pedirConfirmacion(): void {
     if (this.enviando()) {
       return;
     }
     this.mensajeError.set('');
-    // RF-11 · Paso 4: muestra la confirmación final con el total, la fecha de entrega y el anticipo (RNF-5).
+    // RF-12 · Paso 4: muestra la confirmación final con el total, la fecha de entrega y el anticipo (RNF-5).
     this.confirmando.set(true);
   }
 
-  // RF-11 · Excepción paso 5: el cliente canceló; se queda en el resumen sin registrar el pedido.
+  // RF-12 · Excepción paso 5: el cliente canceló; se queda en el resumen sin registrar el pedido.
   cancelarConfirmacion(): void {
     if (!this.enviando()) {
       this.confirmando.set(false);
     }
   }
 
-  // RF-11 · Paso 5: el cliente confirmó el envío.
+  // RF-12 · Paso 5: el cliente confirmó el envío.
   async enviarPedido(): Promise<void> {
     if (this.enviando()) {
       return;
@@ -227,9 +226,9 @@ export default class PagoPagina implements OnInit {
     if (datos.entrega.modalidad === 'Envio a domicilio') {
       direccion = datos.entrega.direccion;
     }
-    // RF-11 · Paso 2: arma la solicitud con el carrito, los datos de entrega y el método de pago.
+    // RF-12 · Paso 2: arma la solicitud con el carrito, los datos de entrega y el método de pago.
     const solicitud: SolicitudPedido = {
-      // RF-11 · Excepción paso 6: la llave evita registrar dos veces el mismo pedido (doble envío).
+      // RF-12 · Excepción paso 6: la llave evita registrar dos veces el mismo pedido (doble envío).
       llaveIdempotencia: this.pedido.llaveActual(),
       articulos: articulosParaApi(this.carrito.articulos()),
       cliente: datos.cliente,
@@ -243,11 +242,11 @@ export default class PagoPagina implements OnInit {
       totalMostrado: this.total(),
     };
     try {
-      // RF-11 · Pasos 3 y 6: la API valida en la BD y registra el pedido con folio único.
+      // RF-12 · Pasos 3 y 6: la API valida en la BD y registra el pedido con folio único.
       const comprobante = await this.api.registrarPedido(solicitud);
-      // RF-11 paso 7: se vacía el carrito y se guarda el comprobante
+      // RF-12 paso 7: se vacía el carrito y se guarda el comprobante
       this.carrito.vaciar();
-      // RF-11 · Paso 8: guarda el comprobante y muestra la confirmación.
+      // RF-12 · Paso 8: guarda el comprobante y muestra la confirmación.
       this.pedido.terminar(comprobante);
       this.confirmando.set(false);
       this.router.navigate(['/pedido/confirmacion'], { replaceUrl: true });
@@ -260,15 +259,15 @@ export default class PagoPagina implements OnInit {
   }
 
   // Cada error manda al cliente al lugar donde lo puede corregir
-  // RF-11: cada excepción manda al cliente al lugar donde la puede corregir.
+  // RF-12: cada excepción manda al cliente al lugar donde la puede corregir.
   private atenderError(error: unknown): void {
-    // RF-11 · Excepción paso 6: «No fue posible enviar tu pedido» con «Reintentar»; se conservan los datos.
+    // RF-12 · Excepción paso 6: «No fue posible enviar tu pedido» con «Reintentar»; se conservan los datos.
     if (esSinConexion(error) || !esErrorApi(error)) {
       this.mensajeError.set(MENSAJE_ENVIO_FALLO);
       return;
     }
 
-    // RF-11 · Excepción paso 3: los precios cambiaron; se actualiza el resumen y se avisa al cliente.
+    // RF-12 · Excepción paso 3: los precios cambiaron; se actualiza el resumen y se avisa al cliente.
     // El precio cambió: se actualiza el carrito y el cliente confirma otra vez
     if (error.codigo === 'PRECIO_CAMBIO') {
       this.usarPreciosNuevos(error.detalles);
@@ -276,14 +275,14 @@ export default class PagoPagina implements OnInit {
       return;
     }
 
-    // RF-11 · Excepciones pasos 2 y 3: carrito vacío o productos «No disponible»; regresa al carrito.
+    // RF-12 · Excepciones pasos 2 y 3: carrito vacío o productos «No disponible»; regresa al carrito.
     if (CODIGOS_DE_CARRITO.indexOf(error.codigo) >= 0) {
       this.avisos.dejarAviso(error.mensaje);
       this.router.navigate(['/carrito']);
       return;
     }
 
-    // RF-11 · Excepción paso 2: datos de entrega incompletos o inválidos; redirige a la entrega conservando lo capturado.
+    // RF-12 · Excepción paso 2: datos de entrega incompletos o inválidos; redirige a la entrega conservando lo capturado.
     // Sin cobertura, día lleno, datos de contacto...: se corrigen en la pantalla de entrega
     const campos = erroresDeCampo(error);
     if (tieneCodigo(error, 'SIN_COBERTURA') || (campos.length > 0 && CAMPOS_DE_ENTREGA.indexOf(campos[0].campo) >= 0)) {
@@ -292,7 +291,7 @@ export default class PagoPagina implements OnInit {
       return;
     }
 
-    // RF-10 · Excepción paso 6: «Por el momento solo está disponible el pago en sucursal».
+    // RF-11 · Excepción paso 6: «Por el momento solo está disponible el pago en sucursal».
     // La repostería quitó sus datos bancarios mientras tanto
     if (tieneCodigo(error, 'SOLO_SUCURSAL')) {
       this.metodo.set('Efectivo');

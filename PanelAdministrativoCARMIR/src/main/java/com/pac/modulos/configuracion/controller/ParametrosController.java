@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Pestaña "Parámetros": un campo por cada valor de la tabla Configuracion.
+ * RF-68 (Modificación de parámetros del sistema): pestaña "Parámetros", un campo por cada valor de la tabla Configuracion.
  * Al guardar se revisan todos los valores; solo se guardan los que cambiaron y cada cambio
  * queda en el historial con el usuario que lo hizo.
  */
@@ -64,7 +64,7 @@ public class ParametrosController {
 
     // ===================== Cargar =====================
 
-    // Llena los campos con lo guardado; si no hay tablas, con lo que usa el panel ahora
+    // RF-68: inicia aquí. Paso 1: llena los campos con lo guardado; si no hay tablas, con lo que usa el panel ahora
     public void cargar(boolean tablasDisponibles) {
         hayTablas = tablasDisponibles;
         limpiarMarcas();
@@ -95,7 +95,8 @@ public class ParametrosController {
         marcarDias(dias);
     }
 
-    // Sin la tabla Configuracion: se muestran los valores con los que trabaja el panel
+    // RF-68 · Excepción paso 1: sin la tabla Configuracion se muestran los valores con los que trabaja el panel
+    // (solo consulta: «Guardar» y «Descartar» quedan desactivados)
     private void mostrarValoresDelArchivo() {
         ConfiguracionApp app = ConfiguracionApp.getInstancia();
         txtNombreNegocio.setText(app.getNombreNegocio());
@@ -116,20 +117,23 @@ public class ParametrosController {
 
     // ===================== Botones =====================
 
+    // RF-68 · Excepción paso 2: «Descartar» vuelve a mostrar los valores guardados.
     @FXML
     private void onDescartar() {
         cargar(hayTablas);
     }
 
+    // RF-68 · Paso 2: el usuario modificó los valores y eligió «Guardar».
     @FXML
     private void onGuardar() {
         limpiarMarcas();
+        // RF-68 · Paso 3: la sesión sigue activa y con el permiso «Configurar sistema».
         if (!AccesoConfiguracion.revisar()) {
             return;
         }
         ResultadoConfiguracion resultado = servicio.guardar(leerFormulario());
         if (!resultado.isExitoso()) {
-            // Se marca el campo con el problema (si es de un campo)
+            // RF-68 · Excepciones pasos 4 y 6: se marca el campo con el problema (si es de un campo) y no se guarda nada
             Node campo = nodoDe(resultado.getCampo());
             if (campo != null) {
                 ApoyoVista.marcar(campo);
@@ -139,6 +143,7 @@ public class ParametrosController {
             ApoyoVista.mostrarNodo(lblError, true);
             return;
         }
+        // RF-68 · Paso 7: «Configuración guardada (N cambio(s))» o «No hay cambios por guardar» (Excepción paso 5).
         Alertas.info(resultado.getMensaje());
         cargar(true);
     }

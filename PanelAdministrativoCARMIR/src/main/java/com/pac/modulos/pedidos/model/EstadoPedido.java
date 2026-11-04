@@ -1,7 +1,7 @@
 package com.pac.modulos.pedidos.model;
 
 /**
- * Los 6 estados de un pedido (RF-26), en el orden en que avanza.
+ * Los 6 estados de un pedido (RF-40), en el orden en que avanza.
  * Son los mismos valores del ENUM Pedido.EstadoPedido.
  * La cancelación y la baja NO son estados: el pedido conserva el último estado que alcanzó.
  */

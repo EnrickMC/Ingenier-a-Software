@@ -21,10 +21,10 @@ interface EstadoRenglon {
 }
 
 /**
- * Carrito de compras · Módulo 2 (RF-5 a RF-8).
- *  - RF-5: al abrir, la API revisa que cada postre siga disponible y con el mismo precio.
- *  - RF-7: cambiar la cantidad o volver a personalizar un postre.
- *  - RF-8: quitar un postre o vaciar el carrito (con confirmación, RNF-5).
+ * Carrito de compras · Módulo 2 (RF-6 a RF-9).
+ *  - RF-6: al abrir, la API revisa que cada postre siga disponible y con el mismo precio.
+ *  - RF-8: cambiar la cantidad o volver a personalizar un postre.
+ *  - RF-9: quitar un postre o vaciar el carrito (con confirmación, RNF-5).
  *  - «Continuar» revisa otra vez y pasa a los datos de entrega.
  */
 @Component({
@@ -55,7 +55,7 @@ export default class CarritoPagina implements OnInit {
   protected readonly porQuitar = signal<ArticuloCarrito | null>(null);
   protected readonly confirmandoVaciar = signal(false);
 
-  // RF-5 (Visualización de producto en el carrito): inicia aquí. Paso 1: el cliente abrió «Carrito».
+  // RF-6 (Visualización de producto en el carrito): inicia aquí. Paso 1: el cliente abrió «Carrito».
   ngOnInit(): void {
     // Aviso que dejó otra pantalla (por ejemplo: «Actualizamos tu postre» o productos no disponibles)
     const aviso = this.avisos.tomarAviso();
@@ -65,12 +65,12 @@ export default class CarritoPagina implements OnInit {
     this.revisar();
   }
 
-  // ===================== RF-5: revisión con la API =====================
+  // ===================== RF-6: revisión con la API =====================
 
-  // RF-5 · Pasos 2 a 5: revisa el carrito con la API (productos activos, precios y opciones vigentes).
+  // RF-6 · Pasos 2 a 5: revisa el carrito con la API (productos activos, precios y opciones vigentes).
   async revisar(): Promise<boolean> {
     const articulos = this.carrito.articulos();
-    // RF-5 · Excepciones pasos 2 y 3: no hay carrito o no tiene productos, se muestra «Tu carrito está vacío».
+    // RF-6 · Excepciones pasos 2 y 3: no hay carrito o no tiene productos, se muestra «Tu carrito está vacío».
     if (articulos.length === 0) {
       this.revisado.set(true);
       this.puedeContinuar.set(false);
@@ -79,13 +79,13 @@ export default class CarritoPagina implements OnInit {
     this.revisando.set(true);
     this.errorRevision.set('');
     try {
-      // RF-5 · Paso 4: la API valida en la BD cada producto, su precio y sus opciones.
+      // RF-6 · Paso 4: la API valida en la BD cada producto, su precio y sus opciones.
       const revision = await this.api.validarCarrito(articulos);
       this.usarRevision(articulos, revision);
       this.revisado.set(true);
       return revision.puedeContinuar;
     } catch (error) {
-      // RF-5 · Excepción paso 2: sin conexión, se muestra el error con «Reintentar» y no se puede continuar.
+      // RF-6 · Excepción paso 2: sin conexión, se muestra el error con «Reintentar» y no se puede continuar.
       this.errorRevision.set(mensajeDeError(error, MENSAJE_SIN_CONEXION));
       this.puedeContinuar.set(false);
       return false;
@@ -102,9 +102,9 @@ export default class CarritoPagina implements OnInit {
       if (articulo === undefined) {
         continue;
       }
-      // RF-5 · Excepción paso 4: producto «No disponible» o «Requiere actualizar personalización»; deshabilita «Continuar».
+      // RF-6 · Excepción paso 4: producto «No disponible» o «Requiere actualizar personalización»; deshabilita «Continuar».
       estados[articulo.id] = { estado: revisado.estado, mensaje: revisado.mensaje };
-      // RF-5 · Excepción paso 4: el precio cambió, se actualiza y se avisa «El precio de [producto] se actualizó».
+      // RF-6 · Excepción paso 4: el precio cambió, se actualiza y se avisa «El precio de [producto] se actualizó».
       // Paso 4: el precio cambió en la base de datos, se actualiza y se avisa
       if (revisado.estado === 'disponible' && revisado.precioUnitario !== articulo.precioUnitario) {
         this.carrito.actualizarPrecio(revisado.posicion, revisado.precioUnitario);
@@ -112,7 +112,7 @@ export default class CarritoPagina implements OnInit {
       }
     }
     this.estados.set(estados);
-    // RF-5 · Paso 6: muestra el resumen con las opciones de modificar, eliminar y continuar.
+    // RF-6 · Paso 6: muestra el resumen con las opciones de modificar, eliminar y continuar.
     this.puedeContinuar.set(revision.puedeContinuar);
     if (cambiaron.length > 0) {
       this.avisoPrecios.set('Se actualizó el precio de: ' + cambiaron.join(', ') + '. Revisa el nuevo total.');
@@ -132,9 +132,9 @@ export default class CarritoPagina implements OnInit {
     return estado !== null && estado.estado !== 'disponible';
   }
 
-  // ===================== RF-7: cantidad =====================
+  // ===================== RF-8: cantidad =====================
 
-  // RF-7 (Modificación de productos del carrito): inicia aquí para la cantidad; la personalización se edita en personalizar-pagina (?editar=).
+  // RF-8 (Modificación de productos del carrito): inicia aquí para la cantidad; la personalización se edita en personalizar-pagina (?editar=).
   sumarPieza(articulo: ArticuloCarrito): void {
     if (articulo.cantidad < PIEZAS_MAXIMAS) {
       this.cambiarCantidad(articulo, articulo.cantidad + 1);
@@ -148,7 +148,7 @@ export default class CarritoPagina implements OnInit {
   }
 
   // Cantidad escrita a mano: si no es válida se regresa al rango de 1 a 20
-  // RF-7 · Excepción paso 5: cantidad fuera de rango, se regresa al valor permitido.
+  // RF-8 · Excepción paso 5: cantidad fuera de rango, se regresa al valor permitido.
   escribirCantidad(articulo: ArticuloCarrito, texto: string): void {
     let cantidad = Math.floor(Number(texto));
     if (!Number.isFinite(cantidad) || cantidad < 1) {
@@ -163,55 +163,55 @@ export default class CarritoPagina implements OnInit {
   private cambiarCantidad(articulo: ArticuloCarrito, cantidad: number): void {
     this.mensajeExito.set('');
     // Si en otra pestaña ya se quitó, se avisa y se actualiza la vista
-    // RF-7 · Excepción paso 2: «El producto ya no está en tu carrito».
+    // RF-8 · Excepción paso 2: «El producto ya no está en tu carrito».
     if (!this.carrito.cambiarCantidad(articulo.id, cantidad)) {
       this.avisoGeneral.set('Este producto ya no está en tu carrito');
     }
   }
 
-  // ===================== RF-8: quitar y vaciar =====================
+  // ===================== RF-9: quitar y vaciar =====================
 
-  // RF-8 (Eliminación de productos del carrito): inicia aquí. Pasos 1 a 3: pide quitar un producto y se muestra la confirmación.
+  // RF-9 (Eliminación de productos del carrito): inicia aquí. Pasos 1 a 3: pide quitar un producto y se muestra la confirmación.
   pedirQuitar(articulo: ArticuloCarrito): void {
     this.porQuitar.set(articulo);
   }
 
-  // RF-8 · Excepción paso 4: el cliente canceló; el carrito queda igual.
+  // RF-9 · Excepción paso 4: el cliente canceló; el carrito queda igual.
   cancelarQuitar(): void {
     this.porQuitar.set(null);
   }
 
-  // RF-8 · Paso 4: el cliente confirmó la eliminación.
+  // RF-9 · Paso 4: el cliente confirmó la eliminación.
   confirmarQuitar(): void {
     const articulo = this.porQuitar();
     this.porQuitar.set(null);
     if (articulo === null) {
       return;
     }
-    // RF-8 · Paso 5: elimina el producto. Paso 7: informa el éxito.
+    // RF-9 · Paso 5: elimina el producto. Paso 7: informa el éxito.
     if (this.carrito.quitar(articulo.id)) {
       this.mensajeExito.set('Quitamos «' + articulo.nombre + '» de tu carrito.');
     } else {
-      // RF-8 · Excepción paso 2: «El producto ya no está en tu carrito»; no se elimina nada.
+      // RF-9 · Excepción paso 2: «El producto ya no está en tu carrito»; no se elimina nada.
       this.avisoGeneral.set('Este producto ya no está en tu carrito');
     }
     this.avisoPrecios.set('');
     // Al quitar un postre puede cambiar si los demás se pueden pedir (repetidos)
-    // RF-8 · Paso 6: recalcula el total y el contador.
+    // RF-9 · Paso 6: recalcula el total y el contador.
     this.revisar();
   }
 
-  // RF-8 · Paso 1 y 3: «Vaciar carrito» muestra la confirmación con el número de productos.
+  // RF-9 · Paso 1 y 3: «Vaciar carrito» muestra la confirmación con el número de productos.
   pedirVaciar(): void {
     this.confirmandoVaciar.set(true);
   }
 
-  // RF-8 · Excepción paso 4: el cliente canceló el vaciado.
+  // RF-9 · Excepción paso 4: el cliente canceló el vaciado.
   cancelarVaciar(): void {
     this.confirmandoVaciar.set(false);
   }
 
-  // RF-8 · Pasos 5 a 7: vacía el carrito e informa el éxito.
+  // RF-9 · Pasos 5 a 7: vacía el carrito e informa el éxito.
   confirmarVaciar(): void {
     this.confirmandoVaciar.set(false);
     this.carrito.vaciar();
@@ -223,7 +223,7 @@ export default class CarritoPagina implements OnInit {
 
   // ===================== Continuar =====================
 
-  // RF-5 · Paso 6: «Continuar» revisa otra vez el carrito y pasa a RF-9 (datos de entrega).
+  // RF-6 · Paso 6: «Continuar» revisa otra vez el carrito y pasa a RF-10 (datos de entrega).
   async continuar(): Promise<void> {
     if (this.revisando()) {
       return;
@@ -231,16 +231,16 @@ export default class CarritoPagina implements OnInit {
     const totalAntes = this.carrito.totalImporte();
     this.avisoPrecios.set('');
     const listo = await this.revisar();
-    // RF-5 · Excepción paso 4: hay productos con problema, no se continúa.
+    // RF-6 · Excepción paso 4: hay productos con problema, no se continúa.
     if (!listo) {
       return;
     }
     // Si un precio cambió justo ahora, el cliente revisa el total antes de seguir
-    // RF-5 · Excepción paso 4: un precio cambió justo ahora; el cliente revisa el total antes de seguir.
+    // RF-6 · Excepción paso 4: un precio cambió justo ahora; el cliente revisa el total antes de seguir.
     if (this.carrito.totalImporte() !== totalAntes) {
       return;
     }
-    // RF-9: inicia en entrega-pagina.
+    // RF-10: inicia en entrega-pagina.
     this.router.navigate(['/pedido/entrega']);
   }
 

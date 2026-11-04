@@ -46,10 +46,10 @@ import java.util.List;
 /**
  * Detalle de un pedido (detalle-pedido.fxml).
  *
- * Muestra cliente, postres con su personalización e imágenes, entrega, desglose de pagos (RF-29),
+ * Muestra cliente, postres con su personalización e imágenes, entrega, desglose de pagos (RF-43),
  * historial de estados, modificaciones y notificaciones. Tiene los botones de las acciones:
- * Aprobar (RF-24), Avanzar estado (RF-26, RF-27, RF-49), Registrar pago (RF-28), Modificar,
- * Cancelar (RF-25), Dar de baja e Imprimir ticket.
+ * Aprobar (RF-38), Avanzar estado (RF-40, RF-41, RF-44), Registrar pago (RF-42), Modificar,
+ * Cancelar (RF-39), Dar de baja e Imprimir ticket.
  */
 public class DetallePedidoController {
 
@@ -155,7 +155,7 @@ public class DetallePedidoController {
      * Lee el pedido y lo muestra. Devuelve false si no se pudo
      * (no existe o error de conexión; ya se avisó al usuario).
      */
-    // RF-21 paso 6 y RF-23 (Visualización de pedidos) pasos 2 a 6: muestra la ficha del pedido.
+    // RF-36 paso 6 y RF-33 (Visualización de pedidos) pasos 2 a 6: muestra la ficha del pedido.
     public boolean mostrar(int folio) {
         folioPedido = folio;
         ResultadoPedido lectura = pedidoService.cargarDetalle(folio);
@@ -164,12 +164,12 @@ public class DetallePedidoController {
             if (lectura.esErrorConexion()) {
                 mostrarVacio(lectura.getMensaje(), true);
                 if (contenedor == null) {
-                    // RF-23 · Excepción paso 2: sin conexión, «Error de conexión».
+                    // RF-33 · Excepción paso 2: sin conexión, «Error de conexión».
                     Alertas.error(lectura.getMensaje());
                 }
             } else {
                 mostrarVacio("Selecciona un pedido de la lista para ver su detalle", false);
-                // RF-23 · Excepción paso 2: «Pedido no encontrado» o ya atendido; se recarga la lista.
+                // RF-33 · Excepción paso 2: «Pedido no encontrado» o ya atendido; se recarga la lista.
                 Alertas.aviso(lectura.getMensaje());
                 avisarCambio(true);
             }
@@ -281,8 +281,8 @@ public class DetallePedidoController {
         }
     }
 
-    // RF-23: avisos de la ficha
-    // RF-23 · Excepciones pasos 4 y 5: avisos de la ficha (datos incompletos, fecha vencida, agenda saturada).
+    // RF-33: avisos de la ficha
+    // RF-33 · Excepciones pasos 4 y 5: avisos de la ficha (datos incompletos, fecha vencida, agenda saturada).
     private void llenarAvisos() {
         listaAvisos.getChildren().clear();
         List<String> avisos;
@@ -368,7 +368,7 @@ public class DetallePedidoController {
         entrega = entrega + "\nFecha acordada: " + Formatos.fecha(pedido.getFechaEntrega()) + "\nHora: " + hora;
         lblEntrega.setText(entrega);
 
-        // RF-29: desglose
+        // RF-43: desglose
         if (pedido.getEstado() == EstadoPedido.EN_ACEPTACION && !pedido.isCancelado()) {
             lblDesglose.setText("Modalidad: " + pedido.getModalidadPago());
             ApoyoVista.mostrarNodo(barraPagado, false);
@@ -396,7 +396,7 @@ public class DetallePedidoController {
     }
 
     // Pagos con su estado, comprobante y, si están pendientes, el botón para revisarlos
-    // RF-29 (Seguimiento de saldos y pagos de pedidos) · Paso 5: desglose de pagos, anticipo, lo pagado y el saldo.
+    // RF-43 (Seguimiento de saldos y pagos de pedidos) · Paso 5: desglose de pagos, anticipo, lo pagado y el saldo.
     private void llenarPagos() {
         listaPagos.getChildren().clear();
         if (pedido.getPagos().isEmpty()) {
@@ -426,10 +426,11 @@ public class DetallePedidoController {
             fila.getStyleClass().add("linea-bitacora");
 
             if (pago.tieneComprobante()) {
-                Button comprobante = new Button("Comprobante");
+                // RF-50 · Paso 1: el comprobante (foto, PDF o enlace) se ve en su propia ventana
+                Button comprobante = new Button("Ver comprobante");
                 comprobante.getStyleClass().add("enlace");
                 // Flecha necesaria: JavaFX pide una acción para el clic del botón
-                comprobante.setOnAction(evento -> abrirComprobante(pago.getLinkComprobante()));
+                comprobante.setOnAction(evento -> VisorComprobante.abrirVentana(pago, listaPagos.getScene().getWindow()));
                 fila.getChildren().add(comprobante);
             }
             if (pago.getEstado() == EstadoPago.PENDIENTE && PermisosPedidos.puedeValidarPagos()) {
@@ -497,8 +498,8 @@ public class DetallePedidoController {
         }
     }
 
-    // RF-32: avisos enviados; los fallidos se pueden reenviar
-    // RF-32 · Paso 7: bitácora de avisos del pedido (con «Reenviar» si falló).
+    // RF-47: avisos enviados; los fallidos se pueden reenviar
+    // RF-47 · Paso 7: bitácora de avisos del pedido (con «Reenviar» si falló).
     private void llenarNotificaciones() {
         listaNotificaciones.getChildren().clear();
         if (pedido.getNotificaciones().isEmpty()) {
@@ -532,7 +533,7 @@ public class DetallePedidoController {
         }
     }
 
-    // RF-32 · Excepción paso 6: «Reenviar» un aviso «Fallido».
+    // RF-47 · Excepción paso 6: «Reenviar» un aviso «Fallido».
     private void reenviar(Notificacion aviso) {
         if (NotificacionService.getInstancia().reenviar(aviso.getIdNotificacion())) {
             Alertas.info("Se volverá a enviar el aviso en segundo plano. Actualiza el detalle en unos segundos.");
@@ -552,7 +553,7 @@ public class DetallePedidoController {
 
     // ===================== Botones según el pedido y los permisos =====================
 
-    // RF-23 · Paso 6: botones «Aprobar», «Modificar», «Cancelar», «Dar de baja» e «Imprimir ticket».
+    // RF-33 · Paso 6: botones «Aprobar», «Modificar», «Cancelar», «Dar de baja» e «Imprimir ticket».
     private void configurarBotones() {
         boolean gestionar = PermisosPedidos.puedeGestionar();
         boolean administradora = PermisosPedidos.esAdministradora();
@@ -572,7 +573,7 @@ public class DetallePedidoController {
         btnAprobar.setDisable(motivoAprobar != null);
         ponerAyuda(btnAprobar, motivoAprobar);
 
-        // Avanzar estado: muestra el siguiente estado y por qué está bloqueado (RF-49)
+        // Avanzar estado: muestra el siguiente estado y por qué está bloqueado (RF-44)
         EstadoPedido siguiente = pedido.getEstado().siguiente();
         boolean verAvanzar = gestionar && activo && pedido.getEstado() != EstadoPedido.EN_ACEPTACION && siguiente != null;
         ApoyoVista.mostrarNodo(btnAvanzar, verAvanzar);
@@ -611,9 +612,9 @@ public class DetallePedidoController {
 
     // ===================== Acciones =====================
 
-    // RF-24: aprobar
+    // RF-38: aprobar
     @FXML
-    // RF-24 (Aprobación de pedidos): inicia aquí. Paso 1: la persona pide «Aprobar».
+    // RF-38 (Aprobación de pedidos): inicia aquí. Paso 1: la persona pide «Aprobar».
     private void onAprobar() {
         if (pedido == null) {
             return;
@@ -637,9 +638,9 @@ public class DetallePedidoController {
         atenderResultado(formulario.getResultado());
     }
 
-    // RF-26, RF-27, RF-49: avanzar al siguiente estado
+    // RF-40, RF-41, RF-44: avanzar al siguiente estado
     @FXML
-    // RF-27 (Modificación de estado del pedido): inicia aquí. Paso 1: la persona pide cambiar el estado.
+    // RF-41 (Modificación de estado del pedido): inicia aquí. Paso 1: la persona pide cambiar el estado.
     private void onAvanzar() {
         if (pedido == null) {
             return;
@@ -654,13 +655,13 @@ public class DetallePedidoController {
         if (siguiente == EstadoPedido.EN_PREPARACION) {
             detalle = detalle + "\n\nSe descontarán del inventario los insumos de las recetas del pedido.";
         }
-        // RF-27 · Pasos 4 y 5: confirmación; si se cancela, el pedido conserva su estado.
+        // RF-41 · Pasos 4 y 5: confirmación; si se cancela, el pedido conserva su estado.
         if (!Alertas.confirmar("¿Cambiar el estado del pedido #" + pedido.getFolio() + "?", detalle)) {
             return;
         }
         ResultadoPedido resultado = estadoService.avanzar(pedido, siguiente, false);
-        // RF-45: hay opciones sin receta; se pregunta si se continúa sin descontarlas
-        // RF-45 · Excepción paso 3: opciones sin receta; la administradora decide si continúa.
+        // RF-63: hay opciones sin receta; se pregunta si se continúa sin descontarlas
+        // RF-63 · Excepción paso 3: opciones sin receta; la administradora decide si continúa.
         if (!resultado.isExitoso() && resultado.isPreguntarSinReceta()) {
             if (!Alertas.confirmar("Opciones sin receta", resultado.getMensaje())) {
                 return;
@@ -675,7 +676,7 @@ public class DetallePedidoController {
     }
 
     // Muestra por qué no se puede avanzar y ofrece registrar el pago o abrir la revisión
-    // RF-27 · Excepciones paso 3 / RF-49: se ofrece registrar el pago o abrir la aprobación.
+    // RF-41 · Excepciones paso 3 / RF-44: se ofrece registrar el pago o abrir la aprobación.
     private void atenderBloqueo(ResultadoPedido bloqueo) {
         if (bloqueo.isOfrecerPago()) {
             if (Alertas.confirmar("No se puede avanzar", bloqueo.getMensaje() + "\n\n¿Registrar o validar un pago ahora?")) {
@@ -693,9 +694,9 @@ public class DetallePedidoController {
         Alertas.aviso(bloqueo.getMensaje());
     }
 
-    // RF-28: registrar un pago (o validar el pendiente si el cliente ya subió uno)
+    // RF-42: registrar un pago (o validar el pendiente si el cliente ya subió uno)
     @FXML
-    // RF-28 (Validación de pagos): inicia aquí. Paso 1: la persona pide «Registrar pago». También RF-29 paso 6.
+    // RF-42 (Validación de pagos): inicia aquí. Paso 1: la persona pide «Registrar pago». También RF-43 paso 6.
     private void onRegistrarPago() {
         if (pedido == null) {
             return;
@@ -741,13 +742,13 @@ public class DetallePedidoController {
 
     // Modificar (solo la Administradora)
     @FXML
-    // RF «Modificación de pedidos»: inicia aquí. Paso 1: la persona pide «Modificar».
+    // RF-34 (Modificación de pedidos): inicia aquí. Paso 1: la persona pide «Modificar».
     private void onModificar() {
         if (pedido == null) {
             return;
         }
         ResultadoPedido lectura = modificacionService.prepararModificacion(pedido.getFolio());
-        // RF «Modificación de pedidos» · Excepción paso 2: no se puede modificar (no encontrado, cancelado o en producción).
+        // RF-34 · Excepción paso 2: no se puede modificar (no encontrado, cancelado o en producción).
         if (!lectura.isExitoso()) {
             if (lectura.esErrorConexion()) {
                 Alertas.error(lectura.getMensaje());
@@ -768,16 +769,16 @@ public class DetallePedidoController {
         atenderResultado(formulario.getResultado());
     }
 
-    // RF-25: cancelar
+    // RF-39: cancelar
     @FXML
-    // RF-25 (Cancelación de pedidos): inicia aquí. Paso 1: la persona pide cancelar el pedido.
+    // RF-39 (Cancelación de pedidos): inicia aquí. Paso 1: la persona pide cancelar el pedido.
     private void onCancelar() {
         if (pedido == null) {
             return;
         }
         String impedimento = pedidoService.motivoNoCancelable(pedido);
         if (impedimento != null) {
-            // RF-25 · Excepción paso 2: ya cancelado o ya en producción.
+            // RF-39 · Excepción paso 2: ya cancelado o ya en producción.
             Alertas.aviso(impedimento);
             return;
         }
@@ -786,14 +787,14 @@ public class DetallePedidoController {
 
     // Dar de baja (solo la Administradora)
     @FXML
-    // RF «Eliminación de pedidos»: inicia aquí. Paso 1: la persona pide «Dar de baja».
+    // RF-35 (Eliminación de pedidos): inicia aquí. Paso 1: la persona pide «Dar de baja».
     private void onDarDeBaja() {
         if (pedido == null) {
             return;
         }
         String impedimento = pedidoService.motivoNoBaja(pedido);
         if (impedimento != null) {
-            // RF «Eliminación de pedidos» · Excepciones pasos 2 y 3: ya dado de baja o ya aprobado.
+            // RF-35 · Excepciones pasos 2 y 3: ya dado de baja o ya aprobado.
             Alertas.aviso(impedimento);
             return;
         }
@@ -820,7 +821,7 @@ public class DetallePedidoController {
     }
 
     // Lo que regresa un formulario: mensaje y recarga
-    // RF-24 / RF-25 / RF «Eliminación de pedidos» / RF-27 · Paso final: informa el resultado y actualiza la vista.
+    // RF-38 / RF-39 / RF-35 (Eliminación de pedidos) / RF-41 · Paso final: informa el resultado y actualiza la vista.
     private void atenderResultado(ResultadoPedido resultado) {
         if (resultado == null) {
             return;
@@ -843,22 +844,28 @@ public class DetallePedidoController {
         Alertas.error(resultado.getMensaje());
     }
 
-    // ===================== Ticket =====================
+    // ===================== Ticket (RF-48) =====================
 
+    // RF-48 (Impresión del ticket del pedido): inicia aquí. Paso 1: se eligió «Imprimir ticket» en la ficha del pedido.
     @FXML
     private void onImprimir() {
         if (pedido == null) {
             return;
         }
+        // RF-48 · Paso 2: arma el ticket de cocina.
         Node ticket = TicketPedido.crear(pedido);
+        // RF-48 · Paso 3: busca una impresora configurada en el equipo.
         PrinterJob trabajo = PrinterJob.createPrinterJob();
+        // RF-48 · Excepción paso 3: «No hay una impresora configurada en este equipo».
         if (trabajo == null) {
             Alertas.error("No hay una impresora configurada en este equipo");
             return;
         }
+        // RF-48 · Paso 4: el usuario elige la impresora y confirma (Excepción paso 4: si cancela no se imprime).
         if (!trabajo.showPrintDialog(ventana())) {
             return;
         }
+        // RF-48 · Paso 5: envía el ticket a la impresora (Excepción paso 5: «No se pudo imprimir el ticket»).
         boolean impreso = trabajo.printPage(ticket);
         if (impreso) {
             trabajo.endJob();

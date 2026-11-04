@@ -67,7 +67,7 @@ public class PedidoDAOMySQL implements PedidoDAO {
             + "LEFT JOIN EntregaDomicilio ed ON ed.Folio = p.Folio "
             + "LEFT JOIN Direccion dir ON dir.IdDireccion = ed.IdDireccion ";
 
-    // Estados que aparecen en la agenda de producción (RF-30)
+    // Estados que aparecen en la agenda de producción (RF-45)
     private static final String ESTADOS_AGENDA =
             "p.EstadoPedido IN ('Aprobado', 'Pagado', 'En preparacion', 'Pedido terminado')";
 

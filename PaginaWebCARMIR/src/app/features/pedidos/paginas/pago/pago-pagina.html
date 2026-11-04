@@ -5,7 +5,7 @@
   @if (estado() === 'cargando') {
     <app-cargando texto="Cargando formas de pago..." />
   } @else if (estado() === 'error') {
-    <!-- RF-10 · Excepción paso 3: sin conexión, no se pueden cargar las formas de pago. -->
+    <!-- RF-11 · Excepción paso 3: sin conexión, no se pueden cargar las formas de pago. -->
     <app-mensaje-estado tipo="error" titulo="No fue posible continuar" [texto]="mensajeSinConexion">
       <button type="button" class="btn btn-principal" (click)="cargarReglas()">Reintentar</button>
       <a routerLink="/pedido/entrega" class="btn btn-secundario">Volver a entrega</a>
@@ -13,7 +13,7 @@
   } @else {
     @if (reglas(); as reglas) {
       <div class="diseno-pedido">
-        <!-- RF-10 · Paso 3 / RF-11 · Paso 4: desglose del total. -->
+        <!-- RF-11 · Paso 3 / RF-12 · Paso 4: desglose del total. -->
         <app-resumen-pedido
           [articulos]="carrito.articulos()"
           [conEnvio]="conEnvio()"
@@ -23,7 +23,7 @@
         />
 
         <div>
-          <!-- RF-10 · Paso 7: resumen final del pedido (entrega) para confirmarlo. -->
+          <!-- RF-11 · Paso 7: resumen final del pedido (entrega) para confirmarlo. -->
           <section class="panel bloque" aria-labelledby="titulo-entrega">
             <h2 id="titulo-entrega">Entrega</h2>
             <dl class="datos-entrega">
@@ -50,12 +50,12 @@
           <section class="panel bloque" aria-labelledby="titulo-pago">
             <h2 id="titulo-pago">¿Cómo quieres pagar?</h2>
 
-            <!-- RF-11 · Excepción paso 3: los precios cambiaron; se avisa del nuevo total. -->
+            <!-- RF-12 · Excepción paso 3: los precios cambiaron; se avisa del nuevo total. -->
             @if (avisoPrecio() !== '') {
               <div class="aviso" role="alert"><p>{{ avisoPrecio() }}</p></div>
             }
 
-            <!-- RF-10 · Paso 4: método de pago (efectivo en la tienda o transferencia). -->
+            <!-- RF-11 · Paso 4: método de pago (efectivo en la tienda o transferencia). -->
             <fieldset class="opciones-tarjeta">
               <legend>Método de pago</legend>
               <label class="opcion-tarjeta" [class.elegida]="metodo() === 'Efectivo'">
@@ -82,7 +82,7 @@
                   <small>Te damos los datos al terminar; después subes la foto de tu comprobante</small>
                 </span>
               </label>
-              <!-- RF-10 · Excepción paso 6: «Por el momento solo está disponible el pago en sucursal». -->
+              <!-- RF-11 · Excepción paso 6: «Por el momento solo está disponible el pago en sucursal». -->
               @if (!reglas.aceptaTransferencia) {
                 <p class="ayuda-pago">{{ reglas.mensajeSoloSucursal }}</p>
               }
@@ -93,7 +93,7 @@
               <app-ubicacion-tienda titulo="Paga en efectivo en nuestra tienda" />
             }
 
-            <!-- RF-10 · Paso 4: modalidad de pago (anticipo o total). -->
+            <!-- RF-11 · Paso 4: modalidad de pago (anticipo o total). -->
             <fieldset class="opciones-tarjeta">
               <legend>¿Cuánto pagas para iniciar?</legend>
               <label class="opcion-tarjeta" [class.elegida]="modalidadPago() === 'Anticipo'">
@@ -112,13 +112,13 @@
               </label>
             </fieldset>
 
-            <!-- RF-11 · Excepción paso 6: «No fue posible enviar tu pedido» (y otros errores). -->
+            <!-- RF-12 · Excepción paso 6: «No fue posible enviar tu pedido» (y otros errores). -->
             @if (mensajeError() !== '') {
               <div class="aviso error" role="alert"><p>{{ mensajeError() }}</p></div>
             }
 
             <div class="barra-acciones">
-              <!-- RF-10 · Excepción paso 4: «Regresar» vuelve al formulario de entrega sin guardar nada más. -->
+              <!-- RF-11 · Excepción paso 4: «Regresar» vuelve al formulario de entrega sin guardar nada más. -->
               <a routerLink="/pedido/entrega" class="btn btn-secundario">Regresar</a>
               <button type="button" class="btn btn-principal" [disabled]="enviando()" (click)="pedirConfirmacion()">
                 @if (enviando()) {
@@ -138,7 +138,7 @@
   }
 </div>
 
-<!-- RF-11 · Pasos 4 y 5: ventana de confirmación final (RNF-5). -->
+<!-- RF-12 · Pasos 4 y 5: ventana de confirmación final (RNF-5). -->
 @if (confirmando()) {
   <app-dialogo-confirmacion
     titulo="¿Enviar tu pedido?"

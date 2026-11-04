@@ -93,22 +93,22 @@ public class ConfiguracionApp {
         return leerEntero("MinutosInactividadSesion", "app.minutosInactividadSesion", 30, 0);
     }
 
-    // Días antes de la caducidad de un lote en que se genera la alerta "Próxima caducidad" (RF-40)
+    // Días antes de la caducidad de un lote en que se genera la alerta "Próxima caducidad" (RF-62)
     public int getDiasAvisoCaducidad() {
         return leerEntero("DiasAvisoCaducidad", "inventario.diasAvisoCaducidad", 3, 0);
     }
 
-    // Módulo 4: pedidos que caben en un día antes de avisar "Agenda saturada" (RF-23)
+    // Módulo 4: pedidos que caben en un día antes de avisar "Agenda saturada" (RF-33)
     public int getCapacidadDiaria() {
         return leerEntero("CapacidadDiaria", "pedidos.capacidadDiaria", 6, 1);
     }
 
-    // Módulo 4: días antes de la entrega en que un pedido debe pasar a preparación (RF-26, RF-30)
+    // Módulo 4: días antes de la entrega en que un pedido debe pasar a preparación (RF-40, RF-45)
     public int getDiasParaPreparar() {
         return leerEntero("DiasParaPreparar", "pedidos.diasParaPreparar", 2, 1);
     }
 
-    // Módulo 4: días máximos de un rango personalizado en la agenda (RF-31)
+    // Módulo 4: días máximos de un rango personalizado en la agenda (RF-46)
     public int getDiasMaximosAgenda() {
         return leerEntero("DiasMaximosAgenda", "pedidos.diasMaximosAgenda", 62, 1);
     }

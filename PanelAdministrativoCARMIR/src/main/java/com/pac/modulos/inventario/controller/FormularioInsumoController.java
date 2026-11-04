@@ -19,7 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 /**
- * Ventana "Registrar insumo" (RF-34) / "Modificar insumo" (RF-35) (formulario-insumo.fxml).
+ * Ventana "Registrar insumo" (RF-52) / "Modificar insumo" (RF-53) (formulario-insumo.fxml).
  */
 public class FormularioInsumoController {
 
@@ -57,7 +57,7 @@ public class FormularioInsumoController {
     }
 
     // Formulario en blanco
-    // RF-34 · Paso 2: despliega el formulario vacío para registrar.
+    // RF-52 · Paso 2: despliega el formulario vacío para registrar.
     public void prepararNuevo() {
         editado = null;
         lblTitulo.setText("Registrar insumo");
@@ -65,7 +65,7 @@ public class FormularioInsumoController {
     }
 
     // Formulario con los datos actuales (las existencias no se cambian aquí)
-    // RF-35 · Paso 3: muestra el formulario con los datos actuales del insumo.
+    // RF-53 · Paso 3: muestra el formulario con los datos actuales del insumo.
     public void prepararEdicion(Insumo insumo) {
         editado = insumo;
         lblTitulo.setText("Modificar insumo");
@@ -95,12 +95,12 @@ public class FormularioInsumoController {
     }
 
     @FXML
-    // RF-34 · Paso 3 / RF-35 · Paso 4: la administradora elige «Guardar».
+    // RF-52 · Paso 3 / RF-53 · Paso 4: la administradora elige «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
 
-        // RF-34 · Excepción paso 4: costo o stock con formato inválido; se resalta el campo.
+        // RF-52 · Excepción paso 4: costo o stock con formato inválido; se resalta el campo.
         if (!ValidacionCatalogo.esDecimal(txtCosto.getText())) {
             mostrarError("Escribe el costo por unidad (por ejemplo 28.50)", txtCosto);
             return;
@@ -125,8 +125,8 @@ public class FormularioInsumoController {
         ResultadoInventario resultado;
         if (editado == null) {
             resultado = servicio.registrar(datos);
-            // RF-34: el nombre es de un insumo dado de baja → se ofrece reactivarlo
-            // RF-34 · Excepción paso 5: el nombre es de un insumo dado de baja; se ofrece reactivarlo.
+            // RF-52: el nombre es de un insumo dado de baja → se ofrece reactivarlo
+            // RF-52 · Excepción paso 5: el nombre es de un insumo dado de baja; se ofrece reactivarlo.
             if (resultado.isOfrecerReactivar()) {
                 if (Alertas.confirmar("Insumo dado de baja", resultado.getMensaje())) {
                     resultado = servicio.reactivar(resultado.getIdRelacionado());
@@ -155,8 +155,8 @@ public class FormularioInsumoController {
             cerrar();
             return;
         }
-        // RF-35: no se permite cambiar la unidad; se restablece la original
-        // RF-35 · Excepción paso 6: cambio de unidad no permitido; se restablece la unidad original.
+        // RF-53: no se permite cambiar la unidad; se restablece la original
+        // RF-53 · Excepción paso 6: cambio de unidad no permitido; se restablece la unidad original.
         if (ResultadoInventario.CAMPO_UNIDAD.equals(resultado.getCampo()) && editado != null) {
             cmbUnidad.setValue(editado.getUnidad());
             onCambioUnidad();
@@ -185,7 +185,7 @@ public class FormularioInsumoController {
     }
 
     @FXML
-    // RF-34 · Excepción paso 3 / RF-35 · Excepción paso 4: «Cancelar» descarta los datos y cierra el formulario.
+    // RF-52 · Excepción paso 3 / RF-53 · Excepción paso 4: «Cancelar» descarta los datos y cierra el formulario.
     private void onCancelar() {
         cerrar();
     }

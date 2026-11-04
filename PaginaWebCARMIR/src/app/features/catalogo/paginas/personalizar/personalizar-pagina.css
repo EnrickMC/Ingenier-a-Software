@@ -285,3 +285,36 @@
     --alto-maximo-visor: 62vh;
   }
 }
+
+/* Casilla «Ponerlo en un topper» debajo del mensaje */
+.casilla-topper {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #cdbfae;
+  border-radius: var(--radio-chico);
+  background: var(--color-blanco);
+  cursor: pointer;
+}
+
+.casilla-topper input {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-acento);
+  flex-shrink: 0;
+}
+
+.casilla-topper span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-weight: 600;
+}
+
+.casilla-topper small {
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}

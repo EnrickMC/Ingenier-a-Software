@@ -57,7 +57,7 @@ public class OpcionService {
     // ===================== Consultas (Visualización) =====================
 
     // Opciones de una característica (con su costo de receta)
-    // RF «Visualización de opciones de característica» · Paso 3: consulta las opciones de la característica.
+    // RF-26 · Paso 3: consulta las opciones de la característica.
     public List<Opcion> listarPorCaracteristica(int idCaracteristica) throws DAOException {
         return opcionDAO.listarPorCaracteristica(idCaracteristica);
     }
@@ -83,67 +83,67 @@ public class OpcionService {
     }
 
     // Una opción tiene datos completos si tiene nombre
-    // RF «Visualización de opciones de característica» · Paso 4: valida que los datos de la opción estén completos.
+    // RF-26 · Paso 4: valida que los datos de la opción estén completos.
     public boolean datosCompletos(Opcion opcion) {
         return !ValidacionCatalogo.estaVacio(opcion.getNombre());
     }
 
     // Paso 2 del registro: la característica debe existir y estar disponible
-    // RF «Registro de opción de característica» · Paso 2: la característica debe seguir existiendo y activa.
+    // RF-23 · Paso 2: la característica debe seguir existiendo y activa.
     public ResultadoCatalogo revisarCaracteristicaParaAlta(int idCaracteristica) {
         try {
             Caracteristica caracteristica = caracteristicaDAO.buscarPorId(idCaracteristica);
-            // RF «Registro de opción de característica» · Excepción paso 2: «La característica ya no está disponible».
+            // RF-23 · Excepción paso 2: «La característica ya no está disponible».
             if (caracteristica == null || !caracteristica.isDisponible()) {
                 return ResultadoCatalogo.noEncontrado(MSG_CARACTERISTICA_NO_DISPONIBLE);
             }
             return ResultadoCatalogo.correcto("");
         } catch (DAOException e) {
-            // RF «Registro de opción de característica» · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-23 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
     }
 
     // ===================== Registro =====================
 
-    // RF «Registro de opción de característica»: inicia aquí la regla de negocio (pasos 5 a 7).
+    // RF-23 (Registro de opción de característica): inicia aquí la regla de negocio (pasos 5 a 7).
     public ResultadoCatalogo registrar(Opcion datos) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF «Registro de opción de característica» · Excepción paso 5: campos incompletos o valores inválidos.
+        // RF-23 · Excepción paso 5: campos incompletos o valores inválidos.
         if (validacion != null) {
             return validacion;
         }
 
         try {
             Caracteristica caracteristica = caracteristicaDAO.buscarPorId(datos.getIdCaracteristica());
-            // RF «Registro de opción de característica» · Excepción paso 2: la característica ya no está disponible.
+            // RF-23 · Excepción paso 2: la característica ya no está disponible.
             if (caracteristica == null || !caracteristica.isDisponible()) {
                 return ResultadoCatalogo.noEncontrado(MSG_CARACTERISTICA_NO_DISPONIBLE);
             }
             // Paso 6: nombre y presupuesto
-            // RF «Registro de opción de característica» · Excepción paso 6: «La opción ya existe en esta característica».
+            // RF-23 · Excepción paso 6: «La opción ya existe en esta característica».
             if (opcionDAO.buscarPorNombre(datos.getIdCaracteristica(), datos.getNombre()) != null) {
                 return ResultadoCatalogo.error(MSG_YA_EXISTE, ResultadoCatalogo.CAMPO_NOMBRE);
             }
             ResultadoCatalogo presupuesto = revisarPresupuesto(datos, caracteristica);
-            // RF «Registro de opción de característica» · Excepción paso 6: «Los puntos superan el presupuesto de la característica».
+            // RF-23 · Excepción paso 6: «Los puntos superan el presupuesto de la característica».
             if (presupuesto != null) {
                 return presupuesto;
             }
         } catch (DAOException e) {
-            // RF «Registro de opción de característica» · Excepción: sin conexión, «Error de conexión».
+            // RF-23 · Excepción: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
-        // RF «Registro de opción de característica» · Paso 7: almacena la opción e informa el éxito.
+        // RF-23 · Paso 7: almacena la opción e informa el éxito.
         try {
             opcionDAO.insertar(datos);
         } catch (DAOException e) {
-            // RF «Registro de opción de característica» · Excepción paso 7: «No fue posible guardar la opción».
+            // RF-23 · Excepción paso 7: «No fue posible guardar la opción».
             return ResultadoCatalogo.error(MSG_NO_GUARDADA, ResultadoCatalogo.CAMPO_CONEXION);
         }
         return ResultadoCatalogo.correcto("La opción «" + datos.getNombre() + "» se registró correctamente");
@@ -152,14 +152,14 @@ public class OpcionService {
     // ===================== Modificación =====================
 
     // confirmado = la administradora ya aceptó el aviso sobre precios y carritos
-    // RF «Modificación de opción de característica»: inicia aquí la regla de negocio (pasos 5 a 8).
+    // RF-25 (Modificación de opción de característica): inicia aquí la regla de negocio (pasos 5 a 8).
     public ResultadoCatalogo modificar(Opcion datos, boolean confirmado) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF «Modificación de opción de característica» · Excepción paso 5: datos inválidos.
+        // RF-25 · Excepción paso 5: datos inválidos.
         if (validacion != null) {
             return validacion;
         }
@@ -167,45 +167,45 @@ public class OpcionService {
         Opcion actual;
         try {
             actual = opcionDAO.buscarPorId(datos.getIdOpcion());
-            // RF «Modificación de opción de característica» · Excepción paso 2: «Opción no encontrada».
+            // RF-25 · Excepción paso 2: «Opción no encontrada».
             if (actual == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADA);
             }
             datos.setIdCaracteristica(actual.getIdCaracteristica());
 
             Opcion conMismoNombre = opcionDAO.buscarPorNombre(actual.getIdCaracteristica(), datos.getNombre());
-            // RF «Modificación de opción de característica» · Excepción paso 6: el nombre ya existe en la característica.
+            // RF-25 · Excepción paso 6: el nombre ya existe en la característica.
             if (conMismoNombre != null && conMismoNombre.getIdOpcion() != datos.getIdOpcion()) {
                 return ResultadoCatalogo.error(MSG_YA_EXISTE, ResultadoCatalogo.CAMPO_NOMBRE);
             }
             Caracteristica caracteristica = caracteristicaDAO.buscarPorId(actual.getIdCaracteristica());
             if (caracteristica != null) {
                 ResultadoCatalogo presupuesto = revisarPresupuesto(datos, caracteristica);
-                // RF «Modificación de opción de característica» · Excepción paso 6: los puntos no caben en el presupuesto.
+                // RF-25 · Excepción paso 6: los puntos no caben en el presupuesto.
                 if (presupuesto != null) {
                     return presupuesto;
                 }
             }
         } catch (DAOException e) {
-            // RF «Modificación de opción de característica» · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-25 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
         // Paso 7: si cambió el multiplicador de costo o la disponibilidad, se avisa
         boolean cambioCosto = Math.abs(actual.getMultiplicadorCosto() - datos.getMultiplicadorCosto()) > 0.001;
         boolean cambioDisponible = actual.isDisponible() != datos.isDisponible();
-        // RF «Modificación de opción de característica» · Paso 7: los pedidos enviados conservan su precio y los carritos se recalculan; se pide confirmar.
+        // RF-25 · Paso 7: los pedidos enviados conservan su precio y los carritos se recalculan; se pide confirmar.
         if ((cambioCosto || cambioDisponible) && !confirmado) {
             String mensaje = "Los pedidos ya enviados conservan su precio y sus opciones originales."
                     + " Los carritos que tengan esta opción se recalcularán.\n\n¿Deseas continuar?";
             return ResultadoCatalogo.confirmacion(mensaje, null);
         }
 
-        // RF «Modificación de opción de característica» · Paso 8: actualiza la opción.
+        // RF-25 · Paso 8: actualiza la opción.
         try {
             opcionDAO.actualizar(datos);
         } catch (DAOException e) {
-            // RF «Modificación de opción de característica» · Excepción paso 8: «No fue posible actualizar la opción».
+            // RF-25 · Excepción paso 8: «No fue posible actualizar la opción».
             return ResultadoCatalogo.error(MSG_NO_ACTUALIZADA, ResultadoCatalogo.CAMPO_CONEXION);
         }
         return ResultadoCatalogo.correcto("La opción «" + datos.getNombre() + "» se actualizó correctamente");
@@ -214,21 +214,21 @@ public class OpcionService {
     // ===================== Baja (Eliminación de opción) =====================
 
     // Pasos 2 a 5: revisa si se puede dar de baja y arma la confirmación doble
-    // RF «Eliminación de opción de característica»: inicia aquí la regla de negocio (pasos 2 a 5).
+    // RF-24 (Eliminación de opción de característica): inicia aquí la regla de negocio (pasos 2 a 5).
     public ResultadoCatalogo prepararBaja(int idOpcion) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
         try {
             Opcion opcion = opcionDAO.buscarPorId(idOpcion);
-            // RF «Eliminación de opción de característica» · Excepción paso 2: «Opción no encontrada».
+            // RF-24 · Excepción paso 2: «Opción no encontrada».
             if (opcion == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADA);
             }
 
             // Paso 3: pedidos vigentes
             List<Integer> folios = opcionDAO.listarFoliosVigentes(idOpcion);
-            // RF «Eliminación de opción de característica» · Excepción paso 3: «La opción está en pedidos en curso» con sus folios.
+            // RF-24 · Excepción paso 3: «La opción está en pedidos en curso» con sus folios.
             if (!folios.isEmpty()) {
                 return ResultadoCatalogo.error(MSG_EN_PEDIDOS + ": " + ValidacionCatalogo.unirFolios(folios), null);
             }
@@ -248,7 +248,7 @@ public class OpcionService {
 
             // Paso 4: última opción disponible de una característica obligatoria
             Caracteristica caracteristica = caracteristicaDAO.buscarPorId(opcion.getIdCaracteristica());
-            // RF «Eliminación de opción de característica» · Excepción paso 4: última opción disponible de una obligatoria; se agrega el aviso a la confirmación.
+            // RF-24 · Excepción paso 4: última opción disponible de una obligatoria; se agrega el aviso a la confirmación.
             if (caracteristica != null && caracteristica.isObligatoria() && opcion.isDisponible()
                     && opcionDAO.contarDisponibles(opcion.getIdCaracteristica()) <= 1) {
                 mensaje = mensaje + "\n\nAVISO: es la última opción disponible de «" + caracteristica.getNombre()
@@ -264,23 +264,23 @@ public class OpcionService {
                 mensaje = mensaje + "\n\nNo tiene relaciones, así que se ELIMINARÁ junto con sus exclusiones."
                         + " Esta acción no se puede deshacer.";
             }
-            // RF «Eliminación de opción de característica» · Paso 5: mensaje de la confirmación doble con las exclusiones afectadas.
+            // RF-24 · Paso 5: mensaje de la confirmación doble con las exclusiones afectadas.
             return ResultadoCatalogo.bajaPosible(mensaje, !historial);
         } catch (DAOException e) {
-            // RF «Eliminación de opción de característica» · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-24 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
     }
 
     // Paso 7: registra la baja
-    // RF «Eliminación de opción de característica» · Paso 7 (después de que la Administradora confirmó en el paso 6).
+    // RF-24 · Paso 7 (después de que la Administradora confirmó en el paso 6).
     public ResultadoCatalogo darDeBaja(int idOpcion) {
         ResultadoCatalogo revision = prepararBaja(idOpcion);
         if (!revision.isExitoso()) {
             return revision;
         }
         try {
-            // RF «Eliminación de opción de característica» · Paso 7: elimina si no tiene relaciones; si tiene historial, inhabilita la opción, sus exclusiones y su receta.
+            // RF-24 · Paso 7: elimina si no tiene relaciones; si tiene historial, inhabilita la opción, sus exclusiones y su receta.
             if (revision.isSeEliminara()) {
                 opcionDAO.eliminar(idOpcion);
                 return ResultadoCatalogo.correcto("La opción se eliminó correctamente");
@@ -288,7 +288,7 @@ public class OpcionService {
             opcionDAO.inhabilitar(idOpcion);
             return ResultadoCatalogo.correcto("La opción se inhabilitó correctamente");
         } catch (DAOException e) {
-            // RF «Eliminación de opción de característica» · Excepción paso 7: «No fue posible dar de baja la opción».
+            // RF-24 · Excepción paso 7: «No fue posible dar de baja la opción».
             return ResultadoCatalogo.error(MSG_NO_DADA_DE_BAJA, null);
         }
     }
@@ -296,7 +296,7 @@ public class OpcionService {
     // ===================== Apoyo =====================
 
     // En características de selección múltiple, los puntos no pueden pasar del presupuesto
-    // RF «Registro de opción de característica» / RF «Modificación de opción de característica» · Paso 6: los puntos de selección no pueden superar el presupuesto.
+    // RF-23 (Registro de opción de característica) / RF-25 · Paso 6: los puntos de selección no pueden superar el presupuesto.
     private ResultadoCatalogo revisarPresupuesto(Opcion datos, Caracteristica caracteristica) {
         if (!caracteristica.isSeleccionMultiple()) {
             return null;
@@ -310,7 +310,7 @@ public class OpcionService {
     }
 
     // Revisa los campos del formulario; devuelve null si todo está bien
-    // RF «Registro de opción de característica» / RF «Modificación de opción de característica» · Paso 5: campos obligatorios, multiplicadores mayores a cero y puntos válidos.
+    // RF-23 (Registro de opción de característica) / RF-25 · Paso 5: campos obligatorios, multiplicadores mayores a cero y puntos válidos.
     private ResultadoCatalogo validarCampos(Opcion datos) {
         if (!ValidacionCatalogo.nombreValido(datos.getNombre(), MAX_NOMBRE)) {
             return ResultadoCatalogo.error(MSG_NOMBRE_INVALIDO, ResultadoCatalogo.CAMPO_NOMBRE);

@@ -6,11 +6,11 @@ import com.pac.session.SesionUsuario;
 /**
  * Quién puede hacer qué dentro del Gestor de Pedidos y Producción.
  *
- * - "Gestión de Pedidos" pide "Gestionar pedidos": ver, aprobar, cancelar y avanzar el estado (RF-22 a RF-27).
- * - "Agenda de Producción" pide "Ver agenda de producción" (RF-30, RF-31).
- * - "Validación de Pagos" pide "Validar pagos" (RF-28, RF-29). Desde el detalle de un pedido
+ * - "Gestión de Pedidos" pide "Gestionar pedidos": ver, aprobar, cancelar y avanzar el estado (RF-37 a RF-41).
+ * - "Agenda de Producción" pide "Ver agenda de producción" (RF-45, RF-46).
+ * - "Validación de Pagos" pide "Validar pagos" (RF-42, RF-43). Desde el detalle de un pedido
  *   también se registran pagos si el usuario tiene ese permiso.
- * - Historial completo con montos (RF-21), modificar y dar de baja pedidos: solo la Administradora.
+ * - Historial completo con montos (RF-36), modificar y dar de baja pedidos: solo la Administradora.
  */
 public class PermisosPedidos {
 

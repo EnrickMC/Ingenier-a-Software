@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface PedidoDAO {
 
-    // Lista de pedidos según el filtro, del más reciente al más antiguo (RF-21, RF-22)
+    // Lista de pedidos según el filtro, del más reciente al más antiguo (RF-36, RF-37)
     List<Pedido> buscar(FiltroPedidos filtro) throws DAOException;
 
     // Pedido con cliente, dirección, saldo, cancelación y baja; null si no existe

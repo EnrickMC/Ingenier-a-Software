@@ -1,7 +1,10 @@
 package com.pac.modulos.catalogo.controller;
 
+import com.pac.dao.DAOException;
 import com.pac.modulos.catalogo.model.Caracteristica;
+import com.pac.modulos.catalogo.model.Categoria;
 import com.pac.modulos.catalogo.model.Opcion;
+import com.pac.modulos.catalogo.service.CategoriaService;
 import com.pac.modulos.catalogo.service.OpcionService;
 import com.pac.modulos.catalogo.service.ResultadoCatalogo;
 import com.pac.modulos.catalogo.service.ValidacionCatalogo;
@@ -24,6 +27,7 @@ public class FormularioOpcionController {
     @FXML private Label lblTitulo;
     @FXML private Label lblCaracteristica;
     @FXML private ComboBox<String> cmbNombre;
+    @FXML private Label lblVista3d;
     @FXML private TextArea txtDescripcion;
     @FXML private TextField txtImagen;
     @FXML private TextField txtMultIngredientes;
@@ -39,6 +43,8 @@ public class FormularioOpcionController {
     private OpcionService servicio = new OpcionService();
     private Opcion editada;
     private Caracteristica caracteristica;
+    // Nombre de la categoría de la característica (se lee una vez al abrir el formulario)
+    private String nombreCategoria = "";
 
     private boolean guardado = false;
     private boolean recargarLista = false;
@@ -47,10 +53,35 @@ public class FormularioOpcionController {
     @FXML
     private void initialize() {
         ApoyoVista.mostrarNodo(lblMensaje, false);
+        // Cada vez que cambia el nombre se explica cómo se verá en el 3D de la página web
+        // (listener de JavaFX: la flecha es la forma corta de escribirlo)
+        cmbNombre.getEditor().textProperty().addListener((observable, antes, ahora) -> actualizarVista3d());
+    }
+
+    // RF-32 · Paso 3: dice cómo se verá esta opción en el 3D de la página web
+    private void actualizarVista3d() {
+        String nombreCaracteristica = "";
+        if (caracteristica != null) {
+            nombreCaracteristica = caracteristica.getNombre();
+        }
+        lblVista3d.setText(PresetsCatalogo.vista3dOpcion(nombreCaracteristica, PresetsCatalogo.texto(cmbNombre), nombreCategoria));
+    }
+
+    // Nombre de la categoría de la característica (para sugerir solo opciones compatibles con el postre)
+    private String buscarNombreCategoria() {
+        try {
+            Categoria categoria = new CategoriaService().buscarPorId(caracteristica.getIdCategoria());
+            if (categoria != null) {
+                return categoria.getNombre();
+            }
+        } catch (DAOException e) {
+            // Si no se puede leer la categoría, se sugieren los nombres generales
+        }
+        return "";
     }
 
     // Formulario en blanco con los valores por defecto de la tabla
-    // RF «Registro de opción de característica» · Paso 3: formulario en blanco.
+    // RF-23 · Paso 3: formulario en blanco.
     public void prepararNueva(Caracteristica caracteristica) {
         editada = null;
         this.caracteristica = caracteristica;
@@ -62,7 +93,7 @@ public class FormularioOpcionController {
     }
 
     // Formulario con los datos actuales
-    // RF «Modificación de opción de característica» · Paso 3: formulario con los datos actuales.
+    // RF-25 · Paso 3: formulario con los datos actuales.
     public void prepararEdicion(Opcion opcion, Caracteristica caracteristica) {
         editada = opcion;
         this.caracteristica = caracteristica;
@@ -85,8 +116,10 @@ public class FormularioOpcionController {
             texto = texto + " · selección única (los puntos no se usan)";
         }
         lblCaracteristica.setText(texto);
-        // Nombres sugeridos según la característica (se puede escribir otro)
-        PresetsCatalogo.llenar(cmbNombre, PresetsCatalogo.opciones(caracteristica.getNombre()));
+        // RF-32 · Pasos 1 y 2: nombres sugeridos según la característica y la categoría (se puede escribir otro)
+        nombreCategoria = buscarNombreCategoria();
+        PresetsCatalogo.llenar(cmbNombre, PresetsCatalogo.opciones(caracteristica.getNombre(), nombreCategoria));
+        actualizarVista3d();
     }
 
     private void llenarNumeros(Opcion opcion) {
@@ -97,7 +130,7 @@ public class FormularioOpcionController {
     }
 
     @FXML
-    // RF «Registro de opción de característica» / RF «Modificación de opción de característica» · Paso 4: la Administradora eligió «Guardar».
+    // RF-23 (Registro de opción de característica) / RF-25 · Paso 4: la Administradora eligió «Guardar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
@@ -105,11 +138,18 @@ public class FormularioOpcionController {
         // Los números se revisan aquí para marcar el campo exacto
         TextField[] numericos = {txtMultIngredientes, txtMultCosto, txtPuntos, txtMultPresupuesto};
         for (TextField campo : numericos) {
-            // RF «Registro de opción de característica» / RF «Modificación de opción de característica» · Excepción paso 5: un número no es válido; se marca el campo.
+            // RF-23 (Registro de opción de característica) / RF-25 · Excepción paso 5: un número no es válido; se marca el campo.
             if (!ValidacionCatalogo.esDecimal(campo.getText())) {
                 mostrarError("Escribe un número válido (por ejemplo 1 o 1.5)", campo);
                 return;
             }
+        }
+
+        // RF-23 (Registro de opción de característica) / RF-25 · Excepción paso 5: la opción no se puede dibujar en este postre (por ejemplo goteo en cupcakes); se marca el nombre (RF-32 · Paso 4).
+        String incompatible = PresetsCatalogo.incompatibilidadOpcion(caracteristica.getNombre(), PresetsCatalogo.texto(cmbNombre), nombreCategoria);
+        if (!incompatible.isEmpty()) {
+            mostrarError(incompatible, cmbNombre);
+            return;
         }
 
         Opcion datos = new Opcion();
@@ -133,7 +173,7 @@ public class FormularioOpcionController {
         } else {
             resultado = servicio.modificar(datos, false);
             // Paso 7: cambió el multiplicador de costo o la disponibilidad
-            // RF «Modificación de opción de característica» · Excepción paso 7: no confirmó el cambio; regresa al formulario.
+            // RF-25 · Excepción paso 7: no confirmó el cambio; regresa al formulario.
             if (resultado.isPideConfirmacion()) {
                 if (!Alertas.confirmar("Confirmar cambio", resultado.getMensaje())) {
                     return;
@@ -184,7 +224,7 @@ public class FormularioOpcionController {
     }
 
     @FXML
-    // RF «Registro de opción de característica» / RF «Modificación de opción de característica» · Excepción paso 4: «Cancelar» descarta los datos.
+    // RF-23 (Registro de opción de característica) / RF-25 · Excepción paso 4: «Cancelar» descarta los datos.
     private void onCancelar() {
         cerrar();
     }

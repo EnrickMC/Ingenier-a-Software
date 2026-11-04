@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Exportación de los reportes a Excel o CSV (RF-48, RNF-9).
+ * Exportación de los reportes a Excel o CSV (RF-67, RNF-9).
  * Arma el archivo con la misma información que se ve en pantalla:
  * una hoja de resumen (periodo, fecha de generación y totales) y hojas de detalle.
  */
@@ -40,7 +40,7 @@ public class ExportadorReportes {
 
     // Guarda el libro como .csv si el nombre termina así; si no, como .xlsx.
     // Después revisa que el archivo exista y tenga contenido.
-    // RF-48 · Paso 5: guarda el archivo y revisa que la descarga se completó.
+    // RF-67 · Paso 5: guarda el archivo y revisa que la descarga se completó.
     public static void guardar(LibroExcel libro, File archivo) throws IOException {
         if (archivo.getName().toLowerCase().endsWith(".csv")) {
             libro.guardarCsv(archivo);
@@ -48,14 +48,14 @@ public class ExportadorReportes {
             libro.guardarXlsx(archivo);
         }
         if (!archivo.exists() || archivo.length() == 0) {
-            // RF-48 · Excepción paso 5: «La descarga no se completó».
+            // RF-67 · Excepción paso 5: «La descarga no se completó».
             throw new IOException(MSG_DESCARGA_INCOMPLETA);
         }
     }
 
-    // ===================== RF-46 · Ingresos y gastos =====================
+    // ===================== RF-65 · Ingresos y gastos =====================
 
-    // RF-48 · Pasos 3 y 4: arma el Excel del reporte de ingresos y gastos.
+    // RF-67 · Pasos 3 y 4: arma el Excel del reporte de ingresos y gastos.
     public static LibroExcel armar(ReporteIngresosGastos reporte) {
         LibroExcel libro = new LibroExcel();
 
@@ -115,9 +115,9 @@ public class ExportadorReportes {
         return libro;
     }
 
-    // ===================== RF-47 · Más vendidos =====================
+    // ===================== RF-66 · Más vendidos =====================
 
-    // RF-48 · Pasos 3 y 4: arma el Excel del reporte de más vendidos.
+    // RF-67 · Pasos 3 y 4: arma el Excel del reporte de más vendidos.
     public static LibroExcel armar(ReporteVentas reporte) {
         LibroExcel libro = new LibroExcel();
 

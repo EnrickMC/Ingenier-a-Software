@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * Apartado "Recetas" (recetas.fxml). Módulo 5.
- * Visualización (RF-41), registro (RF-42), modificación (RF-43) y baja (RF-44) de recetas.
+ * Visualización (RF-55), registro (RF-56), modificación (RF-57) y baja (RF-58) de recetas.
  * Cada receta pertenece a una opción del catálogo y de ella sale el precio de esa opción.
  */
 public class RecetasController implements ControladorSeccion {
@@ -96,7 +96,7 @@ public class RecetasController implements ControladorSeccion {
         }
     }
 
-    // ===================== Lista (RF-41) =====================
+    // ===================== Lista (RF-55) =====================
 
     @FXML
     private void onBuscar() {
@@ -115,7 +115,7 @@ public class RecetasController implements ControladorSeccion {
         cargarRecetas();
     }
 
-    // RF-41 (Visualización de recetas): inicia aquí en la pantalla. Pasos 1 a 3: carga la lista de opciones con receta.
+    // RF-55 (Visualización de recetas): inicia aquí en la pantalla. Pasos 1 a 3: carga la lista de opciones con receta.
     private void cargarRecetas() {
         int idAntes = 0;
         if (seleccionada != null) {
@@ -130,7 +130,7 @@ public class RecetasController implements ControladorSeccion {
         try {
             recetas = servicio.listar(chkInactivas.isSelected());
         } catch (DAOException e) {
-            // RF-41 · Excepción paso 2: sin conexión, «Error de conexión» con «Reintentar».
+            // RF-55 · Excepción paso 2: sin conexión, «Error de conexión» con «Reintentar».
             lblVacio.setText(RecetaService.MSG_ERROR_CONEXION);
             return;
         }
@@ -148,13 +148,13 @@ public class RecetasController implements ControladorSeccion {
         lblConteo.setText(tblRecetas.getItems().size() + " receta(s)");
 
         if (recetas.isEmpty()) {
-            // RF-41 · Excepción paso 2: «Aún no hay recetas registradas».
+            // RF-55 · Excepción paso 2: «Aún no hay recetas registradas».
             lblVacio.setText(RecetaService.MSG_SIN_RECETAS);
         } else if (tblRecetas.getItems().isEmpty()) {
-            // RF-41 · Excepción paso 4: «No hay recetas que coincidan con la búsqueda».
+            // RF-55 · Excepción paso 4: «No hay recetas que coincidan con la búsqueda».
             lblVacio.setText(RecetaService.MSG_SIN_RESULTADOS);
         }
-        // RF-36 / RF-41: recetas con insumos dados de baja
+        // RF-54 / RF-55: recetas con insumos dados de baja
         if (porRevisar > 0) {
             lblAviso.setText(porRevisar + " receta(s) requieren revisión: usan insumos que se dieron de baja."
                     + " Modifícalas para cambiar esos insumos.");
@@ -193,7 +193,7 @@ public class RecetasController implements ControladorSeccion {
 
     // ===================== Detalle (letra grande para la cocina) =====================
 
-    // RF-41 · Pasos 5 y 6: valida la receta seleccionada y la muestra.
+    // RF-55 · Pasos 5 y 6: valida la receta seleccionada y la muestra.
     private void mostrarDetalle(FilaReceta fila) {
         seleccionada = fila;
         ApoyoVista.mostrarNodo(cajaDetalle, fila != null);
@@ -212,7 +212,7 @@ public class RecetasController implements ControladorSeccion {
             return;
         }
         if (receta == null) {
-            // RF-41 · Excepción paso 5: «La receta ya no está disponible» y se recarga la lista.
+            // RF-55 · Excepción paso 5: «La receta ya no está disponible» y se recarga la lista.
             Alertas.aviso(RecetaService.MSG_NO_DISPONIBLE);
             seleccionada = null;
             cargarRecetas();
@@ -237,7 +237,7 @@ public class RecetasController implements ControladorSeccion {
         if (!receta.isActiva()) {
             aviso = "Receta dada de baja: no descuenta insumos y la opción aparece «Sin receta» en el catálogo.";
         } else if (receta.requiereRevision()) {
-            // RF-41 · Excepción paso 6: insumos dados de baja, «Esta receta requiere revisión».
+            // RF-55 · Excepción paso 6: insumos dados de baja, «Esta receta requiere revisión».
             aviso = RecetaService.MSG_REQUIERE_REVISION + ": tiene insumos dados de baja (en rojo).";
         } else if (!receta.isOpcionDisponible()) {
             aviso = "La opción de esta receta ya no está disponible en el catálogo.";
@@ -303,7 +303,7 @@ public class RecetasController implements ControladorSeccion {
     // ===================== Registro, modificación y baja =====================
 
     @FXML
-    // RF-42 (Registro de nueva receta): inicia aquí. Paso 1: «+ Nueva receta».
+    // RF-56 (Registro de nueva receta): inicia aquí. Paso 1: «+ Nueva receta».
     private void onNueva() {
         ResultadoInventario revision = servicio.revisarParaAlta();
         if (!revision.isExitoso()) {
@@ -336,7 +336,7 @@ public class RecetasController implements ControladorSeccion {
     }
 
     @FXML
-    // RF-43 (Modificación de receta): inicia aquí. Paso 1: se selecciona la receta y se pide «Editar receta».
+    // RF-57 (Modificación de receta): inicia aquí. Paso 1: se selecciona la receta y se pide «Editar receta».
     private void onModificar() {
         if (seleccionada == null) {
             return;
@@ -367,7 +367,7 @@ public class RecetasController implements ControladorSeccion {
         Parent raiz = cargador.getRoot();
         ApoyoVista.mostrarModal(raiz, tblRecetas.getScene().getWindow(), titulo);
         if (formulario.seGuardo()) {
-            // RF-42 / RF-43 · Paso 8: informa el éxito y actualiza la lista.
+            // RF-56 / RF-57 · Paso 8: informa el éxito y actualiza la lista.
             Alertas.info(formulario.getMensajeExito());
             txtBuscar.clear();
             cargarRecetas();
@@ -387,14 +387,14 @@ public class RecetasController implements ControladorSeccion {
     }
 
     @FXML
-    // RF-44 (Eliminación de receta): inicia aquí. Paso 1: se selecciona la receta y se pide darla de baja.
+    // RF-58 (Eliminación de receta): inicia aquí. Paso 1: se selecciona la receta y se pide darla de baja.
     private void onDarDeBaja() {
         if (seleccionada == null) {
             return;
         }
         int idReceta = seleccionada.getReceta().getIdReceta();
         ResultadoInventario revision = servicio.prepararBaja(idReceta);
-        // RF-44 · Excepciones pasos 2 y 3: receta no disponible o necesaria para pedidos en curso.
+        // RF-58 · Excepciones pasos 2 y 3: receta no disponible o necesaria para pedidos en curso.
         if (!revision.isExitoso()) {
             mostrarProblema(revision);
             if (revision.isRecargarLista()) {
@@ -403,14 +403,14 @@ public class RecetasController implements ControladorSeccion {
             }
             return;
         }
-        // RF-44: confirmación doble
-        // RF-44 · Pasos 4 y 5: confirmación; si se cancela, la receta queda sin cambios.
+        // RF-58: confirmación doble
+        // RF-58 · Pasos 4 y 5: confirmación; si se cancela, la receta queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja esta receta?", revision.getMensaje())) {
             return;
         }
         ResultadoInventario resultado = servicio.darDeBaja(idReceta);
         if (resultado.isExitoso()) {
-            // RF-44 · Paso 7: informa el éxito.
+            // RF-58 · Paso 7: informa el éxito.
             Alertas.info(resultado.getMensaje());
         } else {
             mostrarProblema(resultado);
@@ -421,7 +421,7 @@ public class RecetasController implements ControladorSeccion {
 
     private void mostrarProblema(ResultadoInventario resultado) {
         if (ResultadoInventario.CAMPO_CONEXION.equals(resultado.getCampo())) {
-            // RF-44 · Excepción paso 6: «No fue posible dar de baja la receta».
+            // RF-58 · Excepción paso 6: «No fue posible dar de baja la receta».
             Alertas.error(resultado.getMensaje());
         } else {
             Alertas.aviso(resultado.getMensaje());

@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import java.time.LocalDateTime;
 
 /**
- * Arma el ticket de cocina de un pedido para imprimirlo (botón «Imprimir ticket»).
+ * RF-48 · Paso 2: arma el ticket de cocina de un pedido para imprimirlo (botón «Imprimir ticket»).
  */
 public class TicketPedido {
 

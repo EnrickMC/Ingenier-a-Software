@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { DisenoPastel } from './diseno-pastel';
+import { DisenoPastel, TipoBase } from './diseno-pastel';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { FormaPastel, Punto2d, estaDentro, puntosForma } from './formas-pastel';
 
 /**
- * Construye el pastel 3D (three.js) a partir de un DisenoPastel.
+ * RF-5 · Paso 4: construye el pastel o la gelatina en 3D (three.js) a partir de un DisenoPastel.
  * Medidas en centímetros. El piso de abajo se apoya en una base (plato).
  *
  * Coordenadas: la forma 2D (x, y) se acuesta en el piso; "y" de la forma queda hacia -z del mundo.
@@ -28,22 +28,22 @@ export interface PastelConstruido {
 }
 
 // Rebanada que se quita con «Ver por dentro» (ángulos de la forma 2D, en radianes)
-const CORTE_INICIO = -Math.PI / 2 + 0.3;
-const CORTE_FIN = -Math.PI / 2 + 1.7;
+export const CORTE_INICIO = -Math.PI / 2 + 0.3;
+export const CORTE_FIN = -Math.PI / 2 + 1.7;
 
 // Ancho de la banda del listón, en centímetros
 const ANCHO_LISTON = 2.2;
 
-const COLORES_CHISPAS = ['#f06292', '#4fc3f7', '#ffd54f', '#81c784', '#ba68c8', '#ffffff', '#ff8a65'];
+export const COLORES_CHISPAS = ['#f06292', '#4fc3f7', '#ffd54f', '#81c784', '#ba68c8', '#ffffff', '#ff8a65'];
 const COLORES_MOSAICO = ['#e2334f', '#9fd356', '#f59a2c', '#f4d03f', '#8e2f7a'];
 // Fruta picada: fresa, kiwi, mango, piña y melón (en cubitos) y moras o uvas (bolitas)
-const COLORES_FRUTA = ['#d7263d', '#7cb342', '#f6a21a', '#f4d03f', '#f3a96b'];
+export const COLORES_FRUTA = ['#d7263d', '#7cb342', '#f6a21a', '#f4d03f', '#f3a96b'];
 const COLORES_BAYAS = ['#2f3a78', '#4a1f45', '#9bbf4a'];
 
 // ===================== Utilidades =====================
 
 // Números pseudoaleatorios repetibles (el pastel se ve igual cada vez que se arma)
-class Aleatorio {
+export class Aleatorio {
   private semilla: number;
 
   constructor(semilla: number) {
@@ -56,18 +56,19 @@ class Aleatorio {
   }
 }
 
-function material(color: string, aspereza: number, metal: number): THREE.MeshStandardMaterial {
+export function material(color: string, aspereza: number, metal: number): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ color: color, roughness: aspereza, metalness: metal });
 }
 
-function conSombras(objeto: THREE.Object3D): void {
+export function conSombras(objeto: THREE.Object3D): void {
   objeto.traverse(marcarSombra);
 }
 
 function marcarSombra(objeto: THREE.Object3D): void {
   const malla = objeto as THREE.Mesh;
   if (malla.isMesh) {
-    malla.castShadow = true;
+    // El cristal deja pasar la luz: no echa sombra
+    malla.castShadow = malla.userData['sinSombra'] !== true;
     malla.receiveShadow = true;
   }
 }
@@ -130,7 +131,7 @@ function juntarPiezas(objeto: THREE.Object3D, lista: THREE.Object3D[]): void {
  * - Las piezas largas (listón, goteo, mensaje, chispas...) se recortan justo en la orilla del corte.
  * - El cuerpo del piso y sus paredes del corte ya vienen cortados (userData.sinRecorte).
  */
-function recortarRebanada(piso: THREE.Object3D): void {
+export function recortarRebanada(piso: THREE.Object3D): void {
   piso.updateMatrixWorld(true);
   const planos = planosDelCorte();
   const piezas: THREE.Object3D[] = [];
@@ -352,7 +353,7 @@ interface LugarArriba {
  * forman un anillo y, si no caben, se abre otro anillo más adentro.
  * Con "enOrilla" el anillo empieza en la orilla (para dejar el centro libre al mensaje).
  */
-function lugaresEnAnillos(cantidad: number, radioMaximo: number, separacion: number, enOrilla: boolean): LugarArriba[] {
+export function lugaresEnAnillos(cantidad: number, radioMaximo: number, separacion: number, enOrilla: boolean): LugarArriba[] {
   const lugares: LugarArriba[] = [];
   if (cantidad === 1 && enOrilla) {
     // Una sola pieza en la orilla de atrás
@@ -392,9 +393,126 @@ function lugaresEnAnillos(cantidad: number, radioMaximo: number, separacion: num
   return lugares;
 }
 
+// ===================== Repisa de los pisos de abajo =====================
+
+/**
+ * Repisa: la franja que queda libre arriba de un piso de abajo, entre su orilla
+ * y la pared del piso de encima. Ahí se acomodan fresas y fruta.
+ */
+export interface Repisa {
+  afuera: PuntoContorno[];
+  adentro: PuntoContorno[];
+}
+
+function repisaDelPiso(forma: FormaPastel, tamano: number, tamanoEncima: number): Repisa {
+  return { afuera: contornoEspaciado(forma, tamano, 0.5), adentro: contornoEspaciado(forma, tamanoEncima, 0.5) };
+}
+
+// Punto del contorno más cercano al ángulo (medido como en el contorno: el frente es -90°)
+function puntoMasCercano(contorno: PuntoContorno[], angulo: number): PuntoContorno {
+  let mejor = contorno[0];
+  let diferenciaMenor = Infinity;
+  for (const punto of contorno) {
+    let diferencia = Math.abs(anguloPositivo(Math.atan2(punto.y, punto.x)) - anguloPositivo(angulo));
+    diferencia = Math.min(diferencia, Math.PI * 2 - diferencia);
+    if (diferencia < diferenciaMenor) {
+      diferenciaMenor = diferencia;
+      mejor = punto;
+    }
+  }
+  return mejor;
+}
+
+/**
+ * Distancia al centro para una pieza suelta en la repisa. "anguloMundo" es el de la posición
+ * en x, z (el contorno usa y = -z), "azar" va de 0 a 1 y "margen" la separa de las dos paredes.
+ */
+function distanciaEnRepisa(repisa: Repisa, anguloMundo: number, azar: number, margen: number): number {
+  const afuera = puntoMasCercano(repisa.afuera, -anguloMundo);
+  const adentro = puntoMasCercano(repisa.adentro, -anguloMundo);
+  const hasta = Math.hypot(afuera.x, afuera.y) - margen;
+  const desde = Math.min(hasta, Math.hypot(adentro.x, adentro.y) + margen);
+  // Raíz: así no se amontonan en la pared de adentro
+  return Math.sqrt(desde * desde + azar * (hasta * hasta - desde * desde));
+}
+
+// Ancho más angosto de la repisa (para que las piezas quepan en toda la vuelta)
+function anchoMinimoRepisa(repisa: Repisa): number {
+  let minimo = Infinity;
+  for (let k = 0; k < 36; k++) {
+    const angulo = (k / 36) * Math.PI * 2;
+    const afuera = puntoMasCercano(repisa.afuera, angulo);
+    const adentro = puntoMasCercano(repisa.adentro, angulo);
+    minimo = Math.min(minimo, Math.hypot(afuera.x, afuera.y) - Math.hypot(adentro.x, adentro.y));
+  }
+  return minimo;
+}
+
+/**
+ * Ángulos (del contorno) para las fresas de la repisa. Si el piso tiene rosetas,
+ * las fresas se reparten en los huecos entre ellas para no encimarse.
+ */
+function angulosFresasRepisa(diseno: DisenoPastel, tamano: number, cantidad: number, rosetasAqui: number, desdeArriba: number, conCorte: boolean): number[] {
+  if (rosetasAqui <= 0) {
+    // Sin rosetas: vuelta pareja; en pisos alternos se recorren medio lugar para no quedar en columna
+    let inicio = -Math.PI / 2;
+    if (desdeArriba % 2 === 0) {
+      inicio = -Math.PI / 2 + Math.PI / cantidad;
+    }
+    return angulosRepartidos(cantidad, inicio, conCorte);
+  }
+  const acomodo = acomodoRosetas(diseno.forma, tamano, rosetasAqui);
+  const angulosRosetas: number[] = [];
+  for (const indice of acomodo.elegidos) {
+    const punto = acomodo.contorno[indice];
+    angulosRosetas.push(anguloPositivo(Math.atan2(punto.y, punto.x)));
+  }
+  angulosRosetas.sort(compararNumeros);
+  const huecos = angulosRosetas.length;
+  const angulos: number[] = [];
+  for (let j = 0; j < huecos; j++) {
+    const desde = angulosRosetas[j];
+    let hasta = angulosRosetas[0] + Math.PI * 2;
+    if (j + 1 < huecos) {
+      hasta = angulosRosetas[j + 1];
+    }
+    // Cuántas fresas caen en este hueco (repartidas parejo entre todos)
+    const enHueco = Math.floor(((j + 1) * cantidad) / huecos) - Math.floor((j * cantidad) / huecos);
+    for (let t = 0; t < enHueco; t++) {
+      angulos.push(desde + ((t + 1) / (enHueco + 1)) * (hasta - desde));
+    }
+  }
+  return angulos;
+}
+
+function compararNumeros(a: number, b: number): number {
+  return a - b;
+}
+
+// Fresas paradas en la repisa de un piso de abajo, a la mitad entre la orilla y el piso de encima
+function fresasEnRepisa(diseno: DisenoPastel, tamano: number, repisa: Repisa, cantidad: number, rosetasAqui: number, altura: number, desdeArriba: number, conCorte: boolean): THREE.Group {
+  const angulos = angulosFresasRepisa(diseno, tamano, cantidad, rosetasAqui, desdeArriba, conCorte);
+  const lugares: LugarArriba[] = [];
+  let vuelta = 0;
+  for (const angulo of angulos) {
+    const afuera = puntoMasCercano(repisa.afuera, angulo);
+    const adentro = puntoMasCercano(repisa.adentro, angulo);
+    const x = (afuera.x + adentro.x) / 2;
+    const z = -(afuera.y + adentro.y) / 2;
+    lugares.push({ x: x, z: z, angulo: Math.atan2(z, x) });
+    vuelta = vuelta + Math.hypot(x, z);
+  }
+  // Tamaño: que quepan a lo ancho de la repisa y a lo largo de la vuelta (junto con las rosetas)
+  const radioMedio = vuelta / Math.max(1, lugares.length);
+  const espacioPorPieza = (Math.PI * 2 * radioMedio) / (cantidad + rosetasAqui);
+  let escala = Math.min(1.2, (anchoMinimoRepisa(repisa) - 0.3) / 2.2, espacioPorPieza / 2.5);
+  escala = Math.max(0.5, escala);
+  return mallaFresas(lugares, altura, escala);
+}
+
 // ===================== Texturas dibujadas en un lienzo =====================
 
-function lienzo(ancho: number, alto: number): CanvasRenderingContext2D {
+export function lienzo(ancho: number, alto: number): CanvasRenderingContext2D {
   const elemento = document.createElement('canvas');
   elemento.width = ancho;
   elemento.height = alto;
@@ -402,7 +520,7 @@ function lienzo(ancho: number, alto: number): CanvasRenderingContext2D {
 }
 
 // Relieve del betún (manchas suaves)
-function texturaRelieve(semilla: number): THREE.CanvasTexture {
+export function texturaRelieve(semilla: number): THREE.CanvasTexture {
   const contexto = lienzo(256, 256);
   contexto.fillStyle = '#808080';
   contexto.fillRect(0, 0, 256, 256);
@@ -428,7 +546,7 @@ function texturaRelieve(semilla: number): THREE.CanvasTexture {
 }
 
 // Rayas que deja la espátula en los costados del betún (relieve)
-function texturaEspatula(semilla: number): THREE.CanvasTexture {
+export function texturaEspatula(semilla: number): THREE.CanvasTexture {
   const contexto = lienzo(512, 256);
   contexto.fillStyle = '#808080';
   contexto.fillRect(0, 0, 512, 256);
@@ -462,7 +580,7 @@ function texturaEspatula(semilla: number): THREE.CanvasTexture {
 }
 
 // Vueltas de espátula en la cara de arriba (círculos alrededor del centro)
-function texturaGiro(semilla: number): THREE.CanvasTexture {
+export function texturaGiro(semilla: number): THREE.CanvasTexture {
   const contexto = lienzo(512, 512);
   contexto.fillStyle = '#808080';
   contexto.fillRect(0, 0, 512, 512);
@@ -484,14 +602,99 @@ function texturaGiro(semilla: number): THREE.CanvasTexture {
   return new THREE.CanvasTexture(contexto.canvas);
 }
 
+/**
+ * Mármol: el color de la cobertura con vetas finas que serpentean.
+ * Sobre una base clara las vetas son grises; sobre una base oscura, claras.
+ */
+export function texturaMarmol(colorBase: string, semilla: number): THREE.CanvasTexture {
+  const lado = 1024;
+  const contexto = lienzo(lado, lado);
+  contexto.fillStyle = colorBase;
+  contexto.fillRect(0, 0, lado, lado);
+  const base = new THREE.Color(colorBase);
+  const luz = base.r * 0.3 + base.g * 0.59 + base.b * 0.11;
+  let vetaFuerte = 'rgba(55, 55, 64, 0.85)';
+  let vetaSuave = 'rgba(110, 110, 120, 0.35)';
+  let mancha = 'rgba(120, 120, 128, 0.08)';
+  if (luz < 0.45) {
+    vetaFuerte = 'rgba(245, 238, 228, 0.9)';
+    vetaSuave = 'rgba(245, 238, 228, 0.4)';
+    mancha = 'rgba(245, 238, 228, 0.08)';
+  }
+  const azar = new Aleatorio(semilla);
+  // Manchas suaves de fondo
+  for (let i = 0; i < 30; i++) {
+    const x = azar.siguiente() * lado;
+    const y = azar.siguiente() * lado;
+    const radio = 60 + azar.siguiente() * 180;
+    const degradado = contexto.createRadialGradient(x, y, 0, x, y, radio);
+    degradado.addColorStop(0, mancha);
+    degradado.addColorStop(1, 'rgba(0,0,0,0)');
+    contexto.fillStyle = degradado;
+    contexto.fillRect(x - radio, y - radio, radio * 2, radio * 2);
+  }
+  // Vetas: caminos que avanzan en diagonal y se desvían poco a poco
+  contexto.lineCap = 'round';
+  contexto.lineJoin = 'round';
+  for (let v = 0; v < 12; v++) {
+    let x = azar.siguiente() * lado;
+    let y = azar.siguiente() * lado;
+    let direccion = -0.6 + azar.siguiente() * 0.5;
+    let fuerte = vetaSuave;
+    let grueso = 1.5 + azar.siguiente() * 2;
+    if (v % 2 === 0) {
+      fuerte = vetaFuerte;
+      grueso = 2.5 + azar.siguiente() * 3.5;
+    }
+    contexto.strokeStyle = fuerte;
+    contexto.lineWidth = grueso;
+    contexto.beginPath();
+    contexto.moveTo(x, y);
+    for (let paso = 0; paso < 140; paso++) {
+      direccion = direccion + (azar.siguiente() - 0.5) * 0.5;
+      x = x + Math.cos(direccion) * 12;
+      y = y + Math.sin(direccion) * 12;
+      contexto.lineTo(x, y);
+      // A veces la veta se abre en una ramita
+      if (azar.siguiente() < 0.04) {
+        contexto.stroke();
+        contexto.lineWidth = 0.6 + azar.siguiente() * 1.5;
+        contexto.beginPath();
+        contexto.moveTo(x, y);
+      }
+    }
+    contexto.stroke();
+  }
+  const textura = new THREE.CanvasTexture(contexto.canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = THREE.RepeatWrapping;
+  textura.wrapT = THREE.RepeatWrapping;
+  textura.anisotropy = 4;
+  return textura;
+}
+
+// Cara de arriba de un pan sin cobertura: costra horneada con migajas
+export function texturaCostra(colorPan: string): THREE.CanvasTexture {
+  const contexto = lienzo(256, 256);
+  const tostado = new THREE.Color(colorPan).lerp(new THREE.Color('#8a5426'), 0.18);
+  contexto.fillStyle = '#' + tostado.getHexString();
+  contexto.fillRect(0, 0, 256, 256);
+  dibujarMigajas(contexto, 256, 256, 21);
+  const textura = new THREE.CanvasTexture(contexto.canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  textura.wrapS = THREE.RepeatWrapping;
+  textura.wrapT = THREE.RepeatWrapping;
+  return textura;
+}
+
 // Pone una textura en la cara de arriba de un piso: una sola vez, centrada
-function centrarArriba(textura: THREE.Texture, tamano: number): void {
+export function centrarArriba(textura: THREE.Texture, tamano: number): void {
   textura.repeat.set(1 / tamano, 1 / tamano);
   textura.offset.set(0.5, 0.5);
 }
 
 // Migajas del bizcocho: poros claros y oscuros
-function dibujarMigajas(contexto: CanvasRenderingContext2D, ancho: number, alto: number, semilla: number): void {
+export function dibujarMigajas(contexto: CanvasRenderingContext2D, ancho: number, alto: number, semilla: number): void {
   const azar = new Aleatorio(semilla);
   for (let i = 0; i < ancho * alto * 0.012; i++) {
     let tono = 'rgba(0,0,0,0.12)';
@@ -520,8 +723,11 @@ function dibujarCapaRelleno(contexto: CanvasRenderingContext2D, ancho: number, c
   contexto.fill();
 }
 
-// Lado "naked": se ven las capas de pan y relleno, con betún untado a medias
-function texturaNaked(diseno: DisenoPastel): THREE.CanvasTexture {
+/**
+ * Lado "naked": se ven las capas de pan y relleno, con betún untado a medias.
+ * Con "conBetun" en false (sin cobertura) solo se ven el pan y el relleno.
+ */
+function texturaNaked(diseno: DisenoPastel, conBetun: boolean): THREE.CanvasTexture {
   const contexto = lienzo(256, 512);
   contexto.fillStyle = diseno.colorBizcocho;
   contexto.fillRect(0, 0, 256, 512);
@@ -531,7 +737,11 @@ function texturaNaked(diseno: DisenoPastel): THREE.CanvasTexture {
   // Betún raspado: rayas horizontales semitransparentes
   const azar = new Aleatorio(15);
   contexto.fillStyle = diseno.colorCobertura;
-  for (let i = 0; i < 34; i++) {
+  let rayas = 34;
+  if (!conBetun) {
+    rayas = 0;
+  }
+  for (let i = 0; i < rayas; i++) {
     contexto.globalAlpha = 0.2 + azar.siguiente() * 0.4;
     const x = azar.siguiente() * 256;
     const y = azar.siguiente() * 512;
@@ -550,7 +760,7 @@ function texturaNaked(diseno: DisenoPastel): THREE.CanvasTexture {
 }
 
 // Corte por dentro: capas de bizcocho y relleno, con la cobertura por fuera y arriba
-function texturaInterior(diseno: DisenoPastel): THREE.CanvasTexture {
+export function texturaInterior(diseno: DisenoPastel): THREE.CanvasTexture {
   const contexto = lienzo(512, 512);
   contexto.fillStyle = diseno.colorBizcocho;
   contexto.fillRect(0, 0, 512, 512);
@@ -559,7 +769,7 @@ function texturaInterior(diseno: DisenoPastel): THREE.CanvasTexture {
   dibujarCapaRelleno(contexto, 512, 512 / 3, 30, diseno.colorRelleno, 0.6);
   dibujarCapaRelleno(contexto, 512, (512 * 2) / 3, 30, diseno.colorRelleno, 2.1);
   // Cobertura arriba y por fuera (lado derecho = orilla del pastel)
-  if (diseno.cobertura !== 'naked') {
+  if (diseno.cobertura !== 'naked' && diseno.cobertura !== 'ninguna') {
     contexto.fillStyle = diseno.colorCobertura;
     contexto.fillRect(0, 0, 512, 26);
     contexto.fillRect(486, 0, 26, 512);
@@ -600,7 +810,7 @@ function renglones(contexto: CanvasRenderingContext2D, texto: string, ancho: num
   return lista;
 }
 
-function texturaDedicatoria(texto: string, color: string): THREE.CanvasTexture {
+export function texturaDedicatoria(texto: string, color: string): THREE.CanvasTexture {
   const contexto = lienzo(ANCHO_TEXTO, ALTO_TEXTO);
   contexto.clearRect(0, 0, ANCHO_TEXTO, ALTO_TEXTO);
   contexto.fillStyle = color;
@@ -737,8 +947,58 @@ function texturaDedicatoriaArco(texto: string, color: string, radioInterior: num
  * Cada acabado tiene su textura: betún con rayas de espátula, chantilly esponjoso,
  * fondant liso y satinado, ganache brillante y naked con las capas a la vista.
  */
+// Color de arriba de la cobertura degradada (casi blanco)
+export const COLOR_ARRIBA_DEGRADADO = '#fdf9f4';
+
+/**
+ * Pinta una figura con un degradado de abajo hacia arriba (colores por vértice).
+ * Se usa en la cobertura «Degradado»: el color elegido abajo y casi blanco arriba.
+ */
+export function pintarDegradado(geometria: THREE.BufferGeometry, colorAbajo: string, colorArriba: string): void {
+  geometria.computeBoundingBox();
+  const caja = geometria.boundingBox as THREE.Box3;
+  const alto = Math.max(0.001, caja.max.y - caja.min.y);
+  const posiciones = geometria.attributes['position'];
+  const colores = new Float32Array(posiciones.count * 3);
+  const color = new THREE.Color();
+  for (let i = 0; i < posiciones.count; i++) {
+    const parte = (posiciones.getY(i) - caja.min.y) / alto;
+    // Abajo se queda con su color un rato y luego se aclara suave
+    mezclarColores(color, colorAbajo, colorArriba, THREE.MathUtils.smoothstep(parte, 0.25, 1));
+    colores[i * 3] = color.r;
+    colores[i * 3 + 1] = color.g;
+    colores[i * 3 + 2] = color.b;
+  }
+  geometria.setAttribute('color', new THREE.BufferAttribute(colores, 3));
+}
+
+/**
+ * Mezcla dos colores como se ven en pantalla (sRGB) y deja el resultado en "destino".
+ * Mezclar en sRGB da un degradado parejo; en los valores internos de three se aclara de golpe.
+ */
+export function mezclarColores(destino: THREE.Color, colorA: string, colorB: string, parte: number): void {
+  const a = new THREE.Color(colorA);
+  const b = new THREE.Color(colorB);
+  const ra = { r: 0, g: 0, b: 0 };
+  const rb = { r: 0, g: 0, b: 0 };
+  a.getRGB(ra, THREE.SRGBColorSpace);
+  b.getRGB(rb, THREE.SRGBColorSpace);
+  destino.setRGB(ra.r + (rb.r - ra.r) * parte, ra.g + (rb.g - ra.g) * parte, ra.b + (rb.b - ra.b) * parte, THREE.SRGBColorSpace);
+}
+
 function materialesCobertura(diseno: DisenoPastel, tamano: number, alto: number): { arriba: THREE.Material; lados: THREE.Material } {
   const color = diseno.colorCobertura;
+  if (diseno.cobertura === 'degradado') {
+    // Betún con el color en degradado: el color lo dan los vértices (pintarDegradado)
+    const giroDegradado = texturaGiro(4);
+    centrarArriba(giroDegradado, tamano);
+    const espatulaDegradado = texturaEspatula(7);
+    espatulaDegradado.repeat.set(1 / 14, 1 / 5);
+    return {
+      arriba: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, bumpMap: giroDegradado, bumpScale: 2 }),
+      lados: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, bumpMap: espatulaDegradado, bumpScale: 2.2 }),
+    };
+  }
   if (diseno.cobertura === 'ganache') {
     const brillo = new THREE.MeshPhysicalMaterial({ color: color, roughness: 0.14, clearcoat: 1, clearcoatRoughness: 0.08 });
     return { arriba: brillo, lados: brillo };
@@ -747,6 +1007,28 @@ function materialesCobertura(diseno: DisenoPastel, tamano: number, alto: number)
     // Fondant: liso y satinado, sin marcas
     const satin = new THREE.MeshPhysicalMaterial({ color: color, roughness: 0.42, sheen: 0.8, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffffff') });
     return { arriba: satin, lados: satin };
+  }
+  if (diseno.cobertura === 'marmol') {
+    // Mármol: liso y satinado con vetas (sin piezas extra)
+    const vetasLados = texturaMarmol(color, 31);
+    vetasLados.repeat.set(1 / 26, 1 / 26);
+    const vetasArriba = texturaMarmol(color, 37);
+    centrarArriba(vetasArriba, tamano);
+    return {
+      arriba: new THREE.MeshPhysicalMaterial({ map: vetasArriba, roughness: 0.32, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+      lados: new THREE.MeshPhysicalMaterial({ map: vetasLados, roughness: 0.32, clearcoat: 0.35, clearcoatRoughness: 0.3 }),
+    };
+  }
+  if (diseno.cobertura === 'ninguna') {
+    // Sin cobertura: a los lados se ven las capas de pan y relleno; arriba, la costra del pan
+    const capas = texturaNaked(diseno, false);
+    capas.repeat.set(1 / 16, 1 / alto);
+    const costra = texturaCostra(diseno.colorBizcocho);
+    costra.repeat.set(1 / 6, 1 / 6);
+    return {
+      arriba: new THREE.MeshStandardMaterial({ map: costra, roughness: 0.9 }),
+      lados: new THREE.MeshStandardMaterial({ map: capas, roughness: 0.9 }),
+    };
   }
   const giro = texturaGiro(4);
   centrarArriba(giro, tamano);
@@ -763,11 +1045,11 @@ function materialesCobertura(diseno: DisenoPastel, tamano: number, alto: number)
   }
   const arriba = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, bumpMap: giro, bumpScale: 2 });
   if (diseno.cobertura === 'naked') {
-    const capas = texturaNaked(diseno);
+    const capas = texturaNaked(diseno, true);
     capas.repeat.set(1 / 16, 1 / alto);
     return { arriba: arriba, lados: new THREE.MeshStandardMaterial({ map: capas, roughness: 0.85 }) };
   }
-  // Betún de mantequilla
+  // Betún de mantequilla (también es la base de la cobertura de chispas)
   const espatula = texturaEspatula(7);
   espatula.repeat.set(1 / 14, 1 / 5);
   return { arriba: arriba, lados: new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, bumpMap: espatula, bumpScale: 2.2 }) };
@@ -777,8 +1059,12 @@ function cuerpoPiso(diseno: DisenoPastel, tamano: number, alto: number, conCorte
   const grupo = new THREE.Group();
   // El fondant tiene la orilla más redondeada
   let biselado = Math.min(1, alto * 0.1);
-  if (diseno.cobertura === 'lisa') {
+  if (diseno.cobertura === 'lisa' || diseno.cobertura === 'marmol') {
     biselado = Math.min(1.6, alto * 0.15);
+  }
+  if (diseno.cobertura === 'ninguna') {
+    // Pan sin cobertura: orilla casi recta
+    biselado = Math.min(0.4, alto * 0.05);
   }
   let puntos = puntosForma(diseno.forma, tamano - 2 * biselado, 180);
   if (conCorte) {
@@ -786,8 +1072,14 @@ function cuerpoPiso(diseno: DisenoPastel, tamano: number, alto: number, conCorte
     biselado = 0;
     puntos = puntosConCorte(diseno.forma, tamano);
   }
+  // El degradado necesita cortes a lo alto para que el color cambie suave
+  let pasos = 1;
+  if (diseno.cobertura === 'degradado') {
+    pasos = 10;
+  }
   const geometria = new THREE.ExtrudeGeometry(formaThree(puntos), {
     depth: alto - 2 * biselado,
+    steps: pasos,
     bevelEnabled: biselado > 0,
     bevelThickness: biselado,
     bevelSize: biselado,
@@ -796,18 +1088,80 @@ function cuerpoPiso(diseno: DisenoPastel, tamano: number, alto: number, conCorte
   });
   geometria.translate(0, 0, biselado);
   geometria.rotateX(-Math.PI / 2);
+  if (diseno.cobertura === 'degradado') {
+    pintarDegradado(geometria, diseno.colorCobertura, COLOR_ARRIBA_DEGRADADO);
+  }
 
   const materiales = materialesCobertura(diseno, tamano, alto);
   const cuerpo = new THREE.Mesh(geometria, [materiales.arriba, materiales.lados]);
   // El cuerpo ya trae la rebanada quitada: no se recorta otra vez
   cuerpo.userData['sinRecorte'] = true;
   grupo.add(cuerpo);
+  if (diseno.cobertura === 'chispas') {
+    grupo.add(chispasDeCobertura(diseno, tamano, alto, conCorte));
+  }
 
   if (conCorte) {
     grupo.add(paredCorte(diseno, tamano, alto, CORTE_INICIO, 1));
     grupo.add(paredCorte(diseno, tamano, alto, CORTE_FIN, -1));
   }
   return grupo;
+}
+
+/**
+ * Cobertura de chispas: chispas de colores pegadas en toda la cobertura, a los lados y arriba.
+ * Es parte de la cobertura (no es la decoración «Chispas», que solo va arriba).
+ */
+function chispasDeCobertura(diseno: DisenoPastel, tamano: number, alto: number, conCorte: boolean): THREE.InstancedMesh {
+  const contorno = contornoEspaciado(diseno.forma, tamano, 0.2);
+  const perimetro = contorno.length * 0.2;
+  const enLados = Math.min(1400, Math.round(perimetro * alto * 0.9));
+  const enArriba = Math.min(900, Math.round(tamano * tamano * 0.5));
+  const malla = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.11, 0.42, 2, 6), material('#ffffff', 0.45, 0), enLados + enArriba);
+  const auxiliar = new THREE.Object3D();
+  const color = new THREE.Color();
+  const azar = new Aleatorio(17);
+  let puestas = 0;
+  // Costados: pegadas a la pared, cada una con su propio giro
+  for (let i = 0; i < enLados; i++) {
+    const punto = contorno[Math.floor(azar.siguiente() * contorno.length)];
+    if (conCorte && dentroDelCorte(Math.atan2(punto.y, punto.x))) {
+      continue;
+    }
+    const posicion = posicionMundo(punto, 0.06);
+    auxiliar.position.set(posicion.x, 0.35 + azar.siguiente() * (alto - 0.7), posicion.y);
+    auxiliar.rotation.set(0, giroMundo(punto), azar.siguiente() * Math.PI * 2, 'YXZ');
+    auxiliar.updateMatrix();
+    malla.setMatrixAt(puestas, auxiliar.matrix);
+    malla.setColorAt(puestas, color.set(COLORES_CHISPAS[Math.floor(azar.siguiente() * COLORES_CHISPAS.length)]));
+    puestas = puestas + 1;
+  }
+  // Arriba: acostadas sobre la cara de arriba
+  const orilla = puntosForma(diseno.forma, tamano - 0.6, 120);
+  let intentos = 0;
+  let arriba = 0;
+  while (arriba < enArriba && intentos < enArriba * 6) {
+    intentos = intentos + 1;
+    const x = (azar.siguiente() - 0.5) * tamano;
+    const y = (azar.siguiente() - 0.5) * tamano;
+    if (!estaDentro(x, y, orilla)) {
+      continue;
+    }
+    if (conCorte && Math.hypot(x, y) > 0.3 && dentroDelCorte(Math.atan2(y, x))) {
+      continue;
+    }
+    auxiliar.position.set(x, alto + 0.1, -y);
+    auxiliar.rotation.set(0, azar.siguiente() * Math.PI * 2, Math.PI / 2, 'YXZ');
+    auxiliar.updateMatrix();
+    malla.setMatrixAt(puestas, auxiliar.matrix);
+    malla.setColorAt(puestas, color.set(COLORES_CHISPAS[Math.floor(azar.siguiente() * COLORES_CHISPAS.length)]));
+    puestas = puestas + 1;
+    arriba = arriba + 1;
+  }
+  malla.count = puestas;
+  // Ya viene sin la rebanada: no se recorta otra vez
+  malla.userData['sinRecorte'] = true;
+  return malla;
 }
 
 // Pared del corte: muestra las capas de bizcocho y relleno
@@ -937,7 +1291,7 @@ function texturaListon(): THREE.CanvasTexture {
  * Color del listón y los moños: un tono de la misma familia que la cobertura, más fuerte,
  * para que combine con el pastel. Sobre coberturas oscuras el listón se aclara.
  */
-function colorListon(diseno: DisenoPastel): string {
+export function colorListon(diseno: DisenoPastel): string {
   const color = new THREE.Color(diseno.colorCobertura);
   const hsl = { h: 0, s: 0, l: 0 };
   color.getHSL(hsl);
@@ -971,7 +1325,7 @@ function liston(diseno: DisenoPastel, tamano: number, color: string, altura: num
 }
 
 // Tela de listón: satinada (brilla suave al girar)
-function telaSatinada(color: string): THREE.MeshPhysicalMaterial {
+export function telaSatinada(color: string): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({ color: color, roughness: 0.35, sheen: 1, sheenRoughness: 0.3, sheenColor: new THREE.Color('#ffffff'), side: THREE.DoubleSide });
 }
 
@@ -1048,7 +1402,7 @@ function geometriaCola(largo: number): THREE.BufferGeometry {
  * Hecho de cinta: dos lazos, el nudo y dos colas con la punta en V.
  * Si el piso tiene listón, el moño se amarra sobre él (misma tela y mismo color).
  */
-function mono(diseno: DisenoPastel, tamano: number, altura: number, color: string, angulo: number, escala: number): THREE.Group {
+export function mono(diseno: DisenoPastel, tamano: number, altura: number, color: string, angulo: number, escala: number): THREE.Group {
   const grupo = new THREE.Group();
   const tela = telaSatinada(color);
   const izquierdo = new THREE.Mesh(geometriaLazo(-1), tela);
@@ -1086,26 +1440,8 @@ function monos(diseno: DisenoPastel, tamano: number, altura: number, angulos: nu
   return grupo;
 }
 
-// Cordón de betún alrededor de la base del piso (conchitas pegadas)
-function cordonBase(diseno: DisenoPastel, tamano: number, color: string): THREE.InstancedMesh {
-  const contorno = contornoEspaciado(diseno.forma, tamano, 1.1);
-  const geometria = new THREE.SphereGeometry(0.75, 12, 10);
-  const relieve = texturaRelieve(8);
-  const malla = new THREE.InstancedMesh(geometria, new THREE.MeshStandardMaterial({ color: color, roughness: 0.75, bumpMap: relieve, bumpScale: 0.8 }), contorno.length);
-  const auxiliar = new THREE.Object3D();
-  for (let i = 0; i < contorno.length; i++) {
-    const posicion = posicionMundo(contorno[i], 0.1);
-    auxiliar.position.set(posicion.x, 0.55, posicion.y);
-    auxiliar.rotation.set(0, giroMundo(contorno[i]), 0.5);
-    auxiliar.scale.set(1.25, 0.8, 0.9);
-    auxiliar.updateMatrix();
-    malla.setMatrixAt(i, auxiliar.matrix);
-  }
-  return malla;
-}
-
 // Roseta de crema hecha con duya de estrella: un cordón con estrías que sube en espiral
-function geometriaRoseta(): THREE.BufferGeometry {
+export function geometriaRoseta(): THREE.BufferGeometry {
   const puntos: THREE.Vector3[] = [];
   const pasos = 60;
   for (let i = 0; i <= pasos; i++) {
@@ -1141,23 +1477,30 @@ function geometriaRoseta(): THREE.BufferGeometry {
  * Rosetas de crema sobre la orilla del piso. Con "cantidad" 0 se llena toda la orilla
  * (cobertura chantilly); si no, se ponen solo esas piezas, repartidas desde el frente.
  */
-function rosetas(diseno: DisenoPastel, tamano: number, altura: number, color: string, cantidad: number, evitarCorte: boolean): THREE.InstancedMesh {
+interface AcomodoRosetas {
+  contorno: PuntoContorno[];
+  // Índices del contorno donde va una roseta
+  elegidos: number[];
+  escala: number;
+}
+
+// Dónde van las rosetas en la orilla de un piso (la primera al frente)
+function acomodoRosetas(forma: FormaPastel, tamano: number, cantidad: number): AcomodoRosetas {
   // Si piden más rosetas de las que caben, se juntan y se hacen más chicas
   let separacion = 3.1;
   let escala = 1;
-  const caben = contornoEspaciado(diseno.forma, tamano, 3.1).length;
+  const caben = contornoEspaciado(forma, tamano, 3.1).length;
   if (cantidad > caben) {
     separacion = Math.max(1.6, (caben * 3.1) / cantidad);
     escala = separacion / 3.1;
   }
-  const contorno = contornoEspaciado(diseno.forma, tamano, separacion);
+  const contorno = contornoEspaciado(forma, tamano, separacion);
   let frente = 0;
   for (let i = 0; i < contorno.length; i++) {
     if (contorno[i].y < contorno[frente].y) {
       frente = i;
     }
   }
-  // Índices del contorno donde va una roseta
   const elegidos: number[] = [];
   if (cantidad <= 0 || cantidad >= contorno.length) {
     for (let i = 0; i < contorno.length; i++) {
@@ -1168,6 +1511,14 @@ function rosetas(diseno: DisenoPastel, tamano: number, altura: number, color: st
       elegidos.push((frente + Math.round((k * contorno.length) / cantidad)) % contorno.length);
     }
   }
+  return { contorno: contorno, elegidos: elegidos, escala: escala };
+}
+
+function rosetas(diseno: DisenoPastel, tamano: number, altura: number, color: string, cantidad: number, evitarCorte: boolean): THREE.InstancedMesh {
+  const acomodo = acomodoRosetas(diseno.forma, tamano, cantidad);
+  const contorno = acomodo.contorno;
+  const elegidos = acomodo.elegidos;
+  const escala = acomodo.escala;
   const malla = new THREE.InstancedMesh(geometriaRoseta(), material(color, 0.7, 0), elegidos.length);
   const auxiliar = new THREE.Object3D();
   let puestas = 0;
@@ -1290,7 +1641,7 @@ function conColor(geometria: THREE.BufferGeometry, color: THREE.Color): THREE.Bu
  * abiertos) y dos hojas. Todo es una sola geometría para que muchas flores no pesen.
  * La flor mira hacia +z.
  */
-function geometriaRosa(color: string): THREE.BufferGeometry {
+export function geometriaRosa(color: string): THREE.BufferGeometry {
   const piezas: THREE.BufferGeometry[] = [];
   const base = new THREE.Color(color);
   const capas = [
@@ -1336,7 +1687,7 @@ function geometriaRosa(color: string): THREE.BufferGeometry {
   return unida;
 }
 
-function materialRosa(): THREE.MeshStandardMaterial {
+export function materialRosa(): THREE.MeshStandardMaterial {
   return new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, side: THREE.DoubleSide });
 }
 
@@ -1410,7 +1761,7 @@ function texturaFresa(): THREE.CanvasTexture {
  * Una fresa por cada unidad elegida, en anillos sobre el pastel.
  * Si son muchas, se hacen más chicas para que quepan todas sin encimarse.
  */
-function fresas(cantidad: number, altura: number, radio: number, enOrilla: boolean): THREE.Group {
+export function fresas(cantidad: number, altura: number, radio: number, enOrilla: boolean): THREE.Group {
   const grupo = new THREE.Group();
   let escala = 1.2;
   if (enOrilla && cantidad > 1) {
@@ -1418,6 +1769,14 @@ function fresas(cantidad: number, altura: number, radio: number, enOrilla: boole
   } else if (cantidad > 1) {
     escala = Math.max(0.55, Math.min(1.2, Math.sqrt((Math.PI * radio * radio) / cantidad) / 2.6));
   }
+  const lugares = lugaresEnAnillos(cantidad, radio, 2.4 * escala, enOrilla);
+  grupo.add(mallaFresas(lugares, altura, escala));
+  return grupo;
+}
+
+// Las fresas ya acomodadas (todas comparten geometría y material)
+function mallaFresas(lugares: LugarArriba[], altura: number, escala: number): THREE.Group {
+  const grupo = new THREE.Group();
   const perfil = [
     [0, 0],
     [0.8, 0.1],
@@ -1445,7 +1804,6 @@ function fresas(cantidad: number, altura: number, radio: number, enOrilla: boole
   const corona = mergeGeometries(hojitas, false);
   const rojo = new THREE.MeshPhysicalMaterial({ map: texturaFresa(), roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.2 });
   const verde = new THREE.MeshStandardMaterial({ color: '#4f8a3a', roughness: 0.6 });
-  const lugares = lugaresEnAnillos(cantidad, radio, 2.4 * escala, enOrilla);
   const cuerpos = new THREE.InstancedMesh(cuerpo, rojo, lugares.length);
   const coronas = new THREE.InstancedMesh(corona, verde, lugares.length);
   const auxiliar = new THREE.Object3D();
@@ -1465,7 +1823,7 @@ function fresas(cantidad: number, altura: number, radio: number, enOrilla: boole
  * Fruta picada sobre la superficie, entre "radioInterior" y "radio": cubitos de fruta
  * y, de vez en cuando, una mora o uva. Con mucha fruta los pedazos son más chicos.
  */
-function cubitos(cantidad: number, colores: string[], radio: number, radioInterior: number, altura: number, semilla: number): THREE.Group {
+export function cubitos(cantidad: number, colores: string[], radio: number, radioInterior: number, altura: number, semilla: number, repisa: Repisa | null = null): THREE.Group {
   const grupo = new THREE.Group();
   // Cada pedazo ocupa una parte de la superficie: con mucha fruta o poco espacio, pedazos más chicos
   const superficie = Math.PI * (radio * radio - radioInterior * radioInterior);
@@ -1482,7 +1840,11 @@ function cubitos(cantidad: number, colores: string[], radio: number, radioInteri
   let totalBayas = 0;
   for (let i = 0; i < cantidad; i++) {
     const angulo = azar.siguiente() * Math.PI * 2;
-    const distancia = Math.sqrt(parteLibre + azar.siguiente() * (1 - parteLibre)) * radio;
+    let distancia = Math.sqrt(parteLibre + azar.siguiente() * (1 - parteLibre)) * radio;
+    if (repisa !== null) {
+      // En la repisa de un piso de abajo la orilla depende de la forma del pastel
+      distancia = distanciaEnRepisa(repisa, angulo, azar.siguiente(), 0.6 * escala);
+    }
     auxiliar.position.set(Math.cos(angulo) * distancia, altura + 0.5 * escala, Math.sin(angulo) * distancia);
     auxiliar.rotation.set(azar.siguiente(), azar.siguiente() * 3, azar.siguiente());
     auxiliar.scale.setScalar(escala);
@@ -1537,11 +1899,14 @@ function texturaResplandor(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(contexto.canvas);
 }
 
+// Cuánto de la vela (mide 7 de alto) queda enterrado en el postre
+const HUNDIDO_VELA = 2.6;
+
 /**
  * Una vela por cada unidad elegida: una sola va al centro; varias, en anillos.
  * Con muchas velas, se hacen más delgadas y bajitas para que quepan.
  */
-function velas(cantidad: number, radio: number, altura: number, llamas: THREE.Mesh[], enOrilla: boolean): THREE.Group {
+export function velas(cantidad: number, radio: number, altura: number, llamas: THREE.Mesh[], enOrilla: boolean): THREE.Group {
   const grupo = new THREE.Group();
   let escala = 1;
   if (cantidad > 16) {
@@ -1578,7 +1943,8 @@ function velas(cantidad: number, radio: number, altura: number, llamas: THREE.Me
     brillo.position.y = 8.2;
     brillo.scale.set(2.4, 3.2, 1);
     vela.add(cuerpo, mecha, llama, centro, brillo);
-    vela.position.set(lugares[i].x, altura, lugares[i].z);
+    // La vela se clava en el postre: una parte de la cera queda enterrada
+    vela.position.set(lugares[i].x, altura - HUNDIDO_VELA * escala, lugares[i].z);
     vela.scale.setScalar(escala);
     grupo.add(vela);
     llamas.push(llama);
@@ -1590,7 +1956,7 @@ function velas(cantidad: number, radio: number, altura: number, llamas: THREE.Me
 }
 
 // Letra oscura sobre fondos claros y clara sobre fondos oscuros (cobertura o goteo de chocolate)
-function colorDedicatoria(colorFondo: string): string {
+export function colorDedicatoria(colorFondo: string): string {
   const fondo = new THREE.Color(colorFondo);
   const luz = fondo.r * 0.3 + fondo.g * 0.59 + fondo.b * 0.11;
   if (luz < 0.35) {
@@ -1603,7 +1969,7 @@ function colorDedicatoria(colorFondo: string): string {
  * Mensaje recto en el centro de la cara de arriba. "radioLibre" es cuánto espacio queda
  * libre en el centro (las piezas que rodean el pastel quedan fuera de ese círculo).
  */
-function dedicatoria(diseno: DisenoPastel, altura: number, radioLibre: number, colorFondo: string): THREE.Mesh {
+export function dedicatoria(diseno: DisenoPastel, altura: number, radioLibre: number, colorFondo: string): THREE.Mesh {
   // El renglón más ancho cabe en el círculo libre
   const ancho = radioLibre * 1.9;
   const plano = new THREE.Mesh(
@@ -1619,7 +1985,7 @@ function dedicatoria(diseno: DisenoPastel, altura: number, radioLibre: number, c
  * Mensaje en arco alrededor del objeto que está en el centro, dentro de la franja
  * entre "radioInterior" y "radioExterior" (medidas del pastel).
  */
-function dedicatoriaEnArco(diseno: DisenoPastel, tamano: number, altura: number, radioInterior: number, radioExterior: number, colorFondo: string): THREE.Mesh {
+export function dedicatoriaEnArco(diseno: DisenoPastel, tamano: number, altura: number, radioInterior: number, radioExterior: number, colorFondo: string): THREE.Mesh {
   const lado = tamano * 0.86;
   const pixeles = LADO_ARCO / lado;
   const textura = texturaDedicatoriaArco(diseno.dedicatoria, colorDedicatoria(colorFondo), radioInterior * pixeles, radioExterior * pixeles);
@@ -1635,38 +2001,456 @@ function dedicatoriaEnArco(diseno: DisenoPastel, tamano: number, altura: number,
 // ===================== Base (plato) =====================
 
 function base(diseno: DisenoPastel, tamano: number): { grupo: THREE.Group; arriba: number } {
-  const grupo = new THREE.Group();
   if (diseno.tipo === 'gelatina') {
-    const radio = tamano / 2 + 4;
-    const perfil = [
-      new THREE.Vector2(0, 0),
-      new THREE.Vector2(radio * 0.7, 0),
-      new THREE.Vector2(radio * 0.75, 0.6),
-      new THREE.Vector2(radio * 0.92, 0.9),
-      new THREE.Vector2(radio, 1.8),
-      new THREE.Vector2(radio * 0.98, 2),
-      new THREE.Vector2(radio * 0.9, 1.3),
-      new THREE.Vector2(0, 1.2),
-    ];
-    const plato = new THREE.Mesh(new THREE.LatheGeometry(perfil, 64), new THREE.MeshStandardMaterial({ color: '#f7f5f0', roughness: 0.3, side: THREE.DoubleSide }));
-    grupo.add(plato);
-    conSombras(grupo);
-    return { grupo: grupo, arriba: 1.25 };
+    // La gelatina va en un plato (o la base elegida) siempre redondo
+    return basePostre(diseno.base, 'redondo', tamano + 8, 0);
   }
-  const geometria = new THREE.ExtrudeGeometry(formaThree(puntosForma(diseno.forma, tamano + 7, 180)), {
-    depth: 1,
+  return basePostre(diseno.base, diseno.forma, tamano + 7, 0);
+}
+
+// ===================== Bases (plato, tabla, pizarra, pedestal) =====================
+
+// Contorno de la base: la forma del postre, o un rectángulo con esquinas redondas si "forma" es null
+function contornoBase(forma: FormaPastel | null, ancho: number, fondo: number): THREE.Shape {
+  if (forma !== null) {
+    return formaThree(puntosForma(forma, ancho, 180));
+  }
+  const figura = new THREE.Shape();
+  const radio = 1.5;
+  const x = ancho / 2;
+  const y = fondo / 2;
+  figura.moveTo(-x + radio, -y);
+  figura.lineTo(x - radio, -y);
+  figura.quadraticCurveTo(x, -y, x, -y + radio);
+  figura.lineTo(x, y - radio);
+  figura.quadraticCurveTo(x, y, x - radio, y);
+  figura.lineTo(-x + radio, y);
+  figura.quadraticCurveTo(-x, y, -x, y - radio);
+  figura.lineTo(-x, -y + radio);
+  figura.quadraticCurveTo(-x, -y, -x + radio, -y);
+  return figura;
+}
+
+// Placa acostada con orilla redondeada. Queda apoyada en y = 0 y su cara de arriba en grueso + 2 * orilla.
+function losa(contorno: THREE.Shape, grueso: number, orilla: number, materialLosa: THREE.Material): THREE.Mesh {
+  const geometria = new THREE.ExtrudeGeometry(contorno, {
+    depth: grueso,
     bevelEnabled: true,
-    bevelThickness: 0.2,
-    bevelSize: 0.3,
+    bevelThickness: orilla,
+    bevelSize: orilla * 1.5,
     bevelSegments: 2,
     curveSegments: 12,
   });
   geometria.rotateX(-Math.PI / 2);
-  const dorado = new THREE.Mesh(geometria, material('#c9952f', 0.3, 0.9));
-  dorado.position.y = 0.2;
-  grupo.add(dorado);
+  const malla = new THREE.Mesh(geometria, materialLosa);
+  malla.position.y = orilla;
+  return malla;
+}
+
+// Plato redondo de cerámica blanca
+export function platoRedondo(radio: number): THREE.Mesh {
+  const perfil = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(radio * 0.7, 0),
+    new THREE.Vector2(radio * 0.75, 0.6),
+    new THREE.Vector2(radio * 0.92, 0.9),
+    new THREE.Vector2(radio, 1.8),
+    new THREE.Vector2(radio * 0.98, 2),
+    new THREE.Vector2(radio * 0.9, 1.3),
+    new THREE.Vector2(0, 1.2),
+  ];
+  const porcelana = new THREE.MeshPhysicalMaterial({ color: '#f7f5f0', roughness: 0.25, clearcoat: 0.6, side: THREE.DoubleSide });
+  return new THREE.Mesh(new THREE.LatheGeometry(perfil, 72), porcelana);
+}
+
+function materialMadera(): THREE.MeshStandardMaterial {
+  const vetas = texturaEspatula(23);
+  vetas.repeat.set(1 / 20, 1 / 6);
+  return new THREE.MeshStandardMaterial({ color: '#c99a6b', roughness: 0.75, bumpMap: vetas, bumpScale: 1 });
+}
+
+export function materialCristal(): THREE.MeshPhysicalMaterial {
+  return new THREE.MeshPhysicalMaterial({
+    color: '#e8f5fa',
+    roughness: 0.05,
+    metalness: 0,
+    clearcoat: 1,
+    clearcoatRoughness: 0.05,
+    transparent: true,
+    opacity: 0.4,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+}
+
+// Pedestal de cristal: pie, tallo y plato arriba (el postre queda a la altura "alto")
+function pedestal(radio: number, alto: number): THREE.Mesh {
+  const perfil = [
+    new THREE.Vector2(0, 0),
+    new THREE.Vector2(radio * 0.5, 0),
+    new THREE.Vector2(radio * 0.52, 0.3),
+    new THREE.Vector2(radio * 0.2, 0.7),
+    new THREE.Vector2(radio * 0.08, 1.4),
+    new THREE.Vector2(radio * 0.07, alto - 1.6),
+    new THREE.Vector2(radio * 0.14, alto - 0.9),
+    new THREE.Vector2(radio * 0.6, alto - 0.45),
+    new THREE.Vector2(radio, alto - 0.25),
+    new THREE.Vector2(radio * 1.01, alto + 0.15),
+    new THREE.Vector2(radio * 0.97, alto + 0.2),
+    new THREE.Vector2(radio * 0.9, alto),
+    new THREE.Vector2(0, alto),
+  ];
+  const malla = new THREE.Mesh(new THREE.LatheGeometry(perfil, 72), materialCristal());
+  malla.userData['sinSombra'] = true;
+  return malla;
+}
+
+/**
+ * Base donde se presenta el postre según lo que eligió el cliente:
+ *  dorada / plateada = cartón metálico con la forma del postre; madera = tabla; pizarra = piedra negra;
+ *  blanca = plato de cerámica; cristal = pedestal (o charola de cristal para piezas).
+ * "forma" null = base rectangular de "ancho" x "fondo" (para varias piezas).
+ * Regresa la base y la altura donde se apoya el postre.
+ */
+export function basePostre(tipo: TipoBase, forma: FormaPastel | null, ancho: number, fondo: number): { grupo: THREE.Group; arriba: number } {
+  const grupo = new THREE.Group();
+  let arriba = 1.4;
+  if (tipo === 'ninguna') {
+    // «Sin base»: el postre se apoya directo
+    return { grupo: grupo, arriba: 0 };
+  }
+  if (tipo === 'blanca' && forma !== null) {
+    grupo.add(platoRedondo(ancho / 2));
+    arriba = 1.25;
+  } else if (tipo === 'blanca') {
+    const porcelana = new THREE.MeshPhysicalMaterial({ color: '#f7f5f0', roughness: 0.25, clearcoat: 0.6 });
+    grupo.add(losa(contornoBase(null, ancho, fondo), 0.6, 0.35, porcelana));
+    arriba = 1.3;
+  } else if (tipo === 'cristal' && forma !== null) {
+    const alto = Math.max(4.5, Math.min(9, ancho * 0.32));
+    grupo.add(pedestal(ancho / 2, alto));
+    arriba = alto;
+  } else if (tipo === 'cristal') {
+    // Charola de cristal con patitas
+    const charola = losa(contornoBase(null, ancho, fondo), 0.5, 0.25, materialCristal());
+    charola.position.y = 2;
+    charola.userData['sinSombra'] = true;
+    grupo.add(charola);
+    const patas = [-1, 1];
+    for (const lx of patas) {
+      for (const lz of patas) {
+        const pata = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 2, 16), materialCristal());
+        pata.position.set(lx * (ancho / 2 - 2), 1, lz * (fondo / 2 - 2));
+        pata.userData['sinSombra'] = true;
+        grupo.add(pata);
+      }
+    }
+    arriba = 3;
+  } else if (tipo === 'madera') {
+    let contorno = contornoBase(null, ancho, fondo);
+    if (forma !== null) {
+      // Tabla redonda (un poco más ancha que el postre)
+      contorno = contornoBase('redondo', ancho, 0);
+    }
+    grupo.add(losa(contorno, 1.4, 0.25, materialMadera()));
+    arriba = 1.9;
+  } else if (tipo === 'pizarra') {
+    let contorno = contornoBase(null, ancho, fondo);
+    if (forma !== null) {
+      contorno = contornoBase('redondo', ancho, 0);
+    }
+    const relieve = texturaRelieve(21);
+    relieve.repeat.set(1 / 12, 1 / 12);
+    const piedra = new THREE.MeshStandardMaterial({ color: '#34373c', roughness: 0.88, bumpMap: relieve, bumpScale: 0.6 });
+    grupo.add(losa(contorno, 0.7, 0.2, piedra));
+    arriba = 1.1;
+  } else {
+    // Cartón dorado o plateado con la forma del postre
+    let metal = material('#c9952f', 0.3, 0.9);
+    if (tipo === 'plateada') {
+      metal = material('#d3d6db', 0.25, 0.95);
+    }
+    grupo.add(losa(contornoBase(forma, ancho, fondo), 1, 0.2, metal));
+    arriba = 1.4;
+  }
   conSombras(grupo);
-  return { grupo: grupo, arriba: 1.4 };
+  return { grupo: grupo, arriba: arriba };
+}
+
+// ===================== Topper, frutos rojos y hoja de oro =====================
+
+/**
+ * Topper: letrero de pie con el texto en dorado, sostenido por dos palitos.
+ * Sale apoyado en y = 0 (los palitos se entierran un poco) y mirando al frente (+z).
+ */
+export function topper(texto: string, ancho: number): THREE.Group {
+  const grupo = new THREE.Group();
+  const medidas = medidasTopper(texto);
+  const renglones = medidas.renglones;
+  const tamanoLetra = medidas.tamanoLetra;
+  const altoLienzo = medidas.altoLienzo;
+  const contexto = lienzo(1024, altoLienzo);
+  contexto.font = fuenteTopper(tamanoLetra);
+  contexto.textAlign = 'center';
+  contexto.textBaseline = 'middle';
+  // Contorno grueso: así las letras quedan unidas como un acrílico recortado
+  contexto.lineJoin = 'round';
+  contexto.strokeStyle = '#b8892c';
+  contexto.lineWidth = Math.max(14, tamanoLetra * 0.18);
+  const separacion = tamanoLetra * 1.15;
+  // Centro del primer renglón (el lienzo mide justo lo que ocupan los renglones más el margen)
+  const primero = MARGEN_TOPPER + tamanoLetra * 0.62;
+  for (let i = 0; i < renglones.length; i++) {
+    contexto.strokeText(renglones[i], 512, primero + i * separacion);
+  }
+  const brillo = contexto.createLinearGradient(0, 0, 0, altoLienzo);
+  brillo.addColorStop(0, '#fff1b8');
+  brillo.addColorStop(0.5, '#e3b54a');
+  brillo.addColorStop(1, '#a8761f');
+  contexto.fillStyle = brillo;
+  for (let i = 0; i < renglones.length; i++) {
+    contexto.fillText(renglones[i], 512, primero + i * separacion);
+  }
+  const textura = new THREE.CanvasTexture(contexto.canvas);
+  textura.colorSpace = THREE.SRGBColorSpace;
+  const alto = (ancho * altoLienzo) / 1024;
+  const margen = (ancho * MARGEN_TOPPER) / 1024;
+  const letrero = new THREE.Mesh(
+    new THREE.PlaneGeometry(ancho, alto),
+    new THREE.MeshStandardMaterial({ map: textura, transparent: true, alphaTest: 0.35, metalness: 0.55, roughness: 0.3, side: THREE.DoubleSide }),
+  );
+  // La orilla de abajo de las letras queda a la altura del palito (el margen transparente se encima)
+  letrero.position.y = ALTO_PALITO_TOPPER + alto / 2 - margen;
+  grupo.add(letrero);
+  // Los palitos suben hasta la mitad del último renglón: así el letrero nunca se ve flotando
+  const arribaPalito = ALTO_PALITO_TOPPER + (ancho * tamanoLetra * 0.6) / 1024;
+  const abajoPalito = -1.5;
+  const oro = material('#d4a645', 0.3, 0.8);
+  const lados = [-ancho * 0.22, ancho * 0.22];
+  for (const x of lados) {
+    const palito = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, arribaPalito - abajoPalito, 8), oro);
+    palito.position.set(x, (arribaPalito + abajoPalito) / 2, -0.05);
+    grupo.add(palito);
+  }
+  return grupo;
+}
+
+// Alto del palito del topper que queda a la vista (de donde se entierra a donde empiezan las letras)
+export const ALTO_PALITO_TOPPER = 3.6;
+// Margen transparente alrededor de las letras en el lienzo del topper (para el contorno)
+const MARGEN_TOPPER = 40;
+
+function fuenteTopper(tamanoLetra: number): string {
+  return 'italic 700 ' + tamanoLetra + 'px Georgia, "Times New Roman", serif';
+}
+
+/**
+ * Renglones, tamaño de letra y alto del lienzo del topper.
+ * El lienzo mide justo lo que ocupan las letras: con dos o más renglones el letrero crece
+ * solo lo necesario (antes quedaba espacio vacío abajo y el texto se veía muy arriba).
+ */
+function medidasTopper(texto: string): { renglones: string[]; tamanoLetra: number; altoLienzo: number } {
+  const renglones = renglonesTopper(texto);
+  const medidor = lienzo(1024, 16);
+  let tamanoLetra = 170;
+  medidor.font = fuenteTopper(tamanoLetra);
+  while (renglonMasAncho(medidor, renglones) > 900 && tamanoLetra > 40) {
+    tamanoLetra = tamanoLetra - 6;
+    medidor.font = fuenteTopper(tamanoLetra);
+  }
+  const altoLienzo = Math.round(MARGEN_TOPPER * 2 + tamanoLetra * 1.24 + tamanoLetra * 1.15 * (renglones.length - 1));
+  return { renglones: renglones, tamanoLetra: tamanoLetra, altoLienzo: altoLienzo };
+}
+
+// Parte el texto del topper en renglones cortos (máximo 4; lo que sobra va en el último)
+function renglonesTopper(texto: string): string[] {
+  const palabras = texto.split(' ');
+  const renglones: string[] = [];
+  let actual = '';
+  for (const palabra of palabras) {
+    if (palabra === '') {
+      continue;
+    }
+    let junto = palabra;
+    if (actual !== '') {
+      junto = actual + ' ' + palabra;
+    }
+    if (junto.length > 16 && actual !== '' && renglones.length < 3) {
+      renglones.push(actual);
+      actual = palabra;
+    } else {
+      actual = junto;
+    }
+  }
+  if (actual !== '' || renglones.length === 0) {
+    renglones.push(actual);
+  }
+  return renglones;
+}
+
+// Ancho del renglón más largo con la letra actual
+function renglonMasAncho(contexto: CanvasRenderingContext2D, renglones: string[]): number {
+  let mayor = 0;
+  for (const renglon of renglones) {
+    mayor = Math.max(mayor, contexto.measureText(renglon).width);
+  }
+  return mayor;
+}
+
+// Altura total de un topper de cierto ancho (para encuadrar la cámara)
+export function altoTopper(ancho: number, texto: string = ''): number {
+  const medidas = medidasTopper(texto);
+  return ALTO_PALITO_TOPPER + (ancho * (medidas.altoLienzo - MARGEN_TOPPER)) / 1024;
+}
+
+// Frambuesa o zarzamora: bolitas (drupas) juntas en forma de domo. Una sola geometría.
+function geometriaDrupas(): THREE.BufferGeometry {
+  const piezas: THREE.BufferGeometry[] = [];
+  const total = 30;
+  for (let i = 0; i < total; i++) {
+    // Puntos repartidos en una esfera (espiral de Fibonacci), sin la parte de abajo
+    const y = 1 - (i / (total - 1)) * 1.7;
+    const radio = Math.sqrt(Math.max(0, 1 - y * y));
+    const angulo = i * 2.39996;
+    const bolita = new THREE.SphereGeometry(0.2, 8, 6);
+    bolita.translate(Math.cos(angulo) * radio * 0.5, 0.55 + y * 0.62, Math.sin(angulo) * radio * 0.5);
+    piezas.push(bolita);
+  }
+  const juntas = mergeGeometries(piezas);
+  for (const pieza of piezas) {
+    pieza.dispose();
+  }
+  return juntas;
+}
+
+/**
+ * Frutos rojos: frambuesas, zarzamoras y arándanos. Cada unidad elegida es un puñito de 3.
+ * Se reparten en un anillo (radioInterior deja libre el centro para el mensaje).
+ */
+export function frutosRojos(cantidad: number, radio: number, radioInterior: number, altura: number, semilla: number, repisa: Repisa | null = null): THREE.Group {
+  const grupo = new THREE.Group();
+  const total = Math.min(90, cantidad * 3);
+  const superficie = Math.PI * (radio * radio - radioInterior * radioInterior);
+  const escala = Math.max(0.55, Math.min(1, Math.sqrt(superficie / total) / 1.5));
+  const brillo = new THREE.MeshPhysicalMaterial({ roughness: 0.35, clearcoat: 0.6, clearcoatRoughness: 0.4 });
+  const drupas = new THREE.InstancedMesh(geometriaDrupas(), brillo, total);
+  const arandanos = new THREE.InstancedMesh(new THREE.SphereGeometry(0.55, 16, 12), new THREE.MeshStandardMaterial({ color: '#3f4a86', roughness: 0.55 }), total);
+  const auxiliar = new THREE.Object3D();
+  const color = new THREE.Color();
+  const azar = new Aleatorio(semilla);
+  const parteLibre = (radioInterior * radioInterior) / Math.max(0.01, radio * radio);
+  let totalDrupas = 0;
+  let totalArandanos = 0;
+  for (let i = 0; i < total; i++) {
+    const angulo = azar.siguiente() * Math.PI * 2;
+    let distancia = Math.sqrt(parteLibre + azar.siguiente() * (1 - parteLibre)) * radio;
+    if (repisa !== null) {
+      distancia = distanciaEnRepisa(repisa, angulo, azar.siguiente(), 0.6 * escala);
+    }
+    auxiliar.position.set(Math.cos(angulo) * distancia, altura, Math.sin(angulo) * distancia);
+    auxiliar.rotation.set((azar.siguiente() - 0.5) * 0.6, azar.siguiente() * 6, (azar.siguiente() - 0.5) * 0.6);
+    auxiliar.scale.setScalar(escala);
+    if (i % 3 === 2) {
+      auxiliar.position.y = altura + 0.45 * escala;
+      auxiliar.updateMatrix();
+      arandanos.setMatrixAt(totalArandanos, auxiliar.matrix);
+      totalArandanos = totalArandanos + 1;
+    } else {
+      auxiliar.updateMatrix();
+      drupas.setMatrixAt(totalDrupas, auxiliar.matrix);
+      // Frambuesa roja o zarzamora casi negra
+      if (i % 3 === 0) {
+        color.set('#c7243a');
+      } else {
+        color.set('#2b1030');
+      }
+      drupas.setColorAt(totalDrupas, color);
+      totalDrupas = totalDrupas + 1;
+    }
+  }
+  drupas.count = totalDrupas;
+  arandanos.count = totalArandanos;
+  grupo.add(drupas);
+  if (totalArandanos > 0) {
+    grupo.add(arandanos);
+  }
+  return grupo;
+}
+
+// Hojuela de oro: pedacito irregular (mira hacia +z)
+export function geometriaHojuela(): THREE.BufferGeometry {
+  const figura = new THREE.Shape();
+  const azar = new Aleatorio(5);
+  const lados = 9;
+  for (let i = 0; i < lados; i++) {
+    const angulo = (i / lados) * Math.PI * 2;
+    const radio = 0.32 + azar.siguiente() * 0.38;
+    const x = Math.cos(angulo) * radio;
+    const y = Math.sin(angulo) * radio * 0.8;
+    if (i === 0) {
+      figura.moveTo(x, y);
+    } else {
+      figura.lineTo(x, y);
+    }
+  }
+  return new THREE.ShapeGeometry(figura);
+}
+
+export function materialOro(): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({ color: '#e2b84a', metalness: 1, roughness: 0.28, side: THREE.DoubleSide });
+}
+
+/**
+ * Hoja de oro en un piso: hojuelas pegadas en la parte alta de los lados y algunas arriba.
+ * "radioLibre" deja sin hojuelas el centro (donde va el mensaje).
+ */
+function hojasDeOro(diseno: DisenoPastel, tamano: number, alto: number, arribaPiso: number, conCorte: boolean, radioLibre: number): THREE.InstancedMesh {
+  const contorno = contornoEspaciado(diseno.forma, tamano, 0.3);
+  const enLados = Math.min(260, Math.round(contorno.length * 0.3 * alto * 0.14));
+  const enArriba = Math.min(120, Math.round(tamano * tamano * 0.05));
+  const malla = new THREE.InstancedMesh(geometriaHojuela(), materialOro(), enLados + enArriba);
+  const auxiliar = new THREE.Object3D();
+  const azar = new Aleatorio(29);
+  let puestas = 0;
+  for (let i = 0; i < enLados; i++) {
+    const punto = contorno[Math.floor(azar.siguiente() * contorno.length)];
+    if (conCorte && dentroDelCorte(Math.atan2(punto.y, punto.x))) {
+      continue;
+    }
+    const posicion = posicionMundo(punto, 0.08);
+    // Más hojuelas cerca de la orilla de arriba
+    const altura = alto * (0.4 + 0.58 * Math.sqrt(azar.siguiente()));
+    auxiliar.position.set(posicion.x, altura, posicion.y);
+    auxiliar.rotation.set(0, giroMundo(punto), azar.siguiente() * Math.PI * 2, 'YXZ');
+    auxiliar.scale.setScalar(0.6 + azar.siguiente() * 0.9);
+    auxiliar.updateMatrix();
+    malla.setMatrixAt(puestas, auxiliar.matrix);
+    puestas = puestas + 1;
+  }
+  const orilla = puntosForma(diseno.forma, tamano - 1, 120);
+  let intentos = 0;
+  let arriba = 0;
+  while (arriba < enArriba && intentos < enArriba * 8) {
+    intentos = intentos + 1;
+    const x = (azar.siguiente() - 0.5) * tamano;
+    const y = (azar.siguiente() - 0.5) * tamano;
+    if (!estaDentro(x, y, orilla) || Math.hypot(x, y) < radioLibre) {
+      continue;
+    }
+    if (conCorte && dentroDelCorte(Math.atan2(y, x))) {
+      continue;
+    }
+    auxiliar.position.set(x, arribaPiso + 0.06, -y);
+    auxiliar.rotation.set(-Math.PI / 2, 0, azar.siguiente() * Math.PI * 2);
+    auxiliar.scale.setScalar(0.6 + azar.siguiente() * 0.8);
+    auxiliar.updateMatrix();
+    malla.setMatrixAt(puestas, auxiliar.matrix);
+    puestas = puestas + 1;
+    arriba = arriba + 1;
+  }
+  malla.count = puestas;
+  malla.userData['sinRecorte'] = true;
+  return malla;
 }
 
 // ===================== Gelatina =====================
@@ -1812,7 +2596,7 @@ function perlasGelatina(radio: number, arribaPlato: number): THREE.InstancedMesh
 // ===================== Armado principal =====================
 
 /**
- * Arma todo el postre. "verDentro" quita una rebanada del piso de arriba para ver
+ * RF-5 · Paso 4: arma todo el postre. "verDentro" (RF-5 · Paso 8) quita una rebanada del piso de arriba para ver
  * el bizcocho y el relleno.
  */
 export function construirPastel(diseno: DisenoPastel, verDentro: boolean): PastelConstruido {
@@ -1849,6 +2633,9 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     if (decoraciones.frutaPicada > 0) {
       raiz.add(cubitos(decoraciones.frutaPicada, COLORES_FRUTA, radioArriba * 0.8, 0, arriba - 0.6, 3));
     }
+    if (decoraciones.frutosRojos > 0) {
+      raiz.add(frutosRojos(decoraciones.frutosRojos, radioArriba * 0.8, 0, arriba - 0.6, 8));
+    }
     if (decoraciones.fresas > 0) {
       raiz.add(fresas(decoraciones.fresas, arriba - 0.4, radioArriba * 0.7, false));
     }
@@ -1868,6 +2655,13 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     if (decoraciones.perlas > 0) {
       raiz.add(perlasGelatina(radioGelatina, plato.arriba));
     }
+    if (diseno.topper !== '') {
+      const anchoLetrero = Math.min(16, diseno.diametro * 0.75);
+      const letrero = topper(diseno.topper, anchoLetrero);
+      letrero.position.set(0, arriba - 0.4, -radioArriba * 0.45);
+      raiz.add(letrero);
+      alturaVelas = Math.max(alturaVelas, altoTopper(anchoLetrero, diseno.topper));
+    }
     conSombras(raiz);
     return { grupo: raiz, alturaTotal: arriba + alturaVelas, anchoTotal: diseno.diametro + 8, llamas: llamas };
   }
@@ -1881,20 +2675,11 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
   const plato = base(diseno, tamanos[0]);
   raiz.add(plato.grupo);
 
-  // Rosetas sueltas: se llena primero la orilla del piso de arriba y lo que sobra baja
+  // Rosetas, fresas y fruta se reparten entre todos los pisos (las que sobran van a los de arriba).
+  // En los pisos de abajo se acomodan en la repisa que deja libre el piso de encima.
   const rosetasPorPiso: number[] = [];
   for (let i = 0; i < diseno.pisos; i++) {
-    rosetasPorPiso.push(0);
-  }
-  let rosetasPendientes = decoraciones.rosetas;
-  for (let i = diseno.pisos - 1; i >= 0; i--) {
-    let aqui = Math.min(contornoEspaciado(diseno.forma, tamanos[i], 3.1).length, rosetasPendientes);
-    if (i === 0) {
-      // El piso de abajo se queda con las que sobren
-      aqui = rosetasPendientes;
-    }
-    rosetasPorPiso[i] = aqui;
-    rosetasPendientes = rosetasPendientes - aqui;
+    rosetasPorPiso.push(piezasDelPiso(decoraciones.rosetas, diseno.pisos - 1 - i, diseno.pisos));
   }
 
   let altura = plato.arriba;
@@ -1909,6 +2694,10 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     const piso = new THREE.Group();
     piso.position.y = altura;
     piso.add(cuerpoPiso(diseno, tamano, alto, conCorte));
+    // Lo que le toca a este piso de fresas y fruta
+    const fresasAqui = piezasDelPiso(decoraciones.fresas, desdeArriba, diseno.pisos);
+    const frutaAqui = piezasDelPiso(decoraciones.frutaPicada, desdeArriba, diseno.pisos);
+    const frutosRojosAqui = piezasDelPiso(decoraciones.frutosRojos, desdeArriba, diseno.pisos);
     if (esArriba && decoraciones.velas > 0) {
       // Las velas miden 8 cm: cuentan para encuadrar la cámara
       alturaVelas = 8.5;
@@ -1932,6 +2721,9 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     let arribaPiso = alto;
     // Color de la cara de arriba (el mensaje se escribe con el color que contraste)
     let colorArriba = diseno.colorCobertura;
+    if (diseno.cobertura === 'degradado') {
+      colorArriba = COLOR_ARRIBA_DEGRADADO;
+    }
     // Goteo: un piso por unidad, empezando por el de arriba. Ganache: siempre en el de arriba
     const conGanache = diseno.cobertura === 'ganache' && esArriba;
     if (desdeArriba < decoraciones.goteo || conGanache) {
@@ -1960,17 +2752,11 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
       collar.position.y = alturasCollar[k];
       piso.add(collar);
     }
-    // Betún: cordón de betún en la base de cada piso (si no hay perlas ni listón en ese lugar)
-    if (diseno.cobertura === 'betun' && listones === 0 && collares === 0) {
-      piso.add(cordonBase(diseno, tamano, diseno.colorCobertura));
-    }
-
-    // Rosetas: chantilly llena la orilla; si no, solo las que se pidieron
-    if (diseno.cobertura === 'chantilly') {
-      piso.add(rosetas(diseno, tamano, arribaPiso, diseno.colorCobertura, 0, conCorte));
-    } else if (rosetasPorPiso[i] > 0) {
+    // La cobertura nunca agrega piezas (cordón, rosetas...): solo cambia cómo se ve el pastel.
+    // Las rosetas salen solo si se piden como decoración.
+    if (rosetasPorPiso[i] > 0) {
       let colorCrema = diseno.colorCobertura;
-      if (diseno.cobertura === 'ganache' || diseno.cobertura === 'naked') {
+      if (diseno.cobertura === 'ganache' || diseno.cobertura === 'naked' || diseno.cobertura === 'ninguna' || diseno.cobertura === 'marmol') {
         colorCrema = '#ffffff';
       }
       piso.add(rosetas(diseno, tamano, arribaPiso, colorCrema, rosetasPorPiso[i], conCorte));
@@ -2024,7 +2810,7 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
       // - varias piezas → van en anillo por la orilla y el mensaje va recto en el centro
       const conMensaje = diseno.dedicatoria !== '';
       const velaAlCentro = decoraciones.velas === 1;
-      const fresaAlCentro = decoraciones.fresas === 1 && !velaAlCentro;
+      const fresaAlCentro = fresasAqui === 1 && !velaAlCentro;
       const hayObjetoCentral = velaAlCentro || fresaAlCentro;
       // Sin mensaje, las piezas se acomodan como siempre (anillos desde el centro)
       const piezasEnOrilla = conMensaje;
@@ -2038,7 +2824,7 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         radioFresas = tamano * 0.41;
         radioVelas = tamano * 0.38;
       }
-      if (decoraciones.fresas > 1 || (decoraciones.fresas === 1 && velaAlCentro)) {
+      if (fresasAqui > 1 || (fresasAqui === 1 && velaAlCentro)) {
         // Con fresas alrededor, las velas se quedan adentro del anillo de fresas
         radioVelas = tamano * 0.22;
         if (conMensaje) {
@@ -2050,8 +2836,8 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
       // Radio del círculo libre del centro (lo que no ocupan los anillos)
       let radioLibre = tamano * 0.43;
 
-      if (decoraciones.fresas > 0) {
-        piso.add(fresas(decoraciones.fresas, arribaPiso, radioFresas, piezasEnOrilla && !fresaAlCentro));
+      if (fresasAqui > 0) {
+        piso.add(fresas(fresasAqui, arribaPiso, radioFresas, piezasEnOrilla && !fresaAlCentro));
         if (!fresaAlCentro) {
           radioLibre = Math.min(radioLibre, radioFresas - 1.6);
         }
@@ -2063,7 +2849,7 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
           radioLibre = Math.min(radioLibre, radioVelas - 1.8);
         }
       }
-      if (decoraciones.frutaPicada > 0) {
+      if (frutaAqui > 0) {
         // Con mensaje, la fruta se queda alrededor y deja el centro libre
         let radioSinFruta = 0;
         if (conMensaje && hayObjetoCentral) {
@@ -2071,7 +2857,25 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         } else if (conMensaje) {
           radioSinFruta = radioLibre * 0.75;
         }
-        piso.add(cubitos(decoraciones.frutaPicada, COLORES_FRUTA, tamano * 0.38, radioSinFruta, arribaPiso - 0.4, 3));
+        piso.add(cubitos(frutaAqui, COLORES_FRUTA, tamano * 0.38, radioSinFruta, arribaPiso - 0.4, 3, null));
+      }
+      if (frutosRojosAqui > 0) {
+        // Igual que la fruta: alrededor del mensaje si hay
+        let radioSinFrutos = 0;
+        if (conMensaje && hayObjetoCentral) {
+          radioSinFrutos = arcoExterior + 0.6;
+        } else if (conMensaje) {
+          radioSinFrutos = radioLibre * 0.75;
+        }
+        piso.add(frutosRojos(frutosRojosAqui, tamano * 0.38, radioSinFrutos, arribaPiso - 0.1, 9, null));
+      }
+      if (diseno.topper !== '') {
+        // RF-5 · Excepción paso 4: el topper va de pie atrás, para no tapar el mensaje
+        const anchoLetrero = Math.min(18, tamano * 0.72);
+        const letrero = topper(diseno.topper, anchoLetrero);
+        letrero.position.set(0, arribaPiso, -tamano * 0.3);
+        piso.add(letrero);
+        alturaVelas = Math.max(alturaVelas, altoTopper(anchoLetrero, diseno.topper));
       }
       if (conMensaje && hayObjetoCentral) {
         piso.add(dedicatoriaEnArco(diseno, tamano, arribaPiso, arcoInterior, arcoExterior, colorArriba));
@@ -2080,6 +2884,22 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         piso.add(dedicatoria(diseno, arribaPiso, Math.max(3, radioLibre), colorArriba));
         radioMensaje = Math.max(3, radioLibre);
       }
+    } else {
+      // Pisos de abajo: fresas y fruta en la repisa (entre la orilla y el piso de encima)
+      const repisa = repisaDelPiso(diseno.forma, tamano, tamanos[i + 1]);
+      if (fresasAqui > 0) {
+        piso.add(fresasEnRepisa(diseno, tamano, repisa, fresasAqui, rosetasPorPiso[i], arribaPiso, desdeArriba, conCorte));
+      }
+      if (frutaAqui > 0) {
+        piso.add(cubitos(frutaAqui, COLORES_FRUTA, tamano / 2, tamanos[i + 1] / 2, arribaPiso - 0.4, 3 + i, repisa));
+      }
+      if (frutosRojosAqui > 0) {
+        piso.add(frutosRojos(frutosRojosAqui, tamano / 2, tamanos[i + 1] / 2, arribaPiso - 0.1, 9 + i, repisa));
+      }
+    }
+    // Hoja de oro: un piso por unidad, empezando por el de arriba
+    if (desdeArriba < decoraciones.hojaOro) {
+      piso.add(hojasDeOro(diseno, tamano, alto, arribaPiso, conCorte, radioMensaje));
     }
     // Chispas: un piso por unidad, empezando por el de arriba
     if (desdeArriba < decoraciones.chispas) {

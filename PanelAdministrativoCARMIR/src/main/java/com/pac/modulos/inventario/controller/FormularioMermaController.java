@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ventana "Registrar merma" (RF-38) (formulario-merma.fxml).
+ * Ventana "Registrar merma" (RF-60) (formulario-merma.fxml).
  * Se puede descontar de un lote en particular o dejar que el sistema use primero el que caduca antes.
  */
 public class FormularioMermaController {
@@ -58,7 +58,7 @@ public class FormularioMermaController {
      * desde una alerta de caducidad llegan el lote y el motivo "Caducidad".
      * Devuelve false si no hubo conexión o no hay insumos con existencia.
      */
-    // RF-38 (Registro de salida de insumos / merma): inicia aquí en la pantalla. Paso 3: muestra el formulario de merma.
+    // RF-60 (Registro de salida de insumos / merma): inicia aquí en la pantalla. Paso 3: muestra el formulario de merma.
     public boolean preparar(Insumo insumo, Lote lote, String motivo) {
         List<Insumo> conExistencia = new ArrayList<>();
         try {
@@ -68,12 +68,12 @@ public class FormularioMermaController {
                 }
             }
         } catch (DAOException e) {
-            // RF-38 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-60 · Excepción paso 2: sin conexión, «Error de conexión».
             Alertas.error(InventarioService.MSG_ERROR_CONEXION);
             return false;
         }
         if (conExistencia.isEmpty()) {
-            // RF-38 · Excepción paso 2: no hay insumos con existencia para registrar una merma.
+            // RF-60 · Excepción paso 2: no hay insumos con existencia para registrar una merma.
             Alertas.aviso("No hay insumos con existencia para registrar una merma");
             return false;
         }
@@ -175,7 +175,7 @@ public class FormularioMermaController {
     }
 
     @FXML
-    // RF-38 · Paso 4: la persona elige «Registrar».
+    // RF-60 · Paso 4: la persona elige «Registrar».
     private void onGuardar() {
         quitarMarcas();
         ApoyoVista.mostrarNodo(lblMensaje, false);
@@ -186,7 +186,7 @@ public class FormularioMermaController {
             return;
         }
         if (!ValidacionCatalogo.esDecimal(txtCantidad.getText())) {
-            // RF-38 · Excepción paso 5: la cantidad debe ser mayor a cero.
+            // RF-60 · Excepción paso 5: la cantidad debe ser mayor a cero.
             mostrarError(InventarioService.MSG_CANTIDAD_INVALIDA, txtCantidad);
             return;
         }
@@ -200,13 +200,13 @@ public class FormularioMermaController {
                 cmbMotivo.getValue(), txtDetalle.getText(), idLote);
         if (resultado.isExitoso()) {
             guardado = true;
-            // RF-38 · Paso 9: informa el éxito y la nueva existencia.
+            // RF-60 · Paso 9: informa el éxito y la nueva existencia.
             Alertas.info(resultado.getMensaje());
             cerrar();
             return;
         }
         if (resultado.isRecargarLista()) {
-            // RF-38 · Excepción pasos 5 y 6: se muestra el error y no se registra la merma.
+            // RF-60 · Excepción pasos 5 y 6: se muestra el error y no se registra la merma.
             Alertas.aviso(resultado.getMensaje());
             recargarLista = true;
             cerrar();
@@ -236,7 +236,7 @@ public class FormularioMermaController {
     }
 
     @FXML
-    // RF-38 · Excepción paso 4: «Cancelar» descarta los datos; la existencia no cambia.
+    // RF-60 · Excepción paso 4: «Cancelar» descarta los datos; la existencia no cambia.
     private void onCancelar() {
         cerrar();
     }

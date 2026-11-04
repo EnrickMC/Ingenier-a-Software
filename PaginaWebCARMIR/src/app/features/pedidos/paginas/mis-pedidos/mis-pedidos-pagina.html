@@ -2,8 +2,8 @@
   <h1>Mis pedidos</h1>
 
   @if (seguimiento(); as pedido) {
-    <!-- ===================== Seguimiento (RF-12) ===================== -->
-    <!-- RF-12 · Paso 7: detalle del pedido con su estado actual. -->
+    <!-- ===================== Seguimiento (RF-13) ===================== -->
+    <!-- RF-13 · Paso 7: detalle del pedido con su estado actual. -->
     <section class="panel bloque cabecera-pedido" aria-labelledby="titulo-pedido">
       <div>
         <h2 id="titulo-pedido">Pedido #{{ pedido.folio }}</h2>
@@ -12,13 +12,13 @@
       <span class="etiqueta estado-actual">{{ pedido.estadoTexto }}</span>
     </section>
 
-    <!-- RF-12 · Excepción paso 7: «Esta solicitud fue dada de baja» con motivo y fecha. -->
+    <!-- RF-13 · Excepción paso 7: «Esta solicitud fue dada de baja» con motivo y fecha. -->
     @if (pedido.baja; as baja) {
       <div class="aviso error" role="status">
         <p><strong>Esta solicitud fue dada de baja.</strong> Motivo: {{ baja.motivo }}</p>
       </div>
     }
-    <!-- RF-12 · Excepción paso 7: «Pedido cancelado» con motivo, fecha y reembolso. -->
+    <!-- RF-13 · Excepción paso 7: «Pedido cancelado» con motivo, fecha y reembolso. -->
     @if (pedido.cancelacion; as cancelacion) {
       <div class="aviso error" role="status">
         <p><strong>Este pedido fue cancelado</strong> el {{ fechaHora(cancelacion.fecha) }}. Motivo: {{ cancelacion.motivo }}</p>
@@ -30,7 +30,7 @@
       </div>
     }
 
-    <!-- RF-12 · Paso 7: barra de avance de los 6 estados. -->
+    <!-- RF-13 · Paso 7: barra de avance de los 6 estados. -->
     <ol class="avance panel" aria-label="Avance del pedido">
       @for (paso of pedido.pasos; track paso.estado) {
         <li [class.hecho]="paso.completado" [class.actual]="paso.actual" [attr.aria-current]="marcaPaso(paso)">
@@ -44,7 +44,7 @@
     </ol>
 
     <div class="diseno-seguimiento">
-      <!-- RF-12 · Paso 6: productos, entrega, total y saldo. -->
+      <!-- RF-13 · Paso 6: productos, entrega, total y saldo. -->
       <section class="panel bloque" aria-labelledby="titulo-productos">
         <h2 id="titulo-productos">Productos</h2>
         <ul class="productos">
@@ -73,12 +73,12 @@
         @if (pedido.entrega.direccion; as direccion) {
           <p>{{ textoDireccion(direccion) }}</p>
         } @else {
-          <!-- Recoger en tienda: dirección de la tienda -->
+          <!-- RF-13 · Paso 6: recoger en la tienda, dirección de la tienda -->
           <app-ubicacion-tienda titulo="Recoge tu pedido en" />
         }
       </section>
 
-      <!-- RF-12 · Paso 6: pagos registrados y saldo pendiente. -->
+      <!-- RF-13 · Paso 6: pagos registrados y saldo pendiente. -->
       <section class="panel bloque" aria-labelledby="titulo-pagos">
         <h2 id="titulo-pagos">Pagos</h2>
         <dl class="cuentas">
@@ -130,11 +130,12 @@
           </ul>
         }
 
+        <!-- RF-14 · Paso 8: «Recibimos tu comprobante…». -->
         @if (mensajeComprobante() !== '') {
           <div class="aviso exito" role="status"><p>{{ mensajeComprobante() }}</p></div>
         }
 
-        <!-- RF-12: envío del comprobante de pago (solo si el pedido lo permite). -->
+        <!-- RF-14 · Paso 1: botón para enviar el comprobante de pago (solo si el pedido lo permite). -->
         @if (pedido.puedeEnviarComprobante) {
           @if (!formularioAbierto()) {
             <button type="button" class="btn btn-principal btn-bloque" (click)="abrirFormulario()">
@@ -143,6 +144,7 @@
             <p class="nota">Si pagas en efectivo, hazlo en nuestra tienda mencionando tu folio.</p>
             <app-ubicacion-tienda titulo="Paga en efectivo en" />
           } @else {
+            <!-- RF-14 · Paso 2: formulario del comprobante con el monto sugerido y los datos bancarios. -->
             <form class="comprobante" (submit)="alEnviarComprobante($event)" novalidate>
               <h3>Comprobante de pago</h3>
               @if (pedido.datosBancarios !== '') {
@@ -185,7 +187,7 @@
                 }
               </div>
 
-              <!-- RF-12: el cliente sube la foto/PDF desde sus archivos o pega un enlace (como antes). -->
+              <!-- RF-14 · Paso 3: el cliente sube la foto/PDF desde sus archivos o pega un enlace. -->
               <fieldset class="opciones-tarjeta en-linea">
                 <legend>¿Cómo nos envías tu comprobante?</legend>
                 <label class="opcion-tarjeta" [class.elegida]="modoComprobante() === 'archivo'">
@@ -277,6 +279,7 @@
                 </div>
               }
 
+              <!-- RF-14 · Excepciones pasos 5 y 6: motivo por el que no se registró el comprobante. -->
               @if (errorComprobante() !== '') {
                 <div class="aviso error" role="alert"><p>{{ errorComprobante() }}</p></div>
               }
@@ -294,6 +297,7 @@
             </form>
           }
         } @else if (pedido.motivoSinComprobante !== '') {
+          <!-- RF-14 · Excepción paso 1: el pedido no admite comprobantes; se explica el motivo. -->
           <p class="nota">{{ pedido.motivoSinComprobante }}</p>
         }
       </section>
@@ -311,10 +315,10 @@
     </div>
   } @else {
     <!-- ===================== Búsqueda ===================== -->
-    <!-- RF-12 · Pasos 2 y 3: formulario de búsqueda con folio y teléfono. -->
+    <!-- RF-13 · Pasos 2 y 3: formulario de búsqueda con folio y teléfono o correo. -->
     <form class="panel bloque busqueda" (submit)="alBuscar($event)" novalidate>
       <h2>Consulta tu pedido</h2>
-      <p class="ayuda-busqueda">Escribe el folio que recibiste al enviar tu pedido y el teléfono de WhatsApp que registraste.</p>
+      <p class="ayuda-busqueda">Escribe el folio que recibiste al enviar tu pedido y el teléfono de WhatsApp o el correo que registraste.</p>
 
       <div class="campo" [class.con-error]="errorFolio() !== ''">
         <label for="folio">Folio</label>
@@ -328,31 +332,32 @@
           [value]="folio()"
           (input)="cambiarFolio(campoFolio.value)"
         />
-        <!-- RF-12 · Excepción paso 4: formato de folio inválido. -->
+        <!-- RF-13 · Excepción paso 4: formato de folio inválido. -->
         @if (errorFolio() !== '') {
           <span class="mensaje-error">{{ errorFolio() }}</span>
         }
       </div>
 
-      <div class="campo" [class.con-error]="errorTelefono() !== ''">
-        <label for="telefonoConsulta">Teléfono (WhatsApp)</label>
+      <div class="campo" [class.con-error]="errorContacto() !== ''">
+        <label for="contactoConsulta">Teléfono (WhatsApp) o correo</label>
         <input
-          #campoTelefono
-          id="telefonoConsulta"
-          type="tel"
-          inputmode="numeric"
-          maxlength="10"
-          placeholder="10 dígitos"
-          [value]="telefono()"
-          (input)="cambiarTelefono(campoTelefono.value)"
+          #campoContacto
+          id="contactoConsulta"
+          type="text"
+          inputmode="email"
+          autocomplete="email"
+          maxlength="100"
+          placeholder="10 dígitos o nombre@correo.com"
+          [value]="contacto()"
+          (input)="cambiarContacto(campoContacto.value)"
         />
-        <!-- RF-12 · Excepción paso 4: formato de teléfono inválido. -->
-        @if (errorTelefono() !== '') {
-          <span class="mensaje-error">{{ errorTelefono() }}</span>
+        <!-- RF-13 · Excepción paso 4: formato de teléfono o correo inválido. -->
+        @if (errorContacto() !== '') {
+          <span class="mensaje-error">{{ errorContacto() }}</span>
         }
       </div>
 
-      <!-- RF-12 · Excepción paso 5: no encontrado, búsqueda bloqueada por intentos o sin conexión. -->
+      <!-- RF-13 · Excepción paso 5: no encontrado, búsqueda bloqueada por intentos o sin conexión. -->
       @if (errorBusqueda() !== '') {
         <div class="aviso error" role="alert"><p>{{ errorBusqueda() }}</p></div>
       }
@@ -368,7 +373,7 @@
     @if (buscando()) {
       <app-cargando texto="Buscando tu pedido..." />
     }
-    <!-- RF-12 · Excepción paso 3: el cliente no busca y regresa al inicio del portal. -->
+    <!-- RF-13 · Excepción paso 3: el cliente no busca y regresa al inicio del portal. -->
     <p class="nota"><a routerLink="/">Ir al catálogo</a></p>
   }
 </div>

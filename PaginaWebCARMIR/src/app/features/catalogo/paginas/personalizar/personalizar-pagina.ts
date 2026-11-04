@@ -10,7 +10,7 @@ import { ImagenPostre } from '../../../../shared/componentes/imagen-postre/image
 import { MensajeEstado } from '../../../../shared/componentes/mensaje-estado/mensaje-estado';
 import { GaleriaPlantillas } from '../../componentes/galeria-plantillas/galeria-plantillas';
 import { SelectorCaracteristica } from '../../componentes/selector-caracteristica/selector-caracteristica';
-import { DisenoPastel, disenoDesdeSeleccion, esGelatina } from '../../pastel3d/diseno-pastel';
+import { DisenoPastel, disenoDesdeSeleccion, esGelatina, lugarDelMensaje, mensajeVaEnTopper, tipoDePostre } from '../../pastel3d/diseno-pastel';
 import { VisorPastel3d } from '../../pastel3d/visor-pastel3d/visor-pastel3d';
 import {
   CaracteristicaPersonalizable,
@@ -23,9 +23,10 @@ import {
 import { CatalogoApiService } from '../../servicios/catalogo-api.service';
 import {
   CANTIDAD_MAXIMA,
-  LARGO_COMENTARIO,
   LARGO_DEDICATORIA,
   buscarOpcion,
+  comentarioConTopper,
+  largoComentarioPermitido,
   calcularPrecio,
   puntosTotales,
   redondear,
@@ -49,7 +50,7 @@ const MENSAJE_PRODUCTO_NO_DISPONIBLE = 'Este producto ya no está disponible';
  *  2. Con cada cambio se recalcula el precio y los puntos disponibles (en el navegador).
  *  3. «Agregar al carrito» valida aquí, luego la API valida otra vez y confirma el precio vigente.
  *
- * Módulo 2 (RF-7): con ?editar=<id del renglón> la página abre un postre que ya está en el carrito
+ * Módulo 2 (RF-8): con ?editar=<id del renglón> la página abre un postre que ya está en el carrito
  * con sus opciones, cantidad y mensaje; el botón cambia a «Guardar cambios» y reemplaza ese renglón.
  */
 @Component({
@@ -69,7 +70,6 @@ export default class PersonalizarPagina implements OnInit {
   // Límites para la vista
   protected readonly cantidadMaxima = CANTIDAD_MAXIMA;
   protected readonly largoDedicatoria = LARGO_DEDICATORIA;
-  protected readonly largoComentario = LARGO_COMENTARIO;
 
   // Datos de la API
   protected readonly datos = signal<DatosPersonalizacion | null>(null);
@@ -80,6 +80,8 @@ export default class PersonalizarPagina implements OnInit {
   protected readonly seleccion = signal<OpcionElegida[]>([]);
   protected readonly cantidad = signal(1);
   protected readonly dedicatoria = signal('');
+  // RF-3 · Paso 3: casilla «Ponerlo en un topper» (solo cuenta en los postres que dejan elegir)
+  protected readonly mensajeEnTopper = signal(false);
   protected readonly comentario = signal('');
 
   // Errores y resultado
@@ -104,10 +106,11 @@ export default class PersonalizarPagina implements OnInit {
   // Producto con el que se entró (para «Regresar» a su ficha)
   private idProductoOriginal = 0;
 
-  // RF-7: renglón del carrito que se está editando (null = postre nuevo)
+  // RF-8: renglón del carrito que se está editando (null = postre nuevo)
   protected readonly editando = signal<ArticuloCarrito | null>(null);
 
-  // RF-3 · Paso 4: diseño del pastel 3D. computed() solo lo recalcula cuando cambia la selección o el mensaje.
+  // RF-3 · Paso 4 / RF-5 · Pasos 5 y 6: diseño del postre 3D. computed() solo lo recalcula cuando cambia la
+  // selección o el mensaje.
   protected readonly diseno3d = computed(this.calcularDiseno3d.bind(this));
 
   // RF-3 (Registro de pedido personalizado): inicia aquí. Paso 1: el cliente presionó «Personalizar pedido» en la ficha.
@@ -122,8 +125,8 @@ export default class PersonalizarPagina implements OnInit {
     this.cargar();
   }
 
-  // RF-7 · Pasos 1 y 2: el cliente pidió modificar un postre del carrito; se busca el renglón.
-  // RF-7: si la dirección trae ?editar=id y ese postre sigue en el carrito, se edita
+  // RF-8 · Pasos 1 y 2: el cliente pidió modificar un postre del carrito; se busca el renglón.
+  // RF-8: si la dirección trae ?editar=id y ese postre sigue en el carrito, se edita
   private buscarRenglonEditado(): void {
     this.editando.set(null);
     const id = this.ruta.snapshot.queryParamMap.get('editar');
@@ -131,7 +134,7 @@ export default class PersonalizarPagina implements OnInit {
       return;
     }
     const articulo = this.carrito.buscar(id);
-    // RF-7 · Excepción paso 2: el producto ya no está en el carrito.
+    // RF-8 · Excepción paso 2: el producto ya no está en el carrito.
     if (articulo === null || articulo.idPostre !== this.idProductoOriginal) {
       this.mostrarResultado('aviso', 'Este producto ya no está en tu carrito. Puedes agregarlo como nuevo.');
       return;
@@ -176,7 +179,7 @@ export default class PersonalizarPagina implements OnInit {
   }
 
   // Pone en la pantalla lo que el postre del carrito ya tenía (solo opciones que siguen existiendo)
-  // RF-7 · Paso 3: muestra el formulario con la configuración actual del postre.
+  // RF-8 · Paso 3: muestra el formulario con la configuración actual del postre.
   private precargarRenglonEditado(): void {
     const articulo = this.editando();
     if (articulo === null) {
@@ -194,9 +197,10 @@ export default class PersonalizarPagina implements OnInit {
     this.seleccion.set(seleccion);
     this.cantidad.set(articulo.cantidad);
     this.dedicatoria.set(articulo.dedicatoria);
+    this.mensajeEnTopper.set(articulo.mensajeEnTopper === true);
     this.comentario.set(articulo.comentario);
     // Si algo ya no existe se marcan de una vez los errores para que el cliente lo corrija
-    // RF-7 · Excepción paso 6: opciones que ya no están disponibles; se marcan para que el cliente las cambie.
+    // RF-8 · Excepción paso 6: opciones que ya no están disponibles; se marcan para que el cliente las cambie.
     if (faltan) {
       this.intentoAgregar = true;
       this.validarConfiguracionActual();
@@ -228,7 +232,37 @@ export default class PersonalizarPagina implements OnInit {
     return esGelatina(datos.producto.nombreCategoria, datos.producto.nombre);
   }
 
-  // RF-3 · Paso 4: el modelo 3D refleja lo elegido (no cambia el precio ni las reglas).
+  // Dónde puede ir el mensaje de este postre: 'elegir' (casilla) o 'topper' (gelatinas y postres chicos)
+  lugarMensaje(): 'elegir' | 'topper' {
+    return lugarDelMensaje(this.tipoPostre());
+  }
+
+  // ¿El mensaje de este postre va en un topper? (lo elegido en la casilla o lo único que admite el postre)
+  mensajeVaEnTopper(): boolean {
+    return mensajeVaEnTopper(this.tipoPostre(), this.mensajeEnTopper());
+  }
+
+  private tipoPostre() {
+    const datos = this.datos();
+    if (datos === null) {
+      return tipoDePostre('', '');
+    }
+    return tipoDePostre(datos.producto.nombreCategoria, datos.producto.nombre);
+  }
+
+  // Lo que le queda al cliente para las indicaciones (el aviso del topper también ocupa lugar)
+  largoComentario(): number {
+    return largoComentarioPermitido(this.dedicatoria(), this.mensajeVaEnTopper());
+  }
+
+  // RF-5 · Paso 5: el cliente marca o desmarca «Ponerlo en un topper»; el 3D se vuelve a armar.
+  cambiarMensajeEnTopper(marcada: boolean): void {
+    this.mensajeEnTopper.set(marcada);
+    // El largo permitido de las indicaciones cambia con la casilla
+    this.errorComentario.set(validarTexto(this.comentario(), 'El comentario', this.largoComentario()));
+  }
+
+  // RF-3 · Paso 4 / RF-5 · Pasos 2 y 3: el modelo 3D refleja lo elegido (no cambia el precio ni las reglas).
   private calcularDiseno3d(): DisenoPastel {
     const datos = this.datos();
     let categoria = '';
@@ -237,7 +271,7 @@ export default class PersonalizarPagina implements OnInit {
       categoria = datos.producto.nombreCategoria;
       nombre = datos.producto.nombre;
     }
-    return disenoDesdeSeleccion(this.caracteristicas(), this.seleccion(), categoria, nombre, this.dedicatoria());
+    return disenoDesdeSeleccion(this.caracteristicas(), this.seleccion(), categoria, nombre, this.dedicatoria(), this.mensajeEnTopper());
   }
 
   // RF-3 · Paso 4: el precio se recalcula con cada cambio de la selección.
@@ -349,7 +383,7 @@ export default class PersonalizarPagina implements OnInit {
 
   cambiarComentario(texto: string): void {
     this.comentario.set(texto);
-    this.errorComentario.set(validarTexto(texto, 'El comentario', LARGO_COMENTARIO));
+    this.errorComentario.set(validarTexto(texto, 'El comentario', this.largoComentario()));
   }
 
   private limpiarResultado(): void {
@@ -377,7 +411,7 @@ export default class PersonalizarPagina implements OnInit {
     // RF-3 · Excepción paso 6: cantidad fuera de rango o dedicatoria inválida; se marca el campo y se conserva lo demás.
     this.errorCantidad.set(validarCantidad(this.cantidad()));
     this.errorDedicatoria.set(validarTexto(this.dedicatoria(), 'La dedicatoria', LARGO_DEDICATORIA));
-    this.errorComentario.set(validarTexto(this.comentario(), 'El comentario', LARGO_COMENTARIO));
+    this.errorComentario.set(validarTexto(this.comentario(), 'El comentario', this.largoComentario()));
     return (
       configuracionValida &&
       this.errorCantidad() === '' &&
@@ -394,7 +428,7 @@ export default class PersonalizarPagina implements OnInit {
     this.agregarAlCarrito();
   }
 
-  // RF-3 · Paso 5: el cliente eligió «Agregar al carrito» (también RF-6 y RF-7 al guardar cambios).
+  // RF-3 · Paso 5: el cliente eligió «Agregar al carrito» (también RF-7 y RF-8 al guardar cambios).
   async agregarAlCarrito(): Promise<void> {
     const datos = this.datos();
     if (datos === null || this.enviando()) {
@@ -419,7 +453,7 @@ export default class PersonalizarPagina implements OnInit {
         opciones: this.seleccion(),
         cantidad: this.cantidad(),
         dedicatoria: this.dedicatoria().trim(),
-        comentario: this.comentario().trim(),
+        comentario: comentarioConTopper(this.comentario(), this.dedicatoria(), this.mensajeVaEnTopper()),
         precioMostrado: this.precioUnitario(),
       });
       await this.revisarCotizacion(cotizacion);
@@ -474,7 +508,7 @@ export default class PersonalizarPagina implements OnInit {
       return;
     }
 
-    // RF-3 · Paso 8: registra la configuración con su precio y la agrega al carrito (sigue RF-6).
+    // RF-3 · Paso 8: registra la configuración con su precio y la agrega al carrito (sigue RF-7).
     // Paso 8: todo bien, se agrega al carrito
     const datos = this.datos();
     if (datos === null) {
@@ -487,15 +521,16 @@ export default class PersonalizarPagina implements OnInit {
       opciones: this.opcionesParaCarrito(),
       cantidad: this.cantidad(),
       dedicatoria: this.dedicatoria().trim(),
+      mensajeEnTopper: this.mensajeVaEnTopper(),
       comentario: this.comentario().trim(),
       precioUnitario: cotizacion.precioUnitario,
     };
 
-    // RF-7 · Pasos 7 y 8: guarda el postre editado y regresa al carrito con el aviso de éxito.
-    // RF-7: se reemplaza el renglón que se estaba editando y se regresa al carrito
+    // RF-8 · Pasos 7 y 8: guarda el postre editado y regresa al carrito con el aviso de éxito.
+    // RF-8: se reemplaza el renglón que se estaba editando y se regresa al carrito
     const editado = this.editando();
     if (editado !== null) {
-      // RF-7 · Excepción paso 2: el postre ya no estaba en el carrito; se agrega como nuevo.
+      // RF-8 · Excepción paso 2: el postre ya no estaba en el carrito; se agrega como nuevo.
       if (this.carrito.reemplazar(editado.id, nuevo)) {
         this.avisos.dejarAviso('Actualizamos tu postre «' + nuevo.nombre + '».');
       } else {
@@ -506,13 +541,13 @@ export default class PersonalizarPagina implements OnInit {
       return;
     }
 
-    // RF-6 · Pasos 3 a 7: agrega al carrito (carrito.service.ts) y muestra «Ver carrito» y «Seguir comprando».
+    // RF-7 · Pasos 3 a 7: agrega al carrito (carrito.service.ts) y muestra «Ver carrito» y «Seguir comprando».
     const resultado = this.carrito.agregar(nuevo);
     let mensaje = '¡Listo! Agregamos tu postre al carrito.';
     if (resultado.juntado) {
       mensaje = '¡Listo! Ya tenías este mismo postre en tu carrito: sumamos las piezas.';
     }
-    // RF-6 · Excepción paso 5: la cantidad excedía el máximo por producto y se ajustó.
+    // RF-7 · Excepción paso 5: la cantidad excedía el máximo por producto y se ajustó.
     if (resultado.cantidadAjustada) {
       mensaje = mensaje + ' Solo se permiten ' + CANTIDAD_MAXIMA + ' piezas por producto, así que ajustamos la cantidad.';
     }
@@ -580,7 +615,8 @@ export default class PersonalizarPagina implements OnInit {
     this.mensajeDentroGaleria.set('');
     this.cargandoGaleria.set(true);
     try {
-      // RF-4 · Paso 2: valida que el producto siga activo y consulta sus plantillas activas.
+      // RF-4 · Paso 2: valida que el producto siga activo y consulta los demás productos base visibles de su
+      // categoría (plantillas).
       const todas = await this.api.listarPlantillas(datos.producto.idPostre);
       // Se quita la plantilla que ya está aplicada
       const otras: Plantilla[] = [];
@@ -594,7 +630,7 @@ export default class PersonalizarPagina implements OnInit {
         this.mensajeGaleria.set('Este producto no cuenta con plantillas de diseño');
         return;
       }
-      // RF-4 · Paso 4: muestra la galería con la vista previa y el precio de cada plantilla.
+      // RF-4 · Paso 4: muestra la galería con la foto, lo que incluye y el precio de cada plantilla.
       this.plantillas.set(otras);
       this.galeriaAbierta.set(true);
     } catch (error) {
@@ -621,11 +657,12 @@ export default class PersonalizarPagina implements OnInit {
     this.aplicandoPlantilla.set(true);
     this.mensajeDentroGaleria.set('');
     try {
-      // RF-4 · Paso 6: valida en la BD que la plantilla siga activa.
+      // RF-4 · Paso 6: valida en la BD que la plantilla siga activa y visible en la tienda.
       const datos = await this.api.obtenerPersonalizacion(plantilla.idPostre);
-      // RF-4 · Paso 7: precarga los valores de diseño de la plantilla y recalcula el precio.
+      // RF-4 · Paso 7: precarga en el formulario las opciones de la plantilla y recalcula el precio.
       this.usarDatos(datos);
-      // RF-4 · Paso 8: cierra la galería y muestra el formulario con la plantilla aplicada.
+      // RF-4 · Paso 8: cierra la galería y muestra el formulario con «Aplicamos la plantilla [nombre]. Puedes
+      // cambiar sus opciones.»
       this.galeriaAbierta.set(false);
       this.mostrarResultado('aviso', 'Aplicamos la plantilla «' + datos.producto.nombre + '». Puedes cambiar sus opciones.');
       // La dirección cambia para que al recargar se vea la misma plantilla (sin volver a cargar la página)
@@ -641,6 +678,7 @@ export default class PersonalizarPagina implements OnInit {
         this.mensajeDentroGaleria.set('La plantilla seleccionada ya no está disponible');
         this.quitarPlantilla(plantilla.idPostre);
       } else {
+        // RF-4 · Excepción paso 6: sin conexión, «No fue posible cargar las plantillas» dentro de la galería.
         this.mensajeDentroGaleria.set('No fue posible cargar las plantillas');
       }
     } finally {

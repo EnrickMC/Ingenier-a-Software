@@ -1,6 +1,8 @@
 import { CaracteristicaPersonalizable, Exclusion, OpcionPersonalizable } from '../modelos/catalogo.models';
 import {
   calcularPrecio,
+  comentarioConTopper,
+  largoComentarioPermitido,
   motivoExclusion,
   puntosTotales,
   validarCantidad,
@@ -79,5 +81,14 @@ describe('reglas de configuración', function () {
     expect(validarCantidad(0)).not.toBe('');
     expect(validarCantidad(21)).not.toBe('');
     expect(validarCantidad(3)).toBe('');
+  });
+
+  it('si el mensaje va en un topper se avisa en las indicaciones', function () {
+    expect(comentarioConTopper(' Sin nuez ', 'Hola', true)).toBe('Mensaje en topper. Sin nuez');
+    expect(comentarioConTopper('', 'Hola', true)).toBe('Mensaje en topper.');
+    expect(comentarioConTopper('Sin nuez', '', true)).toBe('Sin nuez');
+    expect(comentarioConTopper('Sin nuez', 'Hola', false)).toBe('Sin nuez');
+    expect(largoComentarioPermitido('Hola', true)).toBe(255 - 19);
+    expect(largoComentarioPermitido('Hola', false)).toBe(255);
   });
 });

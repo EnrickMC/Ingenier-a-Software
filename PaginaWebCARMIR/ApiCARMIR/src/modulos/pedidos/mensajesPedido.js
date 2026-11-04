@@ -1,5 +1,5 @@
 /*
- * Textos del Portal de Pedidos: instrucciones de pago (RF-10) y aviso de registro (RF-32).
+ * Textos del Portal de Pedidos: instrucciones de pago (RF-11) y aviso de registro (RF-47).
  * El aviso se guarda en la tabla Notificacion como "Pendiente" y lo envía el Panel
  * por WhatsApp y correo (el Panel es quien tiene las credenciales de esos servicios).
  */
@@ -36,10 +36,6 @@ function textoModalidadEntrega(valor) {
 }
 
 function textoMetodo(valor) {
-  // «Depósito» ya no se ofrece en la página; se conserva el texto por si un pedido viejo lo tiene
-  if (valor === 'Deposito') {
-    return 'Depósito bancario';
-  }
   if (valor === 'Transferencia') {
     return 'Transferencia bancaria';
   }
@@ -63,7 +59,7 @@ function montoParaIniciar(modalidadPago, total, anticipo) {
 }
 
 /*
- * Instrucciones de pago (RF-10 paso 6). Regresa { titulo, pasos[], datosBancarios }.
+ * Instrucciones de pago (RF-11 paso 6). Regresa { titulo, pasos[], datosBancarios }.
  * datosBancarios solo se manda cuando el cliente eligió transferencia.
  */
 function instruccionesPago(reglas, metodo, modalidadPago, total, anticipo) {

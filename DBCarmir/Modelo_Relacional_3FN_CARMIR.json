@@ -464,7 +464,7 @@
         },
         {
           "nombre": "MetodoPago",
-          "tipo": "ENUM('Transferencia','Deposito','Efectivo')",
+          "tipo": "ENUM('Transferencia','Efectivo')",
           "longitud": null,
           "nulo": false,
           "pk": false,

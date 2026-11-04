@@ -4,11 +4,11 @@
    ===================================================================== */
 
 /* ---------- Renglones de color en las tablas ---------- */
-/* Durazno: existencia baja (RF-33, RF-39) */
+/* Durazno: existencia baja (RF-51, RF-61) */
 .tabla-carmir .table-row-cell.fila-bajo-minimo { -fx-background-color: -carmir-durazno-fondo; }
 /* Rojo claro: agotado o caducado */
 .tabla-carmir .table-row-cell.fila-critica { -fx-background-color: -carmir-rojo-fondo; }
-/* Ámbar: próximo a caducar (RF-40) */
+/* Ámbar: próximo a caducar (RF-62) */
 .tabla-carmir .table-row-cell.fila-proxima { -fx-background-color: -carmir-ambar-fondo; }
 /* Gris: dado de baja o alerta atendida */
 .tabla-carmir .table-row-cell.fila-inactiva { -fx-background-color: -carmir-gris-fondo; }

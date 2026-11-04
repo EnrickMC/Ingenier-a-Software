@@ -4,7 +4,9 @@ import {
   textoTamano,
   tipoDeArchivo,
   validarArchivoComprobante,
+  contactoConsulta,
   validarCodigoPostal,
+  validarContactoConsulta,
   validarCorreo,
   validarEnlace,
   validarFolio,
@@ -22,6 +24,16 @@ describe('validaciones del Portal de Pedidos', function () {
     expect(validarTelefono('442 123 4567')).not.toBe('');
     expect(validarCorreo('')).toBe('');
     expect(validarCorreo('ana@correo')).not.toBe('');
+  });
+
+  it('consulta con teléfono o correo', function () {
+    expect(contactoConsulta('442 123-4567')).toEqual({ telefono: '4421234567', correo: '' });
+    expect(contactoConsulta(' ana@correo.com ')).toEqual({ telefono: '', correo: 'ana@correo.com' });
+    expect(validarContactoConsulta('4421234567')).toBe('');
+    expect(validarContactoConsulta('ana@correo.com')).toBe('');
+    expect(validarContactoConsulta('')).not.toBe('');
+    expect(validarContactoConsulta('12345')).not.toBe('');
+    expect(validarContactoConsulta('ana@correo')).not.toBe('');
   });
 
   it('dirección y textos libres', function () {

@@ -2,7 +2,7 @@ package com.pac.modulos.inventario.model;
 
 /**
  * Una opción elegida en un postre de un pedido (DetallePedido + PostreOpcion),
- * con los datos que necesita el descuento automático de insumos (RF-45).
+ * con los datos que necesita el descuento automático de insumos (RF-63).
  */
 public class OpcionPedido {
 

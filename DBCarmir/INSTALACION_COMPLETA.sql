@@ -155,7 +155,7 @@ CREATE TABLE Pago (
   IdUsuario INT NULL COMMENT 'Usuario que validó o rechazó el pago (relación Valida)',
   MontoPago DECIMAL(10,2) NOT NULL COMMENT 'Cantidad pagada',
   FechaPago DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha y hora del pago',
-  MetodoPago ENUM('Transferencia','Deposito','Efectivo') NOT NULL COMMENT 'Forma de pago',
+  MetodoPago ENUM('Transferencia','Efectivo') NOT NULL COMMENT 'Forma de pago',
   Referencia VARCHAR(50) NULL COMMENT 'Número de referencia o folio bancario',
   LinkComprobante VARCHAR(255) NULL COMMENT 'Enlace a la imagen del comprobante',
   EstadoValidacion ENUM('Pendiente','Validado','Rechazado') NOT NULL DEFAULT 'Pendiente' COMMENT 'Resultado de la revisión',
@@ -471,6 +471,7 @@ DELIMITER ;
 --   Parte 5 = NUEVO: cuentas de WhatsApp y correo de las notificaciones (tabla ConfiguracionNotificacion)
 --   Parte 6 = NUEVO: casilla «Sus opciones pueden tener receta» en las características (Caracteristica.PermiteReceta)
 --   Parte 7 = NUEVO: foto o PDF del comprobante que sube el cliente desde la página web (tabla ComprobanteArchivo)
+--   Parte 8 = NUEVO: se quita el método de pago «Depósito» (los pagos viejos pasan a «Transferencia»)
 --
 -- CÓMO USARLO
 --   1. Ten tu base creada con DBCarmir/CARMIR_BaseDeDatos.sql (con o sin datos).
@@ -569,7 +570,7 @@ ALTER TABLE MovimientoInventario
   MODIFY IdUsuario INT NULL COMMENT 'Usuario que lo registró (relación Captura); vacío = Administradora o el sistema';
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 2.2 El costo de una receta solo cuenta las recetas activas (RF-44)
+-- 2.2 El costo de una receta solo cuenta las recetas activas (RF-58)
 CREATE OR REPLACE VIEW vw_CostoReceta AS
 SELECT r.IdReceta, r.IdOpcion, r.NombreReceta,
        COALESCE(SUM(ri.CantidadInsumo * i.CostoUnitario), 0) AS CostoReceta
@@ -590,7 +591,7 @@ ALTER TABLE HistorialEstado
   MODIFY IdUsuario INT NULL COMMENT 'Usuario que hizo el cambio (relación Realiza); vacío = Administradora, cliente (web) o el sistema';
 SET FOREIGN_KEY_CHECKS = 1;
 
--- 3.2 Quién canceló el pedido (RF-25)
+-- 3.2 Quién canceló el pedido (RF-39)
 CALL carmir_agregar_columna('Cancelacion', 'IdUsuario',
   'INT NULL COMMENT ''Usuario que canceló; vacío = Administradora o el cliente'' AFTER Folio');
 CALL carmir_agregar_llave_foranea('Cancelacion', 'fk_cancelacion_idusuario',
@@ -620,7 +621,7 @@ CREATE TABLE IF NOT EXISTS ModificacionPedido (
   CONSTRAINT fk_modificacionpedido_idusuario FOREIGN KEY (IdUsuario) REFERENCES Usuario (IdUsuario) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB COMMENT='Qué cambió en cada modificación de un pedido, cuándo y quién lo hizo.';
 
--- 3.5 Notificaciones pendientes de reenvío (RF-32) y motivo del fallo
+-- 3.5 Notificaciones pendientes de reenvío (RF-47) y motivo del fallo
 ALTER TABLE Notificacion
   MODIFY ResultadoEnvio ENUM('Enviado','Fallido','Pendiente') NOT NULL COMMENT 'Si el mensaje se entregó; Pendiente = se reintentará';
 CALL carmir_agregar_columna('Notificacion', 'MotivoFallo',
@@ -652,7 +653,7 @@ CREATE TABLE IF NOT EXISTS CambioConfiguracion (
   CONSTRAINT fk_cambioconfiguracion_idusuario FOREIGN KEY (IdUsuario) REFERENCES Usuario (IdUsuario) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB COMMENT='Historial de cambios de la configuración y de la cobertura de envío.';
 
--- 4.3 Códigos postales a los que se hace envío a domicilio (RF-9) y su costo
+-- 4.3 Códigos postales a los que se hace envío a domicilio (RF-10) y su costo
 CREATE TABLE IF NOT EXISTS CodigoPostalCobertura (
   CodigoPostal CHAR(5) NOT NULL COMMENT 'Código postal con servicio a domicilio',
   CostoEnvio DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Lo que se cobra por enviar a ese código postal',
@@ -684,7 +685,7 @@ CALL carmir_agregar_indice('MovimientoInventario', 'idx_movimiento_tipo_fecha', 
 
 
 -- =====================================================================
--- PARTE 5 · NUEVO · Cuentas de WhatsApp y correo de las notificaciones (RF-32)
+-- PARTE 5 · NUEVO · Cuentas de WhatsApp y correo de las notificaciones (RF-47)
 -- =====================================================================
 -- 5.1 Datos de WhatsApp Business Cloud API y del correo SMTP que se escriben en el Panel
 --     (Configuración → Respaldos y sistema → Notificaciones al cliente).
@@ -698,7 +699,7 @@ CREATE TABLE IF NOT EXISTS ConfiguracionNotificacion (
   EsSecreto TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = token o contraseña (cifrado, nunca se muestra)',
   FechaModificacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Último cambio',
   CONSTRAINT pk_configuracionnotificacion PRIMARY KEY (Clave)
-) ENGINE=InnoDB COMMENT='Cuentas de WhatsApp y correo para avisar a los clientes (RF-32).';
+) ENGINE=InnoDB COMMENT='Cuentas de WhatsApp y correo para avisar a los clientes (RF-47).';
 
 
 -- =====================================================================
@@ -713,7 +714,7 @@ CALL carmir_agregar_columna('Caracteristica', 'PermiteReceta',
 
 
 -- =====================================================================
--- PARTE 7 · NUEVO · Comprobantes de pago subidos desde la página web (RF-12 y RF-28)
+-- PARTE 7 · NUEVO · Comprobantes de pago subidos desde la página web (RF-13 y RF-42)
 -- =====================================================================
 -- 7.1 El cliente ya puede subir la foto (JPG, PNG o WEBP) o el PDF de su comprobante desde sus archivos,
 --     además de pegar un enlace (Pago.LinkComprobante). El archivo se guarda aquí, uno por pago,
@@ -750,6 +751,19 @@ SET @carmir_sql = IF(@carmir_hay_usuario_web > 0,
 PREPARE carmir_sentencia FROM @carmir_sql;
 EXECUTE carmir_sentencia;
 DEALLOCATE PREPARE carmir_sentencia;
+
+
+-- =====================================================================
+-- PARTE 8 · NUEVO · Se quita el método de pago «Depósito» (RF-11 y RF-42)
+-- =====================================================================
+-- 8.1 La página web y el Panel solo ofrecen «Transferencia» y «Efectivo».
+--     Los pagos que se hayan guardado como «Deposito» pasan a «Transferencia»
+--     (los dos son pagos al banco con número de referencia) y después se quita
+--     «Deposito» de la lista de valores. Si ya se aplicó, no cambia nada.
+--     (IdPago > 0 es para que MySQL Workbench lo acepte con el modo de actualización segura)
+UPDATE Pago SET MetodoPago = 'Transferencia' WHERE IdPago > 0 AND MetodoPago = 'Deposito';
+ALTER TABLE Pago
+  MODIFY MetodoPago ENUM('Transferencia','Efectivo') NOT NULL COMMENT 'Forma de pago';
 
 
 -- ---------------------------------------------------------------------

@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * Ventana para cancelar un pedido (RF-25) o dar de baja una solicitud (solo la Administradora).
+ * Ventana para cancelar un pedido (RF-39) o dar de baja una solicitud (solo la Administradora).
  * Pide el motivo (con descripción obligatoria si es "Otro") y, al cancelar con pagos validados,
  * el monto y el estado del reembolso.
  */
@@ -44,7 +44,7 @@ public class FormularioMotivoController {
     private boolean esCancelacion;
     private ResultadoPedido resultado;
 
-    // RF-25 · Paso 3: pide el motivo e informa si el pedido tiene pagos validados.
+    // RF-39 · Paso 3: pide el motivo e informa si el pedido tiene pagos validados.
     public void prepararCancelacion(Pedido pedido) {
         this.pedido = pedido;
         esCancelacion = true;
@@ -69,7 +69,7 @@ public class FormularioMotivoController {
         ApoyoVista.mostrarNodo(lblMensaje, false);
     }
 
-    // RF «Eliminación de pedidos» · Paso 4: solicita el motivo de la baja.
+    // RF-35 · Paso 4: solicita el motivo de la baja.
     public void prepararBaja(Pedido pedido) {
         this.pedido = pedido;
         esCancelacion = false;
@@ -109,7 +109,7 @@ public class FormularioMotivoController {
     }
 
     @FXML
-    // RF-25 paso 4 / RF «Eliminación de pedidos» paso 5: la administradora confirma.
+    // RF-39 paso 4 / RF-35 (Eliminación de pedidos) paso 5: la administradora confirma.
     private void onConfirmar() {
         quitarMarcas();
         double reembolso = 0;
@@ -125,7 +125,7 @@ public class FormularioMotivoController {
         boolean faltaMotivo = motivo == null;
         boolean faltaDetalle = PedidoService.MOTIVO_OTRO.equals(motivo) && txtDetalle.getText().isBlank();
         if (faltaMotivo || faltaDetalle) {
-            // RF-25 · Excepción paso 5 / RF «Eliminación de pedidos» · Excepción paso 6: falta el motivo.
+            // RF-39 · Excepción paso 5 / RF-35 · Excepción paso 6: falta el motivo.
             String mensaje = PedidoService.MSG_INDICA_MOTIVO_BAJA;
             if (esCancelacion) {
                 mensaje = PedidoService.MSG_INDICA_MOTIVO_CANCELACION;
@@ -168,7 +168,7 @@ public class FormularioMotivoController {
     }
 
     @FXML
-    // RF-25 · Excepción paso 4 / RF «Eliminación de pedidos» · Excepción paso 5: «No cancelar» o «No dar de baja».
+    // RF-39 · Excepción paso 4 / RF-35 · Excepción paso 5: «No cancelar» o «No dar de baja».
     private void onNo() {
         cerrar();
     }

@@ -14,7 +14,7 @@ const comprobanteArchivo = require('./comprobanteArchivo');
 const ARTICULOS_MAXIMOS = 20;
 const MODALIDADES_ENTREGA = ['Recoger en tienda', 'Envio a domicilio'];
 const MODALIDADES_PAGO = ['Anticipo', 'Pago total'];
-// Ya no se ofrece «Depósito» en la página: solo efectivo en la tienda o transferencia
+// Solo efectivo en la tienda o transferencia
 const METODOS_PAGO = ['Efectivo', 'Transferencia'];
 const PATRON_TELEFONO = /^[0-9]{10}$/;
 const PATRON_CORREO = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
@@ -53,21 +53,21 @@ function textoOpcional(valor, campo, etiqueta, largoMaximo) {
 
 // ===================== Datos del cliente =====================
 
-// RF-9 · Paso 5 (API): valida campos obligatorios y formato de los datos de contacto.
+// RF-10 · Paso 5 (API): valida campos obligatorios y formato de los datos de contacto.
 function leerCliente(datos) {
   if (!esObjeto(datos)) {
     throw validacion.datoInvalido('Faltan los datos de contacto');
   }
   const nombre = textoObligatorio(datos.nombre, 'nombre', 'tu nombre completo', 100);
   if (nombre.length < 3 || !PATRON_NOMBRE.test(nombre)) {
-    // RF-9 · Excepción paso 5: nombre inválido.
+    // RF-10 · Excepción paso 5: nombre inválido.
     throw errorDeCampo('nombre', 'Escribe tu nombre completo (solo letras y espacios)');
   }
   const telefono = leerTelefono(datos.telefono);
   let correo = '';
   if (datos.correo !== undefined && datos.correo !== null && datos.correo !== '') {
     if (typeof datos.correo !== 'string') {
-      // RF-9 · Excepción paso 5: correo inválido.
+      // RF-10 · Excepción paso 5: correo inválido.
       throw errorDeCampo('correo', 'Escribe un correo válido, por ejemplo nombre@correo.com');
     }
     correo = datos.correo.trim();
@@ -81,7 +81,7 @@ function leerCliente(datos) {
 
 function leerTelefono(valor) {
   if (typeof valor !== 'string' || !PATRON_TELEFONO.test(valor.trim())) {
-    // RF-9 · Excepción paso 5: teléfono inválido.
+    // RF-10 · Excepción paso 5: teléfono inválido.
     throw errorDeCampo('telefono', 'El teléfono de WhatsApp debe tener 10 dígitos, sin espacios ni guiones');
   }
   return valor.trim();
@@ -89,7 +89,7 @@ function leerTelefono(valor) {
 
 // ===================== Entrega =====================
 
-// RF-9 · Pasos 5 y 6 (API): método de entrega, fecha y horario.
+// RF-10 · Pasos 5 y 6 (API): método de entrega, fecha y horario.
 function leerEntrega(datos) {
   if (!esObjeto(datos)) {
     throw validacion.datoInvalido('Faltan los datos de entrega');
@@ -111,7 +111,7 @@ function leerEntrega(datos) {
 }
 
 // Mismos largos que la tabla Direccion
-// RF-9 · Paso 5 (API): dirección de envío a domicilio.
+// RF-10 · Paso 5 (API): dirección de envío a domicilio.
 function leerDireccion(datos) {
   if (!esObjeto(datos)) {
     throw errorDeCampo('calle', 'Indica la dirección de entrega');
@@ -129,7 +129,7 @@ function leerDireccion(datos) {
 
 function leerCodigoPostal(valor) {
   if (typeof valor !== 'string' || !/^[0-9]{5}$/.test(valor.trim())) {
-    // RF-9 · Excepción paso 5: código postal inválido.
+    // RF-10 · Excepción paso 5: código postal inválido.
     throw errorDeCampo('codigoPostal', 'El código postal debe tener 5 dígitos');
   }
   return valor.trim();
@@ -137,10 +137,10 @@ function leerCodigoPostal(valor) {
 
 // ===================== Pago =====================
 
-// RF-10 · Paso 5 (API): valida que se haya seleccionado una modalidad y un método disponibles.
+// RF-11 · Paso 5 (API): valida que se haya seleccionado una modalidad y un método disponibles.
 function leerPago(datos) {
   if (!esObjeto(datos)) {
-    // RF-10 · Excepción paso 5: «Selecciona un método de pago».
+    // RF-11 · Excepción paso 5: «Selecciona un método de pago».
     throw errorDeCampo('metodo', 'Selecciona un método de pago');
   }
   if (METODOS_PAGO.indexOf(datos.metodo) < 0) {
@@ -159,10 +159,10 @@ function leerPago(datos) {
  * (leerDatosCotizacion): producto, opciones, cantidad (1 a 20), dedicatoria y comentario.
  * precioMostrado = precio por pieza que vio el cliente (solo para avisar si cambió).
  */
-// RF-5 / RF-11 · Paso 2 (API): revisa los productos del carrito.
+// RF-6 / RF-12 · Paso 2 (API): revisa los productos del carrito.
 function leerArticulos(lista) {
   if (!Array.isArray(lista) || lista.length === 0) {
-    // RF-5 / RF-9 / RF-10 / RF-11 · Excepción paso 2: «Tu carrito está vacío».
+    // RF-6 / RF-10 / RF-11 / RF-12 · Excepción paso 2: «Tu carrito está vacío».
     throw new ErrorApi(400, 'CARRITO_VACIO', 'Tu carrito está vacío');
   }
   if (lista.length > ARTICULOS_MAXIMOS) {
@@ -200,7 +200,7 @@ function leerMonto(valor) {
 
 // ===================== Pedido completo =====================
 
-// RF-11 · Paso 2 (API): la solicitud debe traer carrito, datos de entrega y método de pago.
+// RF-12 · Paso 2 (API): la solicitud debe traer carrito, datos de entrega y método de pago.
 function leerSolicitudPedido(cuerpo) {
   if (!esObjeto(cuerpo)) {
     throw validacion.datoInvalido('Los datos del pedido no son válidos');
@@ -220,32 +220,52 @@ function leerSolicitudPedido(cuerpo) {
 
 // ===================== Seguimiento y comprobante =====================
 
-// RF-12 · Paso 4 (API): formato del folio.
+// RF-13 · Paso 4 (API): formato del folio.
 function leerFolio(valor) {
   let texto = '';
   if (typeof valor === 'string' || typeof valor === 'number') {
     texto = String(valor).trim().replace(/^#/, '');
   }
   if (!PATRON_FOLIO.test(texto) || Number(texto) <= 0) {
-    // RF-12 · Excepción paso 4: el folio no tiene formato válido.
+    // RF-13 · Excepción paso 4: el folio no tiene formato válido.
     throw errorDeCampo('folio', 'El folio es el número que recibiste al enviar tu pedido (solo números)');
   }
   return Number(texto);
 }
 
-// RF-12 · Paso 4 (API): folio y teléfono.
+// RF-13 · Paso 4 (API): folio y un dato de contacto: el teléfono de WhatsApp o el correo.
+// Regresa { folio, telefono, correo }; de los dos datos de contacto solo uno trae texto.
 function leerConsulta(cuerpo) {
   if (!esObjeto(cuerpo)) {
-    throw validacion.datoInvalido('Escribe tu folio y tu teléfono');
+    throw validacion.datoInvalido('Escribe tu folio y tu teléfono o correo');
   }
-  return { folio: leerFolio(cuerpo.folio), telefono: leerTelefono(cuerpo.telefono) };
+  const folio = leerFolio(cuerpo.folio);
+  // Si viene el teléfono se usa el teléfono; si no, el correo
+  if (cuerpo.telefono !== undefined && cuerpo.telefono !== null && cuerpo.telefono !== '') {
+    return { folio: folio, telefono: leerTelefono(cuerpo.telefono), correo: '' };
+  }
+  return { folio: folio, telefono: '', correo: leerCorreoConsulta(cuerpo.correo) };
 }
 
-// RF-12 (API): datos del comprobante de pago.
+// Correo para buscar un pedido (aquí sí es obligatorio)
+function leerCorreoConsulta(valor) {
+  if (typeof valor !== 'string' || valor.trim() === '') {
+    // RF-13 · Excepción paso 4: no escribió teléfono ni correo.
+    throw errorDeCampo('contacto', 'Escribe tu teléfono de WhatsApp o tu correo');
+  }
+  const correo = valor.trim();
+  if (correo.length > 100 || !PATRON_CORREO.test(correo)) {
+    // RF-13 · Excepción paso 4: formato de correo inválido.
+    throw errorDeCampo('contacto', 'Escribe un correo válido, por ejemplo nombre@correo.com');
+  }
+  return correo;
+}
+
+// RF-14 · Paso 4 (API): valida los datos del comprobante de pago.
 // El cliente puede pegar un enlace, subir una foto/PDF desde sus archivos, o ambas cosas (al menos una).
 function leerComprobante(cuerpo) {
   const consulta = leerConsulta(cuerpo);
-  // Solo transferencia: el efectivo se paga en la tienda y ya no existe la opción «Depósito».
+  // Solo transferencia: el efectivo se paga en la tienda.
   // Si la página no manda el método, se toma como transferencia.
   let metodo = cuerpo.metodo;
   if (metodo === undefined || metodo === null || metodo === '') {
@@ -275,7 +295,7 @@ function leerComprobante(cuerpo) {
   // Archivo subido desde el equipo del cliente (opcional si viene enlace)
   const archivo = comprobanteArchivo.leerArchivo(cuerpo.archivo);
 
-  // RF-12 · Excepción: no se mandó ni enlace ni archivo.
+  // RF-14 · Excepción paso 4: no se mandó ni enlace ni archivo.
   if (enlace === '' && archivo === null) {
     throw errorDeCampo('archivo', 'Sube la foto de tu comprobante o pega el enlace donde la guardaste');
   }
@@ -287,6 +307,7 @@ function leerComprobante(cuerpo) {
   return {
     folio: consulta.folio,
     telefono: consulta.telefono,
+    correo: consulta.correo,
     metodo: metodo,
     monto: monto,
     referencia: referencia,

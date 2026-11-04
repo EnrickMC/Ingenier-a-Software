@@ -62,21 +62,21 @@ public class ExclusionService {
 
     // ===================== Registro =====================
 
-    // RF «Exclusiones entre opciones de características»: inicia aquí la regla de negocio (pasos 5 a 7).
+    // RF-27 (Exclusiones entre opciones de características): inicia aquí la regla de negocio (pasos 5 a 7).
     public ResultadoCatalogo registrar(Exclusion datos) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         // Paso 5: las dos opciones, distintas, y el motivo
-        // RF «Exclusiones entre opciones de características» · Excepción paso 5: falta elegir alguna de las dos opciones.
+        // RF-27 · Excepción paso 5: falta elegir alguna de las dos opciones.
         if (datos.getIdOpcion() <= 0) {
             return ResultadoCatalogo.error(MSG_ELIGE_OPCIONES, ResultadoCatalogo.CAMPO_OPCION_A);
         }
         if (datos.getIdOpcionExcluida() <= 0) {
             return ResultadoCatalogo.error(MSG_ELIGE_OPCIONES, ResultadoCatalogo.CAMPO_OPCION_B);
         }
-        // RF «Exclusiones entre opciones de características» · Excepción paso 5: falta el motivo.
+        // RF-27 · Excepción paso 5: falta el motivo.
         if (ValidacionCatalogo.estaVacio(datos.getMotivo())
                 || !ValidacionCatalogo.largoValido(datos.getMotivo(), MAX_MOTIVO)) {
             return ResultadoCatalogo.error(MSG_MOTIVO, ResultadoCatalogo.CAMPO_MOTIVO);
@@ -88,7 +88,7 @@ public class ExclusionService {
         try {
             // Paso 2: la opción existe
             Opcion opcionA = opcionDAO.buscarPorId(datos.getIdOpcion());
-            // RF «Exclusiones entre opciones de características» · Excepción paso 2: «Opción no encontrada».
+            // RF-27 · Excepción paso 2: «Opción no encontrada».
             if (opcionA == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_OPCION_NO_ENCONTRADA);
             }
@@ -98,7 +98,7 @@ public class ExclusionService {
             }
 
             // Paso 5: de otra característica, pero de la misma categoría
-            // RF «Exclusiones entre opciones de características» · Excepción paso 5: la opción excluida es de la misma característica u otra categoría.
+            // RF-27 · Excepción paso 5: la opción excluida es de la misma característica u otra categoría.
             if (opcionA.getIdCaracteristica() == opcionB.getIdCaracteristica()) {
                 return ResultadoCatalogo.error(MSG_MISMA_CARACTERISTICA, ResultadoCatalogo.CAMPO_OPCION_B);
             }
@@ -111,13 +111,13 @@ public class ExclusionService {
 
             // Paso 6: ya existe en cualquiera de los dos sentidos
             Exclusion existente = exclusionDAO.buscarPar(datos.getIdOpcion(), datos.getIdOpcionExcluida());
-            // RF «Exclusiones entre opciones de características» · Excepción paso 6: «Esta exclusión ya está registrada» con su estado actual.
+            // RF-27 · Excepción paso 6: «Esta exclusión ya está registrada» con su estado actual.
             if (existente != null) {
                 return ResultadoCatalogo.error(MSG_YA_REGISTRADA + " (estado: " + existente.getEstado().getValorBD() + ")",
                         ResultadoCatalogo.CAMPO_OPCION_B);
             }
         } catch (DAOException e) {
-            // RF «Exclusiones entre opciones de características» · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-27 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
@@ -126,7 +126,7 @@ public class ExclusionService {
             datos.setMotivo(datos.getMotivo().trim());
             exclusionDAO.insertar(datos);
         } catch (DAOException e) {
-            // RF «Exclusiones entre opciones de características» · Excepción paso 7: «No fue posible guardar la exclusión».
+            // RF-27 · Excepción paso 7: «No fue posible guardar la exclusión».
             return ResultadoCatalogo.error(MSG_NO_GUARDADA, ResultadoCatalogo.CAMPO_CONEXION);
         }
         return ResultadoCatalogo.correcto("La exclusión se registró correctamente");
@@ -135,13 +135,13 @@ public class ExclusionService {
     // ===================== Cambio de estado y eliminación =====================
 
     // Activa o inactiva una exclusión
-    // RF «Exclusiones entre opciones de características» · Pasos 4 y 7: cambia el estado de una exclusión (la activa se aplica de inmediato, paso 8).
+    // RF-27 · Pasos 4 y 7: cambia el estado de una exclusión (la activa se aplica de inmediato, paso 8).
     public ResultadoCatalogo cambiarEstado(int idExclusion, EstadoRegistro estado) {
         if (!PermisosCatalogo.puedeEditarCatalogo()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
         try {
-            // RF «Exclusiones entre opciones de características» · Excepción paso 2: la exclusión ya no existe.
+            // RF-27 · Excepción paso 2: la exclusión ya no existe.
             if (exclusionDAO.buscarPorId(idExclusion) == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADA);
             }

@@ -1,5 +1,5 @@
 import { CaracteristicaPersonalizable, OpcionPersonalizable } from '../modelos/catalogo.models';
-import { aparienciaDeOpcion, disenoDesdeSeleccion, tipoDeCaracteristica } from './diseno-pastel';
+import { aparienciaDeOpcion, baseDeOpcion, colorDeNombre, colorDeOpcion, disenoDesdeSeleccion, lugarDelMensaje, textoTopper, tipoDePostre, tipoDeCaracteristica } from './diseno-pastel';
 import { puntosForma, rutaSvgForma } from './formas-pastel';
 
 // Opción con los datos mínimos (el precio no importa para el 3D)
@@ -57,7 +57,8 @@ describe('Diseño del pastel 3D', function () {
     expect(fondant.cobertura).toBe('lisa');
     expect(ganache.cobertura).toBe('ganache');
     expect(ganache.colorCobertura).not.toBe(fondant.colorCobertura);
-    expect(otra.cobertura).toBe('chantilly');
+    // «Especial de la casa» es la cobertura de siempre: betún
+    expect(otra.cobertura).toBe('betun');
   });
 
   it('la forma, el sabor y las decoraciones cambian el diseño', function () {
@@ -73,7 +74,22 @@ describe('Diseño del pastel 3D', function () {
     expect(diseno.decoraciones.velas).toBe(3);
     expect(diseno.decoraciones.mono).toBe(1);
     expect(diseno.decoraciones.flores).toBe(0);
+    // Por defecto el mensaje se escribe sobre el pastel
     expect(diseno.dedicatoria).toBe('¡Feliz día!');
+    expect(diseno.topper).toBe('');
+  });
+
+  it('el mensaje va en un topper si el cliente lo pide; en gelatinas y postres chicos siempre', function () {
+    const pastel = disenoDesdeSeleccion([], [], 'Pasteles', 'Pastel', 'Hola', true);
+    expect(pastel.topper).toBe('Hola');
+    expect(pastel.dedicatoria).toBe('');
+    const gelatina = disenoDesdeSeleccion([], [], 'Gelatinas', 'Gelatina', 'Hola', false);
+    expect(gelatina.topper).toBe('Hola');
+    const galletas = disenoDesdeSeleccion([], [], 'Galletas', 'Galletas', 'Hola', false);
+    expect(galletas.topper).toBe('Hola');
+    expect(galletas.dedicatoria).toBe('');
+    expect(lugarDelMensaje('cupcake')).toBe('topper');
+    expect(lugarDelMensaje('rosca')).toBe('elegir');
   });
 
   it('cada unidad elegida de una decoración es una pieza en el 3D', function () {
@@ -102,6 +118,166 @@ describe('Diseño del pastel 3D', function () {
     expect(fresa.colorRelleno).toBe('#c3203a');
     expect(cajeta.colorRelleno).toBe('#a35d24');
     expect(aparienciaDeOpcion(relleno, relleno.opciones[0], false).color).toBe('#c3203a');
+  });
+
+  it('reconoce el tipo de postre: primero por categoría y luego por nombre', function () {
+    expect(tipoDePostre('Pays', 'Pay de queso')).toBe('pay');
+    expect(tipoDePostre('Cupcakes', 'Caja surtida')).toBe('cupcake');
+    expect(tipoDePostre('Galletas', 'Galletas de avena')).toBe('galleta');
+    expect(tipoDePostre('Postres', 'Brownie con nuez')).toBe('brownie');
+    expect(tipoDePostre('Donas', 'Dona glaseada')).toBe('dona');
+    // «Pastel de galleta oreo» sigue siendo pastel por su categoría
+    expect(tipoDePostre('Pastel', 'Pastel de galleta oreo')).toBe('pastel');
+    // «pie» no se confunde con «pieza»
+    expect(tipoDePostre('Especiales', 'Pieza de temporada')).toBe('pastel');
+  });
+
+  it('las coberturas de chispas, mármol y sin cobertura se reconocen por nombre', function () {
+    const cubierta = caracteristica(9, 'Cobertura', false, [opcion(20, 9, 'Chispas de colores'), opcion(21, 9, 'Mármol'), opcion(22, 9, 'Sin cobertura'), opcion(23, 9, 'Normal')]);
+    expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 20, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('chispas');
+    expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 21, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('marmol');
+    expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 22, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('ninguna');
+    expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 23, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('betun');
+    // Si el producto deja elegir cobertura y no se eligió ninguna, va sin cobertura
+    expect(disenoDesdeSeleccion([cubierta], [], 'Pastel', 'Pastel', '').cobertura).toBe('ninguna');
+    // Si el producto no tiene cobertura para elegir, lleva el betún de la casa
+    expect(disenoDesdeSeleccion([], [], 'Pastel', 'Pastel', '').cobertura).toBe('betun');
+  });
+
+  it('galletas, donas y macarons se ven de una sola pieza y el tamaño la hace más grande', function () {
+    const medidas = caracteristica(10, 'Tamaño', false, [opcion(24, 10, 'Mini'), opcion(25, 10, 'Mediano'), opcion(26, 10, 'Jumbo')]);
+    const mini = disenoDesdeSeleccion([medidas], [{ idOpcion: 24, cantidad: 1 }], 'Donas', 'Donas', '');
+    const jumbo = disenoDesdeSeleccion([medidas], [{ idOpcion: 26, cantidad: 1 }], 'Donas', 'Donas', '');
+    expect(jumbo.diametro).toBeGreaterThan(mini.diametro);
+    const macaron = disenoDesdeSeleccion([medidas], [{ idOpcion: 25, cantidad: 1 }], 'Macarons', 'Macarons', '');
+    const galleta = disenoDesdeSeleccion([medidas], [{ idOpcion: 25, cantidad: 1 }], 'Galletas', 'Galletas', '');
+    expect(galleta.diametro).toBeGreaterThan(macaron.diametro);
+  });
+
+  it('el pan del cupcake es el sabor y lo de arriba es el «Frosting»', function () {
+    const sabores = caracteristica(12, 'Sabor', false, [opcion(31, 12, 'Chocolate')]);
+    const frosting = caracteristica(13, 'Frosting', false, [opcion(32, 13, 'Remolino de chantilly'), opcion(33, 13, 'Domo de fondant'), opcion(34, 13, 'Frosting de fresa')]);
+    expect(tipoDeCaracteristica('Frosting')).toBe('frosting');
+    expect(tipoDeCaracteristica('Color del frosting')).toBe('color');
+    // Sin «Frosting» el cupcake va sin nada arriba
+    const solo = disenoDesdeSeleccion([sabores], [{ idOpcion: 31, cantidad: 1 }], 'Cupcakes', 'Cupcake', '');
+    expect(solo.cobertura).toBe('ninguna');
+    expect(solo.colorBizcocho).toBe('#4e2a1a');
+    // Con «Frosting» el pan sigue siendo de chocolate y arriba va lo elegido
+    const conChantilly = disenoDesdeSeleccion([sabores, frosting], [{ idOpcion: 31, cantidad: 1 }, { idOpcion: 32, cantidad: 1 }], 'Cupcakes', 'Cupcake', '');
+    expect(conChantilly.cobertura).toBe('chantilly');
+    expect(conChantilly.colorBizcocho).toBe('#4e2a1a');
+    expect(disenoDesdeSeleccion([frosting], [{ idOpcion: 33, cantidad: 1 }], 'Cupcakes', 'Cupcake', '').cobertura).toBe('lisa');
+    const fresa = disenoDesdeSeleccion([frosting], [{ idOpcion: 34, cantidad: 1 }], 'Cupcakes', 'Cupcake', '');
+    expect(fresa.cobertura).toBe('betun');
+    expect(fresa.colorCobertura).toBe('#f7b2c1');
+    // Si el producto tiene «Frosting» pero no se eligió, tampoco lleva nada arriba
+    expect(disenoDesdeSeleccion([frosting], [], 'Cupcakes', 'Cupcake', '').cobertura).toBe('ninguna');
+  });
+
+  it('el cupcake siempre es uno solo y el tamaño lo hace más grande', function () {
+    const medidas = caracteristica(11, 'Tamaño', false, [opcion(27, 11, 'Mini'), opcion(28, 11, 'Mediano'), opcion(29, 11, 'Jumbo'), opcion(30, 11, 'Docena')]);
+    const mini = disenoDesdeSeleccion([medidas], [{ idOpcion: 27, cantidad: 1 }], 'Cupcakes', 'Cupcake', '');
+    const jumbo = disenoDesdeSeleccion([medidas], [{ idOpcion: 29, cantidad: 1 }], 'Cupcakes', 'Cupcake', '');
+    expect(jumbo.diametro).toBeGreaterThan(mini.diametro);
+  });
+
+  // Los mismos nombres que sugiere el Panel Administrativo (PresetsCatalogo.java): todos deben verse en el 3D
+  it('las categorías sugeridas en el Panel se dibujan con su modelo', function () {
+    const esperado: string[][] = [
+      ['Pasteles', 'pastel'], ['Pasteles de cumpleaños', 'pastel'], ['Pasteles de boda', 'pastel'], ['Gelatinas', 'gelatina'],
+      ['Pays', 'pay'], ['Cheesecakes', 'cheesecake'], ['Cupcakes', 'cupcake'], ['Galletas', 'galleta'], ['Brownies', 'brownie'],
+      ['Donas', 'dona'], ['Roscas', 'rosca'], ['Macarons', 'macaron'],
+    ];
+    for (const par of esperado) {
+      expect(tipoDePostre(par[0], ''), par[0]).toBe(par[1]);
+    }
+  });
+
+  it('las características sugeridas en el Panel cambian el 3D', function () {
+    const esperado: string[][] = [
+      ['Tamaño', 'tamano'], ['Pisos', 'pisos'], ['Forma', 'forma'], ['Sabor', 'sabor'], ['Relleno', 'relleno'],
+      ['Cobertura', 'cobertura'], ['Frosting', 'frosting'], ['Color de cobertura', 'color'], ['Decoración', 'decoracion'], ['Base', 'base'],
+    ];
+    for (const par of esperado) {
+      expect(tipoDeCaracteristica(par[0]), par[0]).toBe(par[1]);
+    }
+    expect(tipoDeCaracteristica('Color de vela')).toBe('otra');
+  });
+
+  it('las coberturas sugeridas en el Panel se reconocen', function () {
+    const esperado: string[][] = [
+      ['Betún de la casa', 'betun'], ['Buttercream', 'betun'], ['Fondant liso', 'lisa'], ['Glaseado', 'lisa'], ['Chantilly', 'chantilly'],
+      ['Ganache de chocolate', 'ganache'], ['Naked cake', 'naked'], ['Chispas de colores', 'chispas'], ['Mármol', 'marmol'],
+      ['Degradado', 'degradado'], ['Sin cobertura', 'ninguna'],
+      // Opciones de «Frosting» (parte de arriba del cupcake)
+      ['Remolino de betún', 'betun'], ['Remolino de chantilly', 'chantilly'], ['Remolino de queso crema', 'betun'],
+      ['Remolino con chispas', 'chispas'], ['Remolino degradado', 'degradado'], ['Domo de fondant', 'lisa'], ['Sin frosting', 'ninguna'],
+    ];
+    const opciones: OpcionPersonalizable[] = [];
+    for (let i = 0; i < esperado.length; i++) {
+      opciones.push(opcion(100 + i, 20, esperado[i][0]));
+    }
+    const cubierta = caracteristica(20, 'Cobertura', false, opciones);
+    for (let i = 0; i < esperado.length; i++) {
+      const diseno = disenoDesdeSeleccion([cubierta], [{ idOpcion: 100 + i, cantidad: 1 }], 'Pasteles', 'Pastel', '');
+      expect(diseno.cobertura, esperado[i][0]).toBe(esperado[i][1]);
+    }
+  });
+
+  it('las decoraciones sugeridas en el Panel aparecen en el 3D', function () {
+    const nombres = ['Velas', 'Moño', 'Listón', 'Flores de azúcar', 'Perlas', 'Chispas', 'Fresas', 'Frutos rojos', 'Fruta picada', 'Rosetas de crema', 'Goteo de chocolate', 'Hoja de oro'];
+    const campos = ['velas', 'mono', 'liston', 'flores', 'perlas', 'chispas', 'fresas', 'frutosRojos', 'frutaPicada', 'rosetas', 'goteo', 'hojaOro'];
+    const opciones: OpcionPersonalizable[] = [];
+    for (let i = 0; i < nombres.length; i++) {
+      opciones.push(opcion(200 + i, 21, nombres[i]));
+    }
+    const adornos = caracteristica(21, 'Decoración', true, opciones);
+    for (let i = 0; i < nombres.length; i++) {
+      const diseno = disenoDesdeSeleccion([adornos], [{ idOpcion: 200 + i, cantidad: 2 }], 'Pasteles', 'Pastel', '');
+      const cuenta = diseno.decoraciones as unknown as Record<string, number>;
+      expect(cuenta[campos[i]], nombres[i]).toBe(2);
+    }
+    expect(textoTopper('Topper Feliz cumpleaños')).toBe('Feliz cumpleaños');
+    expect(textoTopper('Topper')).toBe('¡Felicidades!');
+  });
+
+  it('las bases, colores y sabores sugeridos en el Panel se reconocen', function () {
+    const bases: string[][] = [
+      ['Base dorada', 'dorada'], ['Base plateada', 'plateada'], ['Plato blanco', 'blanca'], ['Tabla de madera', 'madera'],
+      ['Pizarra', 'pizarra'], ['Pedestal de cristal', 'cristal'],
+    ];
+    for (const par of bases) {
+      expect(baseDeOpcion(par[0]), par[0]).toBe(par[1]);
+    }
+    const colores = ['Blanco', 'Marfil', 'Rosa', 'Rosa pastel', 'Rosa mexicano', 'Rojo', 'Lila', 'Morado', 'Azul cielo', 'Azul', 'Azul marino',
+      'Turquesa', 'Verde menta', 'Verde', 'Amarillo', 'Naranja', 'Durazno', 'Coral', 'Dorado', 'Plateado', 'Negro', 'Chocolate'];
+    for (const nombre of colores) {
+      expect(colorDeNombre(nombre), nombre).not.toBeNull();
+    }
+    const sabores = ['Vainilla', 'Chocolate', 'Chocolate blanco', 'Fresa', 'Red velvet', 'Tres leches', 'Limón', 'Naranja', 'Mango', 'Piña',
+      'Coco', 'Café', 'Cajeta', 'Zanahoria', 'Nuez', 'Matcha', 'Pistache', 'Oreo', 'Nutella', 'Frutos rojos', 'Plátano', 'Manzana con canela',
+      'Guayaba', 'Queso', 'Mermelada de fresa', 'Crema pastelera', 'Queso crema', 'Durazno'];
+    for (const nombre of sabores) {
+      expect(colorDeOpcion(nombre, false, false), nombre).not.toBeNull();
+    }
+    const gelatinas = ['Fresa', 'Limón', 'Uva', 'Naranja', 'Piña', 'Mango', 'Mosaico', 'Rompope', 'Leche', 'Coco', 'Chocolate'];
+    for (const nombre of gelatinas) {
+      expect(colorDeOpcion(nombre, true, false), nombre).not.toBeNull();
+    }
+  });
+
+  it('la base y el color de cobertura cambian el diseño', function () {
+    const base = caracteristica(22, 'Base', false, [opcion(300, 22, 'Pedestal de cristal')]);
+    const color = caracteristica(23, 'Color de cobertura', false, [opcion(301, 23, 'Azul cielo')]);
+    const diseno = disenoDesdeSeleccion([base, color], [{ idOpcion: 300, cantidad: 1 }, { idOpcion: 301, cantidad: 1 }], 'Pasteles', 'Pastel', '');
+    expect(diseno.base).toBe('cristal');
+    expect(diseno.colorCobertura).toBe('#a9d4f0');
+    // Sin base elegida: el pastel va en base dorada y las galletas en tabla
+    expect(disenoDesdeSeleccion([], [], 'Pasteles', 'Pastel', '').base).toBe('dorada');
+    expect(disenoDesdeSeleccion([], [], 'Galletas', 'Galletas', '').base).toBe('madera');
+    // Si el producto deja elegir base y el cliente deja «Sin base», no se dibuja base
+    expect(disenoDesdeSeleccion([base], [], 'Pasteles', 'Pastel', '').base).toBe('ninguna');
   });
 
   it('una gelatina se dibuja de un solo molde', function () {

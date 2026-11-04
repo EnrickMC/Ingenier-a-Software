@@ -4,6 +4,7 @@ import com.pac.dao.DAOException;
 import com.pac.dao.DAOFactory;
 import com.pac.modulos.pedidos.dao.PagoDAO;
 import com.pac.modulos.pedidos.dao.PedidoDAO;
+import com.pac.modulos.pedidos.model.ArchivoComprobante;
 import com.pac.modulos.pedidos.model.Cancelacion;
 import com.pac.modulos.pedidos.model.EstadoPago;
 import com.pac.modulos.pedidos.model.EstadoPedido;
@@ -20,9 +21,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Pagos y saldos (RF-28, RF-29):
+ * Pagos y saldos (RF-42, RF-43):
  * - Registrar un pago en sucursal, validar o rechazar los que subió el cliente.
- * - Cuando lo pagado cubre el anticipo y el pedido está «Aprobado», pasa solo a «Pagado» (RF-27).
+ * - Cuando lo pagado cubre el anticipo y el pedido está «Aprobado», pasa solo a «Pagado» (RF-41).
  * - Situación del pedido para el desglose (anticipo pendiente, liquidado, reembolso pendiente...).
  */
 public class PagoService {
@@ -42,7 +43,7 @@ public class PagoService {
     public static final String MSG_PAGO_NO_ENCONTRADO = "Pago no encontrado";
     public static final String MSG_INDICA_MOTIVO_RECHAZO = "Indica el motivo del rechazo";
 
-    // Situaciones del desglose (RF-29)
+    // Situaciones del desglose (RF-43)
     public static final String SITUACION_SIN_APROBAR = "El pedido aún no ha sido aprobado";
     public static final String SITUACION_ANTICIPO_PENDIENTE = "Anticipo pendiente";
     public static final String SITUACION_REEMBOLSO_PENDIENTE = "Pedido cancelado – reembolso pendiente";
@@ -69,34 +70,39 @@ public class PagoService {
         return pagoDAO.listarPorFolio(folio);
     }
 
+    // RF-50 · Paso 2: foto o PDF del comprobante del pago (null si no tiene)
+    public ArchivoComprobante leerArchivo(int idPago) throws DAOException {
+        return pagoDAO.buscarArchivo(idPago);
+    }
+
     /**
-     * Situación del pedido para el desglose de pagos (RF-29).
+     * Situación del pedido para el desglose de pagos (RF-43).
      */
-    // RF-29 (Seguimiento de saldos y pagos de pedidos) · Pasos 4 y 5: situación del pedido según lo pagado y el saldo.
+    // RF-43 (Seguimiento de saldos y pagos de pedidos) · Pasos 4 y 5: situación del pedido según lo pagado y el saldo.
     public static String situacion(Pedido pedido) {
         if (pedido.isDadoDeBaja()) {
             return "Solicitud dada de baja";
         }
         if (pedido.isCancelado()) {
-            // RF-29 · Excepción paso 5: «Pedido cancelado – reembolso pendiente».
+            // RF-43 · Excepción paso 5: «Pedido cancelado – reembolso pendiente».
             if (Cancelacion.REEMBOLSO_PENDIENTE.equals(pedido.getCancelacion().getEstadoReembolso())) {
                 return SITUACION_REEMBOLSO_PENDIENTE + " (" + Formatos.moneda(pedido.getCancelacion().getMontoReembolso()) + ")";
             }
             return "Pedido cancelado";
         }
         if (pedido.getEstado() == EstadoPedido.EN_ACEPTACION) {
-            // RF-29 · Excepción paso 2: «El pedido aún no ha sido aprobado».
+            // RF-43 · Excepción paso 2: «El pedido aún no ha sido aprobado».
             return SITUACION_SIN_APROBAR;
         }
         if (pedido.getSaldo() < -0.004) {
-            // RF-29 · Excepción paso 3: «Inconsistencia en los pagos registrados».
+            // RF-43 · Excepción paso 3: «Inconsistencia en los pagos registrados».
             return EstadoPedidoService.MSG_INCONSISTENCIA;
         }
         if (pedido.getSaldo() <= 0.004) {
             return SITUACION_LIQUIDADO;
         }
         if (!pedido.anticipoCubierto()) {
-            // RF-29 · Excepción paso 3: sin pagos suficientes, «Anticipo pendiente».
+            // RF-43 · Excepción paso 3: sin pagos suficientes, «Anticipo pendiente».
             return SITUACION_ANTICIPO_PENDIENTE + ": faltan " + Formatos.moneda(pedido.getFaltaParaIniciar());
         }
         return "Anticipo cubierto · saldo pendiente " + Formatos.moneda(pedido.getSaldo());
@@ -105,23 +111,23 @@ public class PagoService {
     /**
      * Revisa si al pedido se le pueden registrar pagos. Devuelve el resultado de error o null si sí.
      */
-    // RF-28 (Validación de pagos) · Paso 2: el pedido permite pagos y tiene saldo pendiente.
+    // RF-42 (Validación de pagos) · Paso 2: el pedido permite pagos y tiene saldo pendiente.
     public ResultadoPedido revisarRegistro(Pedido pedido) {
         if (pedido.isDadoDeBaja()) {
             return ResultadoPedido.error(PedidoService.motivoSinCambios(pedido), null);
         }
         if (pedido.isCancelado()) {
-            // RF-28 · Excepción paso 2: «No se pueden registrar pagos en un pedido cancelado».
+            // RF-42 · Excepción paso 2: «No se pueden registrar pagos en un pedido cancelado».
             return ResultadoPedido.error(MSG_CANCELADO, null);
         }
         if (pedido.getEstado() == EstadoPedido.EN_ACEPTACION) {
-            // RF-28 · Excepción paso 2: «El pedido debe aprobarse antes de registrar pagos».
+            // RF-42 · Excepción paso 2: «El pedido debe aprobarse antes de registrar pagos».
             ResultadoPedido resultado = ResultadoPedido.error(MSG_SIN_APROBAR, null);
             resultado.setOfrecerRevision(true);
             return resultado;
         }
         if (pedido.getSaldo() <= 0.004) {
-            // RF-28 · Excepción paso 2: «El pedido ya está liquidado».
+            // RF-42 · Excepción paso 2: «El pedido ya está liquidado».
             return ResultadoPedido.error(MSG_LIQUIDADO, null);
         }
         return null;
@@ -132,7 +138,7 @@ public class PagoService {
     /**
      * Registra un pago ya revisado (queda «Validado» con el usuario de la sesión).
      */
-    // RF-28 (Validación de pagos): inicia aquí el registro de un pago recibido. Pasos 5 a 9.
+    // RF-42 (Validación de pagos): inicia aquí el registro de un pago recibido. Pasos 5 a 9.
     public ResultadoPedido registrar(int folio, double monto, MetodoPago metodo, String referencia,
                                      String linkComprobante) {
         if (!PermisosPedidos.puedeValidarPagos()) {
@@ -161,7 +167,7 @@ public class PagoService {
      * Valida un pago «Pendiente» que subió el cliente. La Administradora puede corregir
      * el monto, el método y la referencia antes de validarlo.
      */
-    // RF-28: inicia aquí la validación de un pago pendiente (comprobante de la web). Pasos 5 a 9.
+    // RF-42: inicia aquí la validación de un pago pendiente (comprobante de la web). Pasos 5 a 9.
     public ResultadoPedido validar(Pago pendiente, double monto, MetodoPago metodo, String referencia) {
         if (!PermisosPedidos.puedeValidarPagos()) {
             return ResultadoPedido.error(PermisosPedidos.MSG_SIN_PERMISO, null);
@@ -182,13 +188,13 @@ public class PagoService {
     /**
      * Rechaza un pago «Pendiente» con su motivo; no cambia el saldo ni el estado del pedido.
      */
-    // RF-28 · Excepción paso 4: el comprobante no es válido; el pago se registra «Rechazado» con su motivo.
+    // RF-42 · Excepción paso 4: el comprobante no es válido; el pago se registra «Rechazado» con su motivo.
     public ResultadoPedido rechazar(Pago pendiente, String motivo) {
         if (!PermisosPedidos.puedeValidarPagos()) {
             return ResultadoPedido.error(PermisosPedidos.MSG_SIN_PERMISO, null);
         }
         if (motivo == null || motivo.isBlank()) {
-            // RF-28 · Excepción paso 4: falta el motivo del rechazo.
+            // RF-42 · Excepción paso 4: falta el motivo del rechazo.
             return ResultadoPedido.error(MSG_INDICA_MOTIVO_RECHAZO, ResultadoPedido.CAMPO_MOTIVO);
         }
         String texto = motivo.trim();
@@ -233,7 +239,7 @@ public class PagoService {
      * Guarda el pago como «Validado» (nuevo o pendiente), recalcula lo pagado y,
      * si cubre el anticipo de un pedido «Aprobado», lo pasa a «Pagado».
      */
-    // RF-28 · Paso 6: registra el pago como «Validado» y recalcula lo pagado y el saldo.
+    // RF-42 · Paso 6: registra el pago como «Validado» y recalcula lo pagado y el saldo.
     private ResultadoPedido guardarValidado(Pago pago, boolean esNuevo) {
         Connection conexion = null;
         Pedido pedido;
@@ -244,7 +250,7 @@ public class PagoService {
             // Se bloquea el pedido para que dos pagos al mismo tiempo no pasen del saldo
             if (pedidoDAO.bloquear(conexion, pago.getFolio()) == null) {
                 ApoyoTransaccion.deshacer(conexion);
-                // RF-28 · Excepción paso 2: «Pedido no encontrado».
+                // RF-42 · Excepción paso 2: «Pedido no encontrado».
                 return ResultadoPedido.recargar(ApoyoTransaccion.MSG_NO_ENCONTRADO);
             }
             if (!esNuevo) {
@@ -266,7 +272,7 @@ public class PagoService {
             }
             // El monto no puede pasar del saldo pendiente
             if (pago.getMonto() > pedido.getSaldo() + 0.004) {
-                // RF-28 · Excepción paso 5: el monto no puede pasar del saldo pendiente.
+                // RF-42 · Excepción paso 5: el monto no puede pasar del saldo pendiente.
                 ApoyoTransaccion.deshacer(conexion);
                 return ResultadoPedido.error("El monto no puede ser mayor al saldo pendiente ("
                         + Formatos.moneda(pedido.getSaldo()) + ")", ResultadoPedido.CAMPO_MONTO);
@@ -281,23 +287,23 @@ public class PagoService {
             pasoAPagado = estadoService.marcarPagadoSiCubre(conexion, pedido, pagadoNuevo);
             conexion.commit();
         } catch (DAOException e) {
-            // RF-28 · Excepción paso 6: se deshace la operación, «No fue posible registrar el pago».
+            // RF-42 · Excepción paso 6: se deshace la operación, «No fue posible registrar el pago».
             ApoyoTransaccion.deshacer(conexion);
             return ResultadoPedido.error(ApoyoTransaccion.mensajeFallo(MSG_NO_REGISTRADO, e), null);
         } catch (SQLException e) {
-            // RF-28 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-42 · Excepción paso 2: sin conexión, «Error de conexión».
             ApoyoTransaccion.deshacer(conexion);
             return ResultadoPedido.error(ApoyoTransaccion.MSG_ERROR_CONEXION, ResultadoPedido.CAMPO_CONEXION);
         } finally {
             ApoyoTransaccion.cerrar(conexion);
         }
 
-        // RF-28 · Paso 9: informa el pago validado y el saldo actualizado.
+        // RF-42 · Paso 9: informa el pago validado y el saldo actualizado.
         // Mensaje con lo pagado y el saldo actualizado
         pedido.setTotalPagado(pagadoNuevo);
         ResultadoPedido resultado = ResultadoPedido.correcto("Pago validado por " + Formatos.moneda(pago.getMonto())
                 + ".\nPagado: " + Formatos.moneda(pagadoNuevo) + " · Saldo pendiente: " + Formatos.moneda(pedido.getSaldo()));
-        // RF-28 · Paso 7 y paso 8: el pedido pasó a «Pagado»; se notifica al cliente.
+        // RF-42 · Paso 7 y paso 8: el pedido pasó a «Pagado»; se notifica al cliente.
         if (pasoAPagado) {
             resultado.agregarAviso("El anticipo quedó cubierto: el pedido pasó a «Pagado».");
         } else if (pedido.getEstado() == EstadoPedido.APROBADO) {
@@ -315,18 +321,18 @@ public class PagoService {
     }
 
     // Revisa los datos del formulario; devuelve el error o null si están bien
-    // RF-28 · Paso 5: valida monto, método y referencia.
+    // RF-42 · Paso 5: valida monto, método y referencia.
     private ResultadoPedido validarDatos(double monto, MetodoPago metodo, String referencia, String linkComprobante,
                                          int idPagoExcluido) {
         if (monto <= 0) {
-            // RF-28 · Excepción paso 5: el monto debe ser mayor a $0.00.
+            // RF-42 · Excepción paso 5: el monto debe ser mayor a $0.00.
             return ResultadoPedido.error(MSG_MONTO_INVALIDO, ResultadoPedido.CAMPO_MONTO);
         }
         if (metodo == null) {
             return ResultadoPedido.error(MSG_ELIGE_METODO, ResultadoPedido.CAMPO_METODO);
         }
         String limpia = limpiar(referencia);
-        // Transferencia y depósito siempre traen referencia; en efectivo es opcional
+        // La transferencia siempre trae referencia; en efectivo es opcional
         if (limpia == null && metodo != MetodoPago.EFECTIVO) {
             return ResultadoPedido.error(MSG_REFERENCIA_OBLIGATORIA, ResultadoPedido.CAMPO_REFERENCIA);
         }
@@ -344,7 +350,7 @@ public class PagoService {
         if (limpia != null) {
             try {
                 if (pagoDAO.referenciaEnUso(limpia, idPagoExcluido)) {
-                    // RF-28 · Excepción paso 5: la referencia ya está registrada en otro pago.
+                    // RF-42 · Excepción paso 5: la referencia ya está registrada en otro pago.
                     return ResultadoPedido.error(MSG_REFERENCIA_REPETIDA, ResultadoPedido.CAMPO_REFERENCIA);
                 }
             } catch (DAOException e) {

@@ -3,6 +3,8 @@
  * Parámetros del negocio en la tabla Configuracion (antes fijos en config/app.properties),
  * zona de cobertura de envío (CodigoPostalCobertura), historial de cambios (CambioConfiguracion)
  * y respaldos de la base de datos (RNF-8).
+ * Requerimientos del módulo «Configuración del Sistema»: RF-68 parámetros, RF-69 cobertura de envío,
+ * RF-70 historial de cambios, RF-71 cuentas de notificaciones, RF-72 generar respaldo y RF-73 restaurarlo.
  *
  *   model/       Parametro, CambioConfiguracion, CodigoPostalCobertura, ClavesConfiguracion
  *   dao/         ConfiguracionDAO, CoberturaDAO (y dao/mysql/ con su implementación)

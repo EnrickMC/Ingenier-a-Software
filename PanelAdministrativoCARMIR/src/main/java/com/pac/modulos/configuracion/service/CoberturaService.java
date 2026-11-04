@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Zona de cobertura de envío a domicilio (tabla CodigoPostalCobertura, RF-9).
+ * RF-69 · Pasos 4 a 6: zona de cobertura de envío a domicilio (tabla CodigoPostalCobertura, la usa RF-10).
  * Cada alta, cambio de costo o baja se anota en CambioConfiguracion con la clave "CP 12345".
  */
 public class CoberturaService {
@@ -42,6 +42,7 @@ public class CoberturaService {
 
     // Agrega un código postal nuevo
     public ResultadoConfiguracion agregar(String codigoTexto, String costoTexto) {
+        // RF-69 · Paso 4 y Excepción paso 4: «El código postal debe tener 5 dígitos» o costo de 0 a 9,999.99.
         String codigo = limpiar(codigoTexto);
         if (!codigoValido(codigo)) {
             return ResultadoConfiguracion.error(MSG_CP_INVALIDO, ResultadoConfiguracion.CAMPO_CODIGO_POSTAL);
@@ -51,6 +52,7 @@ public class CoberturaService {
             return ResultadoConfiguracion.error(MSG_COSTO_INVALIDO, ResultadoConfiguracion.CAMPO_COSTO);
         }
         try {
+            // RF-69 · Excepción paso 5: «Ese código postal ya está en la cobertura».
             if (coberturaDAO.buscarPorCodigo(codigo) != null) {
                 return ResultadoConfiguracion.error(MSG_CP_REPETIDO, ResultadoConfiguracion.CAMPO_CODIGO_POSTAL);
             }
@@ -78,6 +80,7 @@ public class CoberturaService {
         if (actual == null) {
             return ResultadoConfiguracion.error(MSG_CP_NO_EXISTE, ResultadoConfiguracion.CAMPO_CODIGO_POSTAL);
         }
+        // RF-69 · Excepción paso 5: el costo no cambió, «No hay cambios por guardar».
         if (Math.abs(actual.getCostoEnvio() - costo) < 0.005) {
             return ResultadoConfiguracion.correcto(ConfiguracionService.MSG_SIN_CAMBIOS);
         }
@@ -87,7 +90,8 @@ public class CoberturaService {
         return guardar(actual, cambio, true);
     }
 
-    // Quita un código postal de la cobertura
+    // Quita un código postal de la cobertura (RF-69 · Pasos 5 y 6)
+    // RF-69 · Excepción paso 5: «Ese código postal ya no está en la cobertura» (al cambiar o quitar).
     public ResultadoConfiguracion eliminar(String codigo) {
         CodigoPostalCobertura actual;
         try {
@@ -118,7 +122,8 @@ public class CoberturaService {
         return ResultadoConfiguracion.correcto("Código postal " + codigo + " quitado de la cobertura");
     }
 
-    // Inserta o actualiza el código postal junto con su bitácora (en una sola transacción)
+    // RF-69 · Paso 6: inserta o actualiza el código postal junto con su bitácora (en una sola transacción)
+    // RF-69 · Excepción paso 6: si algo falla se deshace todo, «No fue posible guardar la cobertura».
     private ResultadoConfiguracion guardar(CodigoPostalCobertura cobertura, CambioConfiguracion cambio, boolean existente) {
         Connection conexion = null;
         try {

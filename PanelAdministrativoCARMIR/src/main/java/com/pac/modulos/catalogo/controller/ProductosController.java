@@ -37,9 +37,9 @@ import java.util.prefs.Preferences;
 
 /**
  * Pestaña Productos (productos.fxml).
- * - RF-17 Visualización: búsqueda por nombre o SKU, filtros y ficha completa.
- * - RF-18 Registro y RF-19 Modificación: abren formulario-producto.fxml.
- * - RF-20 Baja: revisa pedidos vigentes, confirmación doble, inhabilita u elimina.
+ * - RF-28 Visualización: búsqueda por nombre o SKU, filtros y ficha completa.
+ * - RF-29 Registro y RF-30 Modificación: abren formulario-producto.fxml.
+ * - RF-31 Baja: revisa pedidos vigentes, confirmación doble, inhabilita u elimina.
  */
 public class ProductosController {
 
@@ -109,9 +109,9 @@ public class ProductosController {
     }
 
     // Se llama cada vez que la pestaña queda visible
-    // RF-17 (Visualización de productos): inicia aquí. Paso 1: se abre la pestaña Productos.
+    // RF-28 (Visualización de productos): inicia aquí. Paso 1: se abre la pestaña Productos.
     public void alMostrar() {
-        // RF-17 · Excepción paso 2: sin conexión, «Error de conexión» con «Reintentar».
+        // RF-28 · Excepción paso 2: sin conexión, «Error de conexión» con «Reintentar».
         if (!llenarCategorias()) {
             mostrarErrorConexion();
             return;
@@ -144,10 +144,10 @@ public class ProductosController {
         return true;
     }
 
-    // ===================== Lista (RF-17) =====================
+    // ===================== Lista (RF-28) =====================
 
     @FXML
-    // RF-17 · Paso 1: el usuario indica el criterio (categoría, nombre o SKU, estado).
+    // RF-28 · Paso 1: el usuario indica el criterio (categoría, nombre o SKU, estado).
     private void onBuscar() {
         if (llenandoSelectores) {
             return;
@@ -165,7 +165,7 @@ public class ProductosController {
         cargarProductos();
     }
 
-    // RF-17 · Pasos 2 a 4: valida la categoría, consulta y muestra el listado.
+    // RF-28 · Pasos 2 a 4: valida la categoría, consulta y muestra el listado.
     private void cargarProductos() {
         int idAntes = 0;
         if (seleccionado != null) {
@@ -185,7 +185,7 @@ public class ProductosController {
         try {
             // Paso 2: la categoría elegida debe existir
             if (idCategoria > 0 && servicio.buscarCategoria(idCategoria) == null) {
-                // RF-17 · Excepción paso 2: «Categoría no encontrada»; se limpia el filtro y se recargan las categorías.
+                // RF-28 · Excepción paso 2: «Categoría no encontrada»; se limpia el filtro y se recargan las categorías.
                 Alertas.aviso(ProductoService.MSG_CATEGORIA_NO_ENCONTRADA);
                 llenarCategorias();
                 llenandoSelectores = true;
@@ -195,7 +195,7 @@ public class ProductosController {
             }
             productos = servicio.buscar(txtBuscar.getText(), idCategoria, leerVisibilidad());
         } catch (DAOException e) {
-            // RF-17 · Excepción paso 2: sin conexión.
+            // RF-28 · Excepción paso 2: sin conexión.
             mostrarErrorConexion();
             return;
         }
@@ -211,10 +211,10 @@ public class ProductosController {
         // Paso 3: ningún producto cumple el criterio
         if (productos.isEmpty()) {
             if (txtBuscar.getText() != null && !txtBuscar.getText().isBlank()) {
-                // RF-17 · Excepción paso 3 / RF-19 y RF-20 · Excepción paso 1: no hay productos con ese criterio.
+                // RF-28 · Excepción paso 3 / RF-30 y RF-31 · Excepción paso 1: no hay productos con ese criterio.
                 lblVacio.setText(ProductoService.MSG_BUSQUEDA_VACIA);
             } else {
-                // RF-17 · Excepción paso 3: «No hay productos registrados con el criterio seleccionado» (con «+ Nuevo Postre»).
+                // RF-28 · Excepción paso 3: «No hay productos registrados con el criterio seleccionado» (con «+ Nuevo Postre»).
                 lblVacio.setText(ProductoService.MSG_SIN_PRODUCTOS);
             }
         }
@@ -360,7 +360,7 @@ public class ProductosController {
     }
 
     @FXML
-    // RF-17 · Paso 5: el usuario selecciona un producto para ver sus características.
+    // RF-28 · Paso 5: el usuario selecciona un producto para ver sus características.
     private void onClicTabla(MouseEvent evento) {
         boolean hay = mostrarSeleccionado();
         if (hay && evento.getClickCount() == 2 && puedeEditar) {
@@ -386,11 +386,11 @@ public class ProductosController {
         try {
             producto = servicio.buscarPorId(fila.getProducto().getIdPostre());
         } catch (DAOException e) {
-            // RF-17 · Excepción paso 6: sin conexión.
+            // RF-28 · Excepción paso 6: sin conexión.
             Alertas.error(ProductoService.MSG_ERROR_CONEXION);
             return false;
         }
-        // RF-17 · Excepción paso 6: «Producto no encontrado»; se retira del listado.
+        // RF-28 · Excepción paso 6: «Producto no encontrado»; se retira del listado.
         if (producto == null) {
             // Se retira de la lista
             Alertas.aviso(ProductoService.MSG_NO_ENCONTRADO);
@@ -401,7 +401,7 @@ public class ProductosController {
         return true;
     }
 
-    // RF-17 · Paso 7: ficha completa (SKU, precio base, fotografía y características con sus opciones).
+    // RF-28 · Paso 7: ficha completa (SKU, precio base, fotografía y características con sus opciones).
     private void mostrarDetalle(Producto producto) {
         seleccionado = producto;
         marcarTiles();
@@ -432,7 +432,7 @@ public class ProductosController {
             lblDetDescripcion.setText(producto.getDescripcion());
         }
 
-        // RF-17 · Excepción paso 7: marca «Sin imagen» y señala los campos incompletos.
+        // RF-28 · Excepción paso 7: marca «Sin imagen» y señala los campos incompletos.
         // Campos opcionales que faltan (paso 7)
         List<String> faltantes = servicio.camposIncompletos(producto);
         ApoyoVista.mostrarNodo(lblDetIncompletos, !faltantes.isEmpty());
@@ -477,22 +477,22 @@ public class ProductosController {
         }
     }
 
-    // ===================== Registro y modificación (RF-18, RF-19) =====================
+    // ===================== Registro y modificación (RF-29, RF-30) =====================
 
     @FXML
-    // RF-18 (Registro de producto): inicia aquí. Paso 1: «+ Nuevo Postre».
+    // RF-29 (Registro de producto): inicia aquí. Paso 1: «+ Nuevo Postre».
     private void onNuevo() {
-        // Paso 2 de RF-18: debe existir al menos una categoría activa
+        // Paso 2 de RF-29: debe existir al menos una categoría activa
         List<Categoria> activas;
         try {
             activas = servicio.listarCategoriasActivas();
         } catch (DAOException e) {
-            // RF-18 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
+            // RF-29 · Excepción paso 2: sin conexión, «Error de conexión»; no se abre el formulario.
             Alertas.error(ProductoService.MSG_ERROR_CONEXION);
             return;
         }
         if (activas.isEmpty()) {
-            // RF-18 · Excepción paso 2: no hay categorías activas; se ofrece registrar una.
+            // RF-29 · Excepción paso 2: no hay categorías activas; se ofrece registrar una.
             if (Alertas.confirmar(ProductoService.MSG_SIN_CATEGORIAS, "¿Quieres ir a registrar una categoría?")) {
                 catalogo.irACategorias();
             }
@@ -502,7 +502,7 @@ public class ProductosController {
     }
 
     @FXML
-    // RF-19 (Modificación de producto): inicia aquí. Paso 1: selecciona el producto y pide «Editar detalles».
+    // RF-30 (Modificación de producto): inicia aquí. Paso 1: selecciona el producto y pide «Editar detalles».
     private void onEditar() {
         if (seleccionado == null) {
             Alertas.info("Selecciona un producto de la lista");
@@ -512,7 +512,7 @@ public class ProductosController {
     }
 
     // Abre el formulario de edición de un producto (también se usa para "abrir el existente")
-    // RF-19 · Paso 2: valida que el producto exista y recupera sus datos.
+    // RF-30 · Paso 2: valida que el producto exista y recupera sus datos.
     private void abrirPorId(int idPostre) {
         Producto producto;
         List<Categoria> activas;
@@ -520,11 +520,11 @@ public class ProductosController {
             producto = servicio.buscarPorId(idPostre);
             activas = servicio.listarCategoriasActivas();
         } catch (DAOException e) {
-            // RF-19 · Excepción paso 2: «Error de conexión».
+            // RF-30 · Excepción paso 2: «Error de conexión».
             Alertas.error(ProductoService.MSG_ERROR_CONEXION);
             return;
         }
-        // RF-19 · Excepción paso 2: «Producto no encontrado».
+        // RF-30 · Excepción paso 2: «Producto no encontrado».
         if (producto == null) {
             Alertas.aviso(ProductoService.MSG_NO_ENCONTRADO);
             cargarProductos();
@@ -550,7 +550,7 @@ public class ProductosController {
         Parent raiz = cargador.getRoot();
         ApoyoVista.mostrarModal(raiz, tblProductos.getScene().getWindow(), titulo);
 
-        // RF-18 · Paso 8 / RF-19 · Paso 9: informa el éxito y actualiza el listado.
+        // RF-29 · Paso 8 / RF-30 · Paso 9: informa el éxito y actualiza el listado.
         if (formulario.seGuardo()) {
             Alertas.info(formulario.getMensajeExito());
         }
@@ -564,10 +564,10 @@ public class ProductosController {
         }
     }
 
-    // ===================== Baja (RF-20) =====================
+    // ===================== Baja (RF-31) =====================
 
     @FXML
-    // RF-20 (Eliminación de producto): inicia aquí. Paso 1: selecciona el producto y pide darlo de baja.
+    // RF-31 (Eliminación de producto): inicia aquí. Paso 1: selecciona el producto y pide darlo de baja.
     private void onDarDeBaja() {
         if (seleccionado == null) {
             Alertas.info("Selecciona un producto de la lista");
@@ -575,23 +575,23 @@ public class ProductosController {
         }
         ResultadoCatalogo revision = servicio.prepararBaja(seleccionado.getIdPostre());
         if (!revision.isExitoso()) {
-            // RF-20 · Excepciones pasos 2 y 3: no existe, sin conexión o tiene pedidos en curso.
+            // RF-31 · Excepciones pasos 2 y 3: no existe, sin conexión o tiene pedidos en curso.
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
                 cargarProductos();
             }
             return;
         }
-        // RF-20 · Pasos 4 y 5: confirmación doble; si cancela, el producto queda sin cambios.
+        // RF-31 · Pasos 4 y 5: confirmación doble; si cancela, el producto queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja este producto?", revision.getMensaje())) {
             return;
         }
         ResultadoCatalogo resultado = servicio.darDeBaja(seleccionado.getIdPostre());
         if (resultado.isExitoso()) {
-            // RF-20 · Paso 7: informa el éxito y actualiza el listado.
+            // RF-31 · Paso 7: informa el éxito y actualiza el listado.
             Alertas.info(resultado.getMensaje());
         } else {
-            // RF-20 · Excepción paso 6: «No fue posible dar de baja el producto».
+            // RF-31 · Excepción paso 6: «No fue posible dar de baja el producto».
             Alertas.error(resultado.getMensaje());
         }
         seleccionado = null;

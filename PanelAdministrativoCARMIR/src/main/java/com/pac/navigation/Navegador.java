@@ -23,7 +23,7 @@ import java.util.List;
  * Se encarga de cambiar de pantalla (bloqueo, login, panel) y de cargar
  * los apartados dentro del panel. Avisa a los observadores qué apartado quedó activo.
  *
- * Antes de abrir un apartado revisa los permisos con ControlAcceso (RNF-15).
+ * Antes de abrir un apartado revisa los permisos con ControlAcceso (RNF-12).
  */
 public class Navegador {
 
@@ -86,7 +86,7 @@ public class Navegador {
     }
 
     // Revisa los permisos y, si puede entrar, carga el apartado dentro del panel
-    // RNF-15 (Restricción de acceso a módulos): inicia aquí. Paso 2 de las visualizaciones (RF-13, RF-17, RF-21, RF-30, RF-33, RF-41, RF-46...): valida la sesión y el permiso antes de abrir el apartado.
+    // RNF-12 (Restricción de acceso a módulos): inicia aquí. Paso 2 de las visualizaciones (RF-15, RF-28, RF-36, RF-45, RF-51, RF-55, RF-65...): valida la sesión y el permiso antes de abrir el apartado.
     public void irASeccion(SeccionPanel seccion) {
         if (contenedorSecciones == null) {
             System.out.println("El panel principal todavía no registra su contenedor");
@@ -95,13 +95,13 @@ public class Navegador {
 
         ResultadoAcceso acceso = ControlAcceso.revisar(seccion.getPermisoRequerido());
 
-        // RNF-15: tiene permiso; se abre el apartado (paso 3 del RF correspondiente).
+        // RNF-12: tiene permiso; se abre el apartado (paso 3 del RF correspondiente).
         if (acceso == ResultadoAcceso.PERMITIDO) {
             cargarSeccion(seccion);
             return;
         }
 
-        // RNF-15 · Excepción: los permisos cambiaron; se avisa y se vuelve a armar el menú.
+        // RNF-12 · Excepción: los permisos cambiaron; se avisa y se vuelve a armar el menú.
         if (acceso == ResultadoAcceso.PERMISOS_CAMBIARON) {
             // Se vuelve a armar el panel para que el menú muestre los permisos nuevos
             Alertas.aviso(ControlAcceso.MSG_PERMISOS_CAMBIARON);
@@ -109,7 +109,7 @@ public class Navegador {
             return;
         }
 
-        // RNF-15 · Excepción: la cuenta está inactiva o la sesión venció; regresa al inicio de sesión.
+        // RNF-12 · Excepción: la cuenta está inactiva o la sesión venció; regresa al inicio de sesión.
         if (acceso == ResultadoAcceso.CUENTA_INACTIVA || acceso == ResultadoAcceso.SESION_VENCIDA) {
             String mensaje = ControlAcceso.MSG_SESION_VENCIDA;
             if (acceso == ResultadoAcceso.CUENTA_INACTIVA) {
@@ -122,11 +122,11 @@ public class Navegador {
         }
 
         // DENEGADO o SIN_VERIFICAR: no se abre y se queda donde estaba
-        // RNF-15 · Excepción: no se pudieron verificar los permisos (sin conexión).
+        // RNF-12 · Excepción: no se pudieron verificar los permisos (sin conexión).
         if (acceso == ResultadoAcceso.SIN_VERIFICAR) {
             Alertas.error(ControlAcceso.MSG_SIN_VERIFICAR);
         } else {
-            // Excepción paso 2 (RF-13, RF-17, RF-21, RF-33...): «Acceso denegado»; el apartado no se abre.
+            // Excepción paso 2 (RF-15, RF-28, RF-36, RF-51...): «Acceso denegado»; el apartado no se abre.
             Alertas.error(ControlAcceso.MSG_ACCESO_DENEGADO);
         }
         if (seccionActual == null) {

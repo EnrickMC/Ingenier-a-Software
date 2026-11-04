@@ -22,6 +22,7 @@ public class PermisosConfiguracion {
         return SesionUsuario.getInstancia().tienePermiso(Permisos.CONFIGURAR_SISTEMA);
     }
 
+    // RF-73 · Paso 2: solo la administradora puede restaurar un respaldo.
     public static boolean puedeRestaurar() {
         return SesionUsuario.getInstancia().esAdministradora();
     }

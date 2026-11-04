@@ -32,8 +32,8 @@ import java.time.format.DateTimeParseException;
  * Controlador del apartado "Reportes Financieros" (reportes.fxml). Módulo 6.
  *
  * Arriba está el periodo (con accesos rápidos) y los botones Generar y Exportar;
- * abajo, dos pestañas con su propio controlador: Ingresos y gastos (RF-46) y Más vendidos (RF-47).
- * Esta clase revisa el periodo (paso 3), el permiso (paso 2) y hace la exportación (RF-48).
+ * abajo, dos pestañas con su propio controlador: Ingresos y gastos (RF-65) y Más vendidos (RF-66).
+ * Esta clase revisa el periodo (paso 3), el permiso (paso 2) y hace la exportación (RF-67).
  */
 public class ReportesController implements ControladorSeccion {
 
@@ -112,7 +112,7 @@ public class ReportesController implements ControladorSeccion {
 
     // "Generar reporte": revisa el periodo y el permiso, y genera la pestaña visible
     @FXML
-    // RF-46 / RF-47: inicia aquí en la pantalla. Paso 1: la persona indica el periodo y pide generar el reporte.
+    // RF-65 / RF-66: inicia aquí en la pantalla. Paso 1: la persona indica el periodo y pide generar el reporte.
     private void onGenerar() {
         limpiarMensajes();
 
@@ -163,7 +163,7 @@ public class ReportesController implements ControladorSeccion {
         if (pestanaVisible() == masVendidosController) {
             mensajeSinPermiso = ReporteService.MSG_SIN_PERMISO_REPORTES;
         }
-        // RF-46 / RF-47 · Excepción paso 2: sin permiso financiero, no se genera el reporte.
+        // RF-65 / RF-66 · Excepción paso 2: sin permiso financiero, no se genera el reporte.
         if (!revisarAcceso(mensajeSinPermiso)) {
             return;
         }
@@ -187,7 +187,7 @@ public class ReportesController implements ControladorSeccion {
         return fecha;
     }
 
-    // RF-46 / RF-47 · Excepciones paso 3: se resalta el campo con error y no se genera el reporte.
+    // RF-65 / RF-66 · Excepciones paso 3: se resalta el campo con error y no se genera el reporte.
     private void mostrarErrorPeriodo(RevisionPeriodo revision) {
         String campo = revision.getCampo();
         if (RevisionPeriodo.CAMPO_DESDE.equals(campo) || RevisionPeriodo.CAMPO_AMBOS.equals(campo)) {
@@ -248,7 +248,7 @@ public class ReportesController implements ControladorSeccion {
     // ===================== Permiso (paso 2) =====================
 
     // Revisa que la sesión siga activa y que tenga el permiso; si no, avisa y devuelve false
-    // RF-46 / RF-47 / RF-48 · Paso 2: revisa sesión y permiso contra la base de datos.
+    // RF-65 / RF-66 / RF-67 · Paso 2: revisa sesión y permiso contra la base de datos.
     private boolean revisarAcceso(String mensajeSinPermiso) {
         ResultadoAcceso acceso = PermisosReportes.revisarAcceso();
         if (acceso == ResultadoAcceso.PERMITIDO) {
@@ -261,7 +261,7 @@ public class ReportesController implements ControladorSeccion {
         }
         if (acceso == ResultadoAcceso.SESION_VENCIDA || acceso == ResultadoAcceso.CUENTA_INACTIVA) {
             // Sin sesión: se regresa al inicio de sesión
-            // RF-48 · Excepción paso 2: sesión vencida o cuenta inactiva; se redirige al inicio de sesión.
+            // RF-67 · Excepción paso 2: sesión vencida o cuenta inactiva; se redirige al inicio de sesión.
             String mensaje = ControlAcceso.MSG_SESION_VENCIDA;
             if (acceso == ResultadoAcceso.CUENTA_INACTIVA) {
                 mensaje = ControlAcceso.MSG_CUENTA_INACTIVA;
@@ -271,25 +271,25 @@ public class ReportesController implements ControladorSeccion {
             Navegador.getInstancia().mostrar(Vista.LOGIN_PERSONAL);
             return false;
         }
-        // RF-46 / RF-47 · Excepción paso 2: «No tienes permiso para consultar reportes financieros».
+        // RF-65 / RF-66 · Excepción paso 2: «No tienes permiso para consultar reportes financieros».
         Alertas.error(mensajeSinPermiso);
         return false;
     }
 
-    // ===================== Exportar a Excel (RF-48) =====================
+    // ===================== Exportar a Excel (RF-67) =====================
 
     @FXML
-    // RF-48 (Exportación de reportes a Excel): inicia aquí. Paso 1: la persona pide «Exportar a Excel».
+    // RF-67 (Exportación de reportes a Excel): inicia aquí. Paso 1: la persona pide «Exportar a Excel».
     private void onExportar() {
         PestanaReporte visible = pestanaVisible();
         if (!visible.tieneReporte()) {
-            // RF-48 · Excepción paso 2: «Genera el reporte antes de exportarlo».
+            // RF-67 · Excepción paso 2: «Genera el reporte antes de exportarlo».
             Alertas.info(ExportadorReportes.MSG_GENERA_ANTES);
             return;
         }
         if (!visible.tieneDatos()) {
             btnExportar.setDisable(true);
-            // RF-48 · Excepción paso 2: «No hay datos para exportar».
+            // RF-67 · Excepción paso 2: «No hay datos para exportar».
             Alertas.info(ExportadorReportes.MSG_SIN_DATOS);
             return;
         }
@@ -297,7 +297,7 @@ public class ReportesController implements ControladorSeccion {
             return;
         }
 
-        // RF-48 · Paso 5: nombre del archivo con el reporte y el periodo.
+        // RF-67 · Paso 5: nombre del archivo con el reporte y el periodo.
         // Nombre sugerido: CARMIR_Reporte_<tipo>_<inicio>_<fin>.xlsx
         FileChooser selector = new FileChooser();
         selector.setTitle("Exportar reporte");
@@ -319,15 +319,15 @@ public class ReportesController implements ControladorSeccion {
             otraVez = false;
             try {
                 ExportadorReportes.guardar(libro, archivo);
-                // RF-48 · Paso 5: informa el éxito.
+                // RF-67 · Paso 5: informa el éxito.
                 Alertas.info(ExportadorReportes.MSG_EXITO + "\n" + archivo.getAbsolutePath());
             } catch (IOException e) {
                 if (ExportadorReportes.MSG_DESCARGA_INCOMPLETA.equals(e.getMessage())) {
                     // Ofrece «Descargar de nuevo»
-                    // RF-48 · Excepción paso 5: «La descarga no se completó»; se ofrece «Descargar de nuevo».
+                    // RF-67 · Excepción paso 5: «La descarga no se completó»; se ofrece «Descargar de nuevo».
                     otraVez = Alertas.confirmar(ExportadorReportes.MSG_DESCARGA_INCOMPLETA, "¿Descargar de nuevo?");
                 } else {
-                    // RF-48 · Excepción paso 4: «No fue posible generar el archivo de Excel».
+                    // RF-67 · Excepción paso 4: «No fue posible generar el archivo de Excel».
                     Alertas.error(ExportadorReportes.MSG_ERROR_ARCHIVO + "\n" + e.getMessage());
                 }
             }

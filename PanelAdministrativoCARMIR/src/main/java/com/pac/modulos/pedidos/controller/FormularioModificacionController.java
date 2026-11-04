@@ -78,7 +78,7 @@ public class FormularioModificacionController {
         dpFecha.valueProperty().addListener((observable, antes, ahora) -> mostrarCarga());
     }
 
-    // RF «Modificación de pedidos» · Paso 3: muestra el formulario con los datos actuales.
+    // RF-34 · Paso 3: muestra el formulario con los datos actuales.
     public void preparar(Pedido pedido) {
         original = pedido;
         lblTitulo.setText("Modificar pedido #" + pedido.getFolio() + " · " + pedido.getTextoEstado());
@@ -159,7 +159,7 @@ public class FormularioModificacionController {
     }
 
     // Abre la personalización de un postre del pedido
-    // RF «Modificación de pedidos» · Paso 4: cambiar la personalización de un postre.
+    // RF-34 · Paso 4: cambiar la personalización de un postre.
     public void personalizar(EditorLineaPedido editor) {
         LineaPedido linea = editor.getLinea();
         List<OpcionElegida> elegidas = elegirOpciones(linea.getIdCategoria(), linea.getNombreCategoria(),
@@ -247,7 +247,7 @@ public class FormularioModificacionController {
     }
 
     // Total en vivo y diferencia con el original
-    // RF «Modificación de pedidos» · Paso 7: recalcula el total.
+    // RF-34 · Paso 7: recalcula el total.
     public void recalcularTotal() {
         double total = 0;
         for (EditorLineaPedido editor : editores) {
@@ -272,7 +272,7 @@ public class FormularioModificacionController {
     // ===================== Guardar =====================
 
     @FXML
-    // RF «Modificación de pedidos» · Paso 4: la administradora elige «Guardar».
+    // RF-34 · Paso 4: la administradora elige «Guardar».
     private void onGuardar() {
         quitarMarcas();
         Pedido cambios = leerCambios();
@@ -282,12 +282,12 @@ public class FormularioModificacionController {
 
         // 1. Se revisan los cambios y se muestra "antes / después"
         ResultadoPedido revision = servicio.revisarCambios(original, cambios);
-        // RF «Modificación de pedidos» · Excepciones pasos 5 y 6: datos inválidos; se resalta el campo.
+        // RF-34 · Excepciones pasos 5 y 6: datos inválidos; se resalta el campo.
         if (!revision.isExitoso()) {
             mostrarError(revision.getMensaje(), campoDe(revision.getCampo()));
             return;
         }
-        // RF «Modificación de pedidos» · Paso 8: confirma los cambios con la diferencia del total.
+        // RF-34 · Paso 8: confirma los cambios con la diferencia del total.
         if (!Alertas.confirmarDoble("¿Guardar los cambios del pedido #" + original.getFolio() + "?",
                 revision.getMensajeCompleto())) {
             return;
@@ -295,7 +295,7 @@ public class FormularioModificacionController {
 
         // 2. Se guardan en una sola transacción
         ResultadoPedido respuesta = servicio.modificar(original, cambios);
-        // RF «Modificación de pedidos» · Excepción paso 9: se muestra el error y no se guarda.
+        // RF-34 · Excepción paso 9: se muestra el error y no se guarda.
         if (!respuesta.isExitoso() && !respuesta.isRecargar()) {
             mostrarError(respuesta.getMensaje(), campoDe(respuesta.getCampo()));
             return;
@@ -371,7 +371,7 @@ public class FormularioModificacionController {
     }
 
     @FXML
-    // RF «Modificación de pedidos» · Excepción paso 4: «Cancelar» descarta los cambios.
+    // RF-34 · Excepción paso 4: «Cancelar» descarta los cambios.
     private void onCancelar() {
         cerrar();
     }

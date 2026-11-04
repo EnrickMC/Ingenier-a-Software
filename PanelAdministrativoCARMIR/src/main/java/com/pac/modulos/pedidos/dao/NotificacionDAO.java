@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.util.List;
 
 /**
- * Bitácora de avisos al cliente (tabla Notificacion, RF-32).
+ * Bitácora de avisos al cliente (tabla Notificacion, RF-47).
  * Todas reciben la conexión: el envío corre en un hilo aparte con su propia conexión.
  */
 public interface NotificacionDAO {

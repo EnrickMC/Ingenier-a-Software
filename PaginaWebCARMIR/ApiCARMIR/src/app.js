@@ -27,7 +27,7 @@ function crearApp() {
   app.use(seguridad.cabecerasSeguras);
   app.use(seguridad.cors);
   app.use(seguridad.limiteGeneral);
-  // RF-12: solo esta ruta acepta cuerpos grandes (foto del comprobante). Va antes del lector general:
+  // RF-14: solo esta ruta acepta cuerpos grandes (foto del comprobante). Va antes del lector general:
   // cuando un lector ya leyó el cuerpo, el siguiente lo salta.
   app.use('/api/pedidos/comprobante', express.json({ limit: '8mb' }));
   app.use(express.json({ limit: '32kb' }));

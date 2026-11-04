@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 /**
- * Controla el modo claro y el modo semi oscuro del panel (los dos con colores pastel).
+ * RNF-11 (Modo oscuro del panel administrativo): controla el modo claro y el modo semi oscuro del panel
+ * (los dos con colores pastel).
  *
  * El modo oscuro consiste en ponerle la clase "tema-oscuro" a la raíz de cada ventana
  * y agregar la hoja tema-oscuro.css, que solo cambia las variables de color.
@@ -72,7 +73,9 @@ public class TemaVisual {
 
     public static void establecer(boolean valor) {
         oscuro = valor;
+        // RNF-11 · Paso 3: guarda la elección en el equipo
         guardarPreferencia(valor);
+        // RNF-11 · Paso 2: cambia los colores de todas las ventanas abiertas
         List<Window> abiertas = new ArrayList<Window>(Window.getWindows());
         for (Window ventana : abiertas) {
             if (ventana.getScene() != null) {
@@ -155,7 +158,7 @@ public class TemaVisual {
         try {
             Preferences.userNodeForPackage(TemaVisual.class).putBoolean(LLAVE_PREFERENCIA, valor);
         } catch (RuntimeException error) {
-            // Si no se puede guardar, el modo solo dura mientras la aplicación esté abierta
+            // RNF-11 · Excepción paso 3: si no se puede guardar, el modo solo dura mientras la aplicación esté abierta
         }
     }
 }

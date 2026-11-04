@@ -19,7 +19,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
- * Ventana de pagos (RF-28, RF-29).
+ * Ventana de pagos (RF-42, RF-43).
  * - Registrar: pago en sucursal o recibido por otro medio; queda «Validado».
  * - Validar: revisa un pago «Pendiente» que subió el cliente; se puede validar (corrigiendo
  *   monto, método o referencia) o rechazar con motivo.
@@ -37,8 +37,7 @@ public class FormularioPagoController {
     @FXML private VBox cajaEnlace;
     @FXML private TextField txtComprobante;
     @FXML private VBox cajaRevision;
-    @FXML private Label lblComprobante;
-    @FXML private Button btnAbrirComprobante;
+    @FXML private VisorComprobante visorComprobante;
     @FXML private TextField txtMotivoRechazo;
     @FXML private Label lblMensaje;
     @FXML private Button btnRechazar;
@@ -54,7 +53,7 @@ public class FormularioPagoController {
         cmbMetodo.getItems().setAll(MetodoPago.values());
     }
 
-    // RF-28 · Paso 3: muestra total, anticipo, lo pagado, el saldo y los pagos anteriores (pago en sucursal).
+    // RF-42 · Paso 3: muestra total, anticipo, lo pagado, el saldo y los pagos anteriores (pago en sucursal).
     public void prepararRegistro(Pedido pedido) {
         this.pedido = pedido;
         lblTitulo.setText("Registrar pago · pedido #" + pedido.getFolio());
@@ -74,7 +73,7 @@ public class FormularioPagoController {
         ApoyoVista.mostrarNodo(lblMensaje, false);
     }
 
-    // RF-28 · Paso 3: lo mismo para validar un pago que subió el cliente con su comprobante.
+    // RF-42 · Paso 3: lo mismo para validar un pago que subió el cliente con su comprobante.
     public void prepararValidacion(Pago pago, Pedido pedido) {
         this.pedido = pedido;
         this.pendiente = pago;
@@ -87,12 +86,9 @@ public class FormularioPagoController {
         txtReferencia.setText(ApoyoVista.texto(pago.getReferencia()));
         onCambioMetodo();
         ApoyoVista.mostrarNodo(cajaEnlace, false);
-        if (pago.tieneComprobante()) {
-            lblComprobante.setText("Comprobante: " + pago.getLinkComprobante());
-        } else {
-            lblComprobante.setText("El cliente no subió el enlace del comprobante.");
-        }
-        ApoyoVista.mostrarNodo(btnAbrirComprobante, pago.tieneComprobante());
+        // RF-42 · Paso 4 / RF-50 · Paso 1: el comprobante que subió el cliente se ve aquí mismo para revisarlo
+        visorComprobante.setTamanoVista(480, 300);
+        visorComprobante.mostrar(pago);
         btnGuardar.setText("Validar pago");
         ApoyoVista.mostrarNodo(lblMensaje, false);
     }
@@ -110,7 +106,7 @@ public class FormularioPagoController {
         return resultado;
     }
 
-    // Transferencia y depósito piden referencia; en efectivo es opcional
+    // La transferencia pide referencia; en efectivo es opcional
     @FXML
     private void onCambioMetodo() {
         if (cmbMetodo.getValue() == MetodoPago.EFECTIVO) {
@@ -121,18 +117,11 @@ public class FormularioPagoController {
     }
 
     @FXML
-    private void onAbrirComprobante() {
-        if (pendiente != null) {
-            DetallePedidoController.abrirComprobante(pendiente.getLinkComprobante());
-        }
-    }
-
-    @FXML
-    // RF-28 · Paso 4: la administradora captura el pago y elige validarlo.
+    // RF-42 · Paso 4: la administradora captura el pago y elige validarlo.
     private void onGuardar() {
         quitarMarcas();
         if (!ValidacionCatalogo.esDecimal(txtMonto.getText())) {
-            // RF-28 · Excepción paso 5: el monto debe ser mayor a $0.00.
+            // RF-42 · Excepción paso 5: el monto debe ser mayor a $0.00.
             mostrarError(PagoService.MSG_MONTO_INVALIDO, txtMonto);
             return;
         }
@@ -152,7 +141,7 @@ public class FormularioPagoController {
     }
 
     @FXML
-    // RF-28 · Excepción paso 4: el comprobante no es válido; se rechaza el pago con su motivo.
+    // RF-42 · Excepción paso 4: el comprobante no es válido; se rechaza el pago con su motivo.
     private void onRechazar() {
         quitarMarcas();
         if (txtMotivoRechazo.getText().isBlank()) {
@@ -168,7 +157,7 @@ public class FormularioPagoController {
 
     // Si hubo error de un campo se queda abierta; si no, se cierra con el resultado
     private void terminar(ResultadoPedido respuesta) {
-        // RF-28 · Excepciones pasos 5 y 6: se resalta el campo con error y no se registra.
+        // RF-42 · Excepciones pasos 5 y 6: se resalta el campo con error y no se registra.
         if (!respuesta.isExitoso() && !respuesta.isRecargar() && !respuesta.isOfrecerRevision()) {
             mostrarError(respuesta.getMensaje(), campoDe(respuesta.getCampo()));
             return;
@@ -197,7 +186,7 @@ public class FormularioPagoController {
     }
 
     @FXML
-    // RF-28 · Excepción paso 4: la administradora canceló la captura; nada cambia.
+    // RF-42 · Excepción paso 4: la administradora canceló la captura; nada cambia.
     private void onCerrar() {
         cerrar();
     }

@@ -34,6 +34,9 @@
             <Label styleClass="formulario-etiqueta" text="Nombre *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">
 <graphic><IconoAyuda texto="Nombre de la característica que ve el cliente al personalizar su postre, por ejemplo Sabor, Tamaño o Decoración."/></graphic></Label>
             <ComboBox fx:id="cmbNombre" styleClass="combo-carmir" editable="true" maxWidth="Infinity" promptText="Ej. Sabor, Tamaño, Decoración"/>
+            <Label fx:id="lblVista3d" styleClass="texto-ayuda" wrapText="true" maxWidth="Infinity" minHeight="-Infinity">
+                <graphic><FontIcon iconLiteral="bi-box"/></graphic>
+            </Label>
         </VBox>
         <VBox spacing="4" prefWidth="130">
             <Label styleClass="formulario-etiqueta" text="Orden de muestra *" contentDisplay="RIGHT" graphicTextGap="6" minWidth="-Infinity">

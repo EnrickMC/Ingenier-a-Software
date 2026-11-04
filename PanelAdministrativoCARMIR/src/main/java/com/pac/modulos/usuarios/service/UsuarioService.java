@@ -18,7 +18,7 @@ import java.util.List;
  * Reglas del Módulo 7 (Gestión de Usuarios): registrar, consultar, modificar
  * y dar de baja usuarios del personal.
  *
- * Los mensajes son los de los casos de uso RNF-11, RNF-12, RNF-13 y RNF-14
+ * Los mensajes son los de los casos de uso RNF-16, RNF-17, RNF-18 y RNF-19
  * del archivo "Requerimientos del sistema CARMIR.json".
  */
 public class UsuarioService {
@@ -51,7 +51,7 @@ public class UsuarioService {
         permisoDAO = DAOFactory.crearPermisoDAO();
     }
 
-    // ===================== Consultas (RNF-13) =====================
+    // ===================== Consultas (RNF-18) =====================
 
     // Devuelve los permisos que se pueden asignar (antes da de alta los que falten)
     public List<Permiso> listarPermisos() throws DAOException {
@@ -60,7 +60,7 @@ public class UsuarioService {
     }
 
     // Busca usuarios por nombre o usuario; estado null = todos los estados
-    // RNF-13 · Paso 3: consulta los usuarios que cumplen el criterio.
+    // RNF-18 · Paso 3: consulta los usuarios que cumplen el criterio.
     public List<Usuario> buscar(String texto, EstadoUsuario estado) throws DAOException {
         List<Usuario> encontrados = usuarioDAO.buscar(texto, estado);
 
@@ -75,28 +75,28 @@ public class UsuarioService {
     }
 
     // Lee un usuario por su id; devuelve null si ya no existe
-    // RNF-13 · Paso 6 / RNF-14 · Paso 2: lee el usuario seleccionado (null = ya no existe).
+    // RNF-18 · Paso 6 / RNF-19 · Paso 2: lee el usuario seleccionado (null = ya no existe).
     public Usuario buscarPorId(int idUsuario) throws DAOException {
         return usuarioDAO.buscarPorId(idUsuario);
     }
 
-    // ===================== Registro (RNF-11) =====================
+    // ===================== Registro (RNF-16) =====================
 
-    // RNF-11 (Registro de usuarios): inicia aquí la regla de negocio (pasos 4 a 6).
+    // RNF-16 (Registro de usuarios): inicia aquí la regla de negocio (pasos 4 a 6).
     public ResultadoOperacion registrar(Usuario datos, String contrasena, String confirmacion) {
         // Paso 4: validar campos, contraseña y permisos
         ResultadoOperacion error = validarDatos(datos);
-        // RNF-11 · Excepción paso 4: campos incompletos o con formato inválido.
+        // RNF-16 · Excepción paso 4: campos incompletos o con formato inválido.
         if (error != null) {
             return error;
         }
         error = validarContrasena(contrasena, confirmacion);
-        // RNF-11 · Excepción paso 4: la contraseña no cumple los requisitos o no coincide con su confirmación.
+        // RNF-16 · Excepción paso 4: la contraseña no cumple los requisitos o no coincide con su confirmación.
         if (error != null) {
             return error;
         }
         error = validarPermisos(datos);
-        // RNF-11 · Excepción paso 4: «Asigna al menos un permiso al usuario».
+        // RNF-16 · Excepción paso 4: «Asigna al menos un permiso al usuario».
         if (error != null) {
             return error;
         }
@@ -106,18 +106,18 @@ public class UsuarioService {
         try {
             existente = usuarioDAO.buscarPorNombreUsuario(datos.getNombreUsuario());
         } catch (DAOException e) {
-            // RNF-11 · Excepción paso 5: sin conexión, «Error de conexión».
+            // RNF-16 · Excepción paso 5: sin conexión, «Error de conexión».
             return ResultadoOperacion.error(MSG_ERROR_CONEXION, ResultadoOperacion.CAMPO_CONEXION);
         }
         if (existente != null) {
-            // RNF-11 · Excepción paso 5: el usuario es de una cuenta dada de baja; se ofrece reactivarla.
+            // RNF-16 · Excepción paso 5: el usuario es de una cuenta dada de baja; se ofrece reactivarla.
             if (existente.getEstado() == EstadoUsuario.INACTIVO) {
                 return ResultadoOperacion.reactivacion(existente.getIdUsuario(),
                         "El usuario «" + existente.getNombreUsuario() + "» pertenece a una cuenta dada de baja ("
                         + existente.getNombreCompleto() + ").\n¿Deseas reactivar esa cuenta con estos datos "
                         + "en lugar de crear una nueva?");
             }
-            // RNF-11 · Excepción paso 5: «El usuario ya está registrado».
+            // RNF-16 · Excepción paso 5: «El usuario ya está registrado».
             return ResultadoOperacion.error(MSG_YA_REGISTRADO, ResultadoOperacion.CAMPO_USUARIO);
         }
 
@@ -128,15 +128,15 @@ public class UsuarioService {
         try {
             usuarioDAO.insertar(datos);
         } catch (DAOException e) {
-            // RNF-11 · Excepción paso 6: «No fue posible registrar el usuario».
+            // RNF-16 · Excepción paso 6: «No fue posible registrar el usuario».
             return ResultadoOperacion.error(MSG_NO_REGISTRADO, ResultadoOperacion.CAMPO_CONEXION);
         }
-        // RNF-11 · Paso 7: informa el éxito.
+        // RNF-16 · Paso 7: informa el éxito.
         return ResultadoOperacion.correcto("Usuario «" + datos.getNombreUsuario() + "» registrado correctamente");
     }
 
     // Reactiva una cuenta dada de baja usando los datos capturados en el formulario
-    // RNF-11 · Excepción paso 5: reactiva la cuenta dada de baja en lugar de crear una nueva.
+    // RNF-16 · Excepción paso 5: reactiva la cuenta dada de baja en lugar de crear una nueva.
     public ResultadoOperacion reactivar(int idUsuarioExistente, Usuario datos, String contrasena) {
         datos.setIdUsuario(idUsuarioExistente);
         datos.setEstado(EstadoUsuario.ACTIVO);
@@ -150,26 +150,26 @@ public class UsuarioService {
         return ResultadoOperacion.correcto("La cuenta «" + datos.getNombreUsuario() + "» se reactivó correctamente");
     }
 
-    // ===================== Modificación (RNF-14) =====================
+    // ===================== Modificación (RNF-19) =====================
 
-    // RNF-14 (Modificación de usuarios): inicia aquí la regla de negocio (pasos 5 a 7).
+    // RNF-19 (Modificación de usuarios): inicia aquí la regla de negocio (pasos 5 a 7).
     public ResultadoOperacion modificar(Usuario datos, boolean restablecerContrasena,
                                         String contrasena, String confirmacion) {
         // Paso 5: validar campos, la nueva contraseña (si se restableció) y permisos
         ResultadoOperacion error = validarDatos(datos);
-        // RNF-14 · Excepción paso 5: datos inválidos.
+        // RNF-19 · Excepción paso 5: datos inválidos.
         if (error != null) {
             return error;
         }
         if (restablecerContrasena) {
             error = validarContrasena(contrasena, confirmacion);
-            // RNF-14 · Excepción paso 5: la nueva contraseña no es válida.
+            // RNF-19 · Excepción paso 5: la nueva contraseña no es válida.
             if (error != null) {
                 return error;
             }
         }
         error = validarPermisos(datos);
-        // RNF-14 · Excepción paso 5: debe conservar al menos un permiso.
+        // RNF-19 · Excepción paso 5: debe conservar al menos un permiso.
         if (error != null) {
             return error;
         }
@@ -181,21 +181,21 @@ public class UsuarioService {
             actual = usuarioDAO.buscarPorId(datos.getIdUsuario());
             mismoNombre = usuarioDAO.buscarPorNombreUsuario(datos.getNombreUsuario());
         } catch (DAOException e) {
-            // RNF-14 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RNF-19 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoOperacion.error(MSG_ERROR_CONEXION, ResultadoOperacion.CAMPO_CONEXION);
         }
-        // RNF-14 · Excepción paso 2: «Usuario no encontrado».
+        // RNF-19 · Excepción paso 2: «Usuario no encontrado».
         if (actual == null) {
             return ResultadoOperacion.noEncontrado(MSG_NO_ENCONTRADO);
         }
-        // RNF-14 · Excepción paso 6: «El nombre de usuario ya está en uso».
+        // RNF-19 · Excepción paso 6: «El nombre de usuario ya está en uso».
         if (mismoNombre != null && mismoNombre.getIdUsuario() != datos.getIdUsuario()) {
             return ResultadoOperacion.error(MSG_EN_USO, ResultadoOperacion.CAMPO_USUARIO);
         }
 
         // La persona que tiene la sesión no puede quitarse el acceso a este módulo
         if (esUsuarioDeLaSesion(datos.getIdUsuario())) {
-            // RNF-14 · Excepción paso 6: no puede quitarse el permiso de gestionar usuarios.
+            // RNF-19 · Excepción paso 6: no puede quitarse el permiso de gestionar usuarios.
             if (!datos.tienePermiso(Permisos.GESTIONAR_USUARIOS)) {
                 return ResultadoOperacion.error(MSG_PERMISO_PROPIO, ResultadoOperacion.CAMPO_PERMISO_PROPIO);
             }
@@ -219,39 +219,39 @@ public class UsuarioService {
         try {
             usuarioDAO.actualizar(datos, restablecerContrasena);
         } catch (DAOException e) {
-            // RNF-14 · Excepción paso 7: no se actualizó; el usuario conserva sus datos.
+            // RNF-19 · Excepción paso 7: no se actualizó; el usuario conserva sus datos.
             return ResultadoOperacion.error(MSG_NO_ACTUALIZADO, ResultadoOperacion.CAMPO_CONEXION);
         }
 
         // Si se editó a sí misma, la sesión se queda con los permisos nuevos
-        // RNF-14 · Paso 7: los nuevos permisos se aplican de inmediato (y ControlAcceso avisa «Tus permisos cambiaron»).
+        // RNF-19 · Paso 7: los nuevos permisos se aplican de inmediato (y ControlAcceso avisa «Tus permisos cambiaron»).
         if (esUsuarioDeLaSesion(datos.getIdUsuario())) {
             SesionUsuario.getInstancia().getUsuario().reemplazarPermisos(datos.getPermisos());
         }
         return ResultadoOperacion.correcto("Usuario «" + datos.getNombreUsuario() + "» actualizado correctamente");
     }
 
-    // ===================== Baja (RNF-12) =====================
+    // ===================== Baja (RNF-17) =====================
 
     // Paso 2: revisa que se pueda dar de baja y devuelve el usuario para la confirmación
-    // RNF-12 (Eliminación de usuarios): inicia aquí la regla de negocio (paso 2).
+    // RNF-17 (Eliminación de usuarios): inicia aquí la regla de negocio (paso 2).
     public ResultadoOperacion prepararBaja(int idUsuario) {
         Usuario usuario;
         try {
             usuario = usuarioDAO.buscarPorId(idUsuario);
         } catch (DAOException e) {
-            // RNF-12 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RNF-17 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoOperacion.error(MSG_ERROR_CONEXION, ResultadoOperacion.CAMPO_CONEXION);
         }
-        // RNF-12 · Excepción paso 2: «Usuario no encontrado».
+        // RNF-17 · Excepción paso 2: «Usuario no encontrado».
         if (usuario == null) {
             return ResultadoOperacion.noEncontrado(MSG_NO_ENCONTRADO);
         }
-        // RNF-12 · Excepción paso 2: «La cuenta ya está inactiva».
+        // RNF-17 · Excepción paso 2: «La cuenta ya está inactiva».
         if (usuario.getEstado() == EstadoUsuario.INACTIVO) {
             return ResultadoOperacion.error(MSG_YA_INACTIVA, null);
         }
-        // RNF-12 · Excepción paso 2: «No puedes dar de baja tu propia cuenta».
+        // RNF-17 · Excepción paso 2: «No puedes dar de baja tu propia cuenta».
         if (esUsuarioDeLaSesion(idUsuario)) {
             return ResultadoOperacion.error(MSG_BAJA_PROPIA, null);
         }
@@ -259,22 +259,22 @@ public class UsuarioService {
     }
 
     // Paso 5: el usuario pasa a Inactivo y pierde sus permisos (en una transacción)
-    // RNF-12 · Paso 5 (después de confirmar en el paso 4).
+    // RNF-17 · Paso 5 (después de confirmar en el paso 4).
     public ResultadoOperacion darDeBaja(Usuario usuario) {
         try {
             usuarioDAO.darDeBaja(usuario.getIdUsuario());
         } catch (DAOException e) {
-            // RNF-12 · Excepción paso 5: «No fue posible dar de baja al usuario».
+            // RNF-17 · Excepción paso 5: «No fue posible dar de baja al usuario».
             return ResultadoOperacion.error(MSG_NO_DADO_DE_BAJA, ResultadoOperacion.CAMPO_CONEXION);
         }
-        // RNF-12 · Paso 6: informa el éxito.
+        // RNF-17 · Paso 6: informa el éxito.
         return ResultadoOperacion.correcto("El usuario «" + usuario.getNombreUsuario() + "» fue dado de baja");
     }
 
     // ===================== Validaciones =====================
 
     // Revisa nombre y nombre de usuario; devuelve null si todo está bien
-    // RNF-11 / RNF-14 · Paso 4 / Paso 5: valida nombre y formato del usuario.
+    // RNF-16 / RNF-19 · Paso 4 / Paso 5: valida nombre y formato del usuario.
     private ResultadoOperacion validarDatos(Usuario datos) {
         String nombre = datos.getNombreCompleto();
         if (nombre == null || nombre.isBlank()) {
@@ -300,7 +300,7 @@ public class UsuarioService {
     }
 
     // Revisa que se haya marcado al menos un permiso; null si está bien
-    // RNF-11 / RNF-14: al menos un permiso.
+    // RNF-16 / RNF-19: al menos un permiso.
     private ResultadoOperacion validarPermisos(Usuario datos) {
         if (datos.getPermisos().isEmpty()) {
             return ResultadoOperacion.error(MSG_SIN_PERMISOS, ResultadoOperacion.CAMPO_PERMISOS);
@@ -309,7 +309,7 @@ public class UsuarioService {
     }
 
     // Revisa que la contraseña sea segura y coincida con la confirmación; null si está bien
-    // RNF-11 · Paso 4: la contraseña cumple los requisitos y coincide con su confirmación.
+    // RNF-16 · Paso 4: la contraseña cumple los requisitos y coincide con su confirmación.
     private ResultadoOperacion validarContrasena(String contrasena, String confirmacion) {
         if (contrasena == null || contrasena.isEmpty()) {
             return ResultadoOperacion.error("Escribe la contraseña", ResultadoOperacion.CAMPO_CONTRASENA);

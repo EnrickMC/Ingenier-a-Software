@@ -43,14 +43,14 @@ PaginaWebCARMIR/
             │   ├── utilidades/    reglas-configuracion.ts (precio y validación en vivo)
             │   ├── componentes/   filtros-catalogo · selector-caracteristica · galeria-plantillas
             │   └── paginas/       catalogo (RF-1) · ficha-producto (RF-2) · personalizar (RF-3, RF-4)
-            ├── carrito/           MÓDULO 2 · carrito (RF-5 a RF-8)
+            ├── carrito/           MÓDULO 2 · carrito (RF-6 a RF-9)
             ├── pedidos/           MÓDULO 2 · Portal de Pedidos
             │   ├── pedidos.routes.ts · pedidos-comun.css (diseño "Carrito y Checkout")
             │   ├── modelos/       pedidos.models.ts
             │   ├── servicios/     pedidos-api.service.ts · pedido-en-curso.service.ts (datos guardados, RNF-7)
             │   ├── utilidades/    fechas.ts · validacion-pedido.ts
             │   ├── componentes/   pasos-pedido · resumen-pedido · calendario-entrega
-            │   └── paginas/       entrega (RF-9) · pago (RF-10, RF-11) · confirmacion · mis-pedidos (RF-12)
+            │   └── paginas/       entrega (RF-10) · pago (RF-11, RF-12) · confirmacion · mis-pedidos (RF-13)
             └── no-encontrado/
 ```
 
@@ -61,12 +61,12 @@ PaginaWebCARMIR/
 | `/` | Catálogo (inicio) con filtros en la URL `?categoria=&buscar=&orden=` | RF-1 |
 | `/producto/:id` | Ficha: incluye, ingredientes, qué se personaliza | RF-2 |
 | `/producto/:id/personalizar` | Personalizador + galería de plantillas | RF-3, RF-4 |
-| `/producto/:id/personalizar?editar=<id>` | Editar un postre que ya está en el carrito | RF-7 |
-| `/carrito` | Carrito: revisa disponibilidad y precio, cantidades, editar, quitar, vaciar | RF-5 a RF-8 |
-| `/pedido/entrega` | Contacto, recoger o envío (cobertura por C.P.), calendario con cupo, horario | RF-9 |
-| `/pedido/pago` | Método (efectivo / transferencia / depósito), anticipo o total, enviar pedido | RF-10, RF-11 |
-| `/pedido/confirmacion` | Folio, estado, total, entrega e instrucciones de pago | RF-11 |
-| `/mis-pedidos` | Seguimiento con folio + teléfono y envío del comprobante de pago | RF-12 |
+| `/producto/:id/personalizar?editar=<id>` | Editar un postre que ya está en el carrito | RF-8 |
+| `/carrito` | Carrito: revisa disponibilidad y precio, cantidades, editar, quitar, vaciar | RF-6 a RF-9 |
+| `/pedido/entrega` | Contacto, recoger o envío (cobertura por C.P.), calendario con cupo, horario | RF-10 |
+| `/pedido/pago` | Método (efectivo / transferencia), anticipo o total, enviar pedido | RF-11, RF-12 |
+| `/pedido/confirmacion` | Folio, estado, total, entrega e instrucciones de pago | RF-12 |
+| `/mis-pedidos` | Seguimiento con folio + teléfono y envío del comprobante de pago | RF-13 |
 
 ## API del catálogo (solo lectura, sin inicio de sesión)
 

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reporte de ingresos y gastos de un periodo (RF-46).
+ * Reporte de ingresos y gastos de un periodo (RF-65).
  *
  * Ingresos = pagos validados (anticipos + liquidaciones + pagos totales) − reembolsos realizados.
  * Gastos   = compras de insumos + mermas.

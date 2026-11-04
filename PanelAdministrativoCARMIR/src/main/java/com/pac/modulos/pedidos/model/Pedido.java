@@ -122,7 +122,7 @@ public class Pedido {
         return LocalDateTime.of(fechaEntrega, horarioEntrega);
     }
 
-    // RF-30: la entrega ya pasó y el pedido no se ha entregado
+    // RF-45: la entrega ya pasó y el pedido no se ha entregado
     public boolean isAtrasado() {
         LocalDateTime entrega = getFechaHoraEntrega();
         if (entrega == null || estado == EstadoPedido.ENTREGADO) {
@@ -131,7 +131,7 @@ public class Pedido {
         return entrega.isBefore(LocalDateTime.now());
     }
 
-    // RF-21 / RF-23: un pedido necesita postres, teléfono de contacto y fecha y hora de entrega
+    // RF-36 / RF-33: un pedido necesita postres, teléfono de contacto y fecha y hora de entrega
     public boolean isDatosCompletos() {
         boolean conTelefono = cliente.getTelefono() != null && cliente.getTelefono().matches("[0-9]{10}");
         boolean conDomicilio = modalidadEntrega != ModalidadEntrega.DOMICILIO || direccion != null;

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * PATRÓN SINGLETON + PATRÓN OBSERVER (sujeto).
  * Cuenta las solicitudes por revisar y los pagos por validar, y detecta los pedidos nuevos
- * que llegan desde la web. El panel lo revisa cada 60 segundos (RF-21/RF-23) y avisa a los
+ * que llegan desde la web. El panel lo revisa cada 60 segundos (RF-36/RF-33) y avisa a los
  * observadores solo cuando algo cambió.
  */
 public class MonitorPedidos {
@@ -41,7 +41,7 @@ public class MonitorPedidos {
      * Vuelve a contar en la base de datos; devuelve false si no hubo conexión.
      * Debe llamarse desde el hilo de la pantalla (los observadores cambian controles de JavaFX).
      */
-    // RF-23 · Paso 1: revisa si llegaron solicitudes nuevas para mostrar el contador en el menú.
+    // RF-33 · Paso 1: revisa si llegaron solicitudes nuevas para mostrar el contador en el menú.
     public boolean revisar() {
         int nuevosPorRevisar;
         int nuevosPagos;

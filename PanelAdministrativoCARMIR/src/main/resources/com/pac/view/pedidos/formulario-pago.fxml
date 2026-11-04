@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.pac.modulos.pedidos.controller.VisorComprobante?>
 <?import com.pac.util.IconoAyuda?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
@@ -13,7 +14,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Registrar un pago o validar / rechazar uno que subió el cliente (RF-28, RF-29) -->
+<!-- Registrar un pago o validar / rechazar uno que subió el cliente (RF-42, RF-43) -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.pedidos.controller.FormularioPagoController"
       stylesheets="@../../css/carmir-base.css, @../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
@@ -56,12 +57,9 @@
 
     <!-- Validación de un pago pendiente -->
     <VBox fx:id="cajaRevision" spacing="8">
-        <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label fx:id="lblComprobante" styleClass="texto-suave" wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-            <Button fx:id="btnAbrirComprobante" text="Abrir comprobante" styleClass="btn-azul" onAction="#onAbrirComprobante">
-                <graphic><FontIcon iconLiteral="bi-box-arrow-up-right"/></graphic>
-            </Button>
-        </HBox>
+        <!-- RF-50: foto o PDF del comprobante que subió el cliente (o su enlace) -->
+        <Label styleClass="formulario-etiqueta" text="Comprobante del cliente"/>
+        <VisorComprobante fx:id="visorComprobante"/>
         <Separator/>
         <Label styleClass="formulario-etiqueta" text="Motivo del rechazo (solo si lo rechazas)"/>
         <TextField fx:id="txtMotivoRechazo" styleClass="campo" promptText="Ej. El comprobante no corresponde al monto"/>

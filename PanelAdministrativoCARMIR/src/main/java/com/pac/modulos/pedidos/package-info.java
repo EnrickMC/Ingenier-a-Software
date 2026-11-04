@@ -1,7 +1,7 @@
 /**
  * Módulo 4 · Gestor de Pedidos y Producción.
- * Pedidos (RF-21 a RF-27, modificación y baja), validación de pagos (RF-28, RF-29, RF-49),
- * agenda de producción (RF-30, RF-31) y notificaciones al cliente (RF-32).
+ * Pedidos (RF-36 a RF-41, modificación y baja), validación de pagos (RF-42, RF-43, RF-44),
+ * agenda de producción (RF-45, RF-46) y notificaciones al cliente (RF-47).
  *
  *   model/       clases que representan las tablas (Pedido, LineaPedido, Pago, ...)
  *   dao/         interfaces de acceso a datos (y dao/mysql/ con su implementación)

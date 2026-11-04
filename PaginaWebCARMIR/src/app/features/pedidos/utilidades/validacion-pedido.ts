@@ -12,7 +12,7 @@ const PATRON_CODIGO_POSTAL = /^[0-9]{5}$/;
 const PATRON_FOLIO = /^#?[0-9]{1,9}$/;
 const PATRON_ENLACE = /^https?:\/\/[^\s<>"']+$/;
 
-// RF-9 · Paso 5: validaciones de formato de los datos de contacto y entrega.
+// RF-10 · Paso 5: validaciones de formato de los datos de contacto y entrega.
 export function validarNombre(texto: string): string {
   const limpio = texto.trim();
   if (limpio === '') {
@@ -43,6 +43,36 @@ export function validarCorreo(texto: string): string {
   return '';
 }
 
+// RF-13: el cliente busca su pedido con el teléfono de WhatsApp o con el correo que registró
+export interface ContactoConsulta {
+  telefono: string;
+  correo: string;
+}
+
+// Si el texto trae @ es un correo; si no, es el teléfono (sin espacios, guiones ni paréntesis)
+export function contactoConsulta(texto: string): ContactoConsulta {
+  const limpio = texto.trim();
+  if (limpio.indexOf('@') >= 0) {
+    return { telefono: '', correo: limpio };
+  }
+  return { telefono: limpio.replace(/[\s()-]/g, ''), correo: '' };
+}
+
+// RF-13 · Paso 4: el dato de contacto es un teléfono de 10 dígitos o un correo válido
+export function validarContactoConsulta(texto: string): string {
+  if (texto.trim() === '') {
+    return 'Escribe tu teléfono de WhatsApp o tu correo';
+  }
+  const contacto = contactoConsulta(texto);
+  if (contacto.correo !== '') {
+    return validarCorreo(contacto.correo);
+  }
+  if (validarTelefono(contacto.telefono) !== '') {
+    return 'Escribe tu teléfono de WhatsApp (10 dígitos) o tu correo';
+  }
+  return '';
+}
+
 export function validarCodigoPostal(texto: string): string {
   if (!PATRON_CODIGO_POSTAL.test(texto.trim())) {
     return 'El código postal debe tener 5 dígitos';
@@ -68,7 +98,7 @@ function etiquetaConMayuscula(etiqueta: string): string {
   return etiqueta.charAt(0).toUpperCase() + etiqueta.substring(1);
 }
 
-// RF-12 · Paso 3: validación del folio.
+// RF-13 · Paso 3: validación del folio.
 export function validarFolio(texto: string): string {
   if (!PATRON_FOLIO.test(texto.trim()) || Number(texto.trim().replace('#', '')) <= 0) {
     return 'El folio es el número que recibiste al enviar tu pedido (solo números)';
@@ -76,7 +106,7 @@ export function validarFolio(texto: string): string {
   return '';
 }
 
-// RF-12: validaciones del comprobante de pago.
+// RF-14 · Paso 4: validaciones del comprobante de pago.
 export function validarMontoComprobante(monto: number, maximo: number): string {
   if (!Number.isFinite(monto) || monto <= 0) {
     return 'El monto debe ser mayor a $0.00';
@@ -98,7 +128,7 @@ export function validarEnlace(texto: string): string {
   return '';
 }
 
-// ===================== Archivo del comprobante (RF-12) =====================
+// ===================== Archivo del comprobante (RF-14) =====================
 
 // Mismas reglas que ApiCARMIR/src/modulos/pedidos/comprobanteArchivo.js
 export const TAMANO_MAXIMO_COMPROBANTE = 5 * 1024 * 1024;
@@ -127,7 +157,7 @@ export function tipoDeArchivo(nombre: string, tipoNavegador: string): string {
   return '';
 }
 
-// RF-12: revisa tipo y tamaño de la foto o PDF antes de subirlo (la API revisa además su contenido real).
+// RF-14 · Paso 4: revisa tipo y tamaño de la foto o PDF antes de subirlo (la API revisa además su contenido real).
 export function validarArchivoComprobante(tipo: string, tamano: number): string {
   if (TIPOS_COMPROBANTE.indexOf(tipo) < 0) {
     return 'Solo se aceptan fotos JPG, PNG o WEBP, o un PDF';

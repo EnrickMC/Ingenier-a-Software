@@ -9,7 +9,7 @@ import com.pac.session.SesionUsuario;
 import com.pac.util.Alertas;
 
 /**
- * Antes de guardar algo en Configuración se revisa otra vez que la sesión siga activa
+ * RF-68 a RF-72 · Paso 3: antes de guardar algo en Configuración se revisa otra vez que la sesión siga activa
  * y que tenga el permiso «Configurar sistema» (pudo cambiar con la pantalla abierta).
  */
 public class AccesoConfiguracion {
@@ -19,6 +19,7 @@ public class AccesoConfiguracion {
     }
 
     // true si puede continuar; si no, avisa (y regresa al inicio de sesión si la sesión terminó)
+    // RF-68 a RF-72 · Excepción paso 3: sesión vencida, cuenta inactiva, permisos cambiados o «Acceso denegado».
     public static boolean revisar() {
         ResultadoAcceso acceso = ControlAcceso.revisar(Permisos.CONFIGURAR_SISTEMA);
         if (acceso == ResultadoAcceso.PERMITIDO) {

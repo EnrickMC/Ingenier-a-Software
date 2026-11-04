@@ -3,7 +3,7 @@
    Usa los colores de carmir-base.css y las clases de usuarios.css, catalogo.css e inventario.css
    ===================================================================== */
 
-/* ---------- Etiqueta de estado (paleta pastel, RF-22) ----------
+/* ---------- Etiqueta de estado (paleta pastel, RF-37) ----------
    Diseño simple: fondo liso del color del estado, sin degradado ni sombra, y todas del mismo tamaño */
 .estado-pedido {
     -fx-background-radius: 10;

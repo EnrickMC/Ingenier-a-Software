@@ -19,12 +19,12 @@ import java.util.Locale;
 
 /**
  * Reglas de los reportes financieros (Módulo 6):
- * RF-46 Ingresos y gastos, RF-47 Productos más vendidos.
+ * RF-65 Ingresos y gastos, RF-66 Productos más vendidos.
  * Los mensajes son los de las excepciones del documento de requerimientos.
  */
 public class ReporteService {
 
-    // ----- Mensajes de las excepciones (RF-46 y RF-47) -----
+    // ----- Mensajes de las excepciones (RF-65 y RF-66) -----
     public static final String MSG_SIN_PERMISO_FINANCIERO = "No tienes permiso para consultar reportes financieros";
     public static final String MSG_SIN_PERMISO_REPORTES = "No tienes permiso para consultar reportes";
     public static final String MSG_FECHA_VACIA = "Captura la fecha";
@@ -66,12 +66,12 @@ public class ReporteService {
      * Revisa las fechas del periodo en el orden del caso de uso.
      * desdeInvalida / hastaInvalida = true si el texto escrito no es una fecha.
      */
-    // RF-46 / RF-47 · Paso 3: valida el formato y el rango del periodo (lo usan los dos reportes).
+    // RF-65 / RF-66 · Paso 3: valida el formato y el rango del periodo (lo usan los dos reportes).
     public RevisionPeriodo revisarPeriodo(LocalDate desde, boolean desdeInvalida,
                                           LocalDate hasta, boolean hastaInvalida) {
         // ¿Las fechas tienen un formato válido?
         if (desdeInvalida && hastaInvalida) {
-            // RF-46 / RF-47 · Excepción paso 3: «Fecha inválida».
+            // RF-65 / RF-66 · Excepción paso 3: «Fecha inválida».
             return RevisionPeriodo.error(MSG_FECHA_INVALIDA, RevisionPeriodo.CAMPO_AMBOS);
         }
         if (desdeInvalida) {
@@ -82,7 +82,7 @@ public class ReporteService {
         }
         // ¿Se capturaron ambas fechas?
         if (desde == null && hasta == null) {
-            // RF-46 / RF-47 · Excepción paso 3: falta capturar una fecha.
+            // RF-65 / RF-66 · Excepción paso 3: falta capturar una fecha.
             return RevisionPeriodo.error(MSG_FECHA_VACIA, RevisionPeriodo.CAMPO_AMBOS);
         }
         if (desde == null) {
@@ -93,27 +93,27 @@ public class ReporteService {
         }
         // ¿La fecha de inicio es mayor que la fecha de fin?
         if (desde.isAfter(hasta)) {
-            // RF-46 / RF-47 · Excepción paso 3: «Rango de fechas inválido».
+            // RF-65 / RF-66 · Excepción paso 3: «Rango de fechas inválido».
             return RevisionPeriodo.error(MSG_RANGO_INVALIDO, RevisionPeriodo.CAMPO_AMBOS);
         }
         // ¿La fecha de inicio es posterior a hoy?
         LocalDate hoy = LocalDate.now();
         if (desde.isAfter(hoy)) {
-            // RF-46 / RF-47 · Excepción paso 3: «El periodo no puede iniciar en una fecha futura».
+            // RF-65 / RF-66 · Excepción paso 3: «El periodo no puede iniciar en una fecha futura».
             return RevisionPeriodo.error(MSG_INICIO_FUTURO, RevisionPeriodo.CAMPO_DESDE);
         }
         // ¿La fecha de fin es posterior a hoy? Se ajusta a hoy y se avisa
         if (hasta.isAfter(hoy)) {
-            // RF-46 / RF-47 · Excepción paso 3: la fecha de fin se ajusta a hoy y se avisa.
+            // RF-65 / RF-66 · Excepción paso 3: la fecha de fin se ajusta a hoy y se avisa.
             return RevisionPeriodo.correcto(desde, hoy, MSG_FIN_AJUSTADO + " (" + Formatos.fecha(hoy) + ")");
         }
         return RevisionPeriodo.correcto(desde, hasta, null);
     }
 
-    // ===================== RF-46 · Ingresos y gastos =====================
+    // ===================== RF-65 · Ingresos y gastos =====================
 
     // Consulta y calcula el reporte de ingresos y gastos del periodo (ya revisado)
-    // RF-46 (Generación de reporte de ingresos y gastos): inicia aquí la consulta. Pasos 4 a 6: pagos validados, compras y mermas; totales y utilidad.
+    // RF-65 (Generación de reporte de ingresos y gastos): inicia aquí la consulta. Pasos 4 a 6: pagos validados, compras y mermas; totales y utilidad.
     public ReporteIngresosGastos generarIngresosGastos(LocalDate desde, LocalDate hasta) throws DAOException {
         ReporteIngresosGastos reporte = new ReporteIngresosGastos(desde, hasta);
         reporteDAO.cargarIngresosGastos(reporte);
@@ -127,16 +127,16 @@ public class ReporteService {
     }
 
     // Avisos que acompañan al reporte (sección faltante, pagos por reembolsar, movimientos por revisar)
-    // RF-46 · Paso 5: revisa que haya transacciones y que sean consistentes.
+    // RF-65 · Paso 5: revisa que haya transacciones y que sean consistentes.
     public List<String> avisosDe(ReporteIngresosGastos reporte) {
         List<String> avisos = new ArrayList<String>();
         if (reporte.estaVacio()) {
-            // RF-46 · Excepción paso 5: «Sin registros en el periodo seleccionado».
+            // RF-65 · Excepción paso 5: «Sin registros en el periodo seleccionado».
             avisos.add(MSG_SIN_REGISTROS);
             return avisos;
         }
         if (!reporte.hayIngresos()) {
-            // RF-46 · Excepción paso 5: falta la sección de ingresos o de gastos; se muestra en $0.00.
+            // RF-65 · Excepción paso 5: falta la sección de ingresos o de gastos; se muestra en $0.00.
             avisos.add(MSG_SIN_INGRESOS);
         }
         if (!reporte.hayGastos()) {
@@ -147,7 +147,7 @@ public class ReporteService {
                     + " (no se cuentan como ingreso)");
         }
         if (!reporte.getPorRevisar().isEmpty()) {
-            // RF-46 · Excepción paso 5: movimientos inconsistentes en «Movimientos por revisar».
+            // RF-65 · Excepción paso 5: movimientos inconsistentes en «Movimientos por revisar».
             avisos.add(MSG_POR_REVISAR);
         }
         return avisos;
@@ -204,10 +204,10 @@ public class ReporteService {
         return fecha.withDayOfMonth(1);
     }
 
-    // ===================== RF-47 · Productos más vendidos =====================
+    // ===================== RF-66 · Productos más vendidos =====================
 
-    // true si la categoría elegida todavía existe (paso 3 de RF-47)
-    // RF-47 · Excepción paso 3: revisa que la categoría elegida exista.
+    // true si la categoría elegida todavía existe (paso 3 de RF-66)
+    // RF-66 · Excepción paso 3: revisa que la categoría elegida exista.
     public boolean existeCategoria(int idCategoria) throws DAOException {
         if (idCategoria <= 0) {
             return true;
@@ -219,7 +219,7 @@ public class ReporteService {
      * Consulta las ventas del periodo agrupadas por producto, categoría y opción.
      * idCategoria = 0 para todas; orden = ORDEN_UNIDADES u ORDEN_UTILIDAD.
      */
-    // RF-47 (Generación de reporte de productos más vendidos): inicia aquí la consulta. Pasos 4 y 6: agrupa, ordena y calcula importe y porcentaje.
+    // RF-66 (Generación de reporte de productos más vendidos): inicia aquí la consulta. Pasos 4 y 6: agrupa, ordena y calcula importe y porcentaje.
     public ReporteVentas generarVentas(LocalDate desde, LocalDate hasta, int idCategoria,
                                        String nombreCategoria, String orden) throws DAOException {
         ReporteVentas reporte = new ReporteVentas(desde, hasta);
@@ -237,15 +237,15 @@ public class ReporteService {
     }
 
     // Avisos del reporte de ventas (sin ventas, ventas incompletas, productos inactivos)
-    // RF-47 · Paso 5: revisa que haya ventas y que estén completas.
+    // RF-66 · Paso 5: revisa que haya ventas y que estén completas.
     public List<String> avisosDe(ReporteVentas reporte) {
         List<String> avisos = new ArrayList<String>();
         if (!reporte.tieneDatos()) {
-            // RF-47 · Excepción paso 5: «Sin registros de ventas en el periodo».
+            // RF-66 · Excepción paso 5: «Sin registros de ventas en el periodo».
             avisos.add(MSG_SIN_VENTAS);
         }
         if (reporte.getLineasIncompletas() > 0) {
-            // RF-47 · Excepción paso 5: ventas incompletas excluidas.
+            // RF-66 · Excepción paso 5: ventas incompletas excluidas.
             avisos.add(reporte.getLineasIncompletas() + " " + MSG_VENTAS_INCOMPLETAS);
         }
         int inactivos = 0;
@@ -254,7 +254,7 @@ public class ReporteService {
                 inactivos++;
             }
         }
-        // RF-47 · Excepción paso 5: ventas de productos dados de baja, marca «Producto inactivo».
+        // RF-66 · Excepción paso 5: ventas de productos dados de baja, marca «Producto inactivo».
         if (inactivos > 0) {
             avisos.add(inactivos + " producto(s) vendido(s) ya están dados de baja: aparecen con la marca «"
                     + MSG_PRODUCTO_INACTIVO + "»");

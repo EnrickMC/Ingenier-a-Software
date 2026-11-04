@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * Pestaña Insumos (insumos.fxml).
- * Visualización (RF-33), registro (RF-34), modificación (RF-35) y baja (RF-36) de insumos.
+ * Visualización (RF-51), registro (RF-52), modificación (RF-53) y baja (RF-54) de insumos.
  */
 public class InsumosController {
 
@@ -160,9 +160,9 @@ public class InsumosController {
         alMostrar();
     }
 
-    // ===================== Lista (Visualización RF-33) =====================
+    // ===================== Lista (Visualización RF-51) =====================
 
-    // RF-33 (Visualización de datos de insumos): inicia aquí en la pantalla. Paso 1: la persona entra a Insumos y puede buscar o filtrar.
+    // RF-51 (Visualización de datos de insumos): inicia aquí en la pantalla. Paso 1: la persona entra a Insumos y puede buscar o filtrar.
     private void cargarInsumos() {
         int idAntes = 0;
         if (seleccionada != null) {
@@ -178,14 +178,14 @@ public class InsumosController {
         try {
             insumos = servicio.listar(chkInactivos.isSelected() || FILTRO_BAJA.equals(barraStock.getClave()));
         } catch (DAOException e) {
-            // RF-33 · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
+            // RF-51 · Excepción paso 3: sin conexión, «Error de conexión» con «Reintentar».
             mostrarErrorConexion();
             return;
         }
 
         // Paso 4: no hay insumos
         if (insumos.isEmpty()) {
-            // RF-33 · Excepción paso 4: «No hay insumos registrados» (con «+ Registrar insumo» para la administradora).
+            // RF-51 · Excepción paso 4: «No hay insumos registrados» (con «+ Registrar insumo» para la administradora).
             lblVacio.setText(InsumoService.MSG_SIN_INSUMOS);
             lblConteo.setText("0 insumo(s)");
             return;
@@ -226,7 +226,7 @@ public class InsumosController {
             ApoyoVista.mostrarNodo(lblAviso, true);
         }
         if (tblInsumos.getItems().isEmpty()) {
-            // RF-33 · Excepción paso 4: «No se encontraron insumos con ese criterio» con «Limpiar filtro».
+            // RF-51 · Excepción paso 4: «No se encontraron insumos con ese criterio» con «Limpiar filtro».
             lblVacio.setText(InsumoService.MSG_SIN_RESULTADOS);
         }
 
@@ -271,7 +271,7 @@ public class InsumosController {
         lblConteo.setText("");
     }
 
-    // ===================== Detalle (RF-33 paso 7) =====================
+    // ===================== Detalle (RF-51 paso 7) =====================
 
     @FXML
     private void onClicTabla(MouseEvent evento) {
@@ -298,7 +298,7 @@ public class InsumosController {
         return true;
     }
 
-    // RF-33 · Paso 7: muestra los lotes y últimos movimientos del insumo seleccionado.
+    // RF-51 · Paso 7: muestra los lotes y últimos movimientos del insumo seleccionado.
     private void mostrarDetalle(FilaInsumo fila) {
         seleccionada = fila;
         ApoyoVista.mostrarNodo(cajaDetalle, fila != null);
@@ -316,7 +316,7 @@ public class InsumosController {
         try {
             Insumo actual = servicio.buscarPorId(insumo.getIdInsumo());
             if (actual == null) {
-                // RF-33 · Excepción paso 7: «Insumo no encontrado» y se recarga la tabla.
+                // RF-51 · Excepción paso 7: «Insumo no encontrado» y se recarga la tabla.
                 Alertas.aviso(InsumoService.MSG_NO_ENCONTRADO);
                 seleccionada = null;
                 cargarInsumos();
@@ -425,16 +425,16 @@ public class InsumosController {
         }
     }
 
-    // ===================== Registro y modificación (RF-34, RF-35) =====================
+    // ===================== Registro y modificación (RF-52, RF-53) =====================
 
     @FXML
-    // RF-34 (Registro de datos de insumos): inicia aquí. Paso 1: la administradora pide registrar un insumo.
+    // RF-52 (Registro de datos de insumos): inicia aquí. Paso 1: la administradora pide registrar un insumo.
     private void onNuevo() {
         abrirFormulario(null);
     }
 
     @FXML
-    // RF-35 (Modificación de datos de insumos): inicia aquí. Paso 1: se selecciona el insumo y se pide modificarlo.
+    // RF-53 (Modificación de datos de insumos): inicia aquí. Paso 1: se selecciona el insumo y se pide modificarlo.
     private void onModificar() {
         if (seleccionada == null) {
             Alertas.info("Selecciona un insumo de la lista");
@@ -443,7 +443,7 @@ public class InsumosController {
         // Paso 2: el insumo existe y está activo
         ResultadoInventario revision = servicio.revisarParaModificar(seleccionada.getInsumo().getIdInsumo());
         if (!revision.isExitoso()) {
-            // RF-35 · Excepción paso 2: «Insumo no encontrado» o «Error de conexión»; no se abre el formulario.
+            // RF-53 · Excepción paso 2: «Insumo no encontrado» o «Error de conexión»; no se abre el formulario.
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
                 seleccionada = null;
@@ -479,7 +479,7 @@ public class InsumosController {
         ApoyoVista.mostrarModal(raiz, tblInsumos.getScene().getWindow(), titulo);
 
         if (formulario.seGuardo()) {
-            // RF-34 / RF-35 · Paso final: informa el éxito y actualiza la tabla.
+            // RF-52 / RF-53 · Paso final: informa el éxito y actualiza la tabla.
             Alertas.info(formulario.getMensajeExito());
         }
         if (formulario.seGuardo() || formulario.debeRecargarLista()) {
@@ -503,10 +503,10 @@ public class InsumosController {
         }
     }
 
-    // ===================== Baja (RF-36) =====================
+    // ===================== Baja (RF-54) =====================
 
     @FXML
-    // RF-36 (Eliminación de insumo del inventario): inicia aquí. Paso 1: se selecciona el insumo y se pide darlo de baja.
+    // RF-54 (Eliminación de insumo del inventario): inicia aquí. Paso 1: se selecciona el insumo y se pide darlo de baja.
     private void onDarDeBaja() {
         if (seleccionada == null) {
             Alertas.info("Selecciona un insumo de la lista");
@@ -515,7 +515,7 @@ public class InsumosController {
         int idInsumo = seleccionada.getInsumo().getIdInsumo();
         ResultadoInventario revision = servicio.prepararBaja(idInsumo);
         if (!revision.isExitoso()) {
-            // RF-36 · Excepción paso 2: insumo no encontrado o ya dado de baja.
+            // RF-54 · Excepción paso 2: insumo no encontrado o ya dado de baja.
             Alertas.aviso(revision.getMensaje());
             if (revision.isRecargarLista()) {
                 seleccionada = null;
@@ -523,16 +523,16 @@ public class InsumosController {
             }
             return;
         }
-        // RF-36 · Pasos 4 y 5: confirmación; si la administradora cancela, el insumo queda sin cambios.
+        // RF-54 · Pasos 4 y 5: confirmación; si la administradora cancela, el insumo queda sin cambios.
         if (!Alertas.confirmarDoble("¿Dar de baja este insumo?", revision.getMensaje())) {
             return;
         }
         ResultadoInventario resultado = servicio.darDeBaja(idInsumo);
         if (resultado.isExitoso()) {
-            // RF-36 · Paso 7: informa el éxito y actualiza la tabla.
+            // RF-54 · Paso 7: informa el éxito y actualiza la tabla.
             Alertas.info(resultado.getMensaje());
         } else {
-            // RF-36 · Excepción paso 6: «No fue posible dar de baja el insumo».
+            // RF-54 · Excepción paso 6: «No fue posible dar de baja el insumo».
             Alertas.error(resultado.getMensaje());
         }
         seleccionada = null;
@@ -540,7 +540,7 @@ public class InsumosController {
     }
 
     @FXML
-    // RF-34 · Excepción paso 5: reactivar el insumo dado de baja en lugar de crear uno nuevo.
+    // RF-52 · Excepción paso 5: reactivar el insumo dado de baja en lugar de crear uno nuevo.
     private void onReactivar() {
         if (seleccionada == null) {
             return;

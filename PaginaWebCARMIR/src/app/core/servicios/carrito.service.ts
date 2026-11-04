@@ -9,14 +9,14 @@ export const PIEZAS_MAXIMAS = 20;
 export const RENGLONES_MAXIMOS = 20;
 
 /**
- * Carrito de compras (RF-5 a RF-8 y RNF-7).
+ * Carrito de compras (RF-6 a RF-9 y RNF-7).
  * Guarda los postres en el navegador (localStorage) para que no se pierdan al recargar,
  * cerrar la pestaña o perder el internet, hasta que el pedido se envía.
  * El encabezado lee "articulos" para mostrar el contador.
  */
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
-  // RF-5 / RF-6 · Paso 3: recupera el carrito guardado en el navegador o empieza uno vacío (RNF-7).
+  // RF-6 / RF-7 · Paso 3: recupera el carrito guardado en el navegador o empieza uno vacío (RNF-7).
   readonly articulos = signal<ArticuloCarrito[]>(this.leerGuardado());
   // false si el navegador no deja guardar (modo privado o almacenamiento bloqueado)
   readonly guardadoDisponible = signal(true);
@@ -49,42 +49,42 @@ export class CarritoService {
     return Math.round(total * 100) / 100;
   }
 
-  // ===================== Cambios (RF-6, RF-7, RF-8) =====================
+  // ===================== Cambios (RF-7, RF-8, RF-9) =====================
 
   /**
-   * RF-6: agrega el postre. Si ya hay uno con la misma configuración, mensaje e indicaciones,
+   * RF-7: agrega el postre. Si ya hay uno con la misma configuración, mensaje e indicaciones,
    * solo suma las piezas (paso 4). Si pasa del máximo, la cantidad se ajusta al máximo (paso 5).
    */
-  // RF-6 (Registro de producto en el carrito): inicia aquí, después de que RF-3 validó el postre con la API (paso 2).
+  // RF-7 (Registro de producto en el carrito): inicia aquí, después de que RF-3 validó el postre con la API (paso 2).
   agregar(nuevo: ArticuloNuevo): ResultadoAgregar {
     const lista = this.articulos().slice();
-    // RF-6 · Paso 4: ¿el carrito ya tiene el mismo postre con la misma configuración?
+    // RF-7 · Paso 4: ¿el carrito ya tiene el mismo postre con la misma configuración?
     for (let i = 0; i < lista.length; i++) {
       if (sonIguales(lista[i], nuevo)) {
-        // RF-6 · Paso 5: ya estaba, se incrementa su cantidad.
+        // RF-7 · Paso 5: ya estaba, se incrementa su cantidad.
         const suma = lista[i].cantidad + nuevo.cantidad;
-        // RF-6 · Excepción paso 5: si excede el máximo por producto, se ajusta al máximo y se informa.
+        // RF-7 · Excepción paso 5: si excede el máximo por producto, se ajusta al máximo y se informa.
         const cantidad = Math.min(suma, PIEZAS_MAXIMAS);
         lista[i] = { ...lista[i], cantidad: cantidad, precioUnitario: nuevo.precioUnitario };
         this.guardar(lista);
         return { juntado: true, cantidadAjustada: suma > PIEZAS_MAXIMAS };
       }
     }
-    // RF-6 · Paso 5: se agrega como renglón nuevo con su precio.
+    // RF-7 · Paso 5: se agrega como renglón nuevo con su precio.
     const cantidad = Math.min(nuevo.cantidad, PIEZAS_MAXIMAS);
     lista.push({ ...nuevo, cantidad: cantidad, id: crearId() });
-    // RF-6 · Paso 6: al guardar se recalcula el total y el contador «Carrito (N)» (paso 7).
+    // RF-7 · Paso 6: al guardar se recalcula el total y el contador «Carrito (N)» (paso 7).
     this.guardar(lista);
     return { juntado: false, cantidadAjustada: nuevo.cantidad > PIEZAS_MAXIMAS };
   }
 
   /**
-   * RF-7: cambia la personalización de un renglón (conserva su id). false si ya no está.
+   * RF-8: cambia la personalización de un renglón (conserva su id). false si ya no está.
    * Si después del cambio queda igual a otro renglón, se juntan en uno solo.
    */
-  // RF-7 · Paso 7: actualiza el postre editado en el carrito.
+  // RF-8 · Paso 7: actualiza el postre editado en el carrito.
   reemplazar(id: string, nuevo: ArticuloNuevo): boolean {
-    // RF-7 · Excepción paso 2: el producto ya no está en el carrito.
+    // RF-8 · Excepción paso 2: el producto ya no está en el carrito.
     if (this.buscar(id) === null) {
       return false;
     }
@@ -113,8 +113,8 @@ export class CarritoService {
     return true;
   }
 
-  // RF-7: nueva cantidad (de 1 al máximo). false si el producto ya no está en el carrito.
-  // RF-7 · Paso 7: actualiza la cantidad del renglón.
+  // RF-8: nueva cantidad (de 1 al máximo). false si el producto ya no está en el carrito.
+  // RF-8 · Paso 7: actualiza la cantidad del renglón.
   cambiarCantidad(id: string, cantidad: number): boolean {
     const lista = this.articulos().slice();
     for (let i = 0; i < lista.length; i++) {
@@ -124,12 +124,12 @@ export class CarritoService {
         return true;
       }
     }
-    // RF-7 · Excepción paso 2: el producto ya no está en el carrito.
+    // RF-8 · Excepción paso 2: el producto ya no está en el carrito.
     return false;
   }
 
-  // RF-8: quita un renglón. false si ya no estaba.
-  // RF-8 · Paso 5: elimina el producto seleccionado.
+  // RF-9: quita un renglón. false si ya no estaba.
+  // RF-9 · Paso 5: elimina el producto seleccionado.
   quitar(id: string): boolean {
     const lista: ArticuloCarrito[] = [];
     let encontrado = false;
@@ -143,17 +143,17 @@ export class CarritoService {
     if (encontrado) {
       this.guardar(lista);
     }
-    // RF-8 · Excepción paso 2: si ya no estaba, regresa false y la página lo avisa.
+    // RF-9 · Excepción paso 2: si ya no estaba, regresa false y la página lo avisa.
     return encontrado;
   }
 
-  // RF-8: vaciar el carrito (también al terminar el pedido, RF-11 paso 7)
-  // RF-8 · Paso 5: elimina todos los productos («Vaciar carrito»).
+  // RF-9: vaciar el carrito (también al terminar el pedido, RF-12 paso 7)
+  // RF-9 · Paso 5: elimina todos los productos («Vaciar carrito»).
   vaciar(): void {
     this.guardar([]);
   }
 
-  // RF-5 paso 4: la API dio un precio nuevo para el renglón de esa posición
+  // RF-6 paso 4: la API dio un precio nuevo para el renglón de esa posición
   actualizarPrecio(posicion: number, precioUnitario: number): void {
     const lista = this.articulos().slice();
     if (posicion >= 0 && posicion < lista.length && lista[posicion].precioUnitario !== precioUnitario) {
@@ -164,14 +164,14 @@ export class CarritoService {
 
   // ===================== Guardado en el navegador =====================
 
-  // RF-6 · Paso 6 / RF-7 · Paso 7 / RF-8 · Paso 6: guarda el carrito y recalcula total y contador.
+  // RF-7 · Paso 6 / RF-8 · Paso 7 / RF-9 · Paso 6: guarda el carrito y recalcula total y contador.
   private guardar(lista: ArticuloCarrito[]): void {
     this.articulos.set(lista);
     try {
       localStorage.setItem(LLAVE_ALMACEN, JSON.stringify(lista));
       this.guardadoDisponible.set(true);
     } catch {
-      // RF-6 · Excepción paso 3: el navegador no deja guardar; la página avisa revisar la configuración del navegador.
+      // RF-7 · Excepción paso 3: el navegador no deja guardar; la página avisa revisar la configuración del navegador.
       // Si el navegador no deja guardar (modo privado), el carrito solo vive mientras la página esté abierta
       this.guardadoDisponible.set(false);
     }
@@ -199,7 +199,7 @@ export class CarritoService {
       }
       return lista;
     } catch {
-      // RF-5 · Excepción paso 2: sin carrito guardado o dañado, se empieza vacío («Tu carrito está vacío»).
+      // RF-6 · Excepción paso 2: sin carrito guardado o dañado, se empieza vacío («Tu carrito está vacío»).
       // Datos dañados o almacenamiento bloqueado: se empieza con el carrito vacío
     }
     return [];
@@ -254,6 +254,7 @@ function sonIguales(articulo: ArticuloCarrito, nuevo: ArticuloNuevo): boolean {
   return (
     claveDeOpciones(articulo.opciones) === claveDeOpciones(nuevo.opciones) &&
     articulo.dedicatoria === nuevo.dedicatoria &&
+    articulo.mensajeEnTopper === nuevo.mensajeEnTopper &&
     articulo.comentario === nuevo.comentario
   );
 }

@@ -35,7 +35,7 @@ public class ReporteDAOMySQL implements ReporteDAO {
     // Máximo de movimientos "por revisar" que se listan
     private static final int MAXIMO_POR_REVISAR = 200;
 
-    // ===================== RF-46 · Ingresos y gastos =====================
+    // ===================== RF-65 · Ingresos y gastos =====================
 
     // Pagos validados del periodo, separados en anticipo, liquidación y pago total.
     // Un pago es "Anticipo" si, antes de él, lo pagado del pedido aún no cubría el anticipo requerido.
@@ -273,7 +273,7 @@ public class ReporteDAOMySQL implements ReporteDAO {
         return dias.get((int) posicion);
     }
 
-    // ===================== RF-47 · Productos más vendidos =====================
+    // ===================== RF-66 · Productos más vendidos =====================
 
     // Ventas que cuentan: pedidos pagados (o en un estado posterior), sin cancelación ni baja,
     // solicitados dentro del periodo. El filtro de categoría se agrega solo si se eligió una.

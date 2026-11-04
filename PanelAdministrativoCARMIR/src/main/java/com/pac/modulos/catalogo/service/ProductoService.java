@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reglas de los productos del catálogo (RF-17 a RF-20).
+ * Reglas de los productos del catálogo (RF-28 a RF-31).
  *
  * Un producto es un Postre con nombre comercial: una combinación única de opciones
  * (ClaveConfiguracion). Su precio se calcula con las recetas de esas opciones.
@@ -66,28 +66,28 @@ public class ProductoService {
         exclusionDAO = DAOFactory.crearExclusionDAO();
     }
 
-    // ===================== Consultas (RF-17) =====================
+    // ===================== Consultas (RF-28) =====================
 
     // Busca productos por nombre o SKU; idCategoria 0 = todas; visibilidad: constantes de ProductoDAO
-    // RF-17 · Paso 3: consulta los productos que cumplen el criterio (nombre o SKU, categoría y estado).
+    // RF-28 · Paso 3: consulta los productos que cumplen el criterio (nombre o SKU, categoría y estado).
     public List<Producto> buscar(String texto, int idCategoria, int visibilidad) throws DAOException {
         return productoDAO.buscar(texto, idCategoria, visibilidad);
     }
 
     // Lee un producto con sus opciones; devuelve null si ya no existe
-    // RF-17 · Paso 6 / RF-19 · Paso 2: lee el producto con sus opciones (null = ya no existe).
+    // RF-28 · Paso 6 / RF-30 · Paso 2: lee el producto con sus opciones (null = ya no existe).
     public Producto buscarPorId(int idPostre) throws DAOException {
         return productoDAO.buscarPorId(idPostre);
     }
 
     // Lee la categoría elegida en el filtro; devuelve null si ya no existe
-    // RF-17 · Paso 2: valida la categoría elegida en el filtro.
+    // RF-28 · Paso 2: valida la categoría elegida en el filtro.
     public Categoria buscarCategoria(int idCategoria) throws DAOException {
         return categoriaDAO.buscarPorId(idCategoria);
     }
 
     // Categorías activas para el formulario de alta
-    // RF-18 · Paso 2: categorías activas para el formulario.
+    // RF-29 · Paso 2: categorías activas para el formulario.
     public List<Categoria> listarCategoriasActivas() throws DAOException {
         return categoriaDAO.buscar("", EstadoRegistro.ACTIVA);
     }
@@ -107,8 +107,8 @@ public class ProductoService {
         return new ConfiguracionPostre(caracteristicas, activas);
     }
 
-    // Lista los datos opcionales que le faltan a un producto (para la ficha de RF-17)
-    // RF-17 · Excepción paso 7: datos opcionales que faltan (por ejemplo «Sin imagen»).
+    // Lista los datos opcionales que le faltan a un producto (para la ficha de RF-28)
+    // RF-28 · Excepción paso 7: datos opcionales que faltan (por ejemplo «Sin imagen»).
     public List<String> camposIncompletos(Producto producto) {
         List<String> faltantes = new ArrayList<String>();
         if (!producto.tieneFotografia()) {
@@ -123,9 +123,9 @@ public class ProductoService {
         return faltantes;
     }
 
-    // ===================== Registro (RF-18) =====================
+    // ===================== Registro (RF-29) =====================
 
-    // RF-18 (Registro de producto): inicia aquí la regla de negocio (pasos 5 a 7).
+    // RF-29 (Registro de producto): inicia aquí la regla de negocio (pasos 5 a 7).
     public ResultadoCatalogo registrar(Producto datos) {
         if (!PermisosCatalogo.puedeEditarProductos()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
@@ -133,7 +133,7 @@ public class ProductoService {
 
         // Paso 5: campos obligatorios y fotografía
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF-18 · Excepción paso 5: campos incompletos, precio o fotografía no válidos.
+        // RF-29 · Excepción paso 5: campos incompletos, precio o fotografía no válidos.
         if (validacion != null) {
             return validacion;
         }
@@ -142,39 +142,39 @@ public class ProductoService {
         try {
             // Paso 6: categoría activa
             ResultadoCatalogo categoria = revisarCategoria(datos.getIdCategoria());
-            // RF-18 · Excepción paso 6: «La categoría seleccionada ya no está disponible».
+            // RF-29 · Excepción paso 6: «La categoría seleccionada ya no está disponible».
             if (categoria != null) {
                 return categoria;
             }
 
             // Reglas de personalización (obligatorias, presupuesto, exclusiones)
             ResultadoCatalogo configuracion = revisarConfiguracion(datos);
-            // RF-18 · Excepción: las opciones elegidas no cumplen las reglas de la categoría (obligatorias, presupuesto, exclusiones).
+            // RF-29 · Excepción: las opciones elegidas no cumplen las reglas de la categoría (obligatorias, presupuesto, exclusiones).
             if (configuracion != null) {
                 return configuracion;
             }
 
             // Paso 6: nombre repetido
-            // RF-18 · Excepción paso 6: «El producto ya está registrado».
+            // RF-29 · Excepción paso 6: «El producto ya está registrado».
             if (productoDAO.buscarPorNombre(datos.getNombre()) != null) {
                 return ResultadoCatalogo.error(MSG_YA_REGISTRADO, ResultadoCatalogo.CAMPO_NOMBRE);
             }
 
             // La misma combinación de opciones ya existe en otro postre
             mismaClave = productoDAO.buscarPorClave(datos.getClaveConfiguracion());
-            // RF-18 · Excepción: ya existe un producto con exactamente las mismas opciones.
+            // RF-29 · Excepción: ya existe un producto con exactamente las mismas opciones.
             if (mismaClave != null && mismaClave.getNombre() != null) {
                 return ResultadoCatalogo.existente("Ya existe un producto con exactamente las mismas opciones: «"
                         + mismaClave.getNombre() + "» (" + mismaClave.getSku() + ").",
                         mismaClave.getIdPostre(), ResultadoCatalogo.CAMPO_OPCIONES);
             }
         } catch (DAOException e) {
-            // RF-18 · Excepción: sin conexión, «Error de conexión».
+            // RF-29 · Excepción: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
         // Paso 7: se guarda (Postre + PostreOpcion en una transacción)
-        // RF-18 · Paso 7: almacena el producto, genera su SKU y lo asocia a su categoría.
+        // RF-29 · Paso 7: almacena el producto, genera su SKU y lo asocia a su categoría.
         try {
             if (mismaClave != null) {
                 // Un cliente ya había armado este postre desde la web (sin nombre):
@@ -185,25 +185,25 @@ public class ProductoService {
                 productoDAO.insertar(datos);
             }
         } catch (DAOException e) {
-            // RF-18 · Excepción paso 7: «No fue posible registrar el producto».
+            // RF-29 · Excepción paso 7: «No fue posible registrar el producto».
             return ResultadoCatalogo.error(MSG_NO_REGISTRADO, ResultadoCatalogo.CAMPO_CONEXION);
         }
-        // RF-18 · Paso 8: informa el éxito.
+        // RF-29 · Paso 8: informa el éxito.
         return ResultadoCatalogo.correcto("El producto «" + datos.getNombre() + "» se registró con el SKU "
                 + datos.getSku());
     }
 
-    // ===================== Modificación (RF-19) =====================
+    // ===================== Modificación (RF-30) =====================
 
     // confirmado = ya se aceptó el aviso de precio en pedidos vigentes
-    // RF-19 (Modificación de producto): inicia aquí la regla de negocio (pasos 5 a 8).
+    // RF-30 (Modificación de producto): inicia aquí la regla de negocio (pasos 5 a 8).
     public ResultadoCatalogo modificar(Producto datos, boolean confirmado) {
         if (!PermisosCatalogo.puedeEditarProductos()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
 
         ResultadoCatalogo validacion = validarCampos(datos);
-        // RF-19 · Excepción paso 5: datos inválidos.
+        // RF-30 · Excepción paso 5: datos inválidos.
         if (validacion != null) {
             return validacion;
         }
@@ -214,13 +214,13 @@ public class ProductoService {
         try {
             // Paso 6: el producto sigue existiendo
             actual = productoDAO.buscarPorId(datos.getIdPostre());
-            // RF-19 · Excepción paso 6: «El producto ya no existe».
+            // RF-30 · Excepción paso 6: «El producto ya no existe».
             if (actual == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_YA_NO_EXISTE);
             }
 
             ResultadoCatalogo categoria = revisarCategoria(datos.getIdCategoria());
-            // RF-19 · Excepción paso 6: la categoría no está activa.
+            // RF-30 · Excepción paso 6: la categoría no está activa.
             if (categoria != null) {
                 return categoria;
             }
@@ -231,7 +231,7 @@ public class ProductoService {
             }
 
             Producto conMismoNombre = productoDAO.buscarPorNombre(datos.getNombre());
-            // RF-19 · Excepción paso 6: el nombre ya pertenece a otro producto.
+            // RF-30 · Excepción paso 6: el nombre ya pertenece a otro producto.
             if (conMismoNombre != null && conMismoNombre.getIdPostre() != datos.getIdPostre()) {
                 return ResultadoCatalogo.error(MSG_YA_REGISTRADO, ResultadoCatalogo.CAMPO_NOMBRE);
             }
@@ -240,7 +240,7 @@ public class ProductoService {
                     || datos.getIdCategoria() != actual.getIdCategoria();
             if (cambiaronOpciones) {
                 // Los pedidos guardan el IdPostre: si ya se vendió, sus opciones no se tocan
-                // RF-19 · Excepción: el producto ya se vendió; sus opciones no se pueden cambiar.
+                // RF-30 · Excepción: el producto ya se vendió; sus opciones no se pueden cambiar.
                 if (productoDAO.tienePedidos(datos.getIdPostre())) {
                     return ResultadoCatalogo.error(MSG_OPCIONES_CON_PEDIDOS, ResultadoCatalogo.CAMPO_OPCIONES);
                 }
@@ -256,14 +256,14 @@ public class ProductoService {
             }
             foliosVigentes = productoDAO.listarFoliosVigentes(datos.getIdPostre());
         } catch (DAOException e) {
-            // RF-19 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-30 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
 
         // Paso 7: si cambia el precio y hay pedidos vigentes, se avisa que conservan su precio
         double precioNuevo = ConfiguracionPostre.calcularPrecio(datos.getOpciones());
         boolean cambioPrecio = Math.abs(precioNuevo - actual.getPrecioVenta()) > 0.004;
-        // RF-19 · Paso 7: cambió el precio y hay pedidos vigentes; se pide confirmar (si no, regresa al formulario).
+        // RF-30 · Paso 7: cambió el precio y hay pedidos vigentes; se pide confirmar (si no, regresa al formulario).
         if (cambioPrecio && !foliosVigentes.isEmpty() && !confirmado) {
             String mensaje = "El precio del producto cambia y está en pedidos vigentes ("
                     + ValidacionCatalogo.unirFolios(foliosVigentes) + "). Esos pedidos conservarán su precio original."
@@ -275,30 +275,30 @@ public class ProductoService {
         try {
             productoDAO.actualizar(datos, cambiaronOpciones);
         } catch (DAOException e) {
-            // RF-19 · Excepción paso 8: «No fue posible actualizar el producto».
+            // RF-30 · Excepción paso 8: «No fue posible actualizar el producto».
             return ResultadoCatalogo.error(MSG_NO_ACTUALIZADO, ResultadoCatalogo.CAMPO_CONEXION);
         }
-        // RF-19 · Paso 8: informa el éxito.
+        // RF-30 · Paso 8: informa el éxito.
         return ResultadoCatalogo.correcto("El producto «" + datos.getNombre() + "» se actualizó correctamente");
     }
 
-    // ===================== Baja (RF-20) =====================
+    // ===================== Baja (RF-31) =====================
 
     // Pasos 2 y 3: revisa si se puede dar de baja y arma la confirmación doble
-    // RF-20 (Eliminación de producto): inicia aquí la regla de negocio (pasos 2 a 4).
+    // RF-31 (Eliminación de producto): inicia aquí la regla de negocio (pasos 2 a 4).
     public ResultadoCatalogo prepararBaja(int idPostre) {
         if (!PermisosCatalogo.puedeEditarProductos()) {
             return ResultadoCatalogo.error(PermisosCatalogo.MSG_SOLO_CONSULTA, null);
         }
         try {
             Producto producto = productoDAO.buscarPorId(idPostre);
-            // RF-20 · Excepción paso 2: «Producto no encontrado».
+            // RF-31 · Excepción paso 2: «Producto no encontrado».
             if (producto == null) {
                 return ResultadoCatalogo.noEncontrado(MSG_NO_ENCONTRADO);
             }
 
             List<Integer> folios = productoDAO.listarFoliosVigentes(idPostre);
-            // RF-20 · Excepción paso 3: «El producto tiene pedidos en curso» con sus folios.
+            // RF-31 · Excepción paso 3: «El producto tiene pedidos en curso» con sus folios.
             if (!folios.isEmpty()) {
                 return ResultadoCatalogo.error(MSG_EN_PEDIDOS + ": " + ValidacionCatalogo.unirFolios(folios), null);
             }
@@ -312,23 +312,23 @@ public class ProductoService {
                 mensaje = mensaje + "El producto no tiene pedidos, así que se ELIMINARÁ de la base de datos."
                         + " Esta acción no se puede deshacer.";
             }
-            // RF-20 · Paso 4: mensaje de la confirmación doble (inhabilitar o eliminar).
+            // RF-31 · Paso 4: mensaje de la confirmación doble (inhabilitar o eliminar).
             return ResultadoCatalogo.bajaPosible(mensaje, !conPedidos);
         } catch (DAOException e) {
-            // RF-20 · Excepción paso 2: sin conexión, «Error de conexión».
+            // RF-31 · Excepción paso 2: sin conexión, «Error de conexión».
             return ResultadoCatalogo.error(MSG_ERROR_CONEXION, ResultadoCatalogo.CAMPO_CONEXION);
         }
     }
 
     // Paso 6: registra la baja
-    // RF-20 · Paso 6 (después de que la Administradora confirmó en el paso 5).
+    // RF-31 · Paso 6 (después de que la Administradora confirmó en el paso 5).
     public ResultadoCatalogo darDeBaja(int idPostre) {
         ResultadoCatalogo revision = prepararBaja(idPostre);
         if (!revision.isExitoso()) {
             return revision;
         }
         try {
-            // RF-20 · Paso 6: sin pedidos se elimina; con historial se inhabilita.
+            // RF-31 · Paso 6: sin pedidos se elimina; con historial se inhabilita.
             if (revision.isSeEliminara()) {
                 productoDAO.eliminar(idPostre);
                 return ResultadoCatalogo.correcto("El producto se eliminó correctamente");
@@ -336,7 +336,7 @@ public class ProductoService {
             productoDAO.ocultar(idPostre);
             return ResultadoCatalogo.correcto("El producto se inhabilitó: ya no se muestra en la tienda web");
         } catch (DAOException e) {
-            // RF-20 · Excepción paso 6: «No fue posible dar de baja el producto».
+            // RF-31 · Excepción paso 6: «No fue posible dar de baja el producto».
             return ResultadoCatalogo.error(MSG_NO_DADO_DE_BAJA, null);
         }
     }
@@ -344,7 +344,7 @@ public class ProductoService {
     // ===================== Apoyo =====================
 
     // La categoría debe existir y estar activa; devuelve null si está bien
-    // RF-18 / RF-19 · Paso 6: la categoría debe existir y estar activa.
+    // RF-29 / RF-30 · Paso 6: la categoría debe existir y estar activa.
     private ResultadoCatalogo revisarCategoria(int idCategoria) throws DAOException {
         Categoria categoria = categoriaDAO.buscarPorId(idCategoria);
         if (categoria == null || !categoria.estaActiva()) {
@@ -388,7 +388,7 @@ public class ProductoService {
     }
 
     // Revisa los campos del formulario; devuelve null si todo está bien
-    // RF-18 / RF-19 · Paso 5: campos obligatorios, precios y fotografía.
+    // RF-29 / RF-30 · Paso 5: campos obligatorios, precios y fotografía.
     private ResultadoCatalogo validarCampos(Producto datos) {
         if (datos.getIdCategoria() <= 0) {
             return ResultadoCatalogo.error("Elige la categoría del producto", ResultadoCatalogo.CAMPO_CATEGORIA);
@@ -402,7 +402,7 @@ public class ProductoService {
         }
         // La fotografía es un enlace o un archivo de esta computadora, con formato permitido
         if (datos.tieneFotografia()) {
-            // RF-18 · Excepción paso 5: «Formato o tamaño de imagen no permitido».
+            // RF-29 · Excepción paso 5: «Formato o tamaño de imagen no permitido».
             if (!ValidacionCatalogo.imagenValida(datos.getLinkFotografia())
                     || !ValidacionCatalogo.largoValido(datos.getLinkFotografia(), MAX_ENLACE)) {
                 return ResultadoCatalogo.error(MSG_IMAGEN_NO_PERMITIDA

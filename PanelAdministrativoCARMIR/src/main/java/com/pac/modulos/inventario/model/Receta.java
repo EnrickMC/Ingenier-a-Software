@@ -161,7 +161,7 @@ public class Receta {
         return Math.round(getCosto() * multiplicadorCosto * 100) / 100.0;
     }
 
-    // RF-36 / RF-41: la receta "requiere revisión" si alguno de sus insumos se dio de baja
+    // RF-54 / RF-55: la receta "requiere revisión" si alguno de sus insumos se dio de baja
     public boolean requiereRevision() {
         if (ingredientes.isEmpty()) {
             return insumosDadosDeBaja > 0;

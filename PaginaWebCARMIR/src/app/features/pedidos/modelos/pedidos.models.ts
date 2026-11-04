@@ -4,7 +4,7 @@
  * Los valores de modalidad y método son los de la base de datos (sin acentos).
  */
 
-// ===================== Carrito (RF-5) =====================
+// ===================== Carrito (RF-6) =====================
 
 // disponible | no_disponible | requiere_actualizar | repetido
 export type EstadoArticulo = 'disponible' | 'no_disponible' | 'requiere_actualizar' | 'repetido';
@@ -24,7 +24,7 @@ export interface RevisionCarrito {
   puedeContinuar: boolean;
 }
 
-// ===================== Entrega y pago (RF-9 y RF-10) =====================
+// ===================== Entrega y pago (RF-10 y RF-11) =====================
 
 export interface ReglasEntrega {
   nombreNegocio: string;
@@ -51,7 +51,7 @@ export interface Cobertura {
 }
 
 export type ModalidadEntrega = 'Recoger en tienda' | 'Envio a domicilio';
-// «Depósito» ya no se ofrece: solo efectivo en la tienda o transferencia
+// Solo efectivo en la tienda o transferencia
 export type MetodoPago = 'Efectivo' | 'Transferencia';
 export type ModalidadPago = 'Anticipo' | 'Pago total';
 
@@ -84,7 +84,7 @@ export interface DatosPago {
   modalidad: ModalidadPago;
 }
 
-// ===================== Registro del pedido (RF-11) =====================
+// ===================== Registro del pedido (RF-12) =====================
 
 export interface ArticuloSolicitud {
   idPostre: number;
@@ -154,7 +154,7 @@ export interface PreciosActualizados {
   total: number;
 }
 
-// ===================== Seguimiento (RF-12) =====================
+// ===================== Seguimiento (RF-13) =====================
 
 export interface PasoSeguimiento {
   estado: string;
@@ -222,10 +222,12 @@ export interface ArchivoComprobante {
   contenidoBase64: string;
 }
 
-// RF-12: el cliente manda el enlace, el archivo o ambos (al menos uno)
+// RF-14 · Paso 3: el cliente manda el enlace, el archivo o ambos (al menos uno)
 export interface SolicitudComprobante {
   folio: number;
+  // Uno de los dos: el teléfono o el correo con el que se encontró el pedido
   telefono: string;
+  correo: string;
   monto: number;
   metodo: 'Transferencia';
   referencia: string;

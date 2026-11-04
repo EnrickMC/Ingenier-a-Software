@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<!-- Módulo 4 · Gestión de Pedidos (RF-21 a RF-27): lista a la izquierda y detalle a la derecha -->
+<!-- Módulo 4 · Gestión de Pedidos (RF-36 a RF-41): lista a la izquierda y detalle a la derecha -->
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.pac.modulos.pedidos.controller.PedidosController"
       stylesheets="@../../css/usuarios.css, @../../css/catalogo.css, @../../css/inventario.css, @../../css/pedidos.css"
@@ -38,7 +38,7 @@
         <graphic><FontIcon iconLiteral="bi-eye-fill"/></graphic>
     </Label>
 
-    <!-- Filtros (RF-22): si la ventana es angosta, los botones pasan a un segundo renglón -->
+    <!-- Filtros (RF-37): si la ventana es angosta, los botones pasan a un segundo renglón -->
     <VBox styleClass="tarjeta" spacing="10">
     <HBox spacing="10" alignment="TOP_LEFT">
     <FlowPane HBox.hgrow="ALWAYS" minWidth="0" hgap="10" vgap="10" alignment="CENTER_LEFT">

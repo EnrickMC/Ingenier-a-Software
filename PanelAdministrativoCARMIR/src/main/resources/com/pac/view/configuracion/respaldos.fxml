@@ -46,7 +46,7 @@
         </HBox>
     </VBox>
 
-    <!-- Notificaciones al cliente: datos de WhatsApp y correo (RF-32), con su propio controlador -->
+    <!-- Notificaciones al cliente: datos de WhatsApp y correo (RF-47), con su propio controlador -->
     <fx:include fx:id="integraciones" source="integraciones.fxml"/>
 
     <!-- Respaldos -->

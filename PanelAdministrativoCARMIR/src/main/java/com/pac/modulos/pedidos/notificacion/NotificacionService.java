@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * PATRÓN SINGLETON (fachada de las notificaciones, RF-32).
+ * PATRÓN SINGLETON (fachada de las notificaciones, RF-47).
  *
  * Después de cada evento del pedido (aprobación, modificación, cancelación, baja, pago y cambio de estado)
  * los servicios llaman a notificar(). Este método arma el mensaje, revisa el teléfono y el correo del
@@ -57,7 +57,7 @@ public class NotificacionService {
     /**
      * Avisa al cliente por WhatsApp y correo.
      * Devuelve un aviso para mostrar a la Administradora (por ejemplo si no hay canales válidos) o null.
-     // RF-32 (Notificaciones por WhatsApp y correo electrónico): inicia aquí. Paso 1: recibe el evento del pedido.
+     // RF-47 (Notificaciones por WhatsApp y correo electrónico): inicia aquí. Paso 1: recibe el evento del pedido.
      */
     public String notificar(int folio, String tipoEvento, String detalle) {
         // Paso 2: el pedido existe y se leen los datos de contacto
@@ -68,7 +68,7 @@ public class NotificacionService {
             System.out.println("Notificaciones: no se pudo leer el pedido " + folio + ": " + e.getMessage());
             return null;
         }
-        // RF-32 · Excepción paso 2: el pedido no existe; se descarta el aviso y se registra el error.
+        // RF-47 · Excepción paso 2: el pedido no existe; se descarta el aviso y se registra el error.
         if (pedido == null) {
             System.out.println("Notificaciones: el pedido " + folio + " no existe; se descarta el aviso");
             return null;
@@ -82,7 +82,8 @@ public class NotificacionService {
         List<Notificacion> avisos = new ArrayList<Notificacion>();
         int canalesValidos = 0;
 
-        // Un canal apagado en Configuración (o sin configurar en modo real) no se usa y no genera avisos fallidos
+        // RF-47 · Excepción paso 3: un canal apagado en Configuración (RF-71) o sin configurar en modo real
+        // no se usa y no genera avisos fallidos
         DatosNotificaciones datos = ConfiguracionNotificaciones.getInstancia().getDatos();
         boolean usaWhatsApp = datos.isWhatsAppActivo();
         boolean usaCorreo = datos.isCorreoActivo();
@@ -90,7 +91,7 @@ public class NotificacionService {
         String telefono = pedido.getCliente().getTelefono();
         if (usaWhatsApp) {
             Notificacion whatsapp = crear(folio, tipoEvento, Notificacion.CANAL_WHATSAPP, telefono, mensaje);
-            // RF-32 · Paso 3: teléfono válido, se usa WhatsApp.
+            // RF-47 · Paso 3: teléfono válido, se usa WhatsApp.
             if (telefono != null && telefono.matches(PATRON_TELEFONO)) {
                 canalesValidos++;
             } else {
@@ -102,7 +103,7 @@ public class NotificacionService {
         String correo = pedido.getCliente().getCorreo();
         if (usaCorreo && correo != null && !correo.isBlank()) {
             Notificacion aviso = crear(folio, tipoEvento, Notificacion.CANAL_CORREO, correo.trim(), mensaje);
-            // RF-32 · Paso 3: correo válido, se usa correo electrónico.
+            // RF-47 · Paso 3: correo válido, se usa correo electrónico.
             if (correo.trim().matches(PATRON_CORREO)) {
                 canalesValidos++;
             } else {
@@ -120,7 +121,7 @@ public class NotificacionService {
         if (!usaWhatsApp && !usaCorreo) {
             return null;
         }
-        // RF-32 · Excepción paso 3: no queda ningún canal válido; se avisa a la administradora.
+        // RF-47 · Excepción paso 3: no queda ningún canal válido; se avisa a la administradora.
         if (canalesValidos == 0) {
             return MSG_SIN_CANALES + " (pedido #" + folio + ").";
         }
@@ -128,7 +129,7 @@ public class NotificacionService {
     }
 
     // Reenvía un aviso que quedó "Fallido" (botón «Reenviar» del detalle del pedido)
-    // RF-32 · Excepción paso 6: «Reenviar» un aviso que quedó «Fallido».
+    // RF-47 · Excepción paso 6: «Reenviar» un aviso que quedó «Fallido».
     public boolean reenviar(int idNotificacion) {
         Notificacion aviso;
         Pedido pedido;
@@ -154,7 +155,7 @@ public class NotificacionService {
     }
 
     // Al abrir el panel se vuelven a intentar los avisos que quedaron "Pendiente"
-    // RF-32 · Excepción paso 5: se reintentan los avisos que quedaron «Pendiente de reenvío».
+    // RF-47 · Excepción paso 5: se reintentan los avisos que quedaron «Pendiente de reenvío».
     public void reintentarPendientes() {
         enviarPendientes(false);
     }
@@ -193,7 +194,7 @@ public class NotificacionService {
             if (soloWeb && !TIPO_PEDIDO_WEB.equals(aviso.getTipoEvento())) {
                 continue;
             }
-            // Si el canal está apagado o sin configurar, el aviso se queda como está (sin intentar enviar)
+            // RF-47 · Excepción paso 3: si el canal está apagado o sin configurar, el aviso se queda como está (sin intentar enviar)
             if (Notificacion.CANAL_WHATSAPP.equals(aviso.getCanal()) && !datos.isWhatsAppActivo()) {
                 continue;
             }

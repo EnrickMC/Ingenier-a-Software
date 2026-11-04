@@ -1,19 +1,19 @@
 <div class="contenedor pagina">
   @if (comprobante(); as comprobante) {
-    <!-- RF-11 · Paso 8: comprobante con el folio, el resumen y las instrucciones de pago. -->
+    <!-- RF-12 · Paso 8: comprobante con el folio, el resumen y las instrucciones de pago. -->
     <app-pasos-pedido [actual]="4" />
 
     <section class="panel bloque encabezado-folio" aria-labelledby="titulo-confirmacion">
       <p class="icono" aria-hidden="true">✓</p>
       <h1 id="titulo-confirmacion">¡Recibimos tu pedido!</h1>
       <p class="folio">Folio <strong>#{{ comprobante.folio }}</strong></p>
-      <!-- RF-11 · Paso 6: estado inicial «En proceso de aceptación». -->
+      <!-- RF-12 · Paso 6: estado inicial «En proceso de aceptación». -->
       <p><span class="etiqueta">{{ comprobante.estado }}</span></p>
       <p class="texto">
         Te avisaremos por WhatsApp al {{ comprobante.cliente.telefono }} cuando la repostería apruebe tu pedido.
-        Guarda tu folio: con él y tu teléfono puedes consultar tu pedido en «Mis pedidos».
+        Guarda tu folio: con él y tu teléfono (o tu correo, si lo registraste) puedes consultar tu pedido en «Mis pedidos».
       </p>
-      <!-- RF-11 · Excepción paso 6: doble envío; no se creó un duplicado y se muestra el folio ya generado. -->
+      <!-- RF-12 · Excepción paso 6: doble envío; no se creó un duplicado y se muestra el folio ya generado. -->
       @if (comprobante.repetido) {
         <div class="aviso" role="status"><p>Este pedido ya se había registrado; no se duplicó.</p></div>
       }
@@ -62,12 +62,12 @@
         @if (comprobante.entrega.direccion; as direccion) {
           <p>{{ textoDireccion(direccion) }}</p>
         } @else {
-          <!-- Recoger en tienda: dirección de la tienda -->
+          <!-- RF-12 · Paso 8: recoger en la tienda, dirección de la tienda -->
           <app-ubicacion-tienda titulo="Recoge tu pedido en" />
         }
       </section>
 
-      <!-- RF-10 · Paso 6 / RF-11 · Paso 8: instrucciones de pago según el método elegido. -->
+      <!-- RF-11 · Paso 6 / RF-12 · Paso 8: instrucciones de pago según el método elegido. -->
       <section class="panel bloque instrucciones" aria-labelledby="titulo-instrucciones">
         <h2 id="titulo-instrucciones">Cómo pagar: {{ comprobante.instrucciones.titulo }}</h2>
         <p class="metodo">{{ textoMetodo(comprobante) }} · {{ comprobante.montoParaIniciar | currency: 'MXN' : 'symbol-narrow' }}</p>
@@ -98,7 +98,7 @@
     <app-mensaje-estado
       tipo="info"
       titulo="No hay un pedido reciente"
-      texto="Si ya enviaste tu pedido, puedes consultarlo con tu folio y tu teléfono."
+      texto="Si ya enviaste tu pedido, puedes consultarlo con tu folio y tu teléfono o correo."
     >
       <a routerLink="/mis-pedidos" class="btn btn-principal">Mis pedidos</a>
       <a routerLink="/" class="btn btn-secundario">Ir al catálogo</a>

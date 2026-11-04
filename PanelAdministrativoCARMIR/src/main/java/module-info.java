@@ -24,6 +24,13 @@ module com.pac {
     requires java.net.http;
     requires jakarta.mail;
 
+    // RF-50: vista previa del comprobante de pago (PDF con PDFBox, WEBP con el lector de TwelveMonkeys)
+    requires java.desktop;
+    requires org.apache.pdfbox;
+    // PDFBox escribe sus avisos con commons-logging (sin esta línea no carga en tiempo de ejecución)
+    requires org.apache.commons.logging;
+    requires com.twelvemonkeys.imageio.webp;
+
     // ----- Paquetes generales del panel -----
     opens com.pac to javafx.fxml;
     opens com.pac.controller to javafx.fxml;

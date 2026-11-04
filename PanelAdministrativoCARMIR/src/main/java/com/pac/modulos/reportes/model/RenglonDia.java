@@ -3,7 +3,7 @@ package com.pac.modulos.reportes.model;
 import java.time.LocalDate;
 
 /**
- * Totales de un día dentro del reporte de ingresos y gastos (RF-46).
+ * Totales de un día dentro del reporte de ingresos y gastos (RF-65).
  * También se usa para las barras de la gráfica (una semana o un mes), con su etiqueta.
  */
 public class RenglonDia {
