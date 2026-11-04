@@ -23,8 +23,8 @@
         <HBox spacing="10" alignment="CENTER_LEFT">
             <Label styleClass="tarjeta-titulo" text="Periodo del reporte" minWidth="-Infinity"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnGenerar" text="Generar reporte" styleClass="btn-azul" minWidth="-Infinity" onAction="#onGenerar">
-                <graphic><FontIcon iconLiteral="bi-bar-chart-line-fill"/></graphic>
+            <Button fx:id="btnGenerar" text="Actualizar" styleClass="btn-azul" minWidth="-Infinity" onAction="#onGenerar">
+                <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
             </Button>
             <Button fx:id="btnExportar" text="Exportar a Excel" styleClass="btn-verde" minWidth="-Infinity" onAction="#onExportar">
                 <graphic><FontIcon iconLiteral="bi-file-earmark-spreadsheet-fill"/></graphic>

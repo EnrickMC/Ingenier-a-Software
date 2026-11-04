@@ -110,7 +110,7 @@ public class ReportesController implements ControladorSeccion {
         dpHasta.getEditor().setText(convertidorHasta.toString(hasta));
     }
 
-    // "Generar reporte": revisa el periodo y el permiso, y genera la pestaña visible
+    // "Actualizar": revisa el periodo y el permiso, y genera la pestaña visible
     @FXML
     // RF-65 / RF-66: inicia aquí en la pantalla. Paso 1: la persona indica el periodo y pide generar el reporte.
     private void onGenerar() {
