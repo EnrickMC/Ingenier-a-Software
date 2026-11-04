@@ -8,6 +8,24 @@
   border-color: var(--color-error);
 }
 
+/* Dentro del editor de capas: sin marco, separado por una línea */
+.paso.en-capa {
+  margin: 0;
+  padding: 12px 0 8px;
+  border: none;
+  border-top: 1px solid var(--color-borde);
+  background: transparent;
+}
+
+.paso.en-capa .titulo-paso {
+  font-size: 1rem;
+  color: var(--color-texto-suave);
+}
+
+.paso.en-capa.con-error .titulo-paso {
+  color: var(--color-error);
+}
+
 .titulo-paso {
   float: left;
   width: 100%;

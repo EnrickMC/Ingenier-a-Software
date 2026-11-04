@@ -235,18 +235,34 @@ function esArticuloValido(dato: unknown): dato is ArticuloCarrito {
  * "IdOpcion:Cantidad|..." ordenado por id: la misma ClaveConfiguracion que usan la API y el Panel.
  * Dos postres con la misma clave son el mismo postre en la base de datos.
  */
-export function claveDeOpciones(opciones: { idOpcion: number; cantidad: number }[]): string {
+// Las opciones de las capas 2 en adelante llevan «@capa» (por ejemplo 12:1@2)
+export function claveDeOpciones(opciones: { idOpcion: number; cantidad: number; capa?: number }[]): string {
   const ordenadas = opciones.slice();
   ordenadas.sort(compararOpciones);
   const partes: string[] = [];
   for (const opcion of ordenadas) {
-    partes.push(opcion.idOpcion + ':' + opcion.cantidad);
+    let parte = opcion.idOpcion + ':' + opcion.cantidad;
+    if (opcion.capa !== undefined && opcion.capa > 1) {
+      parte = parte + '@' + opcion.capa;
+    }
+    partes.push(parte);
   }
   return partes.join('|');
 }
 
-function compararOpciones(a: { idOpcion: number }, b: { idOpcion: number }): number {
-  return a.idOpcion - b.idOpcion;
+// Capa de una opción para ordenar (sin capa = Base)
+function capaParaOrden(opcion: { capa?: number }): number {
+  if (opcion.capa === undefined || opcion.capa < 1) {
+    return 1;
+  }
+  return opcion.capa;
+}
+
+function compararOpciones(a: { idOpcion: number; capa?: number }, b: { idOpcion: number; capa?: number }): number {
+  if (a.idOpcion !== b.idOpcion) {
+    return a.idOpcion - b.idOpcion;
+  }
+  return capaParaOrden(a) - capaParaOrden(b);
 }
 
 // Mismo postre con el mismo mensaje e indicaciones

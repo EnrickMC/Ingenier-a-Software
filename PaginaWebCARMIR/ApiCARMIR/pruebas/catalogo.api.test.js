@@ -142,6 +142,11 @@ prueba.test('cotizar rechaza datos mal formados', async function () {
   assert.strictEqual(r3.estado, 400);
   const r4 = await enviar('/catalogo/cotizar', { idPostre: 1, opciones: [], dedicatoria: '<script>' });
   assert.strictEqual(r4.estado, 400);
+  // La misma opción en la misma capa también se rechaza; la capa debe ser un número válido
+  const r5 = await enviar('/catalogo/cotizar', { idPostre: 1, opciones: [{ idOpcion: 1, cantidad: 1, capa: 2 }, { idOpcion: 1, cantidad: 1, capa: 2 }] });
+  assert.strictEqual(r5.estado, 400);
+  const r6 = await enviar('/catalogo/cotizar', { idPostre: 1, opciones: [{ idOpcion: 1, cantidad: 1, capa: 0 }] });
+  assert.strictEqual(r6.estado, 400);
 });
 
 prueba.test('la conexión es de solo lectura', async function () {

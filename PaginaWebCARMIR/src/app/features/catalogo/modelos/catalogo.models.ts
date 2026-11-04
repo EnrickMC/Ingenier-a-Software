@@ -103,6 +103,9 @@ export interface Exclusion {
 export interface OpcionElegida {
   idOpcion: number;
   cantidad: number;
+  // Capa del pastel donde va (1 = Base, 2 = Capa 2...). Sin capa = Base.
+  // Solo Sabor, Cobertura, Color de cobertura y Decoración se eligen por capa.
+  capa?: number;
 }
 
 export interface DatosPersonalizacion {
@@ -121,6 +124,8 @@ export interface ErrorConfiguracion {
   tipo: string;
   idCaracteristica: number;
   mensaje: string;
+  // Capa del pastel donde está el error (solo en las características por capa)
+  capa?: number;
 }
 
 // Lo que se manda a POST /api/catalogo/cotizar

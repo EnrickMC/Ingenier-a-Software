@@ -318,3 +318,80 @@
   font-weight: 400;
   color: var(--color-texto-suave);
 }
+
+/* ===================== Editor de capas (pasteles de 2 o más pisos) ===================== */
+
+.editor-capas {
+  margin: 0 0 16px;
+  padding: 16px;
+}
+
+.encabezado-capas {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.encabezado-capas .titulo-paso {
+  float: none;
+  width: auto;
+  margin: 0 0 10px;
+}
+
+.aplicar-todas {
+  color: var(--color-acento-oscuro);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 4px 0;
+}
+
+.aplicar-todas:hover {
+  text-decoration: underline;
+}
+
+.pestanas-capas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pestana-capa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid var(--color-borde);
+  border-radius: 12px;
+  background: var(--color-blanco);
+  color: var(--color-texto);
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pestana-capa:hover {
+  border-color: var(--color-acento);
+}
+
+.pestana-capa.activa {
+  border-color: var(--color-acento-oscuro);
+  background: #fbe9ea;
+  color: var(--color-acento-oscuro);
+}
+
+.punto-capa {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(74, 59, 50, 0.25);
+  flex-shrink: 0;
+}
+
+.ayuda-capas {
+  margin: 10px 0 4px;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}

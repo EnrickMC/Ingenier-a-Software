@@ -230,7 +230,8 @@ public class DescuentoInsumosService {
             if (!opcion.tieneRecetaActiva()) {
                 continue;
             }
-            double multiplicador = opcion.getCantidadElegida() * opcion.getCantidadPostres();
+            // Por capas: cada capa pone su parte (por ejemplo medio sabor si son 2 capas)
+            double multiplicador = opcion.getCantidadElegida() * opcion.getCantidadPostres() * opcion.getParteCapa();
             if (opcion.isSeEscala()) {
                 multiplicador = multiplicador * factorEscala(opciones, opcion.getIdPostre());
             }
@@ -247,11 +248,12 @@ public class DescuentoInsumosService {
     }
 
     // Factor de escala de un postre = producto de MultiplicadorIngredientes de sus opciones que NO se escalan
+    // (por capas, cada fila pone MultiplicadorIngredientes ^ su parte, igual que la vista de precios)
     private double factorEscala(List<OpcionPedido> opciones, int idPostre) {
         double factor = 1;
         for (OpcionPedido opcion : opciones) {
             if (opcion.getIdPostre() == idPostre && !opcion.isSeEscala()) {
-                factor = factor * opcion.getMultiplicadorIngredientes();
+                factor = factor * Math.pow(opcion.getMultiplicadorIngredientes(), opcion.getParteCapa());
             }
         }
         return factor;

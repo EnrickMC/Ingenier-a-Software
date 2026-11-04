@@ -49,13 +49,21 @@ public class ConsumoPedidoDAOMySQL implements ConsumoPedidoDAO {
 
     @Override
     public List<OpcionPedido> listarOpciones(Connection conexion, int folio) throws DAOException {
+        // ParteCapa: en un pastel por capas, una opción de selección única (por ejemplo el sabor)
+        // lleva 1 / número de capas con esa característica, igual que la vista vw_CostoPrecioPostre
         String sql = "SELECT d.IdPostre, d.Cantidad, po.IdOpcion, po.CantidadElegida, o.NombreOpcion, o.SeEscala, "
-                + "o.MultiplicadorIngredientes, r.IdReceta "
+                + "o.MultiplicadorIngredientes, r.IdReceta, "
+                + "IF(ca.SeleccionMultiple = 1, 1, 1 / fc.Filas) AS ParteCapa "
                 + "FROM DetallePedido d "
                 + "JOIN PostreOpcion po ON po.IdPostre = d.IdPostre "
                 + "JOIN OpcionCaracteristica o ON o.IdOpcion = po.IdOpcion "
+                + "JOIN Caracteristica ca ON ca.IdCaracteristica = o.IdCaracteristica "
+                + "JOIN (SELECT po2.IdPostre, o2.IdCaracteristica, COUNT(*) AS Filas "
+                + "      FROM PostreOpcion po2 JOIN OpcionCaracteristica o2 ON o2.IdOpcion = po2.IdOpcion "
+                + "      GROUP BY po2.IdPostre, o2.IdCaracteristica) fc "
+                + "  ON fc.IdPostre = po.IdPostre AND fc.IdCaracteristica = o.IdCaracteristica "
                 + "LEFT JOIN Receta r ON r.IdOpcion = po.IdOpcion AND r.EstadoReceta = 'Activa' "
-                + "WHERE d.Folio = ? ORDER BY d.IdPostre, po.IdOpcion";
+                + "WHERE d.Folio = ? ORDER BY d.IdPostre, po.IdOpcion, po.NumeroCapa";
         List<OpcionPedido> lista = new ArrayList<OpcionPedido>();
         try {
             PreparedStatement consulta = conexion.prepareStatement(sql);
@@ -71,6 +79,7 @@ public class ConsumoPedidoDAOMySQL implements ConsumoPedidoDAO {
                 opcion.setSeEscala(resultado.getBoolean("SeEscala"));
                 opcion.setMultiplicadorIngredientes(resultado.getDouble("MultiplicadorIngredientes"));
                 opcion.setIdRecetaActiva(resultado.getInt("IdReceta"));    // NULL se lee como 0
+                opcion.setParteCapa(resultado.getDouble("ParteCapa"));
                 lista.add(opcion);
             }
             resultado.close();

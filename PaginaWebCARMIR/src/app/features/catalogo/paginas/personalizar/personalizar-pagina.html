@@ -83,18 +83,69 @@
             </div>
           }
 
-          <!-- RF-3 · Pasos 3 y 4: una tarjeta por característica en su orden de muestra. -->
-          @for (caracteristica of info.caracteristicas; track caracteristica.idCaracteristica) {
-            <app-selector-caracteristica
-              [caracteristica]="caracteristica"
-              [seleccion]="seleccion()"
-              [exclusiones]="info.exclusiones"
-              [puntosTotales]="puntosDe(caracteristica)"
-              [error]="errorDe(caracteristica)"
-              [esGelatina]="esGelatina()"
-              (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
-              (cantidadCambiada)="cambiarCantidadOpcion($event)"
-            />
+          <!-- RF-3 · Pasos 3 y 4: una tarjeta por característica en su orden de muestra. En los pasteles de 2 o más
+               pisos, Sabor, Cobertura, Color de cobertura y Decoración se juntan en el editor de capas. -->
+          @for (bloque of bloques(); track $index) {
+            @if (bloque.esCapas) {
+              <section class="editor-capas panel" aria-labelledby="titulo-capas">
+                <div class="encabezado-capas">
+                  <h2 id="titulo-capas" class="titulo-paso">Sabores y coberturas por capa</h2>
+                  <!-- RF-3 · Paso 4: copia el sabor, la cobertura y el color de esta capa a las demás. -->
+                  <button
+                    type="button"
+                    class="boton-texto aplicar-todas"
+                    title="Copia el sabor, la cobertura y el color de esta capa a las demás"
+                    (click)="aplicarATodas()"
+                  >
+                    Aplicar a todas
+                  </button>
+                </div>
+                <!-- RF-3 · Paso 4: una pestaña por capa (de abajo hacia arriba). -->
+                <div class="pestanas-capas" role="tablist" aria-label="Capas del pastel">
+                  @for (capa of listaCapas(); track capa) {
+                    <button
+                      type="button"
+                      role="tab"
+                      class="pestana-capa"
+                      [class.activa]="capa === capaActiva()"
+                      [attr.aria-selected]="capa === capaActiva()"
+                      (click)="elegirCapa(capa)"
+                    >
+                      <span class="punto-capa" [style.background-color]="colorDeCapa(capa)" aria-hidden="true"></span>
+                      {{ textoCapa(capa) }}
+                    </button>
+                  }
+                </div>
+                <p class="ayuda-capas">
+                  Estás eligiendo la capa <strong>{{ textoCapa(capaActiva()) }}</strong>. Las velas y el topper siempre van
+                  hasta arriba.
+                </p>
+                @for (caracteristica of caracteristicasDeCapa(); track caracteristica.idCaracteristica) {
+                  <app-selector-caracteristica
+                    [caracteristica]="caracteristica"
+                    [seleccion]="seleccionVisible()"
+                    [exclusiones]="info.exclusiones"
+                    [puntosTotales]="puntosDe(caracteristica)"
+                    [error]="errorDe(caracteristica)"
+                    [esGelatina]="esGelatina()"
+                    [dentroDeCapa]="true"
+                    (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
+                    (cantidadCambiada)="cambiarCantidadOpcion($event)"
+                  />
+                }
+              </section>
+            } @else if (bloque.caracteristica; as caracteristica) {
+              <app-selector-caracteristica
+                [caracteristica]="caracteristica"
+                [seleccion]="seleccionVisible()"
+                [exclusiones]="info.exclusiones"
+                [puntosTotales]="puntosDe(caracteristica)"
+                [error]="errorDe(caracteristica)"
+                [esGelatina]="esGelatina()"
+                (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
+                (cantidadCambiada)="cambiarCantidadOpcion($event)"
+              />
+            }
           }
 
           <fieldset class="paso panel">

@@ -328,7 +328,8 @@ public class ReporteDAOMySQL implements ReporteDAO {
             + FROM_VENTAS + WHERE_VENTAS + VENTA_COMPLETA + "%s"
             + "GROUP BY c.IdCategoria, c.NombreCategoria ";
 
-    // Por opción de personalización: cuántos postres vendidos la llevaban y el importe de esos postres
+    // Por opción de personalización: cuántos postres vendidos la llevaban y el importe de esos postres.
+    // DISTINCT: si la opción va en varias capas del mismo pastel (NumeroCapa) el postre se cuenta una vez.
     private static final String SQL_POR_OPCION =
             "SELECT o.NombreOpcion AS Nombre, CONCAT(ca.NombreCaracteristica, ' (', c.NombreCategoria, ')') AS Grupo, "
             + "       MAX(CASE WHEN o.Disponible = 0 OR ca.Disponible = 0 THEN 1 ELSE 0 END) AS Inactivo, 0 AS Oculto, "
@@ -336,7 +337,7 @@ public class ReporteDAOMySQL implements ReporteDAO {
             + "       SUM(d.Cantidad * d.CostoUnitario) AS Costo, "
             + "       SUM(d.Cantidad * d.PrecioUnitario) - SUM(d.Cantidad * d.CostoUnitario) AS Utilidad "
             + FROM_VENTAS
-            + "JOIN PostreOpcion pop ON pop.IdPostre = po.IdPostre "
+            + "JOIN (SELECT DISTINCT IdPostre, IdOpcion FROM PostreOpcion) pop ON pop.IdPostre = po.IdPostre "
             + "JOIN OpcionCaracteristica o ON o.IdOpcion = pop.IdOpcion "
             + "JOIN Caracteristica ca ON ca.IdCaracteristica = o.IdCaracteristica "
             + WHERE_VENTAS + VENTA_COMPLETA + "%s"

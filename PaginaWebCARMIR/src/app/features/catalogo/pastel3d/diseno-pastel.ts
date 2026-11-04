@@ -9,9 +9,11 @@ import { FormaPastel } from './formas-pastel';
  *  - Tamaño:     chico, mediano, grande, extra grande (en postres chicos: mini, mediano, grande, jumbo).
  *  - Pisos:      1 a 5 pisos (solo pasteles).
  *  - Forma:      redondo, cuadrado, corazón, hexágono, estrella, flor, ovalado.
+ *                Gelatinas: molde de gajos, rosca, domo, corazón, estrella, flor, cuadrada.
  *  - Sabor:      color del bizcocho (o de la gelatina) y de su cobertura.
  *  - Relleno:    color de la capa de en medio (se ve con «Ver por dentro»).
- *  - Cobertura:  fondant liso, betún, chantilly, ganache, naked, chispas, mármol, degradado o sin cobertura.
+ *  - Cobertura:  fondant liso, betún, buttercream, rústica, chantilly, ganache, naked, mármol, degradado
+ *                o sin cobertura. Las chispas ya no son cobertura: son una decoración.
  *  - Frosting:   la parte de arriba del cupcake (remolino de betún, chantilly, domo de fondant...).
  *                El pan del cupcake es el Sabor. Si el producto no tiene «Frosting», el cupcake va sin nada arriba.
  *  - Color de cobertura: rosa, azul cielo, dorado, verde menta...
@@ -19,7 +21,10 @@ import { FormaPastel } from './formas-pastel';
  *  - Tipo de postre (por categoría o nombre): pastel, gelatina, pay, cheesecake, cupcake, galleta,
  *                brownie, dona, rosca, macaron.
  *  - Decoración: moño, listón, flores, velas, perlas, fresas, frutos rojos, fruta, crema, chispas,
+ *                cubierta de chispas (costados y arriba),
  *                goteo, hoja de oro y topper.
+ * Capas: en los pasteles de 2 o más pisos, el Sabor, la Cobertura, el Color de cobertura y la Decoración
+ * se eligen por separado en cada capa (Base, Capa 2... Superior). Cada opción elegida trae su número de capa.
  * Los mismos nombres salen como sugerencias en el Panel Administrativo (PresetsCatalogo.java, RF-32).
  * RF-5 · Excepción paso 3: si algo no se reconoce, el modelo usa un valor normal y la página funciona igual que antes.
  */
@@ -40,7 +45,10 @@ export type TipoPostre3d =
 export type TipoBase = 'dorada' | 'plateada' | 'blanca' | 'madera' | 'pizarra' | 'cristal' | 'ninguna';
 // "ninguna" = sin cobertura: solo se ven las capas de pan y relleno
 // "degradado" = betún que va de un color abajo a blanco arriba
-export type TipoCobertura = 'lisa' | 'betun' | 'chantilly' | 'ganache' | 'naked' | 'chispas' | 'marmol' | 'degradado' | 'ninguna';
+// "buttercream" = betún con franjas a lo alto; "rustica" = betún con pinceladas sueltas
+export type TipoCobertura = 'lisa' | 'betun' | 'buttercream' | 'rustica' | 'chantilly' | 'ganache' | 'naked' | 'marmol' | 'degradado' | 'ninguna';
+// Molde de la gelatina: "figura" = el contorno de la Forma (corazón, estrella, flor, cuadrada...)
+export type MoldeGelatina = 'gajos' | 'rosca' | 'domo' | 'figura';
 export type TipoCaracteristica = 'tamano' | 'pisos' | 'forma' | 'sabor' | 'relleno' | 'cobertura' | 'frosting' | 'color' | 'base' | 'decoracion' | 'otra';
 
 // Cuántas piezas de cada decoración van en el 3D (la cantidad que eligió el cliente).
@@ -51,6 +59,8 @@ export interface DecoracionesPastel {
   flores: number;
   perlas: number;
   chispas: number;
+  // Cubierta de chispas: chispas pegadas en los costados y arriba (antes era una cobertura)
+  chispasTodo: number;
   goteo: number;
   rosetas: number;
   velas: number;
@@ -62,9 +72,20 @@ export interface DecoracionesPastel {
   hojaOro: number;
 }
 
+// Lo que cambia en cada capa (piso) del pastel
+export interface CapaPastel {
+  colorBizcocho: string;
+  colorCobertura: string;
+  colorRelleno: string;
+  cobertura: TipoCobertura;
+  decoraciones: DecoracionesPastel;
+}
+
 export interface DisenoPastel {
   tipo: TipoPostre3d;
   forma: FormaPastel;
+  // Molde de la gelatina (en los demás postres no se usa)
+  molde: MoldeGelatina;
   // Número de pisos (1 a 4)
   pisos: number;
   // Ancho del piso de abajo en centímetros
@@ -83,6 +104,10 @@ export interface DisenoPastel {
   dedicatoria: string;
   // Texto del topper (letrero de pie arriba del postre); vacío = sin topper
   topper: string;
+  // ¿Cada piso tiene su propio sabor, cobertura y decoración? (pasteles de 2 o más pisos)
+  porCapas: boolean;
+  // Una capa por piso, de abajo hacia arriba. La primera es la Base (igual a los colores de arriba)
+  capas: CapaPastel[];
 }
 
 // Cómo se ve una opción en los botones de la página
@@ -90,6 +115,8 @@ export interface AparienciaOpcion {
   tipo: 'color' | 'forma' | 'tamano' | 'pisos' | 'ninguna';
   color: string;
   forma: FormaPastel;
+  // Gelatinas: molde del botón de forma ("figura" = se dibuja la forma)
+  molde: MoldeGelatina;
   // 1 = chico, 2 = mediano, 3 = grande, 4 = extra grande
   nivel: number;
 }
@@ -233,6 +260,29 @@ export function formaDeOpcion(nombre: string): FormaPastel | null {
   }
   if (contieneAlguna(texto, ['redond', 'circul'])) {
     return 'redondo';
+  }
+  return null;
+}
+
+// Molde de gelatina que nombra una opción (null si no nombra ninguno)
+export function moldeDeOpcion(nombre: string): MoldeGelatina | null {
+  const texto = normalizar(nombre);
+  if (contieneAlguna(texto, ['rosca', 'corona', 'aro', 'bundt', 'savarin'])) {
+    return 'rosca';
+  }
+  if (contieneAlguna(texto, ['domo', 'media esfera', 'semiesfera', 'bola', 'cupula', 'iglu'])) {
+    return 'domo';
+  }
+  if (contieneAlguna(texto, ['gajo', 'tradicional', 'clasic'])) {
+    return 'gajos';
+  }
+  const forma = formaDeOpcion(nombre);
+  if (forma === 'redondo') {
+    // La gelatina redonda de siempre es la del molde de gajos
+    return 'gajos';
+  }
+  if (forma !== null) {
+    return 'figura';
   }
   return null;
 }
@@ -411,9 +461,13 @@ function colorDeAcabado(acabado: TipoCobertura, posicion: number): string {
     // Degradado: rosa abajo que se aclara hacia arriba (si no se dice otro color)
     return '#f4a7b9';
   }
-  if (acabado === 'chispas' || acabado === 'marmol') {
-    // Fondo blanco: las chispas y las vetas del mármol resaltan
+  if (acabado === 'marmol') {
+    // Fondo blanco: las vetas del mármol resaltan
     return '#fbf7f1';
+  }
+  if (posicion < 0) {
+    // Betún, buttercream, rústica y fondant: color crema (en el pastel toman el color del sabor)
+    return '#fbf2dc';
   }
   return COLORES_COBERTURA[posicion % COLORES_COBERTURA.length];
 }
@@ -423,9 +477,6 @@ function coberturaDeOpcion(nombre: string): TipoCobertura | null {
   // Primero "sin cobertura": el nombre puede decir «sin betún» y no debe tomarse como betún
   if (contieneAlguna(texto, ['sin cobertura', 'sin betun', 'sin glaseado', 'sin frosting', 'sin copete', 'ninguna', 'ninguno', 'sin nada', 'al natural', 'solo pan', 'desnudo'])) {
     return 'ninguna';
-  }
-  if (contieneAlguna(texto, ['chispa', 'sprinkle', 'grajea', 'confeti', 'granillo'])) {
-    return 'chispas';
   }
   if (contieneAlguna(texto, ['marmol', 'marmoleado', 'marmolado', 'marble'])) {
     return 'marmol';
@@ -445,36 +496,75 @@ function coberturaDeOpcion(nombre: string): TipoCobertura | null {
   if (contieneAlguna(texto, ['ganache', 'espejo'])) {
     return 'ganache';
   }
+  // Rústica: betún con pinceladas sueltas de espátula
+  if (contieneAlguna(texto, ['rustic', 'pincelada', 'texturizad'])) {
+    return 'rustica';
+  }
+  // Buttercream: betún de mantequilla peinado en franjas
+  if (contieneAlguna(texto, ['buttercream', 'butter cream', 'mantequilla', 'peinad', 'franja'])) {
+    return 'buttercream';
+  }
   // La cobertura «de siempre» de la pastelería: betún de la casa
-  if (contieneAlguna(texto, ['betun', 'buttercream', 'merengue', 'rustic', 'queso crema', 'mantequilla', 'crema', 'defecto', 'predeterminad', 'normal', 'clasic', 'tradicional', 'sencill', 'basic', 'estandar', 'de la casa', 'original'])) {
+  if (contieneAlguna(texto, ['betun', 'merengue', 'queso crema', 'crema', 'defecto', 'predeterminad', 'normal', 'clasic', 'tradicional', 'sencill', 'basic', 'estandar', 'de la casa', 'original'])) {
+    return 'betun';
+  }
+  // Una cobertura que solo dice «chispas» (de antes) se dibuja con betún y la cubierta de chispas
+  if (contieneAlguna(texto, PALABRAS_CHISPAS)) {
     return 'betun';
   }
   return null;
 }
 
+// Palabras de las chispas (sirven para la decoración y para las coberturas «con chispas» de antes)
+const PALABRAS_CHISPAS = ['chispa', 'sprinkle', 'grajea', 'confeti', 'granillo'];
+
+// ¿El nombre de una cobertura o frosting trae chispas? («Betún con chispas», «Remolino con chispas»)
+// Las chispas son una decoración: se dibujan como la cubierta de chispas de esa capa.
+function coberturaConChispas(nombre: string): boolean {
+  return contieneAlguna(normalizar(nombre), PALABRAS_CHISPAS);
+}
+
 // Acabado y color de una opción de cobertura. Siempre da algo, para que cada opción cambie el 3D.
-function aspectoCobertura(caracteristica: CaracteristicaPersonalizable, opcion: OpcionPersonalizable): { acabado: TipoCobertura; color: string } {
-  const posicion = Math.max(0, caracteristica.opciones.indexOf(opcion));
+// Acabado y color de una cobertura. "colorPropio" = el nombre ya dice su color (o la cobertura siempre es
+// de un color, como la ganache); si no, en el pastel toma el color que combina con el sabor de su capa.
+interface AspectoCobertura {
+  acabado: TipoCobertura;
+  color: string;
+  colorPropio: boolean;
+}
+
+function aspectoCobertura(caracteristica: CaracteristicaPersonalizable, opcion: OpcionPersonalizable): AspectoCobertura {
+  let posicion = -1;
   let acabado = coberturaDeOpcion(opcion.nombre);
+  let colorPropio = false;
   if (acabado === null) {
     // Nombre que no se reconoce: betún liso con un color distinto por su lugar (nunca agrega piezas)
     acabado = 'betun';
+    posicion = Math.max(0, caracteristica.opciones.indexOf(opcion));
+    colorPropio = true;
+  }
+  // Estas coberturas tienen su propio color (el degradado es rosa y el mármol blanco si no se pide otro)
+  if (acabado === 'ganache' || acabado === 'chantilly' || acabado === 'naked' || acabado === 'ninguna' || acabado === 'degradado' || acabado === 'marmol') {
+    colorPropio = true;
   }
   let color = colorDeAcabado(acabado, posicion);
   // Si el nombre dice un sabor («Betún de fresa», «Ganache de chocolate blanco»), se usa su color
   const sabor = coloresDe(opcion.nombre, false);
   if (sabor.palabras.length > 0) {
     color = sabor.cobertura;
+    colorPropio = true;
   }
   // Si el nombre dice un color («Fondant rosa», «Betún azul cielo»), manda ese color
   const nombrado = colorDeNombre(opcion.nombre);
   if (nombrado !== null && sabor.palabras.length === 0) {
     color = nombrado;
+    colorPropio = true;
   }
   if (normalizar(opcion.nombre).indexOf('blanco') >= 0) {
     color = '#fbf5ee';
+    colorPropio = true;
   }
-  return { acabado: acabado, color: color };
+  return { acabado: acabado, color: color, colorPropio: colorPropio };
 }
 
 // Palabras con las que se reconoce cada tipo de postre
@@ -542,7 +632,7 @@ export function aparienciaDeOpcion(
   opcion: OpcionPersonalizable,
   gelatina: boolean,
 ): AparienciaOpcion {
-  const apariencia: AparienciaOpcion = { tipo: 'ninguna', color: '', forma: 'redondo', nivel: 0 };
+  const apariencia: AparienciaOpcion = { tipo: 'ninguna', color: '', forma: 'redondo', nivel: 0, molde: 'figura' };
   const tipo = tipoDeCaracteristica(caracteristica.nombre);
   if (tipo === 'tamano') {
     apariencia.tipo = 'tamano';
@@ -583,6 +673,14 @@ export function aparienciaDeOpcion(
       apariencia.tipo = 'forma';
       apariencia.forma = forma;
     }
+    if (gelatina) {
+      // Gelatinas: el botón dibuja el molde (rosca, domo, gajos) o la figura
+      const molde = moldeDeOpcion(opcion.nombre);
+      if (molde !== null) {
+        apariencia.tipo = 'forma';
+        apariencia.molde = molde;
+      }
+    }
     return apariencia;
   }
   if (tipo === 'sabor' || tipo === 'relleno') {
@@ -595,7 +693,7 @@ export function aparienciaDeOpcion(
   return apariencia;
 }
 
-// ===================== Diseño completo =====================
+// ===================== Decoraciones =====================
 
 function decoracionesVacias(): DecoracionesPastel {
   return {
@@ -604,6 +702,7 @@ function decoracionesVacias(): DecoracionesPastel {
     flores: 0,
     perlas: 0,
     chispas: 0,
+    chispasTodo: 0,
     goteo: 0,
     rosetas: 0,
     velas: 0,
@@ -631,6 +730,9 @@ function sumar(actual: number, cantidad: number): number {
   return Math.min(MAXIMO_PIEZAS, actual + cantidad);
 }
 
+// Decoración que cubre toda la capa de chispas (antes «Cobertura de chispas»)
+const PALABRAS_CHISPAS_TODO = ['cubierta de chispa', 'cubierto de chispa', 'cobertura de chispa', 'con chispa', 'chispas en todo', 'chispas alrededor', 'chispas a los lados', 'todo de chispa'];
+
 // Suma una decoración elegida "cantidad" veces: cada unidad es una pieza en el 3D
 function agregarDecoracion(diseno: DisenoPastel, nombre: string, cantidad: number): void {
   const decoraciones = diseno.decoraciones;
@@ -649,7 +751,10 @@ function agregarDecoracion(diseno: DisenoPastel, nombre: string, cantidad: numbe
     decoraciones.perlas = sumar(decoraciones.perlas, cantidad);
   } else if (contieneAlguna(texto, ['hoja de oro', 'hojas de oro', 'oro comestible', 'laminilla', 'pan de oro', 'hojuela'])) {
     decoraciones.hojaOro = sumar(decoraciones.hojaOro, cantidad);
-  } else if (contieneAlguna(texto, ['chispa', 'grajea', 'confeti'])) {
+  } else if (contieneAlguna(texto, PALABRAS_CHISPAS_TODO)) {
+    // Cubierta de chispas: chispas en los costados y arriba de la capa
+    decoraciones.chispasTodo = sumar(decoraciones.chispasTodo, cantidad);
+  } else if (contieneAlguna(texto, PALABRAS_CHISPAS)) {
     decoraciones.chispas = sumar(decoraciones.chispas, cantidad);
   } else if (contieneAlguna(texto, ['goteo', 'ganache', 'drip'])) {
     decoraciones.goteo = sumar(decoraciones.goteo, cantidad);
@@ -673,19 +778,96 @@ function buscarOpcionEn(caracteristica: CaracteristicaPersonalizable, idOpcion: 
   return null;
 }
 
+// ===================== Capas (pasteles de 2 o más pisos) =====================
+
 /**
- * RF-5 · Paso 3: arma el diseño 3D con lo que el cliente tiene elegido.
- * No cambia nada de la selección ni del precio: solo se usa para dibujar.
+ * RF-5 · Paso 3: características que se eligen por separado en cada capa del pastel:
+ * Sabor, Cobertura, Color de cobertura y Decoración. Las demás (Tamaño, Pisos, Forma, Relleno, Base)
+ * son del pastel completo.
  */
-export function disenoDesdeSeleccion(
+export function esPorCapa(caracteristica: CaracteristicaPersonalizable): boolean {
+  const tipo = tipoDeCaracteristica(caracteristica.nombre);
+  return tipo === 'sabor' || tipo === 'cobertura' || tipo === 'color' || tipo === 'decoracion';
+}
+
+// Capa de una opción elegida (las que no traen capa son de la Base)
+export function capaDe(elegida: OpcionElegida): number {
+  if (elegida.capa === undefined || elegida.capa === null || elegida.capa < 1) {
+    return 1;
+  }
+  return elegida.capa;
+}
+
+// Nombre de una capa para los botones: Base, Capa 2, Capa 3... y Superior (la de hasta arriba)
+export function nombreCapa(capa: number, total: number): string {
+  if (total <= 1) {
+    return 'Única';
+  }
+  if (capa === 1) {
+    return 'Base';
+  }
+  if (capa === total) {
+    return 'Superior';
+  }
+  return 'Capa ' + capa;
+}
+
+/**
+ * RF-5 · Paso 3: cuántas capas se editan por separado: los pisos elegidos en los pasteles
+ * (1 en los demás postres, que no tienen pisos).
+ */
+export function capasDelPostre(
   caracteristicas: CaracteristicaPersonalizable[],
   seleccion: OpcionElegida[],
   categoria: string,
   nombreProducto: string,
-  dedicatoria: string,
-  mensajeEnTopper: boolean = false,
-): DisenoPastel {
-  const tipo = tipoDePostre(categoria, nombreProducto);
+): number {
+  if (tipoDePostre(categoria, nombreProducto) !== 'pastel') {
+    return 1;
+  }
+  let pisos = 1;
+  for (const caracteristica of caracteristicas) {
+    if (tipoDeCaracteristica(caracteristica.nombre) !== 'pisos') {
+      continue;
+    }
+    for (const elegida of seleccion) {
+      const opcion = buscarOpcionEn(caracteristica, elegida.idOpcion);
+      if (opcion !== null && elegida.cantidad > 0) {
+        pisos = pisosDeOpcion(caracteristica, opcion);
+      }
+    }
+  }
+  return pisos;
+}
+
+/**
+ * Lo elegido que le toca a una capa: todo lo del pastel completo (tamaño, pisos, forma...) más lo que
+ * se eligió en esa capa (sabor, cobertura, color y decoración).
+ */
+export function seleccionDeCapa(
+  caracteristicas: CaracteristicaPersonalizable[],
+  seleccion: OpcionElegida[],
+  capa: number,
+): OpcionElegida[] {
+  const resultado: OpcionElegida[] = [];
+  for (const elegida of seleccion) {
+    let porCapa = false;
+    for (const caracteristica of caracteristicas) {
+      if (buscarOpcionEn(caracteristica, elegida.idOpcion) !== null && esPorCapa(caracteristica)) {
+        porCapa = true;
+      }
+    }
+    if (!porCapa || capaDe(elegida) === capa) {
+      resultado.push(elegida);
+    }
+  }
+  return resultado;
+}
+
+// ===================== Diseño completo =====================
+
+// Diseño con los valores normales de cada postre (antes de ver lo que eligió el cliente)
+function disenoInicial(tipo: TipoPostre3d, dedicatoria: string): DisenoPastel {
   const gelatina = tipo === 'gelatina';
   let colores = COLOR_NORMAL;
   if (gelatina) {
@@ -694,6 +876,7 @@ export function disenoDesdeSeleccion(
   const diseno: DisenoPastel = {
     tipo: tipo,
     forma: 'redondo',
+    molde: 'gajos',
     pisos: 1,
     diametro: 24,
     alturaPiso: 10,
@@ -706,6 +889,8 @@ export function disenoDesdeSeleccion(
     decoraciones: decoracionesVacias(),
     dedicatoria: dedicatoria.trim(),
     topper: '',
+    porCapas: false,
+    capas: [],
   };
   if (gelatina) {
     diseno.pisos = 1;
@@ -747,11 +932,95 @@ export function disenoDesdeSeleccion(
     // Ancho de la pieza mediana
     diseno.diametro = ANCHOS_PIEZA_CHICA[tipo][1];
   }
+  return diseno;
+}
 
+// Lo que cambia en una capa, tomado de un diseño ya armado
+function capaDesde(diseno: DisenoPastel): CapaPastel {
+  return {
+    colorBizcocho: diseno.colorBizcocho,
+    colorCobertura: diseno.colorCobertura,
+    colorRelleno: diseno.colorRelleno,
+    cobertura: diseno.cobertura,
+    decoraciones: diseno.decoraciones,
+  };
+}
+
+// Suma las decoraciones de todas las capas (las velas y el topper van siempre hasta arriba)
+function sumarDecoraciones(capas: CapaPastel[]): DecoracionesPastel {
+  const total = decoracionesVacias();
+  for (const capa of capas) {
+    const d = capa.decoraciones;
+    total.mono = sumar(total.mono, d.mono);
+    total.liston = sumar(total.liston, d.liston);
+    total.flores = sumar(total.flores, d.flores);
+    total.perlas = sumar(total.perlas, d.perlas);
+    total.chispas = sumar(total.chispas, d.chispas);
+    total.chispasTodo = sumar(total.chispasTodo, d.chispasTodo);
+    total.goteo = sumar(total.goteo, d.goteo);
+    total.rosetas = sumar(total.rosetas, d.rosetas);
+    total.velas = sumar(total.velas, d.velas);
+    total.fresas = sumar(total.fresas, d.fresas);
+    total.frutaPicada = sumar(total.frutaPicada, d.frutaPicada);
+    total.frutosRojos = sumar(total.frutosRojos, d.frutosRojos);
+    total.hojaOro = sumar(total.hojaOro, d.hojaOro);
+  }
+  return total;
+}
+
+/**
+ * RF-5 · Paso 3: arma el diseño 3D con lo que el cliente tiene elegido.
+ * No cambia nada de la selección ni del precio: solo se usa para dibujar.
+ * En los pasteles de 2 o más pisos cada capa se arma con lo que se eligió en ella.
+ */
+export function disenoDesdeSeleccion(
+  caracteristicas: CaracteristicaPersonalizable[],
+  seleccion: OpcionElegida[],
+  categoria: string,
+  nombreProducto: string,
+  dedicatoria: string,
+  mensajeEnTopper: boolean = false,
+): DisenoPastel {
+  const tipo = tipoDePostre(categoria, nombreProducto);
+  const capas = capasDelPostre(caracteristicas, seleccion, categoria, nombreProducto);
+
+  // La Base (o el postre completo si no tiene pisos)
+  const diseno = disenoInicial(tipo, dedicatoria);
+  aplicarSeleccion(diseno, caracteristicas, seleccionDeCapa(caracteristicas, seleccion, 1));
+  diseno.capas = [capaDesde(diseno)];
+  diseno.porCapas = capas > 1;
+
+  // Las demás capas: cada una con su sabor, cobertura, color y decoración
+  for (let capa = 2; capa <= capas; capa++) {
+    const otra = disenoInicial(tipo, '');
+    aplicarSeleccion(otra, caracteristicas, seleccionDeCapa(caracteristicas, seleccion, capa));
+    diseno.capas.push(capaDesde(otra));
+  }
+  if (diseno.porCapas) {
+    diseno.decoraciones = sumarDecoraciones(diseno.capas);
+  }
+
+  // RF-5 · Excepción paso 4: el mensaje va en un topper (letrero de pie) si el cliente lo pidió o si el
+  // postre solo lo admite así
+  if (diseno.dedicatoria !== '' && mensajeVaEnTopper(tipo, mensajeEnTopper)) {
+    diseno.topper = diseno.dedicatoria;
+    diseno.dedicatoria = '';
+  }
+  return diseno;
+}
+
+// Aplica al diseño las opciones elegidas (de una capa o del postre completo)
+function aplicarSeleccion(diseno: DisenoPastel, caracteristicas: CaracteristicaPersonalizable[], seleccion: OpcionElegida[]): void {
+  const tipo = diseno.tipo;
+  const gelatina = tipo === 'gelatina';
   let coberturaElegida = false;
   let rellenoElegido = false;
   // Color pedido con la característica «Color de cobertura» (se aplica al final)
   let colorPedido: string | null = null;
+  // Color de betún que combina con el sabor elegido, y si la cobertura elegida lo usa (como en la
+  // captura: «Color sugerido para chocolate»)
+  let colorDelSabor: string | null = null;
+  let coberturaSinColor = false;
   // ¿El producto deja elegir base? Si la deja y no se eligió ninguna («Sin base»), no se dibuja base
   let tieneBase = false;
   let baseElegida = false;
@@ -787,9 +1056,16 @@ export function disenoDesdeSeleccion(
         if (forma !== null) {
           diseno.forma = forma;
         }
+        if (gelatina) {
+          const molde = moldeDeOpcion(opcion.nombre);
+          if (molde !== null) {
+            diseno.molde = molde;
+          }
+        }
       } else if (tipoCaracteristica === 'sabor') {
         const sabor = coloresDe(opcion.nombre, gelatina);
         diseno.colorBizcocho = sabor.bizcocho;
+        colorDelSabor = sabor.cobertura;
         if (!coberturaElegida) {
           diseno.colorCobertura = sabor.cobertura;
         }
@@ -813,6 +1089,11 @@ export function disenoDesdeSeleccion(
         diseno.cobertura = aspecto.acabado;
         diseno.colorCobertura = aspecto.color;
         coberturaElegida = true;
+        coberturaSinColor = !aspecto.colorPropio;
+        if (coberturaConChispas(opcion.nombre)) {
+          // Las chispas son una decoración: una cobertura «con chispas» de antes se ve como cubierta de chispas
+          diseno.decoraciones.chispasTodo = sumar(diseno.decoraciones.chispasTodo, 1);
+        }
       } else if (tipoCaracteristica === 'color') {
         colorPedido = colorDeNombre(opcion.nombre);
       } else if (tipoCaracteristica === 'base') {
@@ -845,6 +1126,10 @@ export function disenoDesdeSeleccion(
   if (tieneBase && !baseElegida) {
     diseno.base = 'ninguna';
   }
+  // Betún, buttercream, rústica o fondant sin color en el nombre: el color que combina con el sabor
+  if (coberturaSinColor && colorDelSabor !== null && tipo !== 'gelatina') {
+    diseno.colorCobertura = colorDelSabor;
+  }
   if (colorPedido !== null && diseno.cobertura !== 'ninguna') {
     diseno.colorCobertura = colorPedido;
   }
@@ -852,14 +1137,8 @@ export function disenoDesdeSeleccion(
     // En los macarons el color pedido pinta las tapas
     diseno.colorBizcocho = colorPedido;
   }
-  // RF-5 · Excepción paso 4: el mensaje va en un topper (letrero de pie) si el cliente lo pidió o si el
-  // postre solo lo admite así
-  if (diseno.dedicatoria !== '' && mensajeVaEnTopper(tipo, mensajeEnTopper)) {
-    diseno.topper = diseno.dedicatoria;
-    diseno.dedicatoria = '';
-  }
-  return diseno;
 }
+
 
 /**
  * RF-3 · Paso 3: dónde puede ir el mensaje de cada postre (casilla «Ponerlo en un topper»):

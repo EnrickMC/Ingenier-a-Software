@@ -88,7 +88,8 @@ export interface DatosPago {
 
 export interface ArticuloSolicitud {
   idPostre: number;
-  opciones: { idOpcion: number; cantidad: number }[];
+  // capa = capa del pastel (1 = Base)
+  opciones: { idOpcion: number; cantidad: number; capa?: number }[];
   cantidad: number;
   dedicatoria: string;
   comentario: string;

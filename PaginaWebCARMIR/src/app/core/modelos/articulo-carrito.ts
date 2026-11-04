@@ -6,6 +6,8 @@ export interface OpcionDelArticulo {
   idOpcion: number;
   nombre: string;
   cantidad: number;
+  // Capa del pastel (1 = Base, 2 = Capa 2...). Solo en pasteles de varios pisos.
+  capa?: number;
 }
 
 export interface ArticuloCarrito {

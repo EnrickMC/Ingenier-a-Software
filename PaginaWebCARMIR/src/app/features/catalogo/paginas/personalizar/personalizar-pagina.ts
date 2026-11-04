@@ -10,7 +10,19 @@ import { ImagenPostre } from '../../../../shared/componentes/imagen-postre/image
 import { MensajeEstado } from '../../../../shared/componentes/mensaje-estado/mensaje-estado';
 import { GaleriaPlantillas } from '../../componentes/galeria-plantillas/galeria-plantillas';
 import { SelectorCaracteristica } from '../../componentes/selector-caracteristica/selector-caracteristica';
-import { DisenoPastel, disenoDesdeSeleccion, esGelatina, lugarDelMensaje, mensajeVaEnTopper, tipoDePostre } from '../../pastel3d/diseno-pastel';
+import {
+  DisenoPastel,
+  capaDe,
+  capasDelPostre,
+  disenoDesdeSeleccion,
+  esGelatina,
+  esPorCapa,
+  lugarDelMensaje,
+  mensajeVaEnTopper,
+  nombreCapa,
+  seleccionDeCapa,
+  tipoDePostre,
+} from '../../pastel3d/diseno-pastel';
 import { VisorPastel3d } from '../../pastel3d/visor-pastel3d/visor-pastel3d';
 import {
   CaracteristicaPersonalizable,
@@ -36,6 +48,11 @@ import {
 } from '../../utilidades/reglas-configuracion';
 
 type EstadoPantalla = 'cargando' | 'listo' | 'error';
+// Lo que se muestra en el formulario: una característica, o el editor de capas (pestañas Base, Capa 2...)
+interface BloqueFormulario {
+  esCapas: boolean;
+  caracteristica: CaracteristicaPersonalizable | null;
+}
 // Resultado de «Agregar al carrito»
 type TipoResultado = '' | 'error' | 'aviso' | 'exito';
 
@@ -109,6 +126,9 @@ export default class PersonalizarPagina implements OnInit {
   // RF-8: renglón del carrito que se está editando (null = postre nuevo)
   protected readonly editando = signal<ArticuloCarrito | null>(null);
 
+  // RF-3 · Paso 4: capa del pastel que se está editando (1 = Base). Solo en pasteles de 2 o más pisos.
+  protected readonly capaActiva = signal(1);
+
   // RF-3 · Paso 4 / RF-5 · Pasos 5 y 6: diseño del postre 3D. computed() solo lo recalcula cuando cambia la
   // selección o el mensaje.
   protected readonly diseno3d = computed(this.calcularDiseno3d.bind(this));
@@ -173,7 +193,9 @@ export default class PersonalizarPagina implements OnInit {
   // Guarda los datos de una plantilla y precarga sus opciones
   private usarDatos(datos: DatosPersonalizacion): void {
     this.datos.set(datos);
-    this.seleccion.set(datos.seleccionInicial.slice());
+    this.capaActiva.set(1);
+    // Si la plantilla es de varios pisos, cada capa empieza igual que la Base
+    this.seleccion.set(this.acomodarCapas(datos.seleccionInicial.slice()));
     this.erroresConfiguracion.set([]);
     this.intentoAgregar = false;
   }
@@ -189,12 +211,12 @@ export default class PersonalizarPagina implements OnInit {
     let faltan = false;
     for (const opcion of articulo.opciones) {
       if (buscarOpcion(this.caracteristicas(), opcion.idOpcion) !== null) {
-        seleccion.push({ idOpcion: opcion.idOpcion, cantidad: opcion.cantidad });
+        seleccion.push({ idOpcion: opcion.idOpcion, cantidad: opcion.cantidad, capa: opcion.capa });
       } else {
         faltan = true;
       }
     }
-    this.seleccion.set(seleccion);
+    this.seleccion.set(this.acomodarCapas(seleccion));
     this.cantidad.set(articulo.cantidad);
     this.dedicatoria.set(articulo.dedicatoria);
     this.mensajeEnTopper.set(articulo.mensajeEnTopper === true);
@@ -285,17 +307,217 @@ export default class PersonalizarPagina implements OnInit {
 
   // RF-3 · Paso 4: puntos disponibles de cada característica.
   puntosDe(caracteristica: CaracteristicaPersonalizable): number {
-    return puntosTotales(this.caracteristicas(), caracteristica, this.seleccion());
+    return puntosTotales(this.caracteristicas(), caracteristica, this.seleccionVisible());
   }
 
-  // Error de una característica en particular (para marcarla en rojo)
+  // Error de una característica en particular (para marcarla en rojo).
+  // En el editor de capas se muestra el error de la capa abierta.
   errorDe(caracteristica: CaracteristicaPersonalizable): string {
+    const enCapas = this.capas() > 1 && esPorCapa(caracteristica);
     for (const error of this.erroresConfiguracion()) {
-      if (error.idCaracteristica === caracteristica.idCaracteristica) {
-        return error.mensaje;
+      if (error.idCaracteristica !== caracteristica.idCaracteristica) {
+        continue;
       }
+      if (enCapas && error.capa !== undefined && error.capa !== this.capaActiva()) {
+        continue;
+      }
+      return error.mensaje;
     }
     return '';
+  }
+
+  // ===================== Capas del pastel (RF-3 paso 4) =====================
+
+  // Capas que se editan por separado (los pisos elegidos; 1 si el postre no tiene pisos)
+  capas(): number {
+    const datos = this.datos();
+    if (datos === null) {
+      return 1;
+    }
+    return capasDelPostre(this.caracteristicas(), this.seleccion(), datos.producto.nombreCategoria, datos.producto.nombre);
+  }
+
+  // Números de las capas para las pestañas: 1 (Base), 2, 3...
+  listaCapas(): number[] {
+    const lista: number[] = [];
+    for (let capa = 1; capa <= this.capas(); capa++) {
+      lista.push(capa);
+    }
+    return lista;
+  }
+
+  textoCapa(capa: number): string {
+    return nombreCapa(capa, this.capas());
+  }
+
+  // Color del puntito de cada pestaña: la cobertura de esa capa (o el pan si va sin cobertura)
+  colorDeCapa(capa: number): string {
+    const capas = this.diseno3d().capas;
+    if (capa - 1 >= capas.length) {
+      return '#fbf2dc';
+    }
+    const datosCapa = capas[capa - 1];
+    if (datosCapa.cobertura === 'ninguna') {
+      return datosCapa.colorBizcocho;
+    }
+    return datosCapa.colorCobertura;
+  }
+
+  // ¿Esta característica se edita en las pestañas de capas?
+  private enCapas(caracteristica: CaracteristicaPersonalizable): boolean {
+    return this.capas() > 1 && esPorCapa(caracteristica);
+  }
+
+  // Características del editor de capas (Sabor, Cobertura, Color de cobertura, Decoración)
+  caracteristicasDeCapa(): CaracteristicaPersonalizable[] {
+    const lista: CaracteristicaPersonalizable[] = [];
+    for (const caracteristica of this.caracteristicas()) {
+      if (this.enCapas(caracteristica)) {
+        lista.push(caracteristica);
+      }
+    }
+    return lista;
+  }
+
+  /**
+   * Lo que se muestra en el formulario, en el orden de las características. Las que se eligen por capa
+   * se juntan en un solo bloque con pestañas, donde estaba la primera de ellas.
+   */
+  bloques(): BloqueFormulario[] {
+    const bloques: BloqueFormulario[] = [];
+    let capasPuestas = false;
+    for (const caracteristica of this.caracteristicas()) {
+      if (this.enCapas(caracteristica)) {
+        if (!capasPuestas) {
+          bloques.push({ esCapas: true, caracteristica: null });
+          capasPuestas = true;
+        }
+      } else {
+        bloques.push({ esCapas: false, caracteristica: caracteristica });
+      }
+    }
+    return bloques;
+  }
+
+  // Lo elegido que ven los selectores: la capa abierta más lo del pastel completo
+  seleccionVisible(): OpcionElegida[] {
+    if (this.capas() <= 1) {
+      return this.seleccion();
+    }
+    return seleccionDeCapa(this.caracteristicas(), this.seleccion(), this.capaActiva());
+  }
+
+  // RF-3 · Paso 4: el cliente abre otra capa (Base, Capa 2... Superior)
+  elegirCapa(capa: number): void {
+    this.capaActiva.set(capa);
+  }
+
+  /**
+   * RF-3 · Paso 4: «Aplicar a todas»: el sabor, la cobertura y el color de la capa abierta se copian a las
+   * demás capas (las decoraciones de cada capa se quedan como están).
+   */
+  aplicarATodas(): void {
+    const activa = this.capaActiva();
+    const deLaActiva: OpcionElegida[] = [];
+    const nueva: OpcionElegida[] = [];
+    for (const elegida of this.seleccion()) {
+      const unica = this.esUnicaPorCapa(elegida);
+      if (unica && capaDe(elegida) === activa) {
+        deLaActiva.push(elegida);
+      }
+      if (!unica || capaDe(elegida) === activa) {
+        nueva.push(elegida);
+      }
+    }
+    for (let capa = 1; capa <= this.capas(); capa++) {
+      if (capa === activa) {
+        continue;
+      }
+      for (const elegida of deLaActiva) {
+        nueva.push({ idOpcion: elegida.idOpcion, cantidad: elegida.cantidad, capa: capa });
+      }
+    }
+    this.cambiarSeleccion(nueva);
+  }
+
+  // Característica de una opción elegida (null si ya no existe)
+  private caracteristicaDe(elegida: OpcionElegida): CaracteristicaPersonalizable | null {
+    for (const caracteristica of this.caracteristicas()) {
+      for (const opcion of caracteristica.opciones) {
+        if (opcion.idOpcion === elegida.idOpcion) {
+          return caracteristica;
+        }
+      }
+    }
+    return null;
+  }
+
+  // ¿La opción es de una característica por capa de selección única (sabor, cobertura, color)?
+  private esUnicaPorCapa(elegida: OpcionElegida): boolean {
+    const caracteristica = this.caracteristicaDe(elegida);
+    return caracteristica !== null && esPorCapa(caracteristica) && !caracteristica.seleccionMultiple;
+  }
+
+  /**
+   * Ordena las capas de una selección:
+   *  - Si el postre no tiene varias capas, todo queda en la Base (sin número de capa).
+   *  - Se quitan las opciones de capas que ya no existen (por ejemplo, de 3 pisos a 2).
+   *  - Una capa nueva empieza con el sabor, la cobertura y el color de la capa de abajo.
+   */
+  private acomodarCapas(seleccion: OpcionElegida[]): OpcionElegida[] {
+    const datos = this.datos();
+    if (datos === null) {
+      return seleccion;
+    }
+    const capas = capasDelPostre(this.caracteristicas(), seleccion, datos.producto.nombreCategoria, datos.producto.nombre);
+    const resultado: OpcionElegida[] = [];
+    for (const elegida of seleccion) {
+      const caracteristica = this.caracteristicaDe(elegida);
+      const porCapa = caracteristica !== null && esPorCapa(caracteristica);
+      if (!porCapa || capas <= 1) {
+        // Del pastel completo, o postre sin capas: va en la Base
+        if (capaDe(elegida) === 1) {
+          resultado.push({ idOpcion: elegida.idOpcion, cantidad: elegida.cantidad });
+        }
+      } else if (capaDe(elegida) <= capas) {
+        resultado.push({ idOpcion: elegida.idOpcion, cantidad: elegida.cantidad, capa: capaDe(elegida) });
+      }
+    }
+    for (let capa = 2; capa <= capas; capa++) {
+      let tieneAlgo = false;
+      const deAbajo: OpcionElegida[] = [];
+      for (const elegida of resultado) {
+        if (capaDe(elegida) === capa && this.esPorCapaElegida(elegida)) {
+          tieneAlgo = true;
+        }
+        if (capaDe(elegida) === capa - 1 && this.esUnicaPorCapa(elegida)) {
+          deAbajo.push(elegida);
+        }
+      }
+      if (!tieneAlgo) {
+        for (const elegida of deAbajo) {
+          resultado.push({ idOpcion: elegida.idOpcion, cantidad: elegida.cantidad, capa: capa });
+        }
+      }
+    }
+    if (this.capaActiva() > capas) {
+      this.capaActiva.set(capas);
+    }
+    return resultado;
+  }
+
+  private esPorCapaElegida(elegida: OpcionElegida): boolean {
+    const caracteristica = this.caracteristicaDe(elegida);
+    return caracteristica !== null && esPorCapa(caracteristica);
+  }
+
+  // Ids de las características que se revisan en cada capa
+  private idsPorCapa(): number[] {
+    const ids: number[] = [];
+    for (const caracteristica of this.caracteristicasDeCapa()) {
+      ids.push(caracteristica.idCaracteristica);
+    }
+    return ids;
   }
 
   // Errores que no son de una sola característica (exclusiones, disponibilidad)
@@ -313,42 +535,66 @@ export default class PersonalizarPagina implements OnInit {
 
   // RF-3 · Paso 4: el cliente selecciona las opciones deseadas.
   // Selección única: se quita lo que había en la característica y se pone la nueva opción
+  // En el editor de capas solo cambia la capa abierta
   elegirUnica(caracteristica: CaracteristicaPersonalizable, idOpcion: number): void {
+    const porCapa = this.enCapas(caracteristica);
+    const capa = this.capaActiva();
     const nueva: OpcionElegida[] = [];
     for (const elegida of this.seleccion()) {
       const opcion = buscarOpcion(this.caracteristicas(), elegida.idOpcion);
-      if (opcion === null || opcion.idCaracteristica !== caracteristica.idCaracteristica) {
+      const deEsta = opcion !== null && opcion.idCaracteristica === caracteristica.idCaracteristica;
+      if (!deEsta || (porCapa && capaDe(elegida) !== capa)) {
         nueva.push(elegida);
       }
     }
     if (idOpcion > 0) {
-      nueva.push({ idOpcion: idOpcion, cantidad: 1 });
+      if (porCapa) {
+        nueva.push({ idOpcion: idOpcion, cantidad: 1, capa: capa });
+      } else {
+        nueva.push({ idOpcion: idOpcion, cantidad: 1 });
+      }
     }
     this.cambiarSeleccion(nueva);
   }
 
   // Selección múltiple: cambia la cantidad de una opción (0 = se quita)
+  // En el editor de capas cambia la cantidad de la capa abierta
   cambiarCantidadOpcion(cambio: OpcionElegida): void {
+    const caracteristica = this.caracteristicaDe(cambio);
+    const porCapa = caracteristica !== null && this.enCapas(caracteristica);
+    let capa = 1;
+    if (porCapa) {
+      capa = this.capaActiva();
+    }
     const nueva: OpcionElegida[] = [];
     let encontrada = false;
     for (const elegida of this.seleccion()) {
-      if (elegida.idOpcion === cambio.idOpcion) {
+      if (elegida.idOpcion === cambio.idOpcion && capaDe(elegida) === capa) {
         encontrada = true;
         if (cambio.cantidad > 0) {
-          nueva.push({ idOpcion: cambio.idOpcion, cantidad: cambio.cantidad });
+          nueva.push(this.conCapa(cambio, porCapa, capa));
         }
       } else {
         nueva.push(elegida);
       }
     }
     if (!encontrada && cambio.cantidad > 0) {
-      nueva.push({ idOpcion: cambio.idOpcion, cantidad: cambio.cantidad });
+      nueva.push(this.conCapa(cambio, porCapa, capa));
     }
     this.cambiarSeleccion(nueva);
   }
 
+  // Opción elegida con su número de capa (solo si es de una característica por capa)
+  private conCapa(cambio: OpcionElegida, porCapa: boolean, capa: number): OpcionElegida {
+    if (porCapa) {
+      return { idOpcion: cambio.idOpcion, cantidad: cambio.cantidad, capa: capa };
+    }
+    return { idOpcion: cambio.idOpcion, cantidad: cambio.cantidad };
+  }
+
   private cambiarSeleccion(nueva: OpcionElegida[]): void {
-    this.seleccion.set(nueva);
+    // Si cambiaron los pisos, las capas se acomodan (se agregan o se quitan)
+    this.seleccion.set(this.acomodarCapas(nueva));
     this.limpiarResultado();
     if (this.intentoAgregar) {
       this.validarConfiguracionActual();
@@ -401,7 +647,11 @@ export default class PersonalizarPagina implements OnInit {
       return false;
     }
     // RF-3 · Excepción paso 6: obligatorias sin opción, presupuesto de puntos excedido u opciones excluidas.
-    const errores = validarConfiguracion(datos.caracteristicas, datos.exclusiones, this.seleccion());
+    let idsPorCapa: number[] = [];
+    if (this.capas() > 1) {
+      idsPorCapa = this.idsPorCapa();
+    }
+    const errores = validarConfiguracion(datos.caracteristicas, datos.exclusiones, this.seleccion(), this.capas(), idsPorCapa);
     this.erroresConfiguracion.set(errores);
     return errores.length === 0;
   }
@@ -418,6 +668,20 @@ export default class PersonalizarPagina implements OnInit {
       this.errorDedicatoria() === '' &&
       this.errorComentario() === ''
     );
+  }
+
+  // Abre la primera capa que tenga un error (si el error es de una característica por capa)
+  private abrirCapaConError(): void {
+    if (this.capas() <= 1) {
+      return;
+    }
+    const ids = this.idsPorCapa();
+    for (const error of this.erroresConfiguracion()) {
+      if (error.capa !== undefined && ids.indexOf(error.idCaracteristica) >= 0) {
+        this.capaActiva.set(error.capa);
+        return;
+      }
+    }
   }
 
   // ===================== Agregar al carrito (RF-3 pasos 5 a 8) =====================
@@ -440,6 +704,8 @@ export default class PersonalizarPagina implements OnInit {
 
     // Paso 6: validación en el navegador (resalta los campos y conserva lo demás)
     if (!this.validarTodo()) {
+      // Si el error está en otra capa, se abre esa capa para que el cliente lo vea
+      this.abrirCapaConError();
       // RF-3 · Excepción paso 6: resalta los campos con error y regresa al paso 4.
       this.mostrarResultado('error', 'Revisa los campos marcados en rojo.');
       return;
@@ -573,7 +839,7 @@ export default class PersonalizarPagina implements OnInit {
         conservadas.push(elegida);
       }
     }
-    this.seleccion.set(conservadas);
+    this.seleccion.set(this.acomodarCapas(conservadas));
     this.validarConfiguracionActual();
   }
 
@@ -582,7 +848,12 @@ export default class PersonalizarPagina implements OnInit {
     for (const elegida of this.seleccion()) {
       const opcion = buscarOpcion(this.caracteristicas(), elegida.idOpcion);
       if (opcion !== null) {
-        opciones.push({ idOpcion: elegida.idOpcion, nombre: opcion.nombre, cantidad: elegida.cantidad });
+        const renglon: OpcionDelArticulo = { idOpcion: elegida.idOpcion, nombre: opcion.nombre, cantidad: elegida.cantidad };
+        // La capa solo se guarda en los pasteles de varios pisos (2 = Capa 2...)
+        if (capaDe(elegida) > 1 || (this.esPorCapaElegida(elegida) && this.capas() > 1)) {
+          renglon.capa = capaDe(elegida);
+        }
+        opciones.push(renglon);
       }
     }
     return opciones;

@@ -52,7 +52,7 @@ import { FormaPastel } from './formas-pastel';
  *  - Rosca: rosca horneada con estrías (tipo bundt) y glaseado escurrido.
  *  - Galleta, brownie, dona y macaron: se ve una sola pieza (como el cupcake); el tamaño la hace más grande.
  * Todos se apoyan en la base elegida (plato, tabla, pizarra, base dorada o plateada, pedestal de cristal).
- * La cobertura cambia la superficie de cada postre y nunca agrega piezas, salvo la de chispas.
+ * La cobertura cambia la superficie de cada postre y nunca agrega piezas. La cubierta de chispas es una decoración.
  * Las decoraciones van sobre la pieza (en la dona, sobre el aro: nunca en el hoyo).
  * Medidas en centímetros. Igual que el pastel, el frente es +z del mundo.
  */
@@ -163,15 +163,15 @@ function materialCoberturaPieza(diseno: DisenoPastel, tamano: number, medidasRea
     esponja.repeat.set(1 / 3, 1 / 3);
     return new THREE.MeshStandardMaterial({ color: color, roughness: 0.92, bumpMap: esponja, bumpScale: 2 });
   }
-  // Betún (también naked y la base de la cobertura de chispas)
+  // Betún (también buttercream, rústica y naked)
   const giro = texturaGiro(4);
   centrarArriba(giro, tamano);
   return new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, bumpMap: giro, bumpScale: 1.5 });
 }
 
-// ¿La cobertura se ve como crema untada o con duya (betún, chantilly, chispas, naked, degradado)?
+// ¿La cobertura se ve como crema untada o con duya (betún, buttercream, rústica, chantilly, naked, degradado)?
 function esCremosa(cobertura: TipoCobertura): boolean {
-  return cobertura === 'betun' || cobertura === 'chantilly' || cobertura === 'chispas' || cobertura === 'naked' || cobertura === 'degradado';
+  return cobertura === 'betun' || cobertura === 'buttercream' || cobertura === 'rustica' || cobertura === 'chantilly' || cobertura === 'naked' || cobertura === 'degradado';
 }
 
 // Degradado del centro (claro) a la orilla (color): para coberturas planas como la de la galleta
@@ -589,7 +589,8 @@ function cuerpoCupcake(diseno: DisenoPastel): { grupo: THREE.Group; tope: Tope }
     tope.remolino = true;
     tope.radio = 2.5;
     tope.caida = 1.15;
-    if (diseno.cobertura === 'chispas') {
+    if (diseno.decoraciones.chispasTodo > 0) {
+      // Cubierta de chispas (decoración): chispas en toda la cobertura
       grupo.add(chispasSobre(tope, 110, 50));
     }
     return { grupo: grupo, tope: tope };
@@ -760,7 +761,8 @@ function galleta(diseno: DisenoPastel, indice: number): { grupo: THREE.Group; to
   capa.position.y = 1.26;
   grupo.add(capa);
   tope.altura = 1.42;
-  if (diseno.cobertura === 'chispas') {
+  if (diseno.decoraciones.chispasTodo > 0) {
+    // Cubierta de chispas (decoración): chispas en toda la cobertura
     grupo.add(chispasSobre(tope, 55, 70 + indice));
   }
   return { grupo: grupo, tope: tope };
@@ -838,7 +840,8 @@ function brownie(diseno: DisenoPastel, indice: number): { grupo: THREE.Group; to
   capa.position.y = alto - 0.1;
   grupo.add(capa);
   tope.altura = alto + 0.4;
-  if (diseno.cobertura === 'chispas') {
+  if (diseno.decoraciones.chispasTodo > 0) {
+    // Cubierta de chispas (decoración): chispas en toda la cobertura
     grupo.add(chispasSobre({ altura: tope.altura, radio: 2.7, caida: 0 }, 55, 100 + indice));
   }
   return { grupo: grupo, tope: tope };
@@ -965,7 +968,8 @@ function dona(diseno: DisenoPastel, indice: number): { grupo: THREE.Group; tope:
   (capa.material as THREE.Material).side = THREE.DoubleSide;
   grupo.add(capa);
   tope.altura = arriba + 0.09;
-  if (diseno.cobertura === 'chispas') {
+  if (diseno.decoraciones.chispasTodo > 0) {
+    // Cubierta de chispas (decoración): chispas en toda la cobertura
     const malla = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.09, 0.34, 2, 6), material('#ffffff', 0.45, 0), 90);
     const auxiliar = new THREE.Object3D();
     const color = new THREE.Color();
@@ -1208,7 +1212,8 @@ function pay(diseno: DisenoPastel, verDentro: boolean): PastelConstruido {
   relleno.position.y = 0.9 + (alturaRelleno - 0.9) / 2;
   piso.add(relleno);
   const tope: Tope = { altura: alturaRelleno, radio: radio - 1.2, caida: 0 };
-  if (cobertura === 'chispas') {
+  if (diseno.decoraciones.chispasTodo > 0) {
+    // Cubierta de chispas (decoración): chispas en toda la cobertura
     piso.add(chispasSobre({ altura: alturaRelleno, radio: radio - 1, caida: 0 }, Math.round(radio * radio * 1.5), 120));
   }
 
@@ -1474,7 +1479,8 @@ function cheesecake(diseno: DisenoPastel, verDentro: boolean): PastelConstruido 
     capa.position.y = alto - altoArriba / 2;
     piso.add(capa);
     colorArriba = diseno.colorCobertura;
-    if (cobertura === 'chispas') {
+    if (diseno.decoraciones.chispasTodo > 0) {
+      // Cubierta de chispas (decoración): chispas en toda la cobertura
       piso.add(chispasSobre({ altura: alto, radio: radio - 0.4, caida: 0 }, Math.round(radio * radio * 1.5), 140));
     }
   }
@@ -1587,7 +1593,8 @@ function rosca(diseno: DisenoPastel): PastelConstruido {
     glaseado.computeVertexNormals();
     const capa = cubrir(diseno, glaseado, diseno.diametro, false, false);
     piso.add(capa);
-    if (cobertura === 'chispas') {
+    if (diseno.decoraciones.chispasTodo > 0) {
+      // Cubierta de chispas (decoración): chispas en toda la cobertura
       piso.add(chispasEnAnillo(hueco + 0.8, radio - 0.8, arribaAnillo, Math.round(radio * radio * 1.2), 150));
     }
   }
@@ -1752,7 +1759,8 @@ function macaron(diseno: DisenoPastel, indice: number): { grupo: THREE.Group; to
   arriba.position.y = 1.38 + 0.6;
   grupo.add(arriba);
   const tope: Tope = { altura: 1.38 + 0.6 + 1.38, radio: 1.5, caida: 0.15 };
-  if (diseno.cobertura === 'chispas') {
+  if (diseno.decoraciones.chispasTodo > 0) {
+    // Cubierta de chispas (decoración): chispas en toda la cobertura
     grupo.add(chispasSobre(tope, 22, 170 + indice));
   }
   return { grupo: grupo, tope: tope };

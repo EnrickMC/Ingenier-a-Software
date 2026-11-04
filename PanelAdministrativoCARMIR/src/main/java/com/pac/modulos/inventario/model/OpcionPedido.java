@@ -14,6 +14,9 @@ public class OpcionPedido {
     private boolean seEscala;
     private double multiplicadorIngredientes = 1;
     private int idRecetaActiva;           // 0 si la opción no tiene receta activa
+    // Parte de la opción en un pastel por capas (PostreOpcion.NumeroCapa): en selección única
+    // cada capa lleva 1 / número de capas con esa característica; en selección múltiple, 1
+    private double parteCapa = 1;
 
     public int getIdPostre() {
         return idPostre;
@@ -77,6 +80,14 @@ public class OpcionPedido {
 
     public void setIdRecetaActiva(int idRecetaActiva) {
         this.idRecetaActiva = idRecetaActiva;
+    }
+
+    public double getParteCapa() {
+        return parteCapa;
+    }
+
+    public void setParteCapa(double parteCapa) {
+        this.parteCapa = parteCapa;
     }
 
     public boolean tieneRecetaActiva() {

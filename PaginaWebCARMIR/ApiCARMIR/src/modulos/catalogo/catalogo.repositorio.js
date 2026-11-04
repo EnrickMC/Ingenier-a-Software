@@ -121,13 +121,13 @@ async function buscarProductoVisible(idPostre) {
 // RF-2 · Paso 3 / RF-4 · Paso 7: opciones que trae el producto (valores de la plantilla).
 async function listarOpcionesDeProducto(idPostre) {
   const sql =
-    'SELECT po.IdOpcion, po.CantidadElegida, o.NombreOpcion, o.Disponible AS OpcionDisponible, ' +
+    'SELECT po.IdOpcion, po.NumeroCapa, po.CantidadElegida, o.NombreOpcion, o.Disponible AS OpcionDisponible, ' +
     'ca.IdCaracteristica, ca.NombreCaracteristica, ca.OrdenMostrar, ca.Disponible AS CaracteristicaDisponible ' +
     'FROM PostreOpcion po ' +
     'JOIN OpcionCaracteristica o ON o.IdOpcion = po.IdOpcion ' +
     'JOIN Caracteristica ca ON ca.IdCaracteristica = o.IdCaracteristica ' +
     'WHERE po.IdPostre = ? ' +
-    'ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, o.NombreOpcion';
+    'ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, po.NumeroCapa, o.NombreOpcion';
   return baseDatos.consultar(sql, [idPostre]);
 }
 
@@ -135,7 +135,7 @@ async function listarOpcionesDeProducto(idPostre) {
 // RF-4 · Paso 2: opciones de las plantillas de la categoría.
 async function listarOpcionesDePlantillas(idCategoria) {
   const sql =
-    'SELECT po.IdPostre, po.IdOpcion, po.CantidadElegida ' +
+    'SELECT po.IdPostre, po.IdOpcion, po.NumeroCapa, po.CantidadElegida ' +
     'FROM PostreOpcion po ' +
     'JOIN Postre p ON p.IdPostre = po.IdPostre ' +
     "WHERE p.IdCategoria = ? AND p.MostrarEnTienda = 1 AND p.NombrePostre IS NOT NULL";

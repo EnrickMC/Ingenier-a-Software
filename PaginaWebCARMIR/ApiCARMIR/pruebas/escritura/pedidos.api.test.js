@@ -253,6 +253,65 @@ prueba.test('cliente existente, envío a domicilio y postre personalizado reutil
   assert.strictEqual(await contar('SELECT COUNT(*) AS Total FROM EntregaDomicilio WHERE Folio = ?', [r.cuerpo.folio]), 1);
 });
 
+// Parte 9 de MIGRACION_COMPLETA.sql: cada capa del pastel con su propio sabor (PostreOpcion.NumeroCapa)
+prueba.test('pastel por capas: se guarda la capa de cada opción y el precio cuadra con la vista', async function () {
+  const plantilla = await opcionesDe(1);
+  // Característica de selección única con al menos dos opciones (el sabor en la semilla)
+  let sabor = null;
+  for (let i = 0; i < plantilla.datos.caracteristicas.length; i++) {
+    const caracteristica = plantilla.datos.caracteristicas[i];
+    if (caracteristica.nombre === 'Sabor') {
+      sabor = caracteristica;
+    }
+  }
+  assert.ok(sabor !== null, 'La plantilla 1 debe tener la característica Sabor');
+  // La Base conserva su sabor y la capa 2 lleva otro
+  let saborBase = 0;
+  const opciones = [];
+  for (let i = 0; i < plantilla.opciones.length; i++) {
+    opciones.push({ idOpcion: plantilla.opciones[i].idOpcion, cantidad: plantilla.opciones[i].cantidad, capa: 1 });
+    for (let k = 0; k < sabor.opciones.length; k++) {
+      if (sabor.opciones[k].idOpcion === plantilla.opciones[i].idOpcion) {
+        saborBase = plantilla.opciones[i].idOpcion;
+      }
+    }
+  }
+  let otroSabor = 0;
+  for (let k = 0; k < sabor.opciones.length; k++) {
+    if (sabor.opciones[k].idOpcion !== saborBase && otroSabor === 0) {
+      otroSabor = sabor.opciones[k].idOpcion;
+    }
+  }
+  opciones.push({ idOpcion: otroSabor, cantidad: 1, capa: 2 });
+
+  const cotizacion = await enviar('/catalogo/cotizar', { idPostre: 1, opciones: opciones, cantidad: 1 });
+  assert.strictEqual(cotizacion.cuerpo.valido, true, JSON.stringify(cotizacion.cuerpo));
+  const precio = cotizacion.cuerpo.precioUnitario;
+
+  // El mismo sabor en las dos capas se acepta (son capas distintas) y cuesta lo mismo que la plantilla
+  const mismoSabor = opciones.slice(0, opciones.length - 1);
+  mismoSabor.push({ idOpcion: saborBase, cantidad: 1, capa: 2 });
+  const igual = await enviar('/catalogo/cotizar', { idPostre: 1, opciones: mismoSabor, cantidad: 1 });
+  assert.strictEqual(igual.estado, 200, JSON.stringify(igual.cuerpo));
+  assert.strictEqual(igual.cuerpo.precioUnitario, plantilla.precio);
+
+  const libre = await fechaConLugar(14, 1);
+  const r = await enviar('/pedidos', solicitud([articulo(1, opciones, 1, precio, '')], telefonoNuevo(), libre.fecha, false, precio));
+  assert.strictEqual(r.estado, 201, JSON.stringify(r.cuerpo));
+
+  const postre = await baseDatos.consultar(
+    'SELECT p.IdPostre, p.ClaveConfiguracion, v.PrecioVenta FROM DetallePedido d ' +
+      'JOIN Postre p ON p.IdPostre = d.IdPostre JOIN vw_CostoPrecioPostre v ON v.IdPostre = p.IdPostre WHERE d.Folio = ?',
+    [r.cuerpo.folio]
+  );
+  assert.strictEqual(Number(postre[0].PrecioVenta), precio);
+  assert.ok(postre[0].ClaveConfiguracion.indexOf(otroSabor + ':1@2') >= 0, postre[0].ClaveConfiguracion);
+  assert.strictEqual(
+    await contar('SELECT COUNT(*) AS Total FROM PostreOpcion WHERE IdPostre = ? AND IdOpcion = ? AND NumeroCapa = 2', [postre[0].IdPostre, otroSabor]),
+    1
+  );
+});
+
 prueba.test('precio cambiado: no se guarda y regresa el total vigente', async function () {
   const plantilla = await opcionesDe(1);
   const libre = await fechaConLugar(14, 1);

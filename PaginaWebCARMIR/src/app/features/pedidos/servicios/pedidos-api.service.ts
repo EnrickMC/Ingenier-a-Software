@@ -67,9 +67,14 @@ export class PedidosApiService {
 export function articulosParaApi(articulos: ArticuloCarrito[]): ArticuloSolicitud[] {
   const lista: ArticuloSolicitud[] = [];
   for (const articulo of articulos) {
-    const opciones: { idOpcion: number; cantidad: number }[] = [];
+    const opciones: { idOpcion: number; cantidad: number; capa: number }[] = [];
     for (const opcion of articulo.opciones) {
-      opciones.push({ idOpcion: opcion.idOpcion, cantidad: opcion.cantidad });
+      // Capa del pastel (1 = Base); los artículos viejos del carrito no la traen
+      let capa = 1;
+      if (opcion.capa !== undefined && opcion.capa > 1) {
+        capa = opcion.capa;
+      }
+      opciones.push({ idOpcion: opcion.idOpcion, cantidad: opcion.cantidad, capa: capa });
     }
     lista.push({
       idPostre: articulo.idPostre,

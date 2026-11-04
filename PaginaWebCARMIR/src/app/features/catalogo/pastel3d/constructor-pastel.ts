@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DisenoPastel, TipoBase } from './diseno-pastel';
+import { DecoracionesPastel, DisenoPastel, TipoBase } from './diseno-pastel';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { FormaPastel, Punto2d, estaDentro, puntosForma } from './formas-pastel';
 
@@ -603,6 +603,81 @@ export function texturaGiro(semilla: number): THREE.CanvasTexture {
 }
 
 /**
+ * Buttercream: franjas a lo alto, como cuando se peina el betún con la espátula de dientes
+ * (idea tomada del diseñador de pasteles de Enrick). Es un relieve: claro = sale, oscuro = se hunde.
+ */
+export function texturaFranjas(semilla: number): THREE.CanvasTexture {
+  const contexto = lienzo(256, 256);
+  const franjas = 4;
+  const altoFranja = 256 / franjas;
+  for (let k = 0; k < franjas; k++) {
+    const arriba = k * altoFranja;
+    const gradiente = contexto.createLinearGradient(0, arriba, 0, arriba + altoFranja);
+    gradiente.addColorStop(0, '#d0d0d0');
+    gradiente.addColorStop(0.5, '#9a9a9a');
+    gradiente.addColorStop(1, '#3a3a3a');
+    contexto.fillStyle = gradiente;
+    contexto.fillRect(0, arriba, 256, altoFranja);
+  }
+  // Puntitos para que no se vea de plástico
+  const azar = new Aleatorio(semilla);
+  for (let i = 0; i < 500; i++) {
+    let tono = 'rgba(255,255,255,0.18)';
+    if (azar.siguiente() > 0.5) {
+      tono = 'rgba(0,0,0,0.15)';
+    }
+    contexto.fillStyle = tono;
+    contexto.beginPath();
+    contexto.arc(azar.siguiente() * 256, azar.siguiente() * 256, 0.6 + azar.siguiente() * 1.4, 0, Math.PI * 2);
+    contexto.fill();
+  }
+  const textura = new THREE.CanvasTexture(contexto.canvas);
+  textura.wrapS = THREE.RepeatWrapping;
+  textura.wrapT = THREE.RepeatWrapping;
+  return textura;
+}
+
+/**
+ * Rústica: pinceladas sueltas de espátula en todas direcciones (idea tomada del diseñador de pasteles
+ * de Enrick). Cada pincelada se dibuja también a la izquierda y a la derecha para que no haya costura.
+ */
+export function texturaPinceladas(semilla: number): THREE.CanvasTexture {
+  const lado = 512;
+  const contexto = lienzo(lado, lado);
+  contexto.fillStyle = '#808080';
+  contexto.fillRect(0, 0, lado, lado);
+  const azar = new Aleatorio(semilla);
+  for (let i = 0; i < 170; i++) {
+    const x = azar.siguiente() * lado;
+    const y = azar.siguiente() * lado;
+    const ancho = 50 + azar.siguiente() * 170;
+    const alto = 5 + azar.siguiente() * 16;
+    const giro = (azar.siguiente() - 0.5) * 0.25;
+    let tono = '#000000';
+    if (azar.siguiente() > 0.5) {
+      tono = '#ffffff';
+    }
+    const desplazamientos = [0, -lado, lado];
+    for (const desplazamiento of desplazamientos) {
+      contexto.save();
+      contexto.translate(x + desplazamiento, y);
+      contexto.rotate(giro);
+      contexto.globalAlpha = 0.24;
+      contexto.fillStyle = tono;
+      contexto.beginPath();
+      contexto.ellipse(0, 0, ancho / 2, alto / 2, 0, 0, Math.PI * 2);
+      contexto.fill();
+      contexto.restore();
+    }
+  }
+  contexto.globalAlpha = 1;
+  const textura = new THREE.CanvasTexture(contexto.canvas);
+  textura.wrapS = THREE.RepeatWrapping;
+  textura.wrapT = THREE.RepeatWrapping;
+  return textura;
+}
+
+/**
  * Mármol: el color de la cobertura con vetas finas que serpentean.
  * Sobre una base clara las vetas son grises; sobre una base oscura, claras.
  */
@@ -1043,13 +1118,35 @@ function materialesCobertura(diseno: DisenoPastel, tamano: number, alto: number)
       lados: new THREE.MeshStandardMaterial({ color: color, roughness: 0.92, bumpMap: esponja, bumpScale: 3 }),
     };
   }
+  if (diseno.cobertura === 'buttercream') {
+    // Buttercream: franjas a lo alto en los costados y pinceladas arriba
+    const franjas = texturaFranjas(11);
+    franjas.repeat.set(1 / 14, 1 / 5);
+    const pinceladasArriba = texturaPinceladas(13);
+    pinceladasArriba.repeat.set(1 / 12, 1 / 12);
+    return {
+      arriba: new THREE.MeshStandardMaterial({ color: color, roughness: 0.68, bumpMap: pinceladasArriba, bumpScale: 2 }),
+      lados: new THREE.MeshStandardMaterial({ color: color, roughness: 0.68, bumpMap: franjas, bumpScale: 3 }),
+    };
+  }
+  if (diseno.cobertura === 'rustica') {
+    // Rústica: pinceladas sueltas en toda la cobertura
+    const pinceladas = texturaPinceladas(17);
+    pinceladas.repeat.set(1 / 12, 1 / 8);
+    const pinceladasArriba = texturaPinceladas(19);
+    pinceladasArriba.repeat.set(1 / 12, 1 / 12);
+    return {
+      arriba: new THREE.MeshStandardMaterial({ color: color, roughness: 0.75, bumpMap: pinceladasArriba, bumpScale: 2.6 }),
+      lados: new THREE.MeshStandardMaterial({ color: color, roughness: 0.75, bumpMap: pinceladas, bumpScale: 2.6 }),
+    };
+  }
   const arriba = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, bumpMap: giro, bumpScale: 2 });
   if (diseno.cobertura === 'naked') {
     const capas = texturaNaked(diseno, true);
     capas.repeat.set(1 / 16, 1 / alto);
     return { arriba: arriba, lados: new THREE.MeshStandardMaterial({ map: capas, roughness: 0.85 }) };
   }
-  // Betún de mantequilla (también es la base de la cobertura de chispas)
+  // Betún de la casa: rayas de espátula a los lados
   const espatula = texturaEspatula(7);
   espatula.repeat.set(1 / 14, 1 / 5);
   return { arriba: arriba, lados: new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, bumpMap: espatula, bumpScale: 2.2 }) };
@@ -1097,9 +1194,6 @@ function cuerpoPiso(diseno: DisenoPastel, tamano: number, alto: number, conCorte
   // El cuerpo ya trae la rebanada quitada: no se recorta otra vez
   cuerpo.userData['sinRecorte'] = true;
   grupo.add(cuerpo);
-  if (diseno.cobertura === 'chispas') {
-    grupo.add(chispasDeCobertura(diseno, tamano, alto, conCorte));
-  }
 
   if (conCorte) {
     grupo.add(paredCorte(diseno, tamano, alto, CORTE_INICIO, 1));
@@ -1109,8 +1203,8 @@ function cuerpoPiso(diseno: DisenoPastel, tamano: number, alto: number, conCorte
 }
 
 /**
- * Cobertura de chispas: chispas de colores pegadas en toda la cobertura, a los lados y arriba.
- * Es parte de la cobertura (no es la decoración «Chispas», que solo va arriba).
+ * Cubierta de chispas (decoración): chispas de colores pegadas en toda la cobertura de un piso, a los lados
+ * y arriba. La decoración «Chispas» solo las pone arriba.
  */
 function chispasDeCobertura(diseno: DisenoPastel, tamano: number, alto: number, conCorte: boolean): THREE.InstancedMesh {
   const contorno = contornoEspaciado(diseno.forma, tamano, 0.2);
@@ -2455,11 +2549,88 @@ function hojasDeOro(diseno: DisenoPastel, tamano: number, alto: number, arribaPi
 
 // ===================== Gelatina =====================
 
-function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
-  const grupo = new THREE.Group();
+// Medidas del molde de rosca: hueco del centro y orilla de afuera (proporción del radio)
+const HUECO_ROSCA = 0.3;
+// Alto del domo comparado con su radio (media esfera un poco aplanada)
+const ALTO_DOMO = 0.85;
+
+/**
+ * Lugares de la gelatina donde se ponen las decoraciones, según el molde:
+ *  - "anillo": radio de la vuelta de rosetas, fresas y velas
+ *  - "dentro" y "fuera": franja donde se riegan fruta, chispas y frutos rojos
+ */
+interface LugaresGelatina {
+  anillo: number;
+  dentro: number;
+  fuera: number;
+}
+
+function lugaresGelatina(diseno: DisenoPastel): LugaresGelatina {
+  const radio = diseno.diametro / 2;
+  if (diseno.molde === 'rosca') {
+    // Todo va sobre el aro (nunca en el hueco)
+    const medio = (radio * HUECO_ROSCA + radio) / 2;
+    return { anillo: medio, dentro: radio * HUECO_ROSCA + 1, fuera: radio - 1.2 };
+  }
+  if (diseno.molde === 'domo') {
+    return { anillo: radio * 0.42, dentro: 0, fuera: radio * 0.5 };
+  }
+  if (diseno.molde === 'figura') {
+    // Dentro de cualquier figura (la estrella es la más angosta)
+    return { anillo: radio * 0.42, dentro: 0, fuera: radio * 0.45 };
+  }
+  return { anillo: radio * 0.55, dentro: 0, fuera: radio * 0.6 };
+}
+
+/**
+ * Altura de la cara de arriba de la gelatina a cierta distancia del centro, medida desde el plato.
+ * Sirve para que las decoraciones queden pegadas a la gelatina en cualquier molde.
+ */
+function alturaGelatina(diseno: DisenoPastel, distancia: number): number {
   const radio = diseno.diametro / 2;
   const alto = diseno.alturaPiso;
-  // Perfil de molde con escalones (de abajo hacia arriba)
+  if (diseno.molde === 'domo') {
+    const parte = Math.min(1, distancia / radio);
+    return radio * ALTO_DOMO * Math.sqrt(Math.max(0, 1 - parte * parte));
+  }
+  if (diseno.molde === 'figura') {
+    // Cara plana con la orilla redondeada
+    return alto;
+  }
+  if (diseno.molde === 'rosca') {
+    // Lomo redondo del aro
+    const dentro = radio * HUECO_ROSCA;
+    const medio = (dentro + radio) / 2;
+    const mitad = (radio - dentro) / 2;
+    const parte = Math.min(1, Math.abs(distancia - medio) / mitad);
+    return alto + 1.4 * Math.sqrt(Math.max(0, 1 - parte * parte));
+  }
+  // Molde de gajos: tapa redondeada
+  const parte = distancia / (radio * 0.68);
+  return alto + 1.2 * Math.sqrt(Math.max(0, 1 - parte * parte));
+}
+
+// Altura desde el piso de la cara de arriba de la gelatina (la gelatina está sobre el plato)
+function sobrePlato(diseno: DisenoPastel, arribaPlato: number, distancia: number): number {
+  return arribaPlato + alturaGelatina(diseno, distancia);
+}
+
+// Gajos del molde: el radio sube y baja según el ángulo
+function marcarGajos(geometria: THREE.BufferGeometry, gajos: number, hondo: number): void {
+  const posiciones = geometria.attributes['position'];
+  for (let i = 0; i < posiciones.count; i++) {
+    const x = posiciones.getX(i);
+    const z = posiciones.getZ(i);
+    const angulo = Math.atan2(z, x);
+    const factor = 1 + hondo * Math.cos(angulo * gajos);
+    posiciones.setX(i, x * factor);
+    posiciones.setZ(i, z * factor);
+  }
+  geometria.computeVertexNormals();
+}
+
+// Molde de gajos (el de siempre): sube angostándose con escalones y termina en una tapa redonda
+function geometriaGajos(radio: number, alto: number): THREE.BufferGeometry {
   const perfil: THREE.Vector2[] = [];
   const pasos = 28;
   for (let i = 0; i <= pasos; i++) {
@@ -2475,17 +2646,90 @@ function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
     perfil.push(new THREE.Vector2(radio * 0.68 * Math.cos((t * Math.PI) / 2), alto + Math.sin((t * Math.PI) / 2) * 1.2));
   }
   const geometria = new THREE.LatheGeometry(perfil, 96);
-  // Gajos del molde: el radio sube y baja según el ángulo
-  const posiciones = geometria.attributes['position'];
-  for (let i = 0; i < posiciones.count; i++) {
-    const x = posiciones.getX(i);
-    const z = posiciones.getZ(i);
-    const angulo = Math.atan2(z, x);
-    const factor = 1 + 0.05 * Math.cos(angulo * 10);
-    posiciones.setX(i, x * factor);
-    posiciones.setZ(i, z * factor);
+  marcarGajos(geometria, 10, 0.05);
+  return geometria;
+}
+
+// Molde de rosca: un aro con hueco al centro, lomo redondo y estrías
+function geometriaRosca(radio: number, alto: number): THREE.BufferGeometry {
+  const dentro = radio * HUECO_ROSCA;
+  const medio = (dentro + radio) / 2;
+  const mitad = (radio - dentro) / 2;
+  const perfil: THREE.Vector2[] = [];
+  // Pared de adentro (de arriba hacia abajo), piso y pared de afuera (de abajo hacia arriba).
+  // LatheGeometry necesita el contorno en un solo recorrido.
+  perfil.push(new THREE.Vector2(dentro * 1.08, alto));
+  perfil.push(new THREE.Vector2(dentro, 0));
+  perfil.push(new THREE.Vector2(radio, 0));
+  const pasos = 12;
+  for (let i = 1; i <= pasos; i++) {
+    const t = i / pasos;
+    perfil.push(new THREE.Vector2(radio * (1 - 0.08 * t), t * alto));
   }
-  geometria.computeVertexNormals();
+  // Lomo redondo de afuera hacia adentro
+  for (let i = 1; i < 14; i++) {
+    const t = i / 14;
+    const angulo = t * Math.PI;
+    const x = medio + Math.cos(angulo) * mitad * 0.96;
+    perfil.push(new THREE.Vector2(x, alto + Math.sin(angulo) * 1.4));
+  }
+  perfil.push(new THREE.Vector2(dentro * 1.08, alto));
+  // El contorno va de adentro hacia afuera por abajo: se voltea para que las caras miren hacia fuera
+  perfil.reverse();
+  const geometria = new THREE.LatheGeometry(perfil, 120);
+  marcarGajos(geometria, 14, 0.035);
+  return geometria;
+}
+
+// Molde de domo: media esfera un poco aplanada
+function geometriaDomo(radio: number): THREE.BufferGeometry {
+  const perfil: THREE.Vector2[] = [];
+  const pasos = 24;
+  perfil.push(new THREE.Vector2(0, 0));
+  for (let i = 0; i <= pasos; i++) {
+    const angulo = (i / pasos) * (Math.PI / 2);
+    perfil.push(new THREE.Vector2(radio * Math.cos(angulo), radio * ALTO_DOMO * Math.sin(angulo)));
+  }
+  return new THREE.LatheGeometry(perfil, 96);
+}
+
+// Molde con figura (corazón, estrella, flor, cuadrada...): la forma con la orilla de arriba bien redonda
+function geometriaFigura(forma: FormaPastel, tamano: number, alto: number): THREE.BufferGeometry {
+  const redondeo = Math.min(1.8, alto * 0.2);
+  const puntos = puntosForma(forma, tamano - 2 * redondeo, 180);
+  const geometria = new THREE.ExtrudeGeometry(formaThree(puntos), {
+    depth: alto - 2 * redondeo,
+    steps: 1,
+    bevelEnabled: true,
+    bevelThickness: redondeo,
+    bevelSize: redondeo,
+    bevelSegments: 6,
+    curveSegments: 12,
+  });
+  // Recién desmoldada: la orilla queda redonda arriba y abajo
+  geometria.translate(0, 0, redondeo);
+  geometria.rotateX(-Math.PI / 2);
+  return geometria;
+}
+
+/**
+ * RF-5 · Paso 4: cuerpo de la gelatina según su molde (gajos, rosca, domo o figura).
+ * Es translúcida; la de mosaico deja ver cubitos de colores por dentro.
+ */
+function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
+  const grupo = new THREE.Group();
+  const radio = diseno.diametro / 2;
+  const alto = diseno.alturaPiso;
+  let geometria: THREE.BufferGeometry;
+  if (diseno.molde === 'rosca') {
+    geometria = geometriaRosca(radio, alto);
+  } else if (diseno.molde === 'domo') {
+    geometria = geometriaDomo(radio);
+  } else if (diseno.molde === 'figura') {
+    geometria = geometriaFigura(diseno.forma, diseno.diametro, alto);
+  } else {
+    geometria = geometriaGajos(radio, alto);
+  }
 
   let paso = 0.65;
   let rugosidad = 0.12;
@@ -2502,6 +2746,7 @@ function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
     ior: 1.33,
     clearcoat: 1,
     clearcoatRoughness: 0.1,
+    side: THREE.DoubleSide,
   });
   const malla = new THREE.Mesh(geometria, gel);
   malla.castShadow = true;
@@ -2513,11 +2758,25 @@ function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
     const auxiliar = new THREE.Object3D();
     const color = new THREE.Color();
     const azar = new Aleatorio(21);
+    const lugares = lugaresGelatina(diseno);
     for (let i = 0; i < cantidad; i++) {
-      const altura = 0.8 + azar.siguiente() * (alto - 1.6);
-      const limite = radio * (1 - 0.32 * Math.pow(altura / alto, 1.4)) - 1.4;
       const angulo = azar.siguiente() * Math.PI * 2;
-      const distancia = Math.sqrt(azar.siguiente()) * Math.max(0.5, limite);
+      // Cada cubito queda adentro de la gelatina: entre el hueco (rosca) y la orilla
+      let dentro = 0;
+      let fuera = radio - 1.4;
+      if (diseno.molde === 'rosca') {
+        dentro = lugares.dentro;
+        fuera = lugares.fuera;
+      } else if (diseno.molde === 'figura') {
+        fuera = lugares.fuera;
+      }
+      const distancia = dentro + Math.sqrt(azar.siguiente()) * Math.max(0.5, fuera - dentro);
+      // Alto disponible en ese lugar (el domo y la tapa se van bajando hacia la orilla)
+      let techo = alturaGelatina(diseno, distancia) - 1.2;
+      if (diseno.molde === 'gajos') {
+        techo = Math.min(techo, alto - 0.8);
+      }
+      const altura = 0.8 + azar.siguiente() * Math.max(0.2, techo - 0.8);
       auxiliar.position.set(Math.cos(angulo) * distancia, altura, Math.sin(angulo) * distancia);
       auxiliar.rotation.set(azar.siguiente(), azar.siguiente(), azar.siguiente());
       auxiliar.updateMatrix();
@@ -2529,19 +2788,15 @@ function cuerpoGelatina(diseno: DisenoPastel): THREE.Group {
   return grupo;
 }
 
-// Altura de la tapa redondeada de la gelatina a cierta distancia del centro
-function alturaTapaGelatina(radio: number, arribaMolde: number, distancia: number): number {
-  const parte = distancia / (radio * 0.68);
-  return arribaMolde + 1.2 * Math.sqrt(Math.max(0, 1 - parte * parte));
-}
-
-// Flores acostadas sobre la tapa de la gelatina, en anillo (una sola va al centro)
-function floresGelatina(cantidad: number, radio: number, arribaMolde: number): THREE.Group {
+// Flores acostadas sobre la gelatina, en anillo (una sola va al centro, salvo en la rosca)
+function floresGelatina(diseno: DisenoPastel, cantidad: number, arribaPlato: number): THREE.Group {
   const grupo = new THREE.Group();
   const geometria = geometriaRosa('#e86a92');
   const petalos = materialRosa();
-  let anillo = radio * 0.42;
-  if (cantidad === 1) {
+  let anillo = lugaresGelatina(diseno).anillo * 0.8;
+  if (diseno.molde === 'rosca') {
+    anillo = lugaresGelatina(diseno).anillo;
+  } else if (cantidad === 1) {
     anillo = 0;
   }
   const escala = Math.max(0.55, Math.min(1.2, (Math.PI * 2 * Math.max(anillo, 2)) / cantidad / 3));
@@ -2549,7 +2804,7 @@ function floresGelatina(cantidad: number, radio: number, arribaMolde: number): T
     const angulo = (k / cantidad) * Math.PI * 2 + Math.PI / 2;
     const nueva = new THREE.Mesh(geometria, petalos);
     nueva.scale.setScalar(escala);
-    nueva.position.set(Math.cos(angulo) * anillo, alturaTapaGelatina(radio, arribaMolde, anillo) + 0.2, Math.sin(angulo) * anillo);
+    nueva.position.set(Math.cos(angulo) * anillo, arribaPlato + alturaGelatina(diseno, anillo) + 0.2, Math.sin(angulo) * anillo);
     // La flor mira hacia arriba
     nueva.rotation.x = -Math.PI / 2;
     nueva.rotateZ(angulo);
@@ -2558,17 +2813,18 @@ function floresGelatina(cantidad: number, radio: number, arribaMolde: number): T
   return grupo;
 }
 
-// Chispas de colores sobre la tapa de la gelatina
-function chispasGelatina(radio: number, arribaMolde: number): THREE.InstancedMesh {
-  const cantidad = Math.min(500, Math.round(radio * radio * 1.4));
+// Chispas de colores regadas sobre la gelatina (en la rosca, solo sobre el aro)
+function chispasGelatina(diseno: DisenoPastel, arribaPlato: number): THREE.InstancedMesh {
+  const lugares = lugaresGelatina(diseno);
+  const cantidad = Math.min(500, Math.round(lugares.fuera * lugares.fuera * 3.6));
   const malla = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.11, 0.42, 2, 6), material('#ffffff', 0.45, 0), cantidad);
   const auxiliar = new THREE.Object3D();
   const color = new THREE.Color();
   const azar = new Aleatorio(13);
   for (let i = 0; i < cantidad; i++) {
     const angulo = azar.siguiente() * Math.PI * 2;
-    const distancia = Math.sqrt(azar.siguiente()) * radio * 0.62;
-    auxiliar.position.set(Math.cos(angulo) * distancia, alturaTapaGelatina(radio, arribaMolde, distancia) + 0.08, Math.sin(angulo) * distancia);
+    const distancia = lugares.dentro + Math.sqrt(azar.siguiente()) * (lugares.fuera - lugares.dentro);
+    auxiliar.position.set(Math.cos(angulo) * distancia, arribaPlato + alturaGelatina(diseno, distancia) + 0.08, Math.sin(angulo) * distancia);
     auxiliar.rotation.set(0, azar.siguiente() * Math.PI * 2, Math.PI / 2, 'YXZ');
     auxiliar.updateMatrix();
     malla.setMatrixAt(i, auxiliar.matrix);
@@ -2593,6 +2849,97 @@ function perlasGelatina(radio: number, arribaPlato: number): THREE.InstancedMesh
   return malla;
 }
 
+/**
+ * RF-5 · Paso 4: gelatina completa con su plato y decoraciones. Todo se acomoda sobre la cara de arriba
+ * del molde elegido (en la rosca, sobre el aro).
+ */
+function construirGelatina(diseno: DisenoPastel, llamas: THREE.Mesh[]): PastelConstruido {
+  const raiz = new THREE.Group();
+  const decoraciones = diseno.decoraciones;
+  let anchoPlato = diseno.diametro;
+  if (diseno.molde === 'figura') {
+    anchoPlato = diseno.diametro * 1.05;
+  }
+  const plato = base(diseno, anchoPlato);
+  raiz.add(plato.grupo);
+  const gelatina = cuerpoGelatina(diseno);
+  gelatina.position.y = plato.arriba;
+  raiz.add(gelatina);
+  const lugares = lugaresGelatina(diseno);
+  const radioArriba = lugares.anillo;
+  if (decoraciones.rosetas > 0) {
+    const anillo = new THREE.Group();
+    const geometria = geometriaRoseta();
+    const crema = material('#ffffff', 0.8, 0);
+    // Si son muchas o la gelatina es chica, las rosetas se achican para que quepan
+    let escalaRoseta = 1;
+    if (decoraciones.rosetas > 1) {
+      escalaRoseta = Math.max(0.45, Math.min(1, (Math.PI * 2 * radioArriba) / decoraciones.rosetas / 2.7));
+    }
+    let lista = lugaresEnAnillos(decoraciones.rosetas, radioArriba, 2.7 * escalaRoseta, false);
+    if (diseno.molde === 'rosca') {
+      // En la rosca van todas en la vuelta del aro
+      lista = lugaresEnAnillos(decoraciones.rosetas, radioArriba, 2.7 * escalaRoseta, true);
+    }
+    for (const lugar of lista) {
+      const roseta = new THREE.Mesh(geometria, crema);
+      roseta.scale.setScalar(escalaRoseta);
+      roseta.position.set(lugar.x, sobrePlato(diseno, plato.arriba, Math.hypot(lugar.x, lugar.z)) - 0.3, lugar.z);
+      anillo.add(roseta);
+    }
+    raiz.add(anillo);
+  }
+  const medioFranja = (lugares.dentro + lugares.fuera) / 2;
+  if (decoraciones.frutaPicada > 0) {
+    raiz.add(cubitos(decoraciones.frutaPicada, COLORES_FRUTA, lugares.fuera, lugares.dentro, sobrePlato(diseno, plato.arriba, medioFranja) - 0.4, 3));
+  }
+  if (decoraciones.frutosRojos > 0) {
+    raiz.add(frutosRojos(decoraciones.frutosRojos, lugares.fuera, lugares.dentro, sobrePlato(diseno, plato.arriba, medioFranja) - 0.4, 8));
+  }
+  const enRosca = diseno.molde === 'rosca';
+  if (decoraciones.fresas > 0) {
+    let radioFresas = radioArriba * 0.7;
+    if (enRosca) {
+      radioFresas = radioArriba;
+    }
+    raiz.add(fresas(decoraciones.fresas, sobrePlato(diseno, plato.arriba, radioFresas) - 0.2, radioFresas, enRosca));
+  }
+  let alturaVelas = 0;
+  if (decoraciones.velas > 0) {
+    let radioVelas = radioArriba * 0.6;
+    if (enRosca) {
+      radioVelas = radioArriba;
+    }
+    raiz.add(velas(decoraciones.velas, radioVelas, sobrePlato(diseno, plato.arriba, radioVelas) - 0.1, llamas, enRosca));
+    alturaVelas = 8.5;
+  }
+  // Las demás decoraciones también se acomodan en la gelatina
+  if (decoraciones.flores > 0) {
+    raiz.add(floresGelatina(diseno, decoraciones.flores, plato.arriba));
+  }
+  if (decoraciones.chispas > 0 || decoraciones.chispasTodo > 0) {
+    raiz.add(chispasGelatina(diseno, plato.arriba));
+  }
+  if (decoraciones.perlas > 0) {
+    raiz.add(perlasGelatina(anchoPlato / 2, plato.arriba));
+  }
+  const arribaCentro = sobrePlato(diseno, plato.arriba, lugares.dentro);
+  if (diseno.topper !== '') {
+    const anchoLetrero = Math.min(16, diseno.diametro * 0.75);
+    const letrero = topper(diseno.topper, anchoLetrero);
+    let radioTopper = radioArriba * 0.45;
+    if (enRosca) {
+      radioTopper = radioArriba;
+    }
+    letrero.position.set(0, sobrePlato(diseno, plato.arriba, radioTopper) - 0.3, -radioTopper);
+    raiz.add(letrero);
+    alturaVelas = Math.max(alturaVelas, altoTopper(anchoLetrero, diseno.topper));
+  }
+  conSombras(raiz);
+  const arribaTodo = Math.max(arribaCentro, sobrePlato(diseno, plato.arriba, radioArriba), plato.arriba + diseno.alturaPiso);
+  return { grupo: raiz, alturaTotal: arribaTodo + alturaVelas, anchoTotal: diseno.diametro + 8, llamas: llamas };
+}
+
 // ===================== Armado principal =====================
 
 /**
@@ -2603,67 +2950,9 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
   const raiz = new THREE.Group();
   const llamas: THREE.Mesh[] = [];
   // Cada decoración trae cuántas piezas eligió el cliente: se dibuja una pieza por unidad
-  const decoraciones = diseno.decoraciones;
 
   if (diseno.tipo === 'gelatina') {
-    const plato = base(diseno, diseno.diametro);
-    raiz.add(plato.grupo);
-    const gelatina = cuerpoGelatina(diseno);
-    gelatina.position.y = plato.arriba;
-    raiz.add(gelatina);
-    const arriba = plato.arriba + diseno.alturaPiso + 1.2;
-    const radioArriba = (diseno.diametro / 2) * 0.55;
-    if (decoraciones.rosetas > 0) {
-      const anillo = new THREE.Group();
-      const geometria = geometriaRoseta();
-      const crema = material('#ffffff', 0.8, 0);
-      // Si son muchas o la gelatina es chica, las rosetas se achican para que quepan
-      let escalaRoseta = 1;
-      if (decoraciones.rosetas > 1) {
-        escalaRoseta = Math.max(0.45, Math.min(1, (Math.PI * 2 * radioArriba) / decoraciones.rosetas / 2.7));
-      }
-      for (const lugar of lugaresEnAnillos(decoraciones.rosetas, radioArriba, 2.7 * escalaRoseta, false)) {
-        const roseta = new THREE.Mesh(geometria, crema);
-        roseta.scale.setScalar(escalaRoseta);
-        roseta.position.set(lugar.x, arriba - 0.5, lugar.z);
-        anillo.add(roseta);
-      }
-      raiz.add(anillo);
-    }
-    if (decoraciones.frutaPicada > 0) {
-      raiz.add(cubitos(decoraciones.frutaPicada, COLORES_FRUTA, radioArriba * 0.8, 0, arriba - 0.6, 3));
-    }
-    if (decoraciones.frutosRojos > 0) {
-      raiz.add(frutosRojos(decoraciones.frutosRojos, radioArriba * 0.8, 0, arriba - 0.6, 8));
-    }
-    if (decoraciones.fresas > 0) {
-      raiz.add(fresas(decoraciones.fresas, arriba - 0.4, radioArriba * 0.7, false));
-    }
-    let alturaVelas = 0;
-    if (decoraciones.velas > 0) {
-      raiz.add(velas(decoraciones.velas, radioArriba * 0.6, arriba - 0.3, llamas, false));
-      alturaVelas = 8.5;
-    }
-    // Las demás decoraciones también se acomodan en la gelatina
-    const radioGelatina = diseno.diametro / 2;
-    if (decoraciones.flores > 0) {
-      raiz.add(floresGelatina(decoraciones.flores, radioGelatina, plato.arriba + diseno.alturaPiso));
-    }
-    if (decoraciones.chispas > 0) {
-      raiz.add(chispasGelatina(radioGelatina, plato.arriba + diseno.alturaPiso));
-    }
-    if (decoraciones.perlas > 0) {
-      raiz.add(perlasGelatina(radioGelatina, plato.arriba));
-    }
-    if (diseno.topper !== '') {
-      const anchoLetrero = Math.min(16, diseno.diametro * 0.75);
-      const letrero = topper(diseno.topper, anchoLetrero);
-      letrero.position.set(0, arriba - 0.4, -radioArriba * 0.45);
-      raiz.add(letrero);
-      alturaVelas = Math.max(alturaVelas, altoTopper(anchoLetrero, diseno.topper));
-    }
-    conSombras(raiz);
-    return { grupo: raiz, alturaTotal: arriba + alturaVelas, anchoTotal: diseno.diametro + 8, llamas: llamas };
+    return construirGelatina(diseno, llamas);
   }
 
   // Medidas de cada piso: cada uno 26 % más chico que el de abajo
@@ -2675,13 +2964,6 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
   const plato = base(diseno, tamanos[0]);
   raiz.add(plato.grupo);
 
-  // Rosetas, fresas y fruta se reparten entre todos los pisos (las que sobran van a los de arriba).
-  // En los pisos de abajo se acomodan en la repisa que deja libre el piso de encima.
-  const rosetasPorPiso: number[] = [];
-  for (let i = 0; i < diseno.pisos; i++) {
-    rosetasPorPiso.push(piezasDelPiso(decoraciones.rosetas, diseno.pisos - 1 - i, diseno.pisos));
-  }
-
   let altura = plato.arriba;
   let alturaVelas = 0;
   for (let i = 0; i < diseno.pisos; i++) {
@@ -2689,49 +2971,55 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     const esArriba = i === diseno.pisos - 1;
     // Posición del piso contando desde arriba (0 = el de hasta arriba)
     const desdeArriba = diseno.pisos - 1 - i;
+    // RF-5 · Paso 3: cada piso con el sabor, la cobertura, el color y las decoraciones de su capa
+    const capa = disenoDelPiso(diseno, i);
+    const d = decoracionesDelPiso(diseno, i);
     // «Ver por dentro» quita la misma rebanada de todos los pisos (se ven las capas de cada uno)
     const conCorte = verDentro;
     const piso = new THREE.Group();
     piso.position.y = altura;
-    piso.add(cuerpoPiso(diseno, tamano, alto, conCorte));
-    // Lo que le toca a este piso de fresas y fruta
-    const fresasAqui = piezasDelPiso(decoraciones.fresas, desdeArriba, diseno.pisos);
-    const frutaAqui = piezasDelPiso(decoraciones.frutaPicada, desdeArriba, diseno.pisos);
-    const frutosRojosAqui = piezasDelPiso(decoraciones.frutosRojos, desdeArriba, diseno.pisos);
-    if (esArriba && decoraciones.velas > 0) {
+    piso.add(cuerpoPiso(capa, tamano, alto, conCorte));
+    if (d.chispasTodo > 0) {
+      // Cubierta de chispas (decoración): chispas pegadas en los costados y arriba de este piso
+      piso.add(chispasDeCobertura(capa, tamano, alto, conCorte));
+    }
+    if (esArriba && d.velas > 0) {
       // Las velas miden 8 cm: cuentan para encuadrar la cámara
       alturaVelas = 8.5;
     }
 
-    // Listones y collares de perlas: uno por unidad, de abajo hacia arriba (si sobran, otra vuelta más arriba)
-    const listones = Math.min(2, piezasDelPiso(decoraciones.liston, i, diseno.pisos));
-    const collares = Math.min(3, piezasDelPiso(decoraciones.perlas, i, diseno.pisos));
+    // Listones y collares de perlas: uno por unidad (si sobran, otra vuelta más arriba)
+    const listones = d.liston;
+    const collares = d.perlas;
     // Primer listón en la base y el segundo a media altura
     const alturasListon = [0.15, alto * 0.5 - ANCHO_LISTON / 2];
     // Orilla de arriba del listón más alto (el goteo no baja de ahí) y el centro donde se amarra el moño
     let arribaListones = 0;
     let centroListon = alto * 0.55;
-    const colorTela = colorListon(diseno);
+    const colorTela = colorListon(capa);
     for (let k = 0; k < listones; k++) {
-      piso.add(liston(diseno, tamano, colorTela, alturasListon[k]));
+      piso.add(liston(capa, tamano, colorTela, alturasListon[k]));
       arribaListones = alturasListon[k] + ANCHO_LISTON;
       centroListon = alturasListon[k] + ANCHO_LISTON / 2;
     }
 
     let arribaPiso = alto;
     // Color de la cara de arriba (el mensaje se escribe con el color que contraste)
-    let colorArriba = diseno.colorCobertura;
-    if (diseno.cobertura === 'degradado') {
+    let colorArriba = capa.colorCobertura;
+    if (capa.cobertura === 'degradado') {
       colorArriba = COLOR_ARRIBA_DEGRADADO;
     }
-    // Goteo: un piso por unidad, empezando por el de arriba. Ganache: siempre en el de arriba
-    const conGanache = diseno.cobertura === 'ganache' && esArriba;
-    if (desdeArriba < decoraciones.goteo || conGanache) {
+    // Goteo elegido en este piso. La ganache escurre en el piso de arriba (o en su propia capa)
+    let conGanache = capa.cobertura === 'ganache' && esArriba;
+    if (capa.cobertura === 'ganache' && diseno.porCapas) {
+      conGanache = true;
+    }
+    if (d.goteo > 0 || conGanache) {
       let colorGoteo = '#3b1f14';
       if (conGanache) {
-        colorGoteo = diseno.colorCobertura;
+        colorGoteo = capa.colorCobertura;
       }
-      piso.add(goteo(diseno, tamano, alto, colorGoteo, arribaListones));
+      piso.add(goteo(capa, tamano, alto, colorGoteo, arribaListones));
       arribaPiso = alto + 0.3;
       colorArriba = colorGoteo;
     }
@@ -2748,26 +3036,23 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     }
     const alturasCollar = [alturaPerlas, alto - 1.3, alturaTercero];
     for (let k = 0; k < collares; k++) {
-      const collar = perlas(diseno, tamano, '#f4efe6');
+      const collar = perlas(capa, tamano, '#f4efe6');
       collar.position.y = alturasCollar[k];
       piso.add(collar);
     }
     // La cobertura nunca agrega piezas (cordón, rosetas...): solo cambia cómo se ve el pastel.
     // Las rosetas salen solo si se piden como decoración.
-    if (rosetasPorPiso[i] > 0) {
-      let colorCrema = diseno.colorCobertura;
-      if (diseno.cobertura === 'ganache' || diseno.cobertura === 'naked' || diseno.cobertura === 'ninguna' || diseno.cobertura === 'marmol') {
+    if (d.rosetas > 0) {
+      let colorCrema = capa.colorCobertura;
+      if (capa.cobertura === 'ganache' || capa.cobertura === 'naked' || capa.cobertura === 'ninguna' || capa.cobertura === 'marmol') {
         colorCrema = '#ffffff';
       }
-      piso.add(rosetas(diseno, tamano, arribaPiso, colorCrema, rosetasPorPiso[i], conCorte));
+      piso.add(rosetas(capa, tamano, arribaPiso, colorCrema, d.rosetas, conCorte));
     }
 
-    // Moños (todos en el piso de arriba) y flores (repartidas entre los pisos, desde arriba)
-    let monosAqui = 0;
-    if (esArriba) {
-      monosAqui = decoraciones.mono;
-    }
-    const floresAqui = piezasDelPiso(decoraciones.flores, desdeArriba, diseno.pisos);
+    // Moños y flores de este piso
+    const monosAqui = d.mono;
+    const floresAqui = d.flores;
     const lugares = monosAqui + floresAqui;
     if (lugares > 0) {
       // Moños y flores comparten la vuelta del piso: así nunca quedan una encima de otra
@@ -2796,12 +3081,16 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
       }
       if (angulosMonos.length > 0) {
         // Con listón, el moño se amarra sobre él
-        piso.add(monos(diseno, tamano, centroListon, angulosMonos, lugares, colorTela));
+        piso.add(monos(capa, tamano, centroListon, angulosMonos, lugares, colorTela));
       }
       if (angulosFlores.length > 0) {
-        piso.add(floresLaterales(diseno, tamano, alto, angulosFlores, lugares));
+        piso.add(floresLaterales(capa, tamano, alto, angulosFlores, lugares));
       }
     }
+    // Lo que le toca a este piso de fresas y fruta
+    const fresasAqui = d.fresas;
+    const frutaAqui = d.frutaPicada;
+    const frutosRojosAqui = d.frutosRojos;
     // Círculo del centro donde va el mensaje (ahí no caen chispas)
     let radioMensaje = 0;
     if (esArriba) {
@@ -2809,7 +3098,7 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
       // - una sola pieza en el centro (una vela, o una fresa) → el mensaje va en arco alrededor
       // - varias piezas → van en anillo por la orilla y el mensaje va recto en el centro
       const conMensaje = diseno.dedicatoria !== '';
-      const velaAlCentro = decoraciones.velas === 1;
+      const velaAlCentro = d.velas === 1;
       const fresaAlCentro = fresasAqui === 1 && !velaAlCentro;
       const hayObjetoCentral = velaAlCentro || fresaAlCentro;
       // Sin mensaje, las piezas se acomodan como siempre (anillos desde el centro)
@@ -2830,7 +3119,7 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         if (conMensaje) {
           radioVelas = tamano * 0.31;
         }
-      } else if (decoraciones.velas > 0) {
+      } else if (d.velas > 0) {
         radioFresas = tamano * 0.4;
       }
       // Radio del círculo libre del centro (lo que no ocupan los anillos)
@@ -2842,8 +3131,8 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
           radioLibre = Math.min(radioLibre, radioFresas - 1.6);
         }
       }
-      if (decoraciones.velas > 0) {
-        piso.add(velas(decoraciones.velas, radioVelas, arribaPiso, llamas, piezasEnOrilla && !velaAlCentro));
+      if (d.velas > 0) {
+        piso.add(velas(d.velas, radioVelas, arribaPiso, llamas, piezasEnOrilla && !velaAlCentro));
         if (!velaAlCentro) {
           // Las velas son altas: desde el frente tapan un poco lo que está detrás, se deja más margen
           radioLibre = Math.min(radioLibre, radioVelas - 1.8);
@@ -2878,17 +3167,17 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         alturaVelas = Math.max(alturaVelas, altoTopper(anchoLetrero, diseno.topper));
       }
       if (conMensaje && hayObjetoCentral) {
-        piso.add(dedicatoriaEnArco(diseno, tamano, arribaPiso, arcoInterior, arcoExterior, colorArriba));
+        piso.add(dedicatoriaEnArco(capa, tamano, arribaPiso, arcoInterior, arcoExterior, colorArriba));
         radioMensaje = arcoExterior + 0.4;
       } else if (conMensaje) {
-        piso.add(dedicatoria(diseno, arribaPiso, Math.max(3, radioLibre), colorArriba));
+        piso.add(dedicatoria(capa, arribaPiso, Math.max(3, radioLibre), colorArriba));
         radioMensaje = Math.max(3, radioLibre);
       }
     } else {
       // Pisos de abajo: fresas y fruta en la repisa (entre la orilla y el piso de encima)
       const repisa = repisaDelPiso(diseno.forma, tamano, tamanos[i + 1]);
       if (fresasAqui > 0) {
-        piso.add(fresasEnRepisa(diseno, tamano, repisa, fresasAqui, rosetasPorPiso[i], arribaPiso, desdeArriba, conCorte));
+        piso.add(fresasEnRepisa(capa, tamano, repisa, fresasAqui, d.rosetas, arribaPiso, desdeArriba, conCorte));
       }
       if (frutaAqui > 0) {
         piso.add(cubitos(frutaAqui, COLORES_FRUTA, tamano / 2, tamanos[i + 1] / 2, arribaPiso - 0.4, 3 + i, repisa));
@@ -2897,17 +3186,17 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
         piso.add(frutosRojos(frutosRojosAqui, tamano / 2, tamanos[i + 1] / 2, arribaPiso - 0.1, 9 + i, repisa));
       }
     }
-    // Hoja de oro: un piso por unidad, empezando por el de arriba
-    if (desdeArriba < decoraciones.hojaOro) {
-      piso.add(hojasDeOro(diseno, tamano, alto, arribaPiso, conCorte, radioMensaje));
+    // Hoja de oro de este piso
+    if (d.hojaOro > 0) {
+      piso.add(hojasDeOro(capa, tamano, alto, arribaPiso, conCorte, radioMensaje));
     }
-    // Chispas: un piso por unidad, empezando por el de arriba
-    if (desdeArriba < decoraciones.chispas) {
+    // Chispas encima de este piso
+    if (d.chispas > 0) {
       let siguiente = 0;
       if (!esArriba) {
         siguiente = tamanos[i + 1];
       }
-      piso.add(chispas(diseno, tamano, siguiente, arribaPiso, radioMensaje));
+      piso.add(chispas(capa, tamano, siguiente, arribaPiso, radioMensaje));
     }
     if (conCorte) {
       recortarRebanada(piso);
@@ -2917,6 +3206,86 @@ export function construirPastel(diseno: DisenoPastel, verDentro: boolean): Paste
     altura = altura + arribaPiso;
   }
   return { grupo: raiz, alturaTotal: altura + alturaVelas, anchoTotal: tamanos[0] + 8, llamas: llamas };
+}
+
+/**
+ * RF-5 · Paso 3: diseño de un piso. Si el pastel se arma por capas, el piso toma el sabor, la cobertura y
+ * el color de su capa; si no, todos los pisos son iguales.
+ */
+function disenoDelPiso(diseno: DisenoPastel, indice: number): DisenoPastel {
+  if (!diseno.porCapas || indice >= diseno.capas.length) {
+    return diseno;
+  }
+  const capa = diseno.capas[indice];
+  const copia: DisenoPastel = Object.assign({}, diseno);
+  copia.colorBizcocho = capa.colorBizcocho;
+  copia.colorCobertura = capa.colorCobertura;
+  copia.colorRelleno = capa.colorRelleno;
+  copia.cobertura = capa.cobertura;
+  copia.decoraciones = capa.decoraciones;
+  return copia;
+}
+
+// 1 si se cumple la condición, 0 si no (para las decoraciones que van una vez por piso)
+function unoSi(condicion: boolean): number {
+  if (condicion) {
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * Piezas de cada decoración que van en un piso ("indice" 0 = el de abajo).
+ *  - Por capas: lo que se eligió en esa capa (las velas siempre van en el piso de arriba).
+ *  - Sin capas: se reparten como antes (flores, fresas y rosetas desde arriba; listón y perlas desde abajo;
+ *    goteo, chispas y hoja de oro un piso por unidad empezando por arriba; moños arriba).
+ */
+function decoracionesDelPiso(diseno: DisenoPastel, indice: number): DecoracionesPastel {
+  const pisos = diseno.pisos;
+  const desdeArriba = pisos - 1 - indice;
+  const esArriba = desdeArriba === 0;
+  const total = diseno.decoraciones;
+  let velasAqui = 0;
+  if (esArriba) {
+    velasAqui = total.velas;
+  }
+  if (diseno.porCapas && indice < diseno.capas.length) {
+    const propia = diseno.capas[indice].decoraciones;
+    return {
+      mono: propia.mono,
+      liston: Math.min(2, propia.liston),
+      flores: propia.flores,
+      perlas: Math.min(3, propia.perlas),
+      chispas: unoSi(propia.chispas > 0),
+      chispasTodo: unoSi(propia.chispasTodo > 0),
+      goteo: unoSi(propia.goteo > 0),
+      rosetas: propia.rosetas,
+      velas: velasAqui,
+      fresas: propia.fresas,
+      frutaPicada: propia.frutaPicada,
+      frutosRojos: propia.frutosRojos,
+      hojaOro: unoSi(propia.hojaOro > 0),
+    };
+  }
+  let monosAqui = 0;
+  if (esArriba) {
+    monosAqui = total.mono;
+  }
+  return {
+    mono: monosAqui,
+    liston: Math.min(2, piezasDelPiso(total.liston, indice, pisos)),
+    flores: piezasDelPiso(total.flores, desdeArriba, pisos),
+    perlas: Math.min(3, piezasDelPiso(total.perlas, indice, pisos)),
+    chispas: unoSi(desdeArriba < total.chispas),
+    chispasTodo: unoSi(desdeArriba < total.chispasTodo),
+    goteo: unoSi(desdeArriba < total.goteo),
+    rosetas: piezasDelPiso(total.rosetas, desdeArriba, pisos),
+    velas: velasAqui,
+    fresas: piezasDelPiso(total.fresas, desdeArriba, pisos),
+    frutaPicada: piezasDelPiso(total.frutaPicada, desdeArriba, pisos),
+    frutosRojos: piezasDelPiso(total.frutosRojos, desdeArriba, pisos),
+    hojaOro: unoSi(desdeArriba < total.hojaOro),
+  };
 }
 
 // Libera la memoria de la tarjeta de video al quitar un pastel

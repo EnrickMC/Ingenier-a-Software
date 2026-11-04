@@ -13,7 +13,7 @@
 --
 -- Este archivo junta, en este orden y sin cambiarlos:
 --   1. CARMIR_BaseDeDatos.sql               (tablas)
---   2. migraciones/MIGRACION_COMPLETA.sql   (cambios de los módulos, Partes 1 a 7)
+--   2. migraciones/MIGRACION_COMPLETA.sql   (cambios de los módulos, Partes 1 a 9)
 -- Si cambias alguno de esos archivos, vuelve a generar este.
 -- No crea usuarios de MySQL: en local la API usa root (ver ApiCARMIR/.env).
 -- =====================================================================
@@ -472,6 +472,7 @@ DELIMITER ;
 --   Parte 6 = NUEVO: casilla «Sus opciones pueden tener receta» en las características (Caracteristica.PermiteReceta)
 --   Parte 7 = NUEVO: foto o PDF del comprobante que sube el cliente desde la página web (tabla ComprobanteArchivo)
 --   Parte 8 = NUEVO: se quita el método de pago «Depósito» (los pagos viejos pasan a «Transferencia»)
+--   Parte 9 = NUEVO: capa del pastel en cada opción (PostreOpcion.NumeroCapa) y precio por capas
 --
 -- CÓMO USARLO
 --   1. Ten tu base creada con DBCarmir/CARMIR_BaseDeDatos.sql (con o sin datos).
@@ -766,6 +767,70 @@ ALTER TABLE Pago
   MODIFY MetodoPago ENUM('Transferencia','Efectivo') NOT NULL COMMENT 'Forma de pago';
 
 
+-- =====================================================================
+-- PARTE 9 · NUEVO · Capas del pastel (RF-3)
+-- =====================================================================
+-- 9.1 En un pastel de 2 o más pisos, cada capa puede llevar su propio sabor,
+--     cobertura, color de cobertura y decoración. PostreOpcion guarda en qué
+--     capa va cada opción: 1 = Base (la de abajo), 2 = la siguiente, etc.
+--     Lo que es para todo el postre (tamaño, pisos, forma) queda en la capa 1.
+--     Los postres que ya existen quedan con capa 1. Si ya se aplicó, no cambia nada.
+CALL carmir_agregar_columna('PostreOpcion', 'NumeroCapa',
+  'TINYINT NOT NULL DEFAULT 1 COMMENT ''Capa del pastel donde va la opción: 1 = Base (abajo), 2 = la siguiente. Es 1 si la opción es para todo el postre'' AFTER IdOpcion');
+
+-- 9.2 La capa entra en la llave primaria para que una misma opción
+--     (por ejemplo el sabor chocolate) pueda ir en capas distintas.
+SET @carmir_capa_en_llave = (SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
+                             WHERE TABLE_SCHEMA = DATABASE()
+                               AND LOWER(TABLE_NAME) = 'postreopcion'
+                               AND CONSTRAINT_NAME = 'PRIMARY'
+                               AND LOWER(COLUMN_NAME) = 'numerocapa');
+SET @carmir_sql = IF(@carmir_capa_en_llave = 0,
+  'ALTER TABLE PostreOpcion DROP PRIMARY KEY, ADD PRIMARY KEY (IdPostre, IdOpcion, NumeroCapa)',
+  'SELECT ''La capa ya está en la llave de PostreOpcion'' AS Aviso');
+PREPARE carmir_sentencia FROM @carmir_sql;
+EXECUTE carmir_sentencia;
+DEALLOCATE PREPARE carmir_sentencia;
+
+-- 9.3 La capa empieza en 1
+CALL carmir_agregar_llave_foranea('PostreOpcion', 'chk_postreopcion_capa', 'CHECK (NumeroCapa > 0)');
+
+-- 9.4 Precio por capas. En una característica de selección única (por ejemplo Sabor),
+--     si el pastel tiene 3 capas con un sabor cada una, cada capa paga 1/3 del sabor;
+--     con una sola capa todo queda igual que antes. En selección múltiple
+--     (por ejemplo Decoración) cada fila se cobra completa.
+--     El factor de escala usa la misma parte: MultiplicadorIngredientes ^ (1 / filas).
+CREATE OR REPLACE VIEW vw_CostoPrecioPostre AS
+SELECT po.IdPostre,
+       ROUND(SUM(COALESCE(cr.CostoReceta, 0) * po.CantidadElegida
+                 * IF(o.SeEscala = 1, COALESCE(f.Factor, 1), 1)
+                 * IF(c.SeleccionMultiple = 1, 1, 1 / fc.Filas)), 2) AS CostoIngredientes,
+       ROUND(SUM(COALESCE(cr.CostoReceta, 0) * po.CantidadElegida
+                 * IF(o.SeEscala = 1, COALESCE(f.Factor, 1), 1) * o.MultiplicadorCosto
+                 * IF(c.SeleccionMultiple = 1, 1, 1 / fc.Filas)), 2) AS PrecioVenta
+FROM PostreOpcion po
+JOIN OpcionCaracteristica o ON o.IdOpcion = po.IdOpcion
+JOIN Caracteristica c ON c.IdCaracteristica = o.IdCaracteristica
+JOIN (SELECT po3.IdPostre, o3.IdCaracteristica, COUNT(*) AS Filas
+      FROM PostreOpcion po3
+      JOIN OpcionCaracteristica o3 ON o3.IdOpcion = po3.IdOpcion
+      GROUP BY po3.IdPostre, o3.IdCaracteristica) fc
+  ON fc.IdPostre = po.IdPostre AND fc.IdCaracteristica = o.IdCaracteristica
+LEFT JOIN vw_CostoReceta cr ON cr.IdOpcion = po.IdOpcion
+LEFT JOIN (SELECT po2.IdPostre,
+                  EXP(SUM(LN(o2.MultiplicadorIngredientes) * IF(c2.SeleccionMultiple = 1, 1, 1 / fc2.Filas))) AS Factor
+      FROM PostreOpcion po2
+      JOIN OpcionCaracteristica o2 ON o2.IdOpcion = po2.IdOpcion
+      JOIN Caracteristica c2 ON c2.IdCaracteristica = o2.IdCaracteristica
+      JOIN (SELECT po4.IdPostre, o4.IdCaracteristica, COUNT(*) AS Filas
+            FROM PostreOpcion po4
+            JOIN OpcionCaracteristica o4 ON o4.IdOpcion = po4.IdOpcion
+            GROUP BY po4.IdPostre, o4.IdCaracteristica) fc2
+        ON fc2.IdPostre = po2.IdPostre AND fc2.IdCaracteristica = o2.IdCaracteristica
+      WHERE o2.SeEscala = 0
+      GROUP BY po2.IdPostre) f ON f.IdPostre = po.IdPostre
+GROUP BY po.IdPostre;
+
 -- ---------------------------------------------------------------------
 -- 5. Limpieza: se borran los procedimientos de apoyo
 -- ---------------------------------------------------------------------
@@ -780,7 +845,11 @@ SELECT 'Migración completa aplicada' AS Resultado,
          WHERE TABLE_SCHEMA = DATABASE()
            AND LOWER(TABLE_NAME) IN ('bajapedido', 'modificacionpedido', 'configuracion',
                                      'cambioconfiguracion', 'codigopostalcobertura',
-                                     'configuracionnotificacion', 'comprobantearchivo')) AS TablasNuevas;
+                                     'configuracionnotificacion', 'comprobantearchivo')) AS TablasNuevas,
+       (SELECT COUNT(*) FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND LOWER(TABLE_NAME) = 'postreopcion'
+           AND LOWER(COLUMN_NAME) = 'numerocapa') AS CapaEnPostreOpcion;
 
 -- Por si el archivo anterior dejó otro delimitador
 DELIMITER ;

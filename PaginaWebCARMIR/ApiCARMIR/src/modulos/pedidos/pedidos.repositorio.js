@@ -155,11 +155,12 @@ async function insertarPostrePersonalizado(conexion, idCategoria, clave) {
   return resultado.insertId;
 }
 
-async function insertarPostreOpcion(conexion, idPostre, idOpcion, cantidad) {
+// capa = NumeroCapa (1 = Base)
+async function insertarPostreOpcion(conexion, idPostre, idOpcion, cantidad, capa) {
   await baseDatos.ejecutar(
     conexion,
-    'INSERT INTO PostreOpcion (IdPostre, IdOpcion, CantidadElegida) VALUES (?, ?, ?)',
-    [idPostre, idOpcion, cantidad]
+    'INSERT INTO PostreOpcion (IdPostre, IdOpcion, NumeroCapa, CantidadElegida) VALUES (?, ?, ?, ?)',
+    [idPostre, idOpcion, capa, cantidad]
   );
 }
 
@@ -314,12 +315,12 @@ async function listarLineas(folio) {
 // Opciones de todos los postres de un pedido (para mostrar su personalización)
 async function listarOpcionesDeLineas(folio) {
   const sql =
-    'SELECT po.IdPostre, po.CantidadElegida, o.NombreOpcion, ca.NombreCaracteristica ' +
+    'SELECT po.IdPostre, po.NumeroCapa, po.CantidadElegida, o.NombreOpcion, ca.NombreCaracteristica ' +
     'FROM DetallePedido d ' +
     'JOIN PostreOpcion po ON po.IdPostre = d.IdPostre ' +
     'JOIN OpcionCaracteristica o ON o.IdOpcion = po.IdOpcion ' +
     'JOIN Caracteristica ca ON ca.IdCaracteristica = o.IdCaracteristica ' +
-    'WHERE d.Folio = ? ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, o.NombreOpcion';
+    'WHERE d.Folio = ? ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, po.NumeroCapa, o.NombreOpcion';
   return baseDatos.consultar(sql, [folio]);
 }
 

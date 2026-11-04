@@ -91,4 +91,43 @@ describe('reglas de configuración', function () {
     expect(largoComentarioPermitido('Hola', true)).toBe(255 - 19);
     expect(largoComentarioPermitido('Hola', false)).toBe(255);
   });
+  it('por capas: cada capa paga su parte del sabor y suma sus decoraciones', function () {
+    // Tres capas iguales cuestan lo mismo que una sola elección
+    const una = [{ idOpcion: 3, cantidad: 1 }, { idOpcion: 6, cantidad: 1 }];
+    const tres = [
+      { idOpcion: 3, cantidad: 1 },
+      { idOpcion: 6, cantidad: 1, capa: 1 }, { idOpcion: 6, cantidad: 1, capa: 2 }, { idOpcion: 6, cantidad: 1, capa: 3 },
+    ];
+    expect(calcularPrecio(caracteristicas, tres)).toBe(calcularPrecio(caracteristicas, una));
+    // Una capa de vainilla abarata el pastel
+    const mezcla = [
+      { idOpcion: 3, cantidad: 1 },
+      { idOpcion: 6, cantidad: 1, capa: 1 }, { idOpcion: 4, cantidad: 1, capa: 2 }, { idOpcion: 6, cantidad: 1, capa: 3 },
+    ];
+    expect(calcularPrecio(caracteristicas, mezcla)).toBeLessThan(calcularPrecio(caracteristicas, tres));
+    // Las decoraciones de cada capa se suman
+    const conListon = tres.concat([{ idOpcion: 11, cantidad: 1, capa: 1 }, { idOpcion: 11, cantidad: 1, capa: 2 }]);
+    expect(calcularPrecio(caracteristicas, conListon)).toBe(calcularPrecio(caracteristicas, tres) + 48);
+  });
+
+  it('por capas: revisa cada capa (sabor obligatorio, una sola opción y exclusiones en la misma capa)', function () {
+    // Falta el sabor de la capa 2
+    let errores = validarConfiguracion(caracteristicas, exclusiones, [
+      { idOpcion: 1, cantidad: 1 }, { idOpcion: 4, cantidad: 1, capa: 1 },
+    ], 2, [2, 4]);
+    expect(errores.length).toBe(1);
+    expect(errores[0].capa).toBe(2);
+    // Tres leches en la capa 2 y frambuesa (de todo el pastel) chocan
+    errores = validarConfiguracion(caracteristicas, exclusiones, [
+      { idOpcion: 1, cantidad: 1 }, { idOpcion: 8, cantidad: 1 },
+      { idOpcion: 4, cantidad: 1, capa: 1 }, { idOpcion: 6, cantidad: 1, capa: 2 },
+    ], 2, [2, 4]);
+    expect(errores.length).toBe(1);
+    expect(errores[0].tipo).toBe('exclusion');
+    // Dos capas con sabor distinto están bien
+    errores = validarConfiguracion(caracteristicas, exclusiones, [
+      { idOpcion: 1, cantidad: 1 }, { idOpcion: 4, cantidad: 1, capa: 1 }, { idOpcion: 6, cantidad: 1, capa: 2 },
+    ], 2, [2, 4]);
+    expect(errores.length).toBe(0);
+  });
 });

@@ -94,3 +94,72 @@ prueba.test('el precio sigue la misma cuenta que vw_CostoPrecioPostre', function
   // 276 + (207.375 + 90 + 52×2) × 2 + 24 = 1102.75
   assert.strictEqual(reglas.calcularPrecio(elegidas), 1102.75);
 });
+
+// ===================== Capas del pastel (PostreOpcion.NumeroCapa) =====================
+
+prueba.test('por capas: cada capa paga su parte del sabor y la decoración se suma', function () {
+  const chocolate = opcion(5, 2, 'Chocolate', 94.5, true, 1, 1, 1);
+  // Base vainilla y capa 2 chocolate: cada sabor paga la mitad
+  const elegidas = [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: chocolate, cantidad: 1, capa: 2 },
+    { opcion: flores, cantidad: 1, capa: 1 },
+    { opcion: flores, cantidad: 1, capa: 2 }
+  ];
+  // 138 + (15.3 + 94.5) / 2 + 52 + 52 = 296.9
+  assert.strictEqual(reglas.calcularPrecio(elegidas, caracteristicas), 296.9);
+  // El mismo sabor en las dos capas cuesta lo mismo que un pastel de una capa
+  const igual = [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 2 }
+  ];
+  assert.strictEqual(reglas.calcularPrecio(igual, caracteristicas), reglas.calcularPrecio([igual[0], igual[1]], caracteristicas));
+});
+
+prueba.test('por capas: selección única, presupuesto y exclusiones se revisan en cada capa', function () {
+  const chocolate = opcion(5, 2, 'Chocolate', 94.5, true, 1, 1, 1);
+  // Un sabor por capa es correcto
+  const bien = reglas.validar(caracteristicas, exclusiones, [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: tresLeches, cantidad: 1, capa: 2 }
+  ]);
+  assert.strictEqual(bien.length, 0, JSON.stringify(bien));
+  // Dos sabores en la capa 2 no
+  const dos = reglas.validar(caracteristicas, [], [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 2 },
+    { opcion: chocolate, cantidad: 1, capa: 2 }
+  ]);
+  assert.strictEqual(dos.length, 1);
+  assert.strictEqual(dos[0].tipo, 'seleccionUnica');
+  assert.strictEqual(dos[0].capa, 2);
+  assert.match(dos[0].mensaje, /de la capa 2/);
+  // Tres leches y vainilla en la MISMA capa sí chocan
+  const chocan = reglas.validar(caracteristicas, exclusiones, [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 2 },
+    { opcion: tresLeches, cantidad: 1, capa: 2 }
+  ]);
+  let hayExclusion = false;
+  for (let i = 0; i < chocan.length; i++) {
+    if (chocan[i].tipo === 'exclusion') {
+      hayExclusion = true;
+    }
+  }
+  assert.ok(hayExclusion);
+  // El presupuesto de decoración es por capa: 2 listones en una capa (4 puntos) se pasa de 3
+  const presupuesto = reglas.validar(caracteristicas, [], [
+    { opcion: chico, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: liston, cantidad: 1, capa: 1 },
+    { opcion: liston, cantidad: 2, capa: 2 }
+  ]);
+  assert.strictEqual(presupuesto.length, 1);
+  assert.strictEqual(presupuesto[0].tipo, 'presupuesto');
+  assert.strictEqual(presupuesto[0].capa, 2);
+});

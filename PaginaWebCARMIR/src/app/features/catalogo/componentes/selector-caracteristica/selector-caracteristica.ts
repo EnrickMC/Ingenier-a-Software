@@ -7,7 +7,7 @@ import {
 } from '../../modelos/catalogo.models';
 import { cantidadElegida, motivoExclusion, puntosUsados, redondear } from '../../utilidades/reglas-configuracion';
 import { AparienciaOpcion, aparienciaDeOpcion, tipoDeCaracteristica } from '../../pastel3d/diseno-pastel';
-import { rutaSvgForma } from '../../pastel3d/formas-pastel';
+import { rutaSvgForma, rutaSvgMolde } from '../../pastel3d/formas-pastel';
 
 // Rectángulo de un piso en el icono de tamaño
 interface PisoIcono {
@@ -41,6 +41,8 @@ export class SelectorCaracteristica {
   readonly error = input('');
   // Las gelatinas usan otros colores de sabor
   readonly esGelatina = input(false);
+  // ¿Está dentro del editor de capas? (se ve más compacto, sin marco propio)
+  readonly dentroDeCapa = input(false);
 
   // Selección única: id de la opción elegida (0 = ninguna)
   readonly opcionUnicaElegida = output<number>();
@@ -137,7 +139,12 @@ export class SelectorCaracteristica {
   }
 
   rutaForma(opcion: OpcionPersonalizable): string {
-    return rutaSvgForma(this.apariencia(opcion).forma, 48);
+    const apariencia = this.apariencia(opcion);
+    // Gelatinas: rosca, domo y gajos tienen su propio dibujo
+    if (this.esGelatina() && apariencia.molde !== 'figura') {
+      return rutaSvgMolde(apariencia.molde, 48);
+    }
+    return rutaSvgForma(apariencia.forma, 48);
   }
 
   // Pisos del icono de tamaño (caja de 64 x 56): más pisos y más anchos según el tamaño

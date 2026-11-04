@@ -348,7 +348,7 @@ async function obtenerPersonalizacion(idPostre) {
     const fila = filasOpciones[i];
     const opcion = buscarOpcion(reglasCategoria.opciones, fila.IdOpcion);
     if (opcion !== null && opcionElegible(opcion, reglasCategoria.caracteristicas)) {
-      seleccionInicial.push({ idOpcion: fila.IdOpcion, cantidad: fila.CantidadElegida });
+      seleccionInicial.push({ idOpcion: fila.IdOpcion, cantidad: fila.CantidadElegida, capa: fila.NumeroCapa });
     } else {
       opcionesRetiradas.push(fila.NombreOpcion);
     }
@@ -395,7 +395,12 @@ async function listarPlantillas(idPostre) {
         if (opcion === null || !opcionElegible(opcion, reglasCategoria.caracteristicas)) {
           todasDisponibles = false;
         } else {
-          opciones.push({ idOpcion: opcion.idOpcion, nombre: opcion.nombre, cantidad: filasOpciones[j].CantidadElegida });
+          opciones.push({
+            idOpcion: opcion.idOpcion,
+            nombre: opcion.nombre,
+            cantidad: filasOpciones[j].CantidadElegida,
+            capa: filasOpciones[j].NumeroCapa
+          });
         }
       }
     }
@@ -410,7 +415,7 @@ async function listarPlantillas(idPostre) {
 
 // ===================== RF-3: cotizar una configuración =====================
 
-// datos = { idPostre, opciones: [{ idOpcion, cantidad }], cantidad, dedicatoria, comentario, precioMostrado } (ya validados)
+// datos = { idPostre, opciones: [{ idOpcion, cantidad, capa }], cantidad, dedicatoria, comentario, precioMostrado } (ya validados)
 // RF-3 · Paso 7 (API): inicia aquí la validación final antes de agregar al carrito.
 async function cotizar(datos) {
   // RF-3 · Paso 7: el producto sigue disponible.
@@ -437,7 +442,7 @@ async function cotizar(datos) {
         mensaje: 'La opción seleccionada ya no está disponible: ' + nombre
       });
     } else {
-      elegidas.push({ opcion: opcion, cantidad: pedida.cantidad });
+      elegidas.push({ opcion: opcion, cantidad: pedida.cantidad, capa: pedida.capa });
     }
   }
 
@@ -448,7 +453,7 @@ async function cotizar(datos) {
   }
 
   // RF-3 · Paso 8: precio de la configuración.
-  const precioUnitario = reglas.calcularPrecio(elegidas);
+  const precioUnitario = reglas.calcularPrecio(elegidas, reglasCategoria.caracteristicas);
   const total = reglas.redondear(precioUnitario * datos.cantidad);
 
   // RF-3 paso 7: si el precio que vio el cliente ya no es el vigente, se le avisa

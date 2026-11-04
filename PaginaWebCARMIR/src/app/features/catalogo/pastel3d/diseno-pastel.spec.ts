@@ -1,5 +1,5 @@
 import { CaracteristicaPersonalizable, OpcionPersonalizable } from '../modelos/catalogo.models';
-import { aparienciaDeOpcion, baseDeOpcion, colorDeNombre, colorDeOpcion, disenoDesdeSeleccion, lugarDelMensaje, textoTopper, tipoDePostre, tipoDeCaracteristica } from './diseno-pastel';
+import { aparienciaDeOpcion, baseDeOpcion, capasDelPostre, colorDeNombre, colorDeOpcion, disenoDesdeSeleccion, lugarDelMensaje, moldeDeOpcion, nombreCapa, textoTopper, tipoDePostre, tipoDeCaracteristica } from './diseno-pastel';
 import { puntosForma, rutaSvgForma } from './formas-pastel';
 
 // Opción con los datos mínimos (el precio no importa para el 3D)
@@ -132,9 +132,12 @@ describe('Diseño del pastel 3D', function () {
     expect(tipoDePostre('Especiales', 'Pieza de temporada')).toBe('pastel');
   });
 
-  it('las coberturas de chispas, mármol y sin cobertura se reconocen por nombre', function () {
+  it('las coberturas de mármol y sin cobertura se reconocen por nombre; las chispas son decoración', function () {
     const cubierta = caracteristica(9, 'Cobertura', false, [opcion(20, 9, 'Chispas de colores'), opcion(21, 9, 'Mármol'), opcion(22, 9, 'Sin cobertura'), opcion(23, 9, 'Normal')]);
-    expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 20, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('chispas');
+    // Una cobertura «de chispas» de antes se dibuja con betún y la cubierta de chispas (decoración)
+    const conChispas = disenoDesdeSeleccion([cubierta], [{ idOpcion: 20, cantidad: 1 }], 'Pastel', 'Pastel', '');
+    expect(conChispas.cobertura).toBe('betun');
+    expect(conChispas.decoraciones.chispasTodo).toBe(1);
     expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 21, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('marmol');
     expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 22, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('ninguna');
     expect(disenoDesdeSeleccion([cubierta], [{ idOpcion: 23, cantidad: 1 }], 'Pastel', 'Pastel', '').cobertura).toBe('betun');
@@ -185,7 +188,7 @@ describe('Diseño del pastel 3D', function () {
   // Los mismos nombres que sugiere el Panel Administrativo (PresetsCatalogo.java): todos deben verse en el 3D
   it('las categorías sugeridas en el Panel se dibujan con su modelo', function () {
     const esperado: string[][] = [
-      ['Pasteles', 'pastel'], ['Pasteles de cumpleaños', 'pastel'], ['Pasteles de boda', 'pastel'], ['Gelatinas', 'gelatina'],
+      ['Pasteles', 'pastel'], ['Gelatinas', 'gelatina'],
       ['Pays', 'pay'], ['Cheesecakes', 'cheesecake'], ['Cupcakes', 'cupcake'], ['Galletas', 'galleta'], ['Brownies', 'brownie'],
       ['Donas', 'dona'], ['Roscas', 'rosca'], ['Macarons', 'macaron'],
     ];
@@ -207,12 +210,12 @@ describe('Diseño del pastel 3D', function () {
 
   it('las coberturas sugeridas en el Panel se reconocen', function () {
     const esperado: string[][] = [
-      ['Betún de la casa', 'betun'], ['Buttercream', 'betun'], ['Fondant liso', 'lisa'], ['Glaseado', 'lisa'], ['Chantilly', 'chantilly'],
-      ['Ganache de chocolate', 'ganache'], ['Naked cake', 'naked'], ['Chispas de colores', 'chispas'], ['Mármol', 'marmol'],
+      ['Betún de la casa', 'betun'], ['Buttercream', 'buttercream'], ['Rústica', 'rustica'], ['Fondant liso', 'lisa'], ['Glaseado', 'lisa'],
+      ['Chantilly', 'chantilly'], ['Ganache de chocolate', 'ganache'], ['Naked cake', 'naked'], ['Mármol', 'marmol'],
       ['Degradado', 'degradado'], ['Sin cobertura', 'ninguna'],
       // Opciones de «Frosting» (parte de arriba del cupcake)
       ['Remolino de betún', 'betun'], ['Remolino de chantilly', 'chantilly'], ['Remolino de queso crema', 'betun'],
-      ['Remolino con chispas', 'chispas'], ['Remolino degradado', 'degradado'], ['Domo de fondant', 'lisa'], ['Sin frosting', 'ninguna'],
+      ['Remolino degradado', 'degradado'], ['Domo de fondant', 'lisa'], ['Sin frosting', 'ninguna'],
     ];
     const opciones: OpcionPersonalizable[] = [];
     for (let i = 0; i < esperado.length; i++) {
@@ -226,8 +229,8 @@ describe('Diseño del pastel 3D', function () {
   });
 
   it('las decoraciones sugeridas en el Panel aparecen en el 3D', function () {
-    const nombres = ['Velas', 'Moño', 'Listón', 'Flores de azúcar', 'Perlas', 'Chispas', 'Fresas', 'Frutos rojos', 'Fruta picada', 'Rosetas de crema', 'Goteo de chocolate', 'Hoja de oro'];
-    const campos = ['velas', 'mono', 'liston', 'flores', 'perlas', 'chispas', 'fresas', 'frutosRojos', 'frutaPicada', 'rosetas', 'goteo', 'hojaOro'];
+    const nombres = ['Velas', 'Moño', 'Listón', 'Flores de azúcar', 'Perlas', 'Chispas', 'Cubierta de chispas', 'Fresas', 'Frutos rojos', 'Fruta picada', 'Rosetas de crema', 'Goteo de chocolate', 'Hoja de oro'];
+    const campos = ['velas', 'mono', 'liston', 'flores', 'perlas', 'chispas', 'chispasTodo', 'fresas', 'frutosRojos', 'frutaPicada', 'rosetas', 'goteo', 'hojaOro'];
     const opciones: OpcionPersonalizable[] = [];
     for (let i = 0; i < nombres.length; i++) {
       opciones.push(opcion(200 + i, 21, nombres[i]));
@@ -302,5 +305,50 @@ describe('Diseño del pastel 3D', function () {
     expect(puntos.length).toBe(90);
     expect(maximo).toBeLessThanOrEqual(15.01);
     expect(rutaSvgForma('corazon', 48).startsWith('M')).toBe(true);
+  });
+  it('cada capa del pastel tiene su propio sabor, cobertura y decoración', function () {
+    const seleccion = [
+      { idOpcion: 13, cantidad: 1 },
+      // Base: chocolate con ganache y velas
+      { idOpcion: 5, cantidad: 1, capa: 1 }, { idOpcion: 15, cantidad: 1, capa: 1 }, { idOpcion: 8, cantidad: 2, capa: 1 },
+      // Capa 2: vainilla con fondant y flores
+      { idOpcion: 4, cantidad: 1, capa: 2 }, { idOpcion: 14, cantidad: 1, capa: 2 }, { idOpcion: 10, cantidad: 3, capa: 2 },
+      // Superior: vainilla con betún de la casa
+      { idOpcion: 4, cantidad: 1, capa: 3 }, { idOpcion: 16, cantidad: 1, capa: 3 },
+    ];
+    const diseno = disenoDesdeSeleccion(todas, seleccion, 'Pasteles', 'Pastel', '');
+    expect(diseno.pisos).toBe(3);
+    expect(diseno.porCapas).toBe(true);
+    expect(diseno.capas.length).toBe(3);
+    expect(diseno.capas[0].cobertura).toBe('ganache');
+    expect(diseno.capas[1].cobertura).toBe('lisa');
+    expect(diseno.capas[2].cobertura).toBe('betun');
+    expect(diseno.capas[0].colorBizcocho).not.toBe(diseno.capas[1].colorBizcocho);
+    expect(diseno.capas[1].decoraciones.flores).toBe(3);
+    expect(diseno.capas[2].decoraciones.flores).toBe(0);
+    // Las velas se suman (siempre van hasta arriba)
+    expect(diseno.decoraciones.velas).toBe(2);
+    expect(capasDelPostre(todas, seleccion, 'Pasteles', 'Pastel')).toBe(3);
+    // Las gelatinas no tienen capas
+    expect(capasDelPostre(todas, seleccion, 'Gelatinas', 'Gelatina')).toBe(1);
+    expect(nombreCapa(1, 3)).toBe('Base');
+    expect(nombreCapa(2, 3)).toBe('Capa 2');
+    expect(nombreCapa(3, 3)).toBe('Superior');
+  });
+
+  it('las formas de gelatina sugeridas en el Panel tienen su molde', function () {
+    const esperado: string[][] = [
+      ['Molde de gajos', 'gajos'], ['Rosca', 'rosca'], ['Domo', 'domo'], ['Corazón', 'figura'], ['Estrella', 'figura'],
+      ['Flor', 'figura'], ['Cuadrada', 'figura'], ['Redonda', 'gajos'],
+    ];
+    for (const par of esperado) {
+      expect(moldeDeOpcion(par[0]), par[0]).toBe(par[1]);
+    }
+    const moldes = caracteristica(30, 'Forma', false, [opcion(300, 30, 'Rosca'), opcion(301, 30, 'Corazón')]);
+    expect(disenoDesdeSeleccion([moldes], [{ idOpcion: 300, cantidad: 1 }], 'Gelatinas', 'Gelatina', '').molde).toBe('rosca');
+    const corazon = disenoDesdeSeleccion([moldes], [{ idOpcion: 301, cantidad: 1 }], 'Gelatinas', 'Gelatina', '');
+    expect(corazon.molde).toBe('figura');
+    expect(corazon.forma).toBe('corazon');
+    expect(aparienciaDeOpcion(moldes, moldes.opciones[0], true).molde).toBe('rosca');
   });
 });

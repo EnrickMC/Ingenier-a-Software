@@ -1,4 +1,4 @@
-<fieldset class="paso panel" [class.con-error]="error() !== ''" [attr.id]="'caracteristica-' + caracteristica().idCaracteristica">
+<fieldset class="paso" [class.panel]="!dentroDeCapa()" [class.en-capa]="dentroDeCapa()" [class.con-error]="error() !== ''" [attr.id]="'caracteristica-' + caracteristica().idCaracteristica">
   <legend class="titulo-paso">
     {{ caracteristica().nombre }}
     @if (caracteristica().obligatoria) {

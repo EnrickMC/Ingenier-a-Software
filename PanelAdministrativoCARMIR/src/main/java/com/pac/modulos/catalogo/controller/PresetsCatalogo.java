@@ -17,6 +17,11 @@ import java.util.List;
  * En los cupcakes el pan es el «Sabor» y lo de arriba es el «Frosting» (si el producto no tiene
  * «Frosting», el cupcake se ve sin nada arriba).
  *
+ * Capas: en los pasteles de 2 o más pisos, la página web deja elegir Sabor, Cobertura, Color de cobertura
+ * y Decoración por separado en cada capa (Base, Capa 2... Superior).
+ *
+ * Las chispas son una decoración («Chispas» arriba, «Cubierta de chispas» en los costados y arriba), no una cobertura.
+ *
  * No hay presets «Sin ...»: si la característica no es obligatoria, la página web ya ofrece
  * «Sin cobertura», «Sin frosting», etc., y en el 3D ese elemento no se dibuja.
  *
@@ -28,7 +33,7 @@ public class PresetsCatalogo {
     // ===================== Categorías (tipo de postre) =====================
 
     private static final String[] CATEGORIAS = {
-        "Pasteles", "Pasteles de cumpleaños", "Pasteles de boda", "Gelatinas", "Pays", "Cheesecakes",
+        "Pasteles", "Gelatinas", "Pays", "Cheesecakes",
         "Cupcakes", "Galletas", "Brownies", "Donas", "Roscas", "Macarons"
     };
 
@@ -73,6 +78,8 @@ public class PresetsCatalogo {
     private static final String[] TAMANOS_CHICOS = {"Mini", "Mediano", "Grande", "Jumbo"};
     private static final String[] PISOS = {"1 piso", "2 pisos", "3 pisos", "4 pisos", "5 pisos"};
     private static final String[] FORMAS = {"Redondo", "Cuadrado", "Corazón", "Hexágono", "Estrella", "Flor", "Ovalado"};
+    // Moldes de gelatina (la web dibuja cada uno)
+    private static final String[] FORMAS_GELATINA = {"Molde de gajos", "Rosca", "Domo", "Corazón", "Estrella", "Flor", "Cuadrada"};
     private static final String[] SABORES = {
         "Vainilla", "Chocolate", "Chocolate blanco", "Fresa", "Red velvet", "Tres leches", "Limón", "Naranja",
         "Mango", "Piña", "Coco", "Café", "Cajeta", "Zanahoria", "Nuez", "Matcha", "Pistache", "Oreo",
@@ -86,12 +93,12 @@ public class PresetsCatalogo {
         "Durazno", "Mango", "Chocolate"
     };
     private static final String[] COBERTURAS = {
-        "Betún de la casa", "Buttercream", "Fondant liso", "Glaseado", "Chantilly", "Ganache de chocolate",
-        "Naked cake", "Chispas de colores", "Mármol", "Degradado"
+        "Betún de la casa", "Buttercream", "Rústica", "Fondant liso", "Glaseado", "Chantilly", "Ganache de chocolate",
+        "Naked cake", "Mármol", "Degradado"
     };
     // Parte de arriba del cupcake
     private static final String[] FROSTINGS = {
-        "Remolino de betún", "Remolino de chantilly", "Remolino de queso crema", "Remolino con chispas",
+        "Remolino de betún", "Remolino de chantilly", "Remolino de queso crema",
         "Remolino degradado", "Domo de fondant", "Ganache de chocolate", "Mármol"
     };
     private static final String[] COLORES = {
@@ -100,7 +107,7 @@ public class PresetsCatalogo {
         "Dorado", "Plateado", "Negro", "Chocolate"
     };
     private static final String[] DECORACIONES = {
-        "Velas", "Moño", "Listón", "Flores de azúcar", "Perlas", "Chispas", "Fresas", "Frutos rojos",
+        "Velas", "Moño", "Listón", "Flores de azúcar", "Perlas", "Chispas", "Cubierta de chispas", "Fresas", "Frutos rojos",
         "Fruta picada", "Rosetas de crema", "Goteo de chocolate", "Hoja de oro"
     };
     private static final String[] BASES = {
@@ -145,14 +152,15 @@ public class PresetsCatalogo {
 
     private static final String[][] PALABRAS_COBERTURA = {
         {"sin cobertura", "sin cobertura", "sin betun", "sin glaseado", "sin frosting", "sin copete", "ninguna", "ninguno", "sin nada", "al natural", "solo pan", "desnudo"},
-        {"chispas de colores", "chispa", "sprinkle", "grajea", "confeti", "granillo"},
         {"mármol (vetas)", "marmol", "marble"},
         {"degradado (color abajo, blanco arriba)", "degradado", "ombre", "difuminado"},
         {"naked (se ven las capas)", "naked", "semi desnudo", "semidesnudo"},
         {"fondant o glaseado liso", "fondant", "liso", "lisa", "glaseado", "glase", "royal"},
         {"chantilly", "chantilly", "crema batida", "nata"},
         {"ganache brillante", "ganache", "espejo"},
-        {"betún de la casa", "betun", "buttercream", "merengue", "rustic", "queso crema", "mantequilla", "crema",
+        {"rústica (pinceladas)", "rustic", "pincelada", "texturizad"},
+        {"buttercream (franjas)", "buttercream", "butter cream", "mantequilla", "peinad", "franja"},
+        {"betún de la casa", "betun", "merengue", "queso crema", "crema",
             "defecto", "predeterminad", "normal", "clasic", "tradicional", "sencill", "basic", "estandar", "de la casa", "original"}
     };
 
@@ -164,7 +172,9 @@ public class PresetsCatalogo {
         {"flores de azúcar", "flor"},
         {"perlas", "perla"},
         {"hoja de oro", "hoja de oro", "hojas de oro", "oro comestible", "laminilla", "pan de oro", "hojuela"},
-        {"chispas", "chispa", "grajea", "confeti"},
+        {"cubierta de chispas (costados y arriba)", "cubierta de chispa", "cubierto de chispa", "cobertura de chispa", "con chispa",
+            "chispas en todo", "chispas alrededor", "chispas a los lados", "todo de chispa"},
+        {"chispas (arriba)", "chispa", "sprinkle", "grajea", "confeti"},
         {"goteo de chocolate (solo pasteles)", "goteo", "ganache", "drip"},
         {"frutos rojos", "frutos rojos", "frutos del bosque", "mora", "arandano", "frambuesa", "blueberr"},
         {"fresas", "fresa"},
@@ -190,6 +200,16 @@ public class PresetsCatalogo {
         {"ovalado", "oval"},
         {"redondo", "redond", "circul"}
     };
+
+    // Moldes de gelatina (antes de las formas: «Rosca» no es una forma de pastel)
+    private static final String[][] PALABRAS_MOLDE = {
+        {"molde de rosca (aro con hueco)", "rosca", "corona", "aro", "bundt", "savarin"},
+        {"molde de domo (media esfera)", "domo", "media esfera", "semiesfera", "bola", "cupula", "iglu"},
+        {"molde de gajos", "gajo", "tradicional", "clasic", "redond", "circul"}
+    };
+
+    // Palabras de las chispas: en una cobertura ya no se usan (las chispas son decoración)
+    private static final String[] PALABRAS_CHISPAS = {"chispa", "sprinkle", "grajea", "confeti", "granillo"};
 
     private static final String[][] PALABRAS_TAMANO = {
         {"extra grande", "extra", "gigante", "jumbo"},
@@ -278,6 +298,9 @@ public class PresetsCatalogo {
     // ¿La web dibuja esta opción en este postre? (por ejemplo, el goteo solo en pasteles)
     private static boolean opcionSirve(String tipoCaracteristica, String nombreOpcion, String tipoPostre) {
         String texto = limpiar(nombreOpcion);
+        if (esChispasEnCobertura(tipoCaracteristica, texto)) {
+            return false;
+        }
         String elemento = null;
         if (tipoCaracteristica.equals("decoracion")) {
             elemento = buscarGrupo(texto, PALABRAS_DECORACION, false);
@@ -333,6 +356,9 @@ public class PresetsCatalogo {
      * Regresa "" si sí se puede o si la web no reconoce el nombre.
      */
     public static String incompatibilidadOpcion(String nombreCaracteristica, String nombreOpcion, String nombreCategoria) {
+        if (esChispasEnCobertura(tipoDeCaracteristica(nombreCaracteristica), limpiar(nombreOpcion))) {
+            return MENSAJE_CHISPAS;
+        }
         if (limpiar(nombreCategoria).isEmpty()) {
             return "";
         }
@@ -342,6 +368,16 @@ public class PresetsCatalogo {
         }
         return "«" + nombreOpcion.trim() + "» no es compatible con " + plural(tipoPostre)
                 + ": la página web no lo puede dibujar en ese postre.";
+    }
+
+    // RF-32 · Excepción paso 4: las chispas ya no son cobertura
+    private static final String MENSAJE_CHISPAS = "Las chispas son una decoración: agrégalas en «Decoración» "
+            + "(«Chispas» van arriba y «Cubierta de chispas» en los costados y arriba).";
+
+    // ¿Es una cobertura (o frosting) con chispas? Ya no se permite: las chispas van en Decoración
+    private static boolean esChispasEnCobertura(String tipoCaracteristica, String textoOpcion) {
+        boolean esCobertura = tipoCaracteristica.equals("cobertura") || tipoCaracteristica.equals("frosting");
+        return esCobertura && contieneAlguna(textoOpcion, PALABRAS_CHISPAS);
     }
 
     private static String plural(String tipoPostre) {
@@ -372,6 +408,9 @@ public class PresetsCatalogo {
             return lista(PISOS);
         }
         if (tipo.equals("forma")) {
+            if (tipoPostre.equals("gelatina")) {
+                return lista(FORMAS_GELATINA);
+            }
             return lista(FORMAS);
         }
         if (tipo.equals("sabor")) {
@@ -398,7 +437,7 @@ public class PresetsCatalogo {
         if (tipo.equals("base")) {
             return lista(BASES);
         }
-        String[][] grupos = {TAMANOS, TAMANOS_CHICOS, FORMAS, PISOS, SABORES, SABORES_GELATINA, RELLENOS,
+        String[][] grupos = {TAMANOS, TAMANOS_CHICOS, FORMAS, FORMAS_GELATINA, PISOS, SABORES, SABORES_GELATINA, RELLENOS,
             COBERTURAS, FROSTINGS, COLORES, DECORACIONES, BASES};
         List<String> todas = new ArrayList<String>();
         for (String[] grupo : grupos) {
@@ -449,14 +488,14 @@ public class PresetsCatalogo {
         String[][] explicacion = {
             {"tamano", "el tamaño (en cupcakes, galletas, brownies, donas y macarons hace más grande la pieza)"},
             {"pisos", "el número de pisos (solo pasteles)"},
-            {"forma", "la forma del pastel o de la gelatina"},
-            {"sabor", "el color del pan (en cupcakes, solo el pan), del relleno y de la cobertura"},
+            {"forma", "la forma del pastel o el molde de la gelatina (gajos, rosca, domo, corazón...)"},
+            {"sabor", "el color del pan (en cupcakes, solo el pan), del relleno y de la cobertura; en pasteles de varios pisos se elige por capa"},
             {"relleno", "el color del relleno (se ve con «Ver por dentro»)"},
-            {"cobertura", "la cobertura (betún, fondant, chispas, mármol, degradado...)"},
+            {"cobertura", "la cobertura (betún, buttercream, rústica, fondant, mármol, degradado...); en pasteles de varios pisos se elige por capa"},
             {"frosting", "la parte de arriba del cupcake (remolino o domo); sin esta característica el cupcake va sin nada arriba"},
-            {"color", "el color de la cobertura (o del frosting)"},
+            {"color", "el color de la cobertura (o del frosting); en pasteles de varios pisos se elige por capa"},
             {"base", "dónde se presenta: plato, tabla, pizarra, base dorada o plateada, pedestal"},
-            {"decoracion", "las decoraciones (cada unidad elegida es una pieza en el 3D)"}
+            {"decoracion", "las decoraciones (cada unidad elegida es una pieza en el 3D); en pasteles de varios pisos se eligen por capa"}
         };
         for (String[] fila : explicacion) {
             if (fila[0].equals(tipo)) {
@@ -471,6 +510,22 @@ public class PresetsCatalogo {
         String incompatible = incompatibilidadOpcion(nombreCaracteristica, nombreOpcion, nombreCategoria);
         if (!incompatible.isEmpty()) {
             return incompatible;
+        }
+        // Gelatinas: la forma es el molde (rosca, domo, gajos o una figura)
+        boolean esForma = tipoDeCaracteristica(nombreCaracteristica).equals("forma");
+        String texto = limpiar(nombreOpcion);
+        if (esForma && tipoDePostre(nombreCategoria).equals("gelatina") && !texto.isEmpty()) {
+            String molde = buscarGrupo(texto, PALABRAS_MOLDE, false);
+            if (molde == null) {
+                String figura = buscarGrupo(texto, PALABRAS_FORMA, false);
+                if (figura != null) {
+                    molde = "molde de " + figura;
+                }
+            }
+            if (molde == null) {
+                return "La página web no reconoce este nombre: se usa el molde de gajos.";
+            }
+            return "Se verá en el 3D como: " + molde + ".";
         }
         return vista3dOpcion(nombreCaracteristica, nombreOpcion);
     }
@@ -504,6 +559,9 @@ public class PresetsCatalogo {
             }
             siNo = "usa el color de vainilla";
         } else if (tipo.equals("cobertura") || tipo.equals("frosting")) {
+            if (esChispasEnCobertura(tipo, texto)) {
+                return MENSAJE_CHISPAS;
+            }
             encontrado = buscarGrupo(texto, PALABRAS_COBERTURA, false);
             siNo = "se dibuja con betún de la casa";
         } else if (tipo.equals("color")) {

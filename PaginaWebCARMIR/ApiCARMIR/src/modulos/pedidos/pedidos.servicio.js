@@ -54,14 +54,32 @@ function redondear(valor) {
   return Math.round((valor + Number.EPSILON) * 100) / 100;
 }
 
-// ClaveConfiguracion igual que ConfiguracionPostre.claveConfiguracion del Panel: "IdOpcion:Cantidad|..." por id
+// Capa de una opción (sin capa = 1, la Base)
+function capaDeOpcion(opcion) {
+  if (opcion.capa === undefined || opcion.capa === null || opcion.capa < 1) {
+    return 1;
+  }
+  return opcion.capa;
+}
+
+// Revisa si la opción "a" va después de la "b": primero por id de opción y luego por capa
+function vaDespues(a, b) {
+  if (a.idOpcion !== b.idOpcion) {
+    return a.idOpcion > b.idOpcion;
+  }
+  return capaDeOpcion(a) > capaDeOpcion(b);
+}
+
+// ClaveConfiguracion igual que ConfiguracionPostre.claveConfiguracion del Panel: "IdOpcion:Cantidad|..." por id.
+// Si la opción va en la capa 2 o más se agrega "@capa" (por ejemplo "4:1|4:1@2"); la Base no lo lleva,
+// así las claves de los postres de una sola capa no cambian.
 function claveConfiguracion(opciones) {
   const ordenadas = opciones.slice();
   // Ordenamiento por inserción (como en el Panel), de menor a mayor id de opción
   for (let i = 1; i < ordenadas.length; i++) {
     const actual = ordenadas[i];
     let j = i - 1;
-    while (j >= 0 && ordenadas[j].idOpcion > actual.idOpcion) {
+    while (j >= 0 && vaDespues(ordenadas[j], actual)) {
       ordenadas[j + 1] = ordenadas[j];
       j = j - 1;
     }
@@ -69,7 +87,11 @@ function claveConfiguracion(opciones) {
   }
   const partes = [];
   for (let i = 0; i < ordenadas.length; i++) {
-    partes.push(ordenadas[i].idOpcion + ':' + ordenadas[i].cantidad);
+    let parte = ordenadas[i].idOpcion + ':' + ordenadas[i].cantidad;
+    if (capaDeOpcion(ordenadas[i]) > 1) {
+      parte = parte + '@' + capaDeOpcion(ordenadas[i]);
+    }
+    partes.push(parte);
   }
   return partes.join('|');
 }
@@ -485,7 +507,7 @@ async function crearPostre(conexion, fila) {
   const idPostre = await repositorio.insertarPostrePersonalizado(conexion, fila.idCategoria, fila.clave);
   const opciones = fila.articulo.opciones;
   for (let i = 0; i < opciones.length; i++) {
-    await repositorio.insertarPostreOpcion(conexion, idPostre, opciones[i].idOpcion, opciones[i].cantidad);
+    await repositorio.insertarPostreOpcion(conexion, idPostre, opciones[i].idOpcion, opciones[i].cantidad, capaDeOpcion(opciones[i]));
   }
   return idPostre;
 }
@@ -727,6 +749,36 @@ function armarPasos(estadoActual, historial) {
   return pasos;
 }
 
+// « (Base)», « (Capa 2)» o « (Superior)» si el postre tiene esa característica en varias capas; vacío si no
+function textoCapa(opciones, posicion) {
+  const fila = opciones[posicion];
+  let enVariasCapas = false;
+  let capaMayor = 1;
+  for (let i = 0; i < opciones.length; i++) {
+    const otra = opciones[i];
+    if (otra.IdPostre !== fila.IdPostre) {
+      continue;
+    }
+    if (Number(otra.NumeroCapa) > capaMayor) {
+      capaMayor = Number(otra.NumeroCapa);
+    }
+    if (otra.NombreCaracteristica === fila.NombreCaracteristica && Number(otra.NumeroCapa) > 1) {
+      enVariasCapas = true;
+    }
+  }
+  if (!enVariasCapas) {
+    return '';
+  }
+  const capa = Number(fila.NumeroCapa);
+  if (capa === 1) {
+    return ' (Base)';
+  }
+  if (capa === capaMayor) {
+    return ' (Superior)';
+  }
+  return ' (Capa ' + capa + ')';
+}
+
 function armarProductos(lineas, opciones) {
   const productos = [];
   for (let i = 0; i < lineas.length; i++) {
@@ -738,7 +790,7 @@ function armarProductos(lineas, opciones) {
     const personalizacion = [];
     for (let j = 0; j < opciones.length; j++) {
       if (opciones[j].IdPostre === linea.IdPostre) {
-        let texto = opciones[j].NombreCaracteristica + ': ' + opciones[j].NombreOpcion;
+        let texto = opciones[j].NombreCaracteristica + textoCapa(opciones, j) + ': ' + opciones[j].NombreOpcion;
         if (opciones[j].CantidadElegida > 1) {
           texto = texto + ' ×' + opciones[j].CantidadElegida;
         }

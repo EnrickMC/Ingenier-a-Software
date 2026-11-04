@@ -122,3 +122,49 @@ export function estaDentro(x: number, y: number, contorno: Punto2d[]): boolean {
   }
   return dentro;
 }
+
+/**
+ * Ruta SVG del icono de un molde de gelatina (caja cuadrada de "caja" pixeles):
+ *  - gajos: vista desde arriba con sus gajos
+ *  - rosca: aro con el hueco del centro
+ *  - domo: vista de lado (media esfera)
+ * Para "figura" se usa rutaSvgForma.
+ */
+export function rutaSvgMolde(molde: string, caja: number): string {
+  const centro = caja / 2;
+  const radio = caja * 0.42;
+  if (molde === 'domo') {
+    const abajo = caja * 0.72;
+    return 'M' + (centro - radio).toFixed(1) + ' ' + abajo.toFixed(1) +
+      ' A' + radio.toFixed(1) + ' ' + (radio * 0.85).toFixed(1) + ' 0 0 1 ' + (centro + radio).toFixed(1) + ' ' + abajo.toFixed(1) + ' Z';
+  }
+  let ruta = '';
+  const pasos = 90;
+  for (let i = 0; i <= pasos; i++) {
+    const t = (i / pasos) * Math.PI * 2;
+    let r = radio;
+    if (molde === 'gajos') {
+      r = radio * (1 + 0.08 * Math.cos(10 * t)) * 0.95;
+    }
+    let letra = 'L';
+    if (i === 0) {
+      letra = 'M';
+    }
+    ruta = ruta + letra + (centro + Math.cos(t) * r).toFixed(1) + ' ' + (centro - Math.sin(t) * r).toFixed(1) + ' ';
+  }
+  ruta = ruta + 'Z';
+  if (molde === 'rosca') {
+    // Hueco: un círculo recorrido al revés (así queda vacío)
+    const hueco = radio * 0.38;
+    for (let i = 0; i <= pasos; i++) {
+      const t = (i / pasos) * Math.PI * 2;
+      let letra = 'L';
+      if (i === 0) {
+        letra = ' M';
+      }
+      ruta = ruta + letra + (centro + Math.cos(t) * hueco).toFixed(1) + ' ' + (centro + Math.sin(t) * hueco).toFixed(1) + ' ';
+    }
+    ruta = ruta + 'Z';
+  }
+  return ruta;
+}

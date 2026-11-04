@@ -269,20 +269,27 @@ public class PedidoDAOMySQL implements PedidoDAO {
         return lineas;
     }
 
-    // "Característica: Opción" de cada opción del postre, y las imágenes de referencia
+    // "Característica: Opción" de cada opción del postre, y las imágenes de referencia.
+    // En un pastel por capas se dice en qué capa va: "Sabor (Base): Vainilla", "Sabor (Superior): Chocolate".
     private void cargarEspecificaciones(Connection conexion, LineaPedido linea) throws SQLException {
-        String sql = "SELECT ca.NombreCaracteristica, o.NombreOpcion, pop.CantidadElegida, o.LinkImagen "
+        String sql = "SELECT ca.NombreCaracteristica, o.NombreOpcion, pop.CantidadElegida, o.LinkImagen, pop.NumeroCapa, "
+                + "(SELECT MAX(p2.NumeroCapa) FROM PostreOpcion p2 JOIN OpcionCaracteristica o2 ON o2.IdOpcion = p2.IdOpcion "
+                + " WHERE p2.IdPostre = pop.IdPostre AND o2.IdCaracteristica = o.IdCaracteristica) AS CapaMayorCaracteristica, "
+                + "(SELECT MAX(p3.NumeroCapa) FROM PostreOpcion p3 WHERE p3.IdPostre = pop.IdPostre) AS CapaMayorPostre "
                 + "FROM PostreOpcion pop "
                 + "JOIN OpcionCaracteristica o ON o.IdOpcion = pop.IdOpcion "
                 + "JOIN Caracteristica ca ON ca.IdCaracteristica = o.IdCaracteristica "
-                + "WHERE pop.IdPostre = ? ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, o.NombreOpcion";
+                + "WHERE pop.IdPostre = ? ORDER BY ca.OrdenMostrar, ca.NombreCaracteristica, pop.NumeroCapa, o.NombreOpcion";
         PreparedStatement consulta = conexion.prepareStatement(sql);
         consulta.setInt(1, linea.getIdPostre());
         ResultSet resultado = consulta.executeQuery();
         List<String> especificaciones = new ArrayList<String>();
         List<String> imagenes = new ArrayList<String>();
         while (resultado.next()) {
-            String texto = resultado.getString("NombreCaracteristica") + ": " + resultado.getString("NombreOpcion");
+            String texto = resultado.getString("NombreCaracteristica")
+                    + textoCapa(resultado.getInt("NumeroCapa"), resultado.getInt("CapaMayorCaracteristica"),
+                            resultado.getInt("CapaMayorPostre"))
+                    + ": " + resultado.getString("NombreOpcion");
             int veces = resultado.getInt("CantidadElegida");
             if (veces > 1) {
                 texto = texto + " ×" + veces;
@@ -297,6 +304,20 @@ public class PedidoDAOMySQL implements PedidoDAO {
         consulta.close();
         linea.setEspecificaciones(especificaciones);
         linea.setImagenes(imagenes);
+    }
+
+    // " (Base)", " (Capa 2)" o " (Superior)" si la característica va en varias capas; vacío si no
+    private String textoCapa(int capa, int capaMayorCaracteristica, int capaMayorPostre) {
+        if (capaMayorCaracteristica <= 1) {
+            return "";
+        }
+        if (capa == 1) {
+            return " (Base)";
+        }
+        if (capa == capaMayorPostre) {
+            return " (Superior)";
+        }
+        return " (Capa " + capa + ")";
     }
 
     // ===================== Dentro de una transacción =====================

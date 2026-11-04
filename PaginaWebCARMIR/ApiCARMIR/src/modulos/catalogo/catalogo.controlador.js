@@ -10,7 +10,9 @@ const ORDENES_PERMITIDOS = ['nombre', 'precio_asc', 'precio_desc'];
 const CANTIDAD_MAXIMA_PIEZAS = 20;
 const LARGO_MAXIMO_DEDICATORIA = 150;
 const LARGO_MAXIMO_COMENTARIO = 255;
-const OPCIONES_MAXIMAS = 40;
+const OPCIONES_MAXIMAS = 80;
+// Capas máximas de un pastel (PostreOpcion.NumeroCapa: 1 = Base)
+const CAPA_MAXIMA = 10;
 
 // RF-1 · Paso 2 (API): categorías activas para el catálogo.
 // GET /api/catalogo/categorias
@@ -106,11 +108,21 @@ function leerDatosCotizacion(cuerpo) {
     if (cantidad > 127) {
       throw validacion.datoInvalido('La cantidad de una opción no es válida');
     }
-    if (vistas.indexOf(idOpcion) >= 0) {
+    // Capa del pastel donde va la opción; si no viene es la Base (1)
+    let capa = 1;
+    if (elegida.capa !== undefined && elegida.capa !== null) {
+      capa = validacion.enteroPositivo(elegida.capa, 'capa de la opción');
+    }
+    if (capa > CAPA_MAXIMA) {
+      throw validacion.datoInvalido('La capa de una opción no es válida');
+    }
+    // Una opción puede repetirse solo en capas distintas (llave de PostreOpcion)
+    const llave = idOpcion + '@' + capa;
+    if (vistas.indexOf(llave) >= 0) {
       throw validacion.datoInvalido('Una opción viene repetida');
     }
-    vistas.push(idOpcion);
-    opciones.push({ idOpcion: idOpcion, cantidad: cantidad });
+    vistas.push(llave);
+    opciones.push({ idOpcion: idOpcion, cantidad: cantidad, capa: capa });
   }
 
   let cantidad = 1;
