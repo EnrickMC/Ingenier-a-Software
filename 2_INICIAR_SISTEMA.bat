@@ -25,6 +25,9 @@ call :configurar_entorno
 REM --- 2. Encender MySQL (Servicio de Windows o XAMPP oculto, sin abrir otra ventana) ---
 call :asegurar_mysql_activo
 
+REM --- 2.5 Pedir la contrasena de root de MySQL de este equipo (Enter = sin contrasena) ---
+call :pedir_root_mysql
+
 REM --- 3. Verificar que todo este instalado y sincronizado en este equipo ---
 if not defined NODE_ENCONTRADO goto :ejecutar_instalacion_previa
 if not defined JAVA_HOME goto :ejecutar_instalacion_previa
@@ -56,6 +59,9 @@ if errorlevel 1 exit /b 1
 call :configurar_entorno
 
 :arrancar_en_misma_consola
+REM La contrasena de root ya quedo guardada en db.local.properties; no pasarla a los procesos
+set "MYSQL_PASS="
+set "CARMIR_ROOT_PASS="
 set "CARMIR_BAT_FILE=%~f0"
 set "CARMIR_JS_TMP=%TEMP%\carmir_consola_unica_%RANDOM%_%RANDOM%.js"
 "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$lines = [IO.File]::ReadAllLines($env:CARMIR_BAT_FILE, [Text.Encoding]::ASCII); $idx = [Array]::IndexOf($lines, 'REM === CARMIR_NODE_LAUNCHER_START ==='); if ($idx -ge 0) { $js = $lines[($idx + 1)..($lines.Length - 1)]; [IO.File]::WriteAllLines($env:CARMIR_JS_TMP, $js, [Text.Encoding]::ASCII) }"
@@ -115,6 +121,78 @@ echo [INFO] Encendiendo MySQL de XAMPP en segundo plano...
 "%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath 'D:\xampp\mysql\bin\mysqld.exe' -ArgumentList '--defaults-file=D:\xampp\mysql\bin\my.ini','--standalone' -WindowStyle Hidden" >nul 2>nul
 ping 127.0.0.1 -n 6 >nul
 "D:\xampp\mysql\bin\mysql.exe" -u root -h 127.0.0.1 -P 3306 -e "SET GLOBAL max_allowed_packet = 16777216;" >nul 2>nul
+exit /b 0
+
+:pedir_root_mysql
+call :buscar_mysql
+REM Si este equipo aun no tiene cliente MySQL, el instalador se encarga despues
+if not defined MYSQL_EXE exit /b 0
+set "MYSQL_CNF=%TEMP%\carmir_mysql_%RANDOM%_%RANDOM%.cnf"
+set "MYSQL_ERR=%TEMP%\carmir_mysql_err_%RANDOM%_%RANDOM%.txt"
+
+:pedir_pass_mysql
+set "MYSQL_PASS="
+echo Escribe la contrasena del usuario "root" de tu MySQL.
+echo Si tu MySQL no tiene contrasena, solo presiona Enter.
+set /p "MYSQL_PASS=Contrasena de root: "
+call :probar_login_root
+if not errorlevel 1 goto :root_mysql_correcto
+call :explicar_error_mysql
+echo.
+goto :pedir_pass_mysql
+
+:root_mysql_correcto
+echo [OK] Conexion verificada con MySQL (usuario root).
+echo.
+REM Guardar la contrasena para el Panel Administrativo y dejarla lista para el instalador
+call :escribir_db_local_properties
+set "CARMIR_ROOT_PASS=%MYSQL_PASS%"
+set "CARMIR_ROOT_VERIFICADO=1"
+if exist "%MYSQL_CNF%" del /f /q "%MYSQL_CNF%" >nul 2>nul
+if exist "%MYSQL_ERR%" del /f /q "%MYSQL_ERR%" >nul 2>nul
+exit /b 0
+
+:buscar_mysql
+set "MYSQL_EXE="
+set "MYSQL_TMP=%TEMP%\carmir_mysql_exe_%RANDOM%.txt"
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$cands = @(); Get-CimInstance Win32_Service -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^(MySQL|MariaDB)' -and $_.State -eq 'Running' } | ForEach-Object { if ($_.PathName -match '(?i)^\W?(.+?\\bin)\\') { $cands += (Join-Path $Matches[1] 'mysql.exe') } }; foreach ($r in @('C:\Program Files\MySQL', 'C:\Program Files')) { if (Test-Path -LiteralPath $r) { Get-ChildItem -LiteralPath $r -Directory -Filter 'MySQL Server*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') }; Get-ChildItem -LiteralPath $r -Directory -Filter 'MariaDB*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') } } }; $cands += 'C:\xampp\mysql\bin\mysql.exe'; $cands += 'D:\xampp\mysql\bin\mysql.exe'; $cmd = Get-Command mysql -ErrorAction SilentlyContinue; if ($cmd) { $cands += $cmd.Source }; foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath $c)) { [IO.File]::WriteAllText($env:MYSQL_TMP, $c, (New-Object Text.UTF8Encoding($false))); break } }" >nul 2>nul
+if exist "%MYSQL_TMP%" set /p MYSQL_EXE=<"%MYSQL_TMP%"
+if exist "%MYSQL_TMP%" del /f /q "%MYSQL_TMP%" >nul 2>nul
+exit /b 0
+
+:probar_login_root
+REM Primero por 127.0.0.1 y, si falla, por localhost (algunas instalaciones solo aceptan una de las dos)
+set "MYSQL_HOST=127.0.0.1"
+call :probar_login_host
+if not errorlevel 1 exit /b 0
+set "MYSQL_HOST=localhost"
+call :probar_login_host
+if not errorlevel 1 exit /b 0
+exit /b 1
+
+:probar_login_host
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$pw = $env:MYSQL_PASS; if ($null -eq $pw) { $pw = '' }; $pw = $pw.Trim(); $esc = $pw.Replace('\', '\\').Replace([char]34, '\' + [char]34); $lines = @('[client]', 'user=root', ('password=' + [char]34 + $esc + [char]34), ('host=' + $env:MYSQL_HOST), 'port=3306', 'default-character-set=utf8mb4'); [IO.File]::WriteAllLines($env:MYSQL_CNF, $lines, (New-Object Text.UTF8Encoding($false)))" >nul 2>nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -h %MYSQL_HOST% -P 3306 -e "SELECT 1;" >nul 2>"%MYSQL_ERR%"
+exit /b %ERRORLEVEL%
+
+:explicar_error_mysql
+echo.
+echo [ERROR] MySQL no acepto la conexion como root. Esto respondio MySQL:
+if exist "%MYSQL_ERR%" type "%MYSQL_ERR%"
+echo.
+findstr /c:"1045" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - Error 1045: la contrasena de root de ESTE equipo no es la que escribiste.
+findstr /c:"2059" /c:"caching_sha2" /c:"plugin" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - Problema de autenticacion entre el cliente y el servidor MySQL (version distinta).
+findstr /c:"2003" /c:"2005" /c:"2013" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - No se pudo conectar al puerto 3306: revisa que el servicio MySQL este encendido.
+echo   Cliente usado: "%MYSQL_EXE%"
+if defined MYSQL_PASS echo   (El script SI envio una contrasena a MySQL.)
+if not defined MYSQL_PASS echo   (El script envio la contrasena VACIA: no se leyo lo que escribiste.)
+exit /b 0
+
+:escribir_db_local_properties
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$pw = $env:MYSQL_PASS; if ($null -eq $pw) { $pw = '' }; $esc = $pw.Replace('\', '\\'); $dest = Join-Path $env:CARMIR_ROOT 'Software_CARMIR\PanelAdministrativoCARMIR\db.local.properties'; $lines = @('# Configuracion local autogenerada para este equipo (no se sube a Git)', 'db.url=jdbc:mysql://localhost:3306/CARMIR_DB?useSSL=false&serverTimezone=America/Mexico_City&allowPublicKeyRetrieval=true', 'db.usuario=root', ('db.contrasena=' + $esc)); [IO.File]::WriteAllLines($dest, $lines, [Text.Encoding]::GetEncoding('ISO-8859-1'))" >nul 2>nul
 exit /b 0
 
 :puerto_activo
@@ -351,14 +429,6 @@ function mostrarResumen() {
   console.log('  - Tienda en linea (Clientes):  http://localhost:4200');
   console.log('  - Estado de la API REST:       http://127.0.0.1:3000/api/salud');
   console.log('  - Panel Administrativo:        Abierto en su ventana de escritorio');
-  console.log('');
-  console.log('  CREDENCIALES DEL PANEL ADMINISTRATIVO:');
-  console.log('    * Administradora (acceso total):   admin  /  admin');
-  console.log('    * Acceso del Personal (enlace inferior):');
-  console.log('        - maria / Maria2026   (Pedidos, agenda, insumos, recetas)');
-  console.log('        - jose  / Jose2026    (Agenda, insumos, recetas)');
-  console.log('        - lucia / Lucia2026   (Pedidos, pagos, finanzas)');
-  console.log('        - pedro / Pedro2026   (Cuenta bloqueada para prueba)');
   console.log('----------------------------------------------------------------------');
   console.log('  -> Presiona [ENTER] aqui cuando termines para detener y cerrar todo.');
   console.log('     (Opcional: P + Enter reabre el Panel | W + Enter reabre la Web)');

@@ -91,43 +91,20 @@ goto :revisar_puerto_mysql
 :mysql_encendido
 echo [OK] Servidor MySQL activo en el puerto 3306.
 
-REM --- 3. Conectar como root (deteccion automatica o solicitud) ---
+REM --- 3. Conectar como root (se pide la contrasena; Enter = sin contrasena) ---
 set "MYSQL_CNF=%TEMP%\carmir_reset_%RANDOM%_%RANDOM%.cnf"
 set "MYSQL_PASS="
+set "MYSQL_ERR=%TEMP%\carmir_mysql_err_%RANDOM%_%RANDOM%.txt"
 
-if not exist "%~dp0Software_CARMIR\PanelAdministrativoCARMIR\db.local.properties" goto :probar_claves_comunes
-call :leer_pass_local
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
-:probar_claves_comunes
-set "MYSQL_PASS="
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
-set "MYSQL_PASS=admin"
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
-set "MYSQL_PASS=root"
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
-set "MYSQL_PASS=1234"
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
-set "MYSQL_PASS=123456"
-call :probar_login_root
-if not errorlevel 1 goto :root_conectado
-
+REM Siempre se pregunta la contrasena de root (cada equipo puede tener una distinta o ninguna)
 :pedir_pass_mysql
 set "MYSQL_PASS="
-echo Tu instalacion de MySQL utiliza una contrasena personalizada para "root".
-set /p "MYSQL_PASS=Escribe la contrasena de root de tu MySQL y presiona Enter: "
+echo Escribe la contrasena del usuario "root" de tu MySQL.
+echo Si tu MySQL no tiene contrasena, solo presiona Enter.
+set /p "MYSQL_PASS=Contrasena de root: "
 call :probar_login_root
 if not errorlevel 1 goto :root_conectado
-echo [ERROR] Contrasena incorrecta para root@127.0.0.1:3306. Intenta de nuevo.
+call :explicar_error_mysql
 echo.
 goto :pedir_pass_mysql
 
@@ -136,27 +113,27 @@ echo [OK] Conexion verificada con MySQL (usuario root).
 echo.
 
 REM --- 4. Borrar y restaurar CARMIR_DB desde cero ---
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -e "SET GLOBAL max_allowed_packet = 16777216;" >nul 2>nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -e "SET GLOBAL max_allowed_packet = 16777216;" >nul 2>nul
 
 echo [1/4] Recreando estructura limpia de CARMIR_DB (INSTALACION_COMPLETA.sql)...
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" < "%~dp0Software_CARMIR\DBCarmir\INSTALACION_COMPLETA.sql" >nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" < "%~dp0Software_CARMIR\DBCarmir\INSTALACION_COMPLETA.sql" >nul
 if errorlevel 1 goto :error_sql
 
 echo [2/4] Cargando catalogo completo, exclusiones, recetas y datos iniciales (POBLAR_BASE.sql)...
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" < "%~dp0Software_CARMIR\DBCarmir\POBLAR_BASE.sql" >nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" < "%~dp0Software_CARMIR\DBCarmir\POBLAR_BASE.sql" >nul
 if errorlevel 1 goto :error_sql
 
 echo [3/4] Restaurando permisos de los usuarios de la API web (carmir_web y carmir_pedidos)...
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -e "FLUSH PRIVILEGES;" >nul 2>nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -e "FLUSH PRIVILEGES;" >nul 2>nul
 if errorlevel 1 call :reparar_tablas_sistema_mysql
 
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" < "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR\sql\crear_usuario_lectura.sql" >nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" < "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR\sql\crear_usuario_lectura.sql" >nul
 if errorlevel 1 goto :error_sql
 
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" < "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR\sql\crear_usuario_pedidos.sql" >nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" < "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR\sql\crear_usuario_pedidos.sql" >nul
 if errorlevel 1 goto :error_sql
 
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -e "ALTER USER 'carmir_web'@'localhost' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_web'@'127.0.0.1' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_pedidos'@'localhost' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_pedidos'@'127.0.0.1' IDENTIFIED BY 'CambiaEstaContrasena2026'; FLUSH PRIVILEGES;" >nul 2>nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -e "ALTER USER 'carmir_web'@'localhost' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_web'@'127.0.0.1' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_pedidos'@'localhost' IDENTIFIED BY 'CambiaEstaContrasena2026'; ALTER USER 'carmir_pedidos'@'127.0.0.1' IDENTIFIED BY 'CambiaEstaContrasena2026'; FLUSH PRIVILEGES;" >nul 2>nul
 
 echo [4/4] Sincronizando credenciales locales y verificando restauracion...
 call :escribir_db_local_properties
@@ -165,10 +142,11 @@ call :escribir_env_api
 echo.
 echo   Resumen de datos restaurados en CARMIR_DB:
 echo   ------------------------------------------------------------------
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -N -B -e "USE CARMIR_DB; SELECT CONCAT('    Categorias:          ', (SELECT COUNT(*) FROM CategoriaPostre)); SELECT CONCAT('    Caracteristicas:     ', (SELECT COUNT(*) FROM Caracteristica)); SELECT CONCAT('    Opciones:            ', (SELECT COUNT(*) FROM OpcionCaracteristica)); SELECT CONCAT('    Exclusiones activas: ', (SELECT COUNT(*) FROM ExclusionOpciones WHERE EstadoExclusion = 'Activa')); SELECT CONCAT('    Productos en tienda: ', (SELECT COUNT(*) FROM Postre WHERE MostrarEnTienda = 1)); SELECT CONCAT('    Insumos / Recetas:   ', (SELECT COUNT(*) FROM Insumo), ' insumos / ', (SELECT COUNT(*) FROM Receta), ' recetas'); SELECT CONCAT('    Pedidos iniciales:   ', (SELECT COUNT(*) FROM Pedido));"
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -N -B -e "USE CARMIR_DB; SELECT CONCAT('    Categorias:          ', (SELECT COUNT(*) FROM CategoriaPostre)); SELECT CONCAT('    Caracteristicas:     ', (SELECT COUNT(*) FROM Caracteristica)); SELECT CONCAT('    Opciones:            ', (SELECT COUNT(*) FROM OpcionCaracteristica)); SELECT CONCAT('    Exclusiones activas: ', (SELECT COUNT(*) FROM ExclusionOpciones WHERE EstadoExclusion = 'Activa')); SELECT CONCAT('    Productos en tienda: ', (SELECT COUNT(*) FROM Postre WHERE MostrarEnTienda = 1)); SELECT CONCAT('    Insumos / Recetas:   ', (SELECT COUNT(*) FROM Insumo), ' insumos / ', (SELECT COUNT(*) FROM Receta), ' recetas'); SELECT CONCAT('    Pedidos iniciales:   ', (SELECT COUNT(*) FROM Pedido));"
 echo   ------------------------------------------------------------------
 
 del /f /q "%MYSQL_CNF%" >nul 2>nul
+if exist "%MYSQL_ERR%" del /f /q "%MYSQL_ERR%" >nul 2>nul
 
 echo.
 echo ======================================================================
@@ -186,7 +164,7 @@ REM ===================== SUBRUTINAS DE APOYO =====================
 :buscar_mysql
 set "MYSQL_EXE="
 set "MYSQL_TMP=%TEMP%\carmir_mysql_exe_%RANDOM%.txt"
-"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$cands = @(); foreach ($r in @('C:\Program Files\MySQL', 'C:\Program Files')) { if (Test-Path -LiteralPath $r) { Get-ChildItem -LiteralPath $r -Directory -Filter 'MySQL Server*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') }; Get-ChildItem -LiteralPath $r -Directory -Filter 'MariaDB*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') } } }; $cands += 'C:\xampp\mysql\bin\mysql.exe'; $cands += 'D:\xampp\mysql\bin\mysql.exe'; $cmd = Get-Command mysql -ErrorAction SilentlyContinue; if ($cmd) { $cands += $cmd.Source }; foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath $c)) { [IO.File]::WriteAllText($env:MYSQL_TMP, $c, (New-Object Text.UTF8Encoding($false))); break } }" >nul 2>nul
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$cands = @(); Get-CimInstance Win32_Service -ErrorAction SilentlyContinue | Where-Object { $_.Name -match '^(MySQL|MariaDB)' -and $_.State -eq 'Running' } | ForEach-Object { if ($_.PathName -match '(?i)^\W?(.+?\\bin)\\') { $cands += (Join-Path $Matches[1] 'mysql.exe') } }; foreach ($r in @('C:\Program Files\MySQL', 'C:\Program Files')) { if (Test-Path -LiteralPath $r) { Get-ChildItem -LiteralPath $r -Directory -Filter 'MySQL Server*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') }; Get-ChildItem -LiteralPath $r -Directory -Filter 'MariaDB*' -ErrorAction SilentlyContinue | Sort-Object Name -Descending | ForEach-Object { $cands += (Join-Path $_.FullName 'bin\mysql.exe') } } }; $cands += 'C:\xampp\mysql\bin\mysql.exe'; $cands += 'D:\xampp\mysql\bin\mysql.exe'; $cmd = Get-Command mysql -ErrorAction SilentlyContinue; if ($cmd) { $cands += $cmd.Source }; foreach ($c in $cands) { if ($c -and (Test-Path -LiteralPath $c)) { [IO.File]::WriteAllText($env:MYSQL_TMP, $c, (New-Object Text.UTF8Encoding($false))); break } }" >nul 2>nul
 if exist "%MYSQL_TMP%" set /p MYSQL_EXE=<"%MYSQL_TMP%"
 if exist "%MYSQL_TMP%" del /f /q "%MYSQL_TMP%" >nul 2>nul
 exit /b 0
@@ -204,13 +182,39 @@ if exist "%PASS_TMP%" del /f /q "%PASS_TMP%" >nul 2>nul
 exit /b 0
 
 :probar_login_root
-"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$pw = $env:MYSQL_PASS; if ($null -eq $pw) { $pw = '' }; $esc = $pw.Replace('\', '\\').Replace([char]34, '\' + [char]34); $lines = @('[client]', 'user=root', ('password=' + [char]34 + $esc + [char]34), 'host=127.0.0.1', 'port=3306', 'default-character-set=utf8mb4'); [IO.File]::WriteAllLines($env:MYSQL_CNF, $lines, [Text.Encoding]::ASCII)" >nul 2>nul
-"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -e "SELECT 1;" >nul 2>nul
+REM Primero por 127.0.0.1 y, si falla, por localhost (algunas instalaciones solo aceptan una de las dos)
+set "MYSQL_HOST=127.0.0.1"
+call :probar_login_host
+if not errorlevel 1 exit /b 0
+set "MYSQL_HOST=localhost"
+call :probar_login_host
+if not errorlevel 1 exit /b 0
+exit /b 1
+
+:probar_login_host
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$pw = $env:MYSQL_PASS; if ($null -eq $pw) { $pw = '' }; $pw = $pw.Trim(); $esc = $pw.Replace('\', '\\').Replace([char]34, '\' + [char]34); $lines = @('[client]', 'user=root', ('password=' + [char]34 + $esc + [char]34), ('host=' + $env:MYSQL_HOST), 'port=3306', 'default-character-set=utf8mb4'); [IO.File]::WriteAllLines($env:MYSQL_CNF, $lines, (New-Object Text.UTF8Encoding($false)))" >nul 2>nul
+"%MYSQL_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" -h %MYSQL_HOST% -P 3306 -e "SELECT 1;" >nul 2>"%MYSQL_ERR%"
 exit /b %ERRORLEVEL%
+
+:explicar_error_mysql
+echo.
+echo [ERROR] MySQL no acepto la conexion como root. Esto respondio MySQL:
+if exist "%MYSQL_ERR%" type "%MYSQL_ERR%"
+echo.
+findstr /c:"1045" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - Error 1045: la contrasena de root de ESTE equipo no es la que escribiste.
+findstr /c:"2059" /c:"caching_sha2" /c:"plugin" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - Problema de autenticacion entre el cliente y el servidor MySQL (version distinta).
+findstr /c:"2003" /c:"2005" /c:"2013" "%MYSQL_ERR%" >nul 2>nul
+if not errorlevel 1 echo   - No se pudo conectar al puerto 3306: revisa que el servicio MySQL este encendido.
+echo   Cliente usado: "%MYSQL_EXE%"
+if defined MYSQL_PASS echo   (El script SI envio una contrasena a MySQL.)
+if not defined MYSQL_PASS echo   (El script envio la contrasena VACIA: no se leyo lo que escribiste.)
+exit /b 0
 
 :reparar_tablas_sistema_mysql
 for %%F in ("%MYSQL_EXE%") do set "MYSQLCHECK_EXE=%%~dpFmysqlcheck.exe"
-if exist "%MYSQLCHECK_EXE%" "%MYSQLCHECK_EXE%" "--defaults-extra-file=%MYSQL_CNF%" --auto-repair --databases mysql >nul 2>nul
+if exist "%MYSQLCHECK_EXE%" "%MYSQLCHECK_EXE%" "--defaults-extra-file=%MYSQL_CNF%" -u root "--password=%MYSQL_PASS%" --auto-repair --databases mysql >nul 2>nul
 exit /b 0
 
 :escribir_db_local_properties

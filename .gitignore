@@ -1,0 +1,9 @@
+# Archivos que generan los .bat y las herramientas en cada equipo (no se suben a Git)
+node_modules/
+target/
+.angular/
+dist/
+.env
+!.env.example
+db.local.properties
+*.log
