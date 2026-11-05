@@ -165,4 +165,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- En JDK 26+ se elimino jdk.jsobject del JDK base; se activa solo en JDK 26 o superior -->
+        <profile>
+            <id>jdk26-plus</id>
+            <activation>
+                <jdk>[26,)</jdk>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>jdk-jsobject</artifactId>
+                    <version>25.0.5</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>
