@@ -67,7 +67,7 @@ goto :pedir_encender_mysql
 
 :iniciar_xampp_c
 echo [INFO] Encendiendo MySQL de XAMPP (C:\xampp) automaticamente...
-start "MySQL CARMIR (XAMPP)" /min "C:\xampp\mysql\bin\mysqld.exe" --defaults-file="C:\xampp\mysql\bin\my.ini" --standalone
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath 'C:\xampp\mysql\bin\mysqld.exe' -ArgumentList '--defaults-file=C:\xampp\mysql\bin\my.ini','--standalone' -WindowStyle Hidden" >nul 2>nul
 ping 127.0.0.1 -n 6 >nul
 call :puerto_activo 3306
 if not errorlevel 1 goto :mysql_encendido
@@ -75,7 +75,7 @@ goto :pedir_encender_mysql
 
 :iniciar_xampp_d
 echo [INFO] Encendiendo MySQL de XAMPP (D:\xampp) automaticamente...
-start "MySQL CARMIR (XAMPP)" /min "D:\xampp\mysql\bin\mysqld.exe" --defaults-file="D:\xampp\mysql\bin\my.ini" --standalone
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath 'D:\xampp\mysql\bin\mysqld.exe' -ArgumentList '--defaults-file=D:\xampp\mysql\bin\my.ini','--standalone' -WindowStyle Hidden" >nul 2>nul
 ping 127.0.0.1 -n 6 >nul
 call :puerto_activo 3306
 if not errorlevel 1 goto :mysql_encendido

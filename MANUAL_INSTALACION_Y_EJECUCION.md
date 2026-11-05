@@ -54,7 +54,7 @@ Automáticamente verificará que MySQL esté encendido y abrirá:
 1. **La Tienda en Línea** en su navegador web: http://localhost:4200
 2. **El Panel Administrativo de Escritorio** en su propia ventana (tarda unos segundos en aparecer).
 
-*(Nota: Se abrirán 3 ventanas negras de consola que mantienen encendidos los servidores. **No las cierre** mientras esté revisando el sistema; cuando termine, solo cierre esas ventanas).*
+*(Nota: Todos los servidores se ejecutan juntos **en esa misma ventana de consola**, sin abrir terminales adicionales. Manténgala abierta mientras revisa el sistema y, al terminar, simplemente presione **`Enter`** en esa consola para detener y cerrar todo).*
 
 ---
 

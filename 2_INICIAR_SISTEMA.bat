@@ -1,14 +1,14 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 chcp 65001 >nul
-title CARMIR - Iniciar Sistema Completo
+title CARMIR - Sistema en Ejecucion (Consola Unica)
 cd /d "%~dp0"
 set "CARMIR_ROOT=%~dp0"
 set "PS_EXE=%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe"
 if not exist "%PS_EXE%" set "PS_EXE=powershell"
 
 echo ======================================================================
-echo              INICIANDO SISTEMA CARMIR (3 COMPONENTES)
+echo        SISTEMA CARMIR - INICIANDO TODO EN ESTA MISMA CONSOLA
 echo ======================================================================
 echo.
 
@@ -22,7 +22,7 @@ if not exist "%~dp0Software_CARMIR\PanelAdministrativoCARMIR\pom.xml" goto :falt
 REM --- 1. Configurar PATH (Node.js 22+) y JAVA_HOME (JDK 25+) ---
 call :configurar_entorno
 
-REM --- 2. Encender MySQL (Servicio de Windows o XAMPP) si esta apagado ---
+REM --- 2. Encender MySQL (Servicio de Windows o XAMPP oculto, sin abrir otra ventana) ---
 call :asegurar_mysql_activo
 
 REM --- 3. Verificar que todo este instalado y sincronizado en este equipo ---
@@ -38,10 +38,10 @@ if not exist "%~dp0Software_CARMIR\PanelAdministrativoCARMIR\target\classes\com\
 
 REM Comprobar conexion real de la API (carmir_web + carmir_pedidos) y esquema actualizado (NumeroCapa)
 pushd "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR"
-call node -e "const mysql=require('mysql2/promise'),cfg=require('./src/config/configuracion');(async()=>{const bd=cfg.baseDatos,c1=await mysql.createConnection({host:bd.host,port:bd.puerto,user:bd.usuario,password:bd.contrasena,database:bd.nombre,connectTimeout:5000});const [r]=await c1.execute(`SELECT COUNT(*) AS n FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND LOWER(TABLE_NAME)='postreopcion' AND LOWER(COLUMN_NAME)='numerocapa'`);await c1.end();if(!Number(r[0].n))process.exit(1);const c2=await mysql.createConnection({host:bd.host,port:bd.puerto,user:cfg.baseDatosEscritura.usuario,password:cfg.baseDatosEscritura.contrasena,database:bd.nombre,connectTimeout:5000});await c2.end();})().catch(()=>process.exit(1));" >nul 2>nul
+call "%NODE_ENCONTRADO%\node.exe" -e "const mysql=require('mysql2/promise'),cfg=require('./src/config/configuracion');(async function(){const bd=cfg.baseDatos,c1=await mysql.createConnection({host:bd.host,port:bd.puerto,user:bd.usuario,password:bd.contrasena,database:bd.nombre,connectTimeout:5000});const [r]=await c1.execute(`SELECT COUNT(*) AS n FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND LOWER(TABLE_NAME)='postreopcion' AND LOWER(COLUMN_NAME)='numerocapa'`);await c1.end();if(!Number(r[0].n))process.exit(1);const c2=await mysql.createConnection({host:bd.host,port:bd.puerto,user:cfg.baseDatosEscritura.usuario,password:cfg.baseDatosEscritura.contrasena,database:bd.nombre,connectTimeout:5000});await c2.end();})().catch(function(){process.exit(1);});" >nul 2>nul
 if errorlevel 1 goto :instalar_desde_popd
 popd
-goto :arrancar_servicios
+goto :arrancar_en_misma_consola
 
 :instalar_desde_popd
 popd
@@ -55,66 +55,21 @@ call "%~dp01_INSTALAR_PRIMERA_VEZ.bat"
 if errorlevel 1 exit /b 1
 call :configurar_entorno
 
-:arrancar_servicios
-echo [1/3] Iniciando API REST (http://127.0.0.1:3000)...
-call :puerto_activo 3000
-if not errorlevel 1 goto :api_ya_activa
-start "1. API CARMIR - Puerto 3000 (No cerrar)" /d "%~dp0Software_CARMIR\PaginaWebCARMIR\ApiCARMIR" cmd /k "npm.cmd start"
-goto :iniciar_web
+:arrancar_en_misma_consola
+set "CARMIR_BAT_FILE=%~f0"
+set "CARMIR_JS_TMP=%TEMP%\carmir_consola_unica_%RANDOM%_%RANDOM%.js"
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "$lines = [IO.File]::ReadAllLines($env:CARMIR_BAT_FILE, [Text.Encoding]::ASCII); $idx = [Array]::IndexOf($lines, 'REM === CARMIR_NODE_LAUNCHER_START ==='); if ($idx -ge 0) { $js = $lines[($idx + 1)..($lines.Length - 1)]; [IO.File]::WriteAllLines($env:CARMIR_JS_TMP, $js, [Text.Encoding]::ASCII) }"
+if not exist "%CARMIR_JS_TMP%" (
+    echo [ERROR] No se pudo preparar el coordinador de consola unica.
+    pause
+    exit /b 1
+)
 
-:api_ya_activa
-echo       La API ya estaba encendida en el puerto 3000.
-
-:iniciar_web
-echo [2/3] Iniciando Pagina Web en Angular (http://localhost:4200)...
-call :puerto_activo 4200
-if not errorlevel 1 goto :web_ya_activa
-start "2. Pagina Web CARMIR - Puerto 4200 (No cerrar)" /d "%~dp0Software_CARMIR\PaginaWebCARMIR" cmd /k "set NG_CLI_ANALYTICS=false&& npm.cmd start"
-goto :iniciar_panel
-
-:web_ya_activa
-echo       La Pagina Web ya estaba encendida en el puerto 4200.
-
-:iniciar_panel
-echo [3/3] Abriendo Panel Administrativo CARMIR (Escritorio JavaFX)...
-start "3. Panel Administrativo CARMIR (No cerrar)" /d "%~dp0Software_CARMIR\PanelAdministrativoCARMIR" cmd /k ".\mvnw.cmd javafx:run"
-
-echo.
-echo Esperando unos segundos a que cargue la tienda web para abrir tu navegador...
-set /a INTENTOS=0
-:esperar_angular
-call :puerto_activo 4200
-if not errorlevel 1 goto :abrir_navegador
-set /a INTENTOS+=1
-if %INTENTOS% GEQ 30 goto :abrir_navegador
-ping 127.0.0.1 -n 3 >nul
-goto :esperar_angular
-
-:abrir_navegador
-start "" "http://localhost:4200"
-
-echo.
-echo ======================================================================
-echo                  SISTEMA CARMIR EN EJECUCION
-echo ======================================================================
-echo.
-echo   - Tienda en linea (Clientes):  http://localhost:4200
-echo   - Estado de la API:            http://127.0.0.1:3000/api/salud
-echo   - Panel Administrativo:        Se abrira en su propia ventana
-echo.
-echo   CREDENCIALES DEL PANEL ADMINISTRATIVO:
-echo     * Administradora (acceso total):   admin  /  admin
-echo     * Acceso del Personal (enlace inferior):
-echo         - maria / Maria2026   (Pedidos, agenda, insumos, recetas)
-echo         - jose  / Jose2026    (Agenda, insumos, recetas)
-echo         - lucia / Lucia2026   (Pedidos, pagos, finanzas)
-echo         - pedro / Pedro2026   (Cuenta bloqueada para prueba)
-echo.
-echo   NOTA: No cierres las ventanas negras mientras uses el sistema.
-echo ======================================================================
-echo.
-pause
-exit /b 0
+"%NODE_ENCONTRADO%\node.exe" "%CARMIR_JS_TMP%"
+set "EXIT_NODE=%ERRORLEVEL%"
+if exist "%CARMIR_JS_TMP%" del /f /q "%CARMIR_JS_TMP%" >nul 2>nul
+if not "%EXIT_NODE%"=="0" pause
+exit /b %EXIT_NODE%
 
 REM ===================== SUBRUTINAS DE APOYO =====================
 
@@ -149,15 +104,15 @@ if exist "D:\xampp\mysql\bin\mysqld.exe" goto :arrancar_xampp_d
 exit /b 0
 
 :arrancar_xampp_c
-echo [INFO] Encendiendo MySQL de XAMPP...
-start "MySQL CARMIR (XAMPP)" /min "C:\xampp\mysql\bin\mysqld.exe" --defaults-file="C:\xampp\mysql\bin\my.ini" --standalone
+echo [INFO] Encendiendo MySQL de XAMPP en segundo plano...
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath 'C:\xampp\mysql\bin\mysqld.exe' -ArgumentList '--defaults-file=C:\xampp\mysql\bin\my.ini','--standalone' -WindowStyle Hidden" >nul 2>nul
 ping 127.0.0.1 -n 6 >nul
 "C:\xampp\mysql\bin\mysql.exe" -u root -h 127.0.0.1 -P 3306 -e "SET GLOBAL max_allowed_packet = 16777216;" >nul 2>nul
 exit /b 0
 
 :arrancar_xampp_d
-echo [INFO] Encendiendo MySQL de XAMPP...
-start "MySQL CARMIR (XAMPP)" /min "D:\xampp\mysql\bin\mysqld.exe" --defaults-file="D:\xampp\mysql\bin\my.ini" --standalone
+echo [INFO] Encendiendo MySQL de XAMPP en segundo plano...
+"%PS_EXE%" -NoProfile -ExecutionPolicy Bypass -Command "Start-Process -FilePath 'D:\xampp\mysql\bin\mysqld.exe' -ArgumentList '--defaults-file=D:\xampp\mysql\bin\my.ini','--standalone' -WindowStyle Hidden" >nul 2>nul
 ping 127.0.0.1 -n 6 >nul
 "D:\xampp\mysql\bin\mysql.exe" -u root -h 127.0.0.1 -P 3306 -e "SET GLOBAL max_allowed_packet = 16777216;" >nul 2>nul
 exit /b 0
@@ -175,3 +130,319 @@ echo desde la carpeta ya descomprimida.
 echo.
 pause
 exit /b 1
+
+REM === CARMIR_NODE_LAUNCHER_START ===
+const path = require('path');
+const net = require('net');
+const readline = require('readline');
+const childProcess = require('child_process');
+
+const raiz = process.env.CARMIR_ROOT || process.cwd();
+const dirApi = path.join(raiz, 'Software_CARMIR', 'PaginaWebCARMIR', 'ApiCARMIR');
+const dirWeb = path.join(raiz, 'Software_CARMIR', 'PaginaWebCARMIR');
+const dirPanel = path.join(raiz, 'Software_CARMIR', 'PanelAdministrativoCARMIR');
+
+const procesos = {
+  api: null,
+  web: null,
+  panel: null
+};
+let cerrando = false;
+let resumenMostrado = false;
+
+function limpiarAnsi(texto) {
+  return texto.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
+}
+
+function conectarLineas(flujo, etiqueta, filtro) {
+  let pendiente = '';
+  flujo.on('data', function (trozo) {
+    pendiente = pendiente + trozo.toString('utf8');
+    const partes = pendiente.split(/\r?\n/);
+    pendiente = partes.pop();
+    for (let i = 0; i < partes.length; i++) {
+      const limpia = limpiarAnsi(partes[i]).trim();
+      if (limpia.length > 0 && filtro(limpia)) {
+        console.log('[' + etiqueta + '] ' + limpia);
+      }
+    }
+  });
+}
+
+function filtroApi(linea) {
+  return true;
+}
+
+function filtroWeb(linea) {
+  if (linea.indexOf('Application bundle generation') >= 0) {
+    return false;
+  }
+  if (linea.indexOf('Building...') >= 0 || linea.indexOf('Changes detected') >= 0) {
+    return false;
+  }
+  if (linea.indexOf('Watch mode enabled') >= 0) {
+    return false;
+  }
+  if (linea.indexOf('Local:') >= 0 || linea.indexOf('ERROR') >= 0 || linea.indexOf('Error') >= 0) {
+    return true;
+  }
+  return false;
+}
+
+function filtroPanel(linea) {
+  if (linea.indexOf('[INFO]') === 0 || linea.indexOf('Downloading') === 0 || linea.indexOf('Progress') === 0) {
+    return false;
+  }
+  if (linea.indexOf('WARNING: A terminally deprecated') >= 0 || linea.indexOf('WARNING: sun.misc.Unsafe') >= 0) {
+    return false;
+  }
+  if (linea.indexOf('WARNING: Please consider reporting') >= 0 || linea.indexOf('WARNING: JavaFX') >= 0) {
+    return false;
+  }
+  return true;
+}
+
+function revisarPuerto(host, puerto) {
+  return new Promise(function (resolver) {
+    const socket = new net.Socket();
+    let resuelto = false;
+    function terminar(activo) {
+      if (!resuelto) {
+        resuelto = true;
+        socket.destroy();
+        resolver(activo);
+      }
+    }
+    socket.setTimeout(800);
+    socket.once('connect', function () {
+      terminar(true);
+    });
+    socket.once('timeout', function () {
+      terminar(false);
+    });
+    socket.once('error', function () {
+      terminar(false);
+    });
+    socket.connect(puerto, host);
+  });
+}
+
+async function puertoDisponible(puerto) {
+  const v4 = await revisarPuerto('127.0.0.1', puerto);
+  if (v4) {
+    return true;
+  }
+  return revisarPuerto('localhost', puerto);
+}
+
+function esperar(ms) {
+  return new Promise(function (resolver) {
+    setTimeout(resolver, ms);
+  });
+}
+
+function abrirNavegador(url) {
+  try {
+    const p = childProcess.spawn('cmd.exe', ['/d', '/s', '/c', '"start "" "' + url + '""'], {
+      stdio: 'ignore',
+      windowsHide: true,
+      windowsVerbatimArguments: true
+    });
+    p.unref();
+  } catch (e) {
+    // Ignorar si no hay navegador predeterminado
+  }
+}
+
+function matarArbol(proc) {
+  if (proc && proc.pid) {
+    try {
+      childProcess.spawnSync('taskkill', ['/PID', String(proc.pid), '/T', '/F'], {
+        stdio: 'ignore',
+        windowsHide: true
+      });
+    } catch (e) {
+      // Ignorar si ya habia terminado
+    }
+  }
+}
+
+function apagarTodo(codigo) {
+  if (cerrando) {
+    return;
+  }
+  cerrando = true;
+  console.log('');
+  console.log('[INFO] Cerrando Panel Administrativo, Pagina Web y API REST...');
+  matarArbol(procesos.panel);
+  matarArbol(procesos.web);
+  matarArbol(procesos.api);
+  console.log('[OK] Todos los servicios de CARMIR se detuvieron correctamente.');
+  process.exit(codigo);
+}
+
+function iniciarApi() {
+  const proc = childProcess.spawn(process.execPath, ['src/servidor.js'], {
+    cwd: dirApi,
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+  procesos.api = proc;
+  conectarLineas(proc.stdout, 'API', filtroApi);
+  conectarLineas(proc.stderr, 'API', filtroApi);
+  proc.on('exit', function (codigo) {
+    if (!cerrando && codigo !== 0) {
+      console.log('[API] El servidor de la API se detuvo (codigo ' + codigo + ').');
+    }
+    procesos.api = null;
+  });
+}
+
+function iniciarWeb() {
+  const envWeb = Object.assign({}, process.env, {
+    NG_CLI_ANALYTICS: 'false',
+    NO_COLOR: '1'
+  });
+  const ngBin = path.join(dirWeb, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
+  const proc = childProcess.spawn(process.execPath, [ngBin, 'serve'], {
+    cwd: dirWeb,
+    env: envWeb,
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+  procesos.web = proc;
+  conectarLineas(proc.stdout, 'WEB', filtroWeb);
+  conectarLineas(proc.stderr, 'WEB', filtroWeb);
+  proc.on('exit', function (codigo) {
+    if (!cerrando && codigo !== 0) {
+      console.log('[WEB] El servidor Angular se detuvo (codigo ' + codigo + ').');
+    }
+    procesos.web = null;
+  });
+}
+
+function iniciarPanel() {
+  if (procesos.panel !== null) {
+    console.log('[PANEL] El Panel Administrativo ya se encuentra abierto.');
+    return;
+  }
+  const proc = childProcess.spawn('cmd.exe', ['/d', '/s', '/c', '".\\mvnw.cmd -q javafx:run"'], {
+    cwd: dirPanel,
+    env: process.env,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    windowsVerbatimArguments: true
+  });
+  procesos.panel = proc;
+  conectarLineas(proc.stdout, 'PANEL', filtroPanel);
+  conectarLineas(proc.stderr, 'PANEL', filtroPanel);
+  proc.on('exit', function () {
+    procesos.panel = null;
+    if (!cerrando && resumenMostrado) {
+      console.log('[PANEL] Ventana del Panel cerrada. (Escribe P y Enter si deseas abrirlo de nuevo).');
+    }
+  });
+}
+
+function mostrarResumen() {
+  resumenMostrado = true;
+  console.log('');
+  console.log('======================================================================');
+  console.log('            SISTEMA CARMIR EN EJECUCION (CONSOLA UNICA)');
+  console.log('======================================================================');
+  console.log('  - Tienda en linea (Clientes):  http://localhost:4200');
+  console.log('  - Estado de la API REST:       http://127.0.0.1:3000/api/salud');
+  console.log('  - Panel Administrativo:        Abierto en su ventana de escritorio');
+  console.log('');
+  console.log('  CREDENCIALES DEL PANEL ADMINISTRATIVO:');
+  console.log('    * Administradora (acceso total):   admin  /  admin');
+  console.log('    * Acceso del Personal (enlace inferior):');
+  console.log('        - maria / Maria2026   (Pedidos, agenda, insumos, recetas)');
+  console.log('        - jose  / Jose2026    (Agenda, insumos, recetas)');
+  console.log('        - lucia / Lucia2026   (Pedidos, pagos, finanzas)');
+  console.log('        - pedro / Pedro2026   (Cuenta bloqueada para prueba)');
+  console.log('----------------------------------------------------------------------');
+  console.log('  -> Presiona [ENTER] aqui cuando termines para detener y cerrar todo.');
+  console.log('     (Opcional: P + Enter reabre el Panel | W + Enter reabre la Web)');
+  console.log('======================================================================');
+  console.log('');
+}
+
+async function principal() {
+  process.on('SIGINT', function () {
+    apagarTodo(0);
+  });
+  process.on('SIGBREAK', function () {
+    apagarTodo(0);
+  });
+  process.on('SIGHUP', function () {
+    apagarTodo(0);
+  });
+  process.on('SIGTERM', function () {
+    apagarTodo(0);
+  });
+
+  console.log('[1/3] Iniciando API REST en http://127.0.0.1:3000 ...');
+  if (await puertoDisponible(3000)) {
+    console.log('      La API ya estaba activa en el puerto 3000.');
+  } else {
+    iniciarApi();
+    for (let i = 0; i < 20; i++) {
+      if (await puertoDisponible(3000)) {
+        break;
+      }
+      await esperar(500);
+    }
+  }
+
+  console.log('[2/3] Iniciando Pagina Web Angular en http://localhost:4200 ...');
+  const webYaEstaba = await puertoDisponible(4200);
+  if (webYaEstaba) {
+    console.log('      La Pagina Web ya estaba activa en el puerto 4200.');
+  } else {
+    iniciarWeb();
+  }
+
+  if (process.env.CARMIR_SIN_PANEL !== '1') {
+    console.log('[3/3] Abriendo Panel Administrativo de Escritorio (JavaFX) ...');
+    iniciarPanel();
+  }
+
+  if (!webYaEstaba) {
+    console.log('      Compilando tienda web por primera vez, espera unos segundos...');
+    for (let i = 0; i < 90; i++) {
+      if (await puertoDisponible(4200)) {
+        break;
+      }
+      await esperar(1000);
+    }
+  }
+
+  if (process.env.CARMIR_SIN_NAVEGADOR !== '1') {
+    abrirNavegador('http://localhost:4200');
+  }
+
+  mostrarResumen();
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false
+  });
+
+  rl.on('line', function (entrada) {
+    const cmd = entrada.trim().toUpperCase();
+    if (cmd === 'P') {
+      console.log('[INFO] Abriendo nuevamente el Panel Administrativo...');
+      iniciarPanel();
+    } else if (cmd === 'W') {
+      console.log('[INFO] Abriendo http://localhost:4200 en tu navegador...');
+      abrirNavegador('http://localhost:4200');
+    } else {
+      apagarTodo(0);
+    }
+  });
+}
+
+principal().catch(function (err) {
+  console.error('[ERROR]', err);
+  apagarTodo(1);
+});
