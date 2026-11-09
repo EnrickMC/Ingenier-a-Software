@@ -24,7 +24,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
 
     private static final String SELECT_PRODUCTO =
             "SELECT p.IdPostre, p.IdCategoria, p.ClaveConfiguracion, p.NombrePostre, p.DescripcionPostre, "
-            + "p.LinkFotografia, p.MostrarEnTienda, cat.NombreCategoria, cat.EstadoCategoria, "
+            + "p.LinkFotografia, p.MostrarEnTienda, p.Vista3DActiva, cat.NombreCategoria, cat.EstadoCategoria, "
             + "v.CostoIngredientes, v.PrecioVenta "
             + "FROM Postre p "
             + "JOIN CategoriaPostre cat ON cat.IdCategoria = p.IdCategoria "
@@ -121,7 +121,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
     @Override
     public int insertar(Producto producto) throws DAOException {
         String sql = "INSERT INTO Postre (IdCategoria, ClaveConfiguracion, NombrePostre, DescripcionPostre, "
-                + "LinkFotografia, MostrarEnTienda) VALUES (?, ?, ?, ?, ?, ?)";
+                + "LinkFotografia, MostrarEnTienda, Vista3DActiva) VALUES (?, ?, ?, ?, ?, ?, ?)";
         Connection conexion = null;
         try {
             conexion = ConexionBD.getInstancia().getConexion();
@@ -157,7 +157,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
     @Override
     public void actualizar(Producto producto, boolean cambiarOpciones) throws DAOException {
         String sql = "UPDATE Postre SET IdCategoria = ?, ClaveConfiguracion = ?, NombrePostre = ?, "
-                + "DescripcionPostre = ?, LinkFotografia = ?, MostrarEnTienda = ? WHERE IdPostre = ?";
+                + "DescripcionPostre = ?, LinkFotografia = ?, MostrarEnTienda = ?, Vista3DActiva = ? WHERE IdPostre = ?";
         Connection conexion = null;
         try {
             conexion = ConexionBD.getInstancia().getConexion();
@@ -165,7 +165,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
 
             PreparedStatement consulta = conexion.prepareStatement(sql);
             llenarDatos(consulta, producto);
-            consulta.setInt(7, producto.getIdPostre());
+            consulta.setInt(8, producto.getIdPostre());
             consulta.executeUpdate();
             consulta.close();
 
@@ -206,7 +206,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
 
     // ===================== Métodos de apoyo =====================
 
-    // Llena los 6 datos del postre (posiciones 1 a 6)
+    // Llena los 7 datos del postre (posiciones 1 a 7)
     private void llenarDatos(PreparedStatement consulta, Producto producto) throws SQLException {
         consulta.setInt(1, producto.getIdCategoria());
         consulta.setString(2, producto.getClaveConfiguracion());
@@ -214,6 +214,8 @@ public class ProductoDAOMySQL implements ProductoDAO {
         consulta.setString(4, ApoyoMySQL.textoONulo(producto.getDescripcion()));
         consulta.setString(5, ApoyoMySQL.textoONulo(producto.getLinkFotografia()));
         consulta.setBoolean(6, producto.isMostrarEnTienda());
+        // RF-29 / RF-30: casilla «Activar vista 3D»
+        consulta.setBoolean(7, producto.isVista3DActiva());
     }
 
     // Guarda una fila de PostreOpcion por cada opción elegida
@@ -292,6 +294,7 @@ public class ProductoDAOMySQL implements ProductoDAO {
         p.setDescripcion(resultado.getString("DescripcionPostre"));
         p.setLinkFotografia(resultado.getString("LinkFotografia"));
         p.setMostrarEnTienda(resultado.getBoolean("MostrarEnTienda"));
+        p.setVista3DActiva(resultado.getBoolean("Vista3DActiva"));
         p.setNombreCategoria(resultado.getString("NombreCategoria"));
         p.setCategoriaActiva("Activa".equalsIgnoreCase(resultado.getString("EstadoCategoria")));
         // Si el postre no tiene opciones con receta, la vista devuelve NULL y queda en 0

@@ -21,7 +21,7 @@ const CONDICION_PRODUCTO_VISIBLE =
 
 const SELECT_PRODUCTO =
   'SELECT p.IdPostre, p.NombrePostre, p.DescripcionPostre, p.LinkFotografia, ' +
-  'p.IdCategoria, c.NombreCategoria, v.PrecioVenta ' +
+  'p.IdCategoria, c.NombreCategoria, v.PrecioVenta, p.Vista3DActiva ' +
   'FROM Postre p ' +
   'JOIN CategoriaPostre c ON c.IdCategoria = p.IdCategoria ' +
   'JOIN vw_CostoPrecioPostre v ON v.IdPostre = p.IdPostre ' +

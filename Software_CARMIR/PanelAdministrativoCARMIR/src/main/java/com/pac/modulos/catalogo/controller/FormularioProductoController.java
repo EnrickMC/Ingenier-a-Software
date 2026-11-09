@@ -55,6 +55,7 @@ public class FormularioProductoController {
     @FXML private ImageView imgFoto;
     @FXML private Label lblSinImagen;
     @FXML private CheckBox chkMostrar;
+    @FXML private CheckBox chkVista3D;
     @FXML private VBox contenedorCaracteristicas;
     @FXML private VBox listaAvisos;
     @FXML private Label lblMensaje;
@@ -90,6 +91,8 @@ public class FormularioProductoController {
         editado = null;
         lblTitulo.setText("Nuevo Postre");
         lblSku.setText("El SKU se genera al guardar.");
+        // RF-29 · Paso 3: la casilla «Activar vista 3D» empieza desmarcada
+        chkVista3D.setSelected(false);
         preparando = true;
         cmbCategoria.getItems().setAll(activas);
         cmbCategoria.setValue(activas.get(0));
@@ -107,6 +110,8 @@ public class FormularioProductoController {
         txtDescripcion.setText(ApoyoVista.texto(producto.getDescripcion()));
         txtFoto.setText(ApoyoVista.texto(producto.getLinkFotografia()));
         chkMostrar.setSelected(producto.isMostrarEnTienda());
+        // RF-30 · Paso 3: la casilla «Activar vista 3D» muestra lo que tiene guardado
+        chkVista3D.setSelected(producto.isVista3DActiva());
         ApoyoVista.cargarImagen(imgFoto, lblSinImagen, producto.getLinkFotografia());
 
         preparando = true;
@@ -367,6 +372,7 @@ public class FormularioProductoController {
         datos.setDescripcion(txtDescripcion.getText());
         datos.setLinkFotografia(txtFoto.getText());
         datos.setMostrarEnTienda(chkMostrar.isSelected());
+        datos.setVista3DActiva(chkVista3D.isSelected());
         datos.setOpciones(leerElegidas());
 
         ResultadoCatalogo resultado;

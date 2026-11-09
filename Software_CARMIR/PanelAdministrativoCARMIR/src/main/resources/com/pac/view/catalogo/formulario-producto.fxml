@@ -74,6 +74,11 @@
                 </Label>
             </VBox>
             <CheckBox fx:id="chkMostrar" text="Mostrar producto en la tienda web"/>
+            <!-- RF-29 / RF-30: vista 3D en la página web (desmarcada = se ve la foto de la plantilla) -->
+            <HBox spacing="6" alignment="CENTER_LEFT">
+                <CheckBox fx:id="chkVista3D" text="Activar vista 3D" selected="false"/>
+                <IconoAyuda texto="Si se activa, la página web mostrará el modelo 3D del postre en lugar de la foto de la plantilla."/>
+            </HBox>
         </VBox>
 
         <Separator orientation="VERTICAL"/>

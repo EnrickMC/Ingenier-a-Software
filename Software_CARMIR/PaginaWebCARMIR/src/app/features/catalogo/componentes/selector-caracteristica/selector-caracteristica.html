@@ -6,7 +6,8 @@
     } @else {
       <span class="opcional">Opcional</span>
     }
-    @if (seVeEn3d()) {
+    <!-- RF-5: la etiqueta solo sale si el producto tiene la vista 3D activa -->
+    @if (vista3dActiva() && seVeEn3d()) {
       <span class="en-3d" title="Esta elección se ve en el pastel 3D">Se ve en 3D</span>
     }
   </legend>

@@ -37,7 +37,10 @@ function convertirProducto(fila) {
     linkFotografia: enlaceImagen.enlaceParaWeb(fila.LinkFotografia, 'postre', fila.IdPostre),
     precio: aNumero(fila.PrecioVenta),
     idCategoria: fila.IdCategoria,
-    nombreCategoria: fila.NombreCategoria
+    nombreCategoria: fila.NombreCategoria,
+    // RF-5 (Vista previa 3D del postre personalizado): solo se dibuja el modelo 3D si la
+    // Administradora marcó «Activar vista 3D» en el Panel; si no, la página muestra la plantilla.
+    vista3dActiva: aBooleano(fila.Vista3DActiva)
   };
 }
 

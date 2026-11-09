@@ -23,6 +23,8 @@ export interface ProductoCatalogo {
   precio: number;
   idCategoria: number;
   nombreCategoria: string;
+  // RF-5: casilla «Activar vista 3D» del Panel. false = se muestra la plantilla (foto y datos)
+  vista3dActiva: boolean;
 }
 
 // Orden que puede elegir el cliente

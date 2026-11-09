@@ -91,6 +91,52 @@
   color: var(--color-texto-suave);
 }
 
+/* RF-5: sin vista 3D la franja no repite la foto (ya está grande a la izquierda) */
+.plantilla-base.sin-foto {
+  grid-template-columns: 1fr;
+}
+
+/* RF-5: tarjeta de la plantilla (se ve cuando el producto no tiene la vista 3D activa) */
+.tarjeta-plantilla {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+.foto-plantilla {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  /* En escritorio la foto se achica igual que el 3D para que el precio quepa en la pantalla */
+  max-height: var(--alto-maximo-visor, none);
+  border-radius: var(--radio-chico);
+  overflow: hidden;
+}
+
+.datos-tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.datos-tarjeta h2 {
+  font-size: 1.3rem;
+  margin: 0;
+}
+
+.descripcion-plantilla {
+  margin: 0;
+  color: var(--color-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.precio-desde {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
 /* En celular el precio se ve en la barra de abajo */
 .precios {
   display: none;
@@ -211,6 +257,10 @@
   /* La franja de la plantilla queda en una sola fila */
   .plantilla-base {
     grid-template-columns: 72px 1fr auto;
+  }
+
+  .plantilla-base.sin-foto {
+    grid-template-columns: 1fr auto;
   }
 
   .plantilla-base .boton-plantillas {

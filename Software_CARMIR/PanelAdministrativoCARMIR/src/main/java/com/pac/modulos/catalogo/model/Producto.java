@@ -19,6 +19,8 @@ public class Producto {
     private String descripcion;
     private String linkFotografia;
     private boolean mostrarEnTienda;
+    // RF-29 / RF-30: si la página web muestra el modelo 3D del postre (false = solo la foto de la plantilla)
+    private boolean vista3DActiva;
 
     // Datos calculados (no son columnas)
     private String nombreCategoria;
@@ -93,6 +95,14 @@ public class Producto {
 
     public void setMostrarEnTienda(boolean mostrarEnTienda) {
         this.mostrarEnTienda = mostrarEnTienda;
+    }
+
+    public boolean isVista3DActiva() {
+        return vista3DActiva;
+    }
+
+    public void setVista3DActiva(boolean vista3DActiva) {
+        this.vista3DActiva = vista3DActiva;
     }
 
     public String getNombreCategoria() {

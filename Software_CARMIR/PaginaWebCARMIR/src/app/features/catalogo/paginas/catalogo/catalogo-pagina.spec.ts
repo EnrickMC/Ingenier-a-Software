@@ -38,7 +38,7 @@ async function crearPagina(productos: unknown[], fallo: string): Promise<HTMLEle
 describe('CatalogoPagina (RF-1)', function () {
   it('muestra los productos en la cuadrícula', async function () {
     const pagina = await crearPagina(
-      [{ idPostre: 1, nombre: 'Pastel', descripcion: null, linkFotografia: null, precio: 100, idCategoria: 1, nombreCategoria: 'Pastel' }],
+      [{ idPostre: 1, nombre: 'Pastel', descripcion: null, linkFotografia: null, precio: 100, idCategoria: 1, nombreCategoria: 'Pastel', vista3dActiva: false }],
       '',
     );
     expect(pagina.querySelectorAll('app-tarjeta-producto').length).toBe(1);

@@ -201,6 +201,20 @@ async function revisarObjetos(conexion, nombreBase) {
     return false;
   }
   bien('La tabla Postre tiene la columna MostrarEnTienda (MIGRACION_COMPLETA aplicada)');
+
+  // RF-5: columna de la casilla «Activar vista 3D» (Parte 10 de la migración)
+  const columna3d = await conexion.execute(
+    "SELECT COUNT(*) AS total FROM information_schema.COLUMNS " +
+    "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'Postre' AND COLUMN_NAME = 'Vista3DActiva'",
+    [nombreBase]
+  );
+  if (Number(columna3d[0][0].total) === 0) {
+    falla('La tabla Postre no tiene la columna Vista3DActiva', [
+      'Ejecuta la PARTE 10 de DBCarmir/INSTALACION_COMPLETA.sql (o reinstala la base): el catálogo la necesita.'
+    ]);
+    return false;
+  }
+  bien('La tabla Postre tiene la columna Vista3DActiva (Parte 10 aplicada)');
   return true;
 }
 

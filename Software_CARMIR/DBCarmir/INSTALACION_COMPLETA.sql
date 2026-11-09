@@ -13,13 +13,11 @@
 --
 -- Este archivo junta, en este orden y sin cambiarlos:
 --   1. CARMIR_BaseDeDatos.sql               (tablas)
---   2. migraciones/MIGRACION_COMPLETA.sql   (cambios de los módulos, Partes 1 a 9)
+--   2. migraciones/MIGRACION_COMPLETA.sql   (cambios de los módulos, Partes 1 a 10)
 -- Si cambias alguno de esos archivos, vuelve a generar este.
 -- No crea usuarios de MySQL: en local la API usa root (ver ApiCARMIR/.env).
 -- =====================================================================
 SET NAMES utf8mb4;
-
-
 
 -- #####################################################################
 -- ##### INICIO: CARMIR_BaseDeDatos.sql
@@ -473,6 +471,7 @@ DELIMITER ;
 --   Parte 7 = NUEVO: foto o PDF del comprobante que sube el cliente desde la página web (tabla ComprobanteArchivo)
 --   Parte 8 = NUEVO: se quita el método de pago «Depósito» (los pagos viejos pasan a «Transferencia»)
 --   Parte 9 = NUEVO: capa del pastel en cada opción (PostreOpcion.NumeroCapa) y precio por capas
+--   Parte 10 = NUEVO: casilla «Activar vista 3D» de cada producto (Postre.Vista3DActiva)
 --
 -- CÓMO USARLO
 --   1. Ten tu base creada con DBCarmir/CARMIR_BaseDeDatos.sql (con o sin datos).
@@ -831,6 +830,27 @@ LEFT JOIN (SELECT po2.IdPostre,
       GROUP BY po2.IdPostre) f ON f.IdPostre = po.IdPostre
 GROUP BY po.IdPostre;
 
+
+-- =====================================================================
+-- PARTE 10 · NUEVO · Vista 3D por producto (RF-5, RF-29 y RF-30)
+-- =====================================================================
+-- 10.1 Casilla «Activar vista 3D» del formulario de producto del Panel.
+--      0 = la página web muestra la plantilla (foto, nombre, descripción y precio).
+--      1 = la página web muestra el modelo 3D del postre.
+--      Los productos que ya existen quedan con 0. Si ya se aplicó, no cambia nada.
+--      Esta parte no usa los procedimientos de apoyo: se puede copiar y
+--      ejecutar sola en una base que ya existe (después de USE CARMIR_DB;).
+SET @carmir_hay_vista3d = (SELECT COUNT(*) FROM information_schema.COLUMNS
+                           WHERE TABLE_SCHEMA = DATABASE()
+                             AND LOWER(TABLE_NAME) = 'postre'
+                             AND LOWER(COLUMN_NAME) = 'vista3dactiva');
+SET @carmir_sql = IF(@carmir_hay_vista3d = 0,
+  'ALTER TABLE Postre ADD COLUMN Vista3DActiva TINYINT(1) NOT NULL DEFAULT 0 COMMENT ''Si la página web muestra el modelo 3D del postre (0 = muestra la foto de la plantilla)'' AFTER MostrarEnTienda',
+  'SELECT ''Postre ya tiene la columna Vista3DActiva'' AS Aviso');
+PREPARE carmir_sentencia FROM @carmir_sql;
+EXECUTE carmir_sentencia;
+DEALLOCATE PREPARE carmir_sentencia;
+
 -- ---------------------------------------------------------------------
 -- 5. Limpieza: se borran los procedimientos de apoyo
 -- ---------------------------------------------------------------------
@@ -849,7 +869,11 @@ SELECT 'Migración completa aplicada' AS Resultado,
        (SELECT COUNT(*) FROM information_schema.COLUMNS
          WHERE TABLE_SCHEMA = DATABASE()
            AND LOWER(TABLE_NAME) = 'postreopcion'
-           AND LOWER(COLUMN_NAME) = 'numerocapa') AS CapaEnPostreOpcion;
+           AND LOWER(COLUMN_NAME) = 'numerocapa') AS CapaEnPostreOpcion,
+       (SELECT COUNT(*) FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND LOWER(TABLE_NAME) = 'postre'
+           AND LOWER(COLUMN_NAME) = 'vista3dactiva') AS Vista3DEnPostre;
 
 -- Por si el archivo anterior dejó otro delimitador
 DELIMITER ;

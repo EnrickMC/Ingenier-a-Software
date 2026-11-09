@@ -111,6 +111,8 @@ prueba.test('personalización: la plantilla precarga sus opciones y el costo no 
   const r = await obtener('/catalogo/productos/' + producto.idPostre + '/personalizacion');
   assert.strictEqual(r.estado, 200);
   assert.ok(r.cuerpo.seleccionInicial.length > 0);
+  // RF-5: la página decide con esta bandera si muestra la plantilla o el modelo 3D
+  assert.strictEqual(typeof r.cuerpo.producto.vista3dActiva, 'boolean');
   const texto = JSON.stringify(r.cuerpo);
   assert.ok(texto.indexOf('CostoReceta') < 0);
   assert.ok(texto.indexOf('costo') < 0);

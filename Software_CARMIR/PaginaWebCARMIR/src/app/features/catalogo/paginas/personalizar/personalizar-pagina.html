@@ -28,12 +28,31 @@
       <h1 class="titulo-pagina">Personaliza tu postre</h1>
 
       <div class="diseno">
-        <!-- Columna del modelo 3D y del precio (fija al bajar en escritorio) -->
+        <!-- Columna del modelo 3D (o de la plantilla) y del precio (fija al bajar en escritorio) -->
         <aside class="columna-visor" aria-labelledby="titulo-precio">
-          <!-- RF-3 · Paso 4 / RF-5: el postre 3D cambia con cada opción elegida (tamaño, forma, sabor, decoración...). -->
-          <app-visor-pastel3d [diseno]="diseno3d()" [nombre]="info.producto.nombre">
-            <app-imagen-postre class="foto-respaldo" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
-          </app-visor-pastel3d>
+          @if (info.producto.vista3dActiva) {
+            <!-- RF-3 · Paso 4 / RF-5: el postre 3D cambia con cada opción elegida (tamaño, forma, sabor, decoración...).
+                 Solo se crea si la Administradora marcó «Activar vista 3D» en el Panel. -->
+            <app-visor-pastel3d [diseno]="diseno3d()" [nombre]="info.producto.nombre">
+              <app-imagen-postre class="foto-respaldo" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+            </app-visor-pastel3d>
+          } @else {
+            <!-- RF-5 · Por defecto: sin vista 3D se muestra la plantilla del producto (foto, nombre, categoría,
+                 descripción y precio desde). No se crea el visor 3D. -->
+            <section class="tarjeta-plantilla panel" aria-labelledby="titulo-tarjeta-plantilla">
+              <app-imagen-postre class="foto-plantilla" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+              <div class="datos-tarjeta">
+                <span class="etiqueta">{{ info.producto.nombreCategoria }}</span>
+                <h2 id="titulo-tarjeta-plantilla">{{ info.producto.nombre }}</h2>
+                @if (info.producto.descripcion) {
+                  <p class="descripcion-plantilla">{{ info.producto.descripcion }}</p>
+                }
+                <p class="precio-desde">
+                  Desde <span class="precio">{{ info.producto.precio | currency: 'MXN' : 'symbol-narrow' }}</span>
+                </p>
+              </div>
+            </section>
+          }
 
           <!-- RF-3 · Paso 4: precio por pieza y total que se recalculan con cada cambio. -->
           <div class="precios panel" aria-live="polite">
@@ -52,8 +71,11 @@
         <!-- Formulario de personalización -->
         <form class="formulario" (submit)="alEnviar($event)" novalidate>
           <!-- Plantilla base: foto y datos en una franja arriba de las opciones -->
-          <section class="plantilla-base panel" aria-labelledby="titulo-plantilla">
-            <app-imagen-postre class="foto" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+          <section class="plantilla-base panel" [class.sin-foto]="!info.producto.vista3dActiva" aria-labelledby="titulo-plantilla">
+            <!-- Sin vista 3D la foto ya se ve grande a la izquierda; aquí no se repite -->
+            @if (info.producto.vista3dActiva) {
+              <app-imagen-postre class="foto" [link]="info.producto.linkFotografia" [nombre]="info.producto.nombre" />
+            }
             <div class="datos-plantilla">
               <p class="plantilla-aplicada">Partes de la plantilla base</p>
               <h2 id="titulo-plantilla">{{ info.producto.nombre }}</h2>
@@ -129,6 +151,7 @@
                     [error]="errorDe(caracteristica)"
                     [esGelatina]="esGelatina()"
                     [dentroDeCapa]="true"
+                    [vista3dActiva]="info.producto.vista3dActiva"
                     (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
                     (cantidadCambiada)="cambiarCantidadOpcion($event)"
                   />
@@ -142,6 +165,7 @@
                 [puntosTotales]="puntosDe(caracteristica)"
                 [error]="errorDe(caracteristica)"
                 [esGelatina]="esGelatina()"
+                [vista3dActiva]="info.producto.vista3dActiva"
                 (opcionUnicaElegida)="elegirUnica(caracteristica, $event)"
                 (cantidadCambiada)="cambiarCantidadOpcion($event)"
               />

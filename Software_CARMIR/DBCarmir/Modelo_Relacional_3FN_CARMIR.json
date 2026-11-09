@@ -898,6 +898,15 @@
           "pk": false,
           "fk": false,
           "descripcion": "Si aparece en el catálogo público"
+        },
+        {
+          "nombre": "Vista3DActiva",
+          "tipo": "BOOLEAN",
+          "longitud": null,
+          "nulo": false,
+          "pk": false,
+          "fk": false,
+          "descripcion": "Si la página web muestra el modelo 3D del postre (0 = muestra la foto de la plantilla)"
         }
       ],
       "llaves_foraneas": [

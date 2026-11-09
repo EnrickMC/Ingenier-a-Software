@@ -43,6 +43,8 @@ export class SelectorCaracteristica {
   readonly esGelatina = input(false);
   // ¿Está dentro del editor de capas? (se ve más compacto, sin marco propio)
   readonly dentroDeCapa = input(false);
+  // RF-5: ¿el producto tiene la vista 3D activa? Si no, no se muestra la etiqueta «Se ve en 3D»
+  readonly vista3dActiva = input(false);
 
   // Selección única: id de la opción elegida (0 = ninguna)
   readonly opcionUnicaElegida = output<number>();
