@@ -6,7 +6,9 @@
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Se carga el .env que está en la carpeta ApiCARMIR (no importa desde dónde se ejecute)
+// Se carga el .env que está en la carpeta ApiCARMIR (no importa desde dónde se ejecute).
+// En la EC2 de AWS no hay .env: systemd carga /opt/carmir/api.env (EnvironmentFile) y dotenv
+// no reemplaza las variables que ya existen.
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env'), quiet: true });
 
 // Lee una variable de entorno; si no existe regresa el valor por defecto
@@ -27,6 +29,19 @@ function leerEntero(nombre, valorPorDefecto) {
   const numero = Number(texto);
   if (!Number.isInteger(numero) || numero <= 0) {
     throw new Error('La variable ' + nombre + ' debe ser un número entero positivo');
+  }
+  return numero;
+}
+
+// Lee una variable que debe ser un número entero mayor o igual a 0
+function leerEnteroOCero(nombre, valorPorDefecto) {
+  const texto = leerTexto(nombre, '');
+  if (texto === '') {
+    return valorPorDefecto;
+  }
+  const numero = Number(texto);
+  if (!Number.isInteger(numero) || numero < 0) {
+    throw new Error('La variable ' + nombre + ' debe ser un número entero mayor o igual a 0');
   }
   return numero;
 }
@@ -63,7 +78,10 @@ const configuracion = {
     origenesPermitidos: leerLista('CORS_ORIGENES', 'http://localhost:4200'),
     peticionesPorMinuto: leerEntero('LIMITE_PETICIONES_MINUTO', 300),
     // Módulo 2: pedidos que se pueden registrar por hora desde la misma conexión
-    pedidosPorHora: leerEntero('LIMITE_PEDIDOS_HORA', 10)
+    pedidosPorHora: leerEntero('LIMITE_PEDIDOS_HORA', 10),
+    // En AWS la API está detrás de CloudFront: cuántos "saltos" de proxy se confían para leer la IP real
+    // del cliente (encabezado X-Forwarded-For). 0 = sin proxy (en la computadora local).
+    proxiesConfiables: leerEnteroOCero('PROXIES_CONFIABLES', 0)
   },
   baseDatos: {
     host: leerTexto('DB_HOST', '127.0.0.1'),
@@ -73,7 +91,10 @@ const configuracion = {
     // Puede venir vacía (por ejemplo root sin contraseña en una instalación local)
     contrasena: leerTexto('DB_CONTRASENA', ''),
     conexionesMaximas: leerEntero('DB_CONEXIONES_MAXIMAS', 10),
-    tiempoEsperaMs: leerEntero('DB_TIEMPO_ESPERA_MS', 10000)
+    tiempoEsperaMs: leerEntero('DB_TIEMPO_ESPERA_MS', 10000),
+    // Ruta del certificado de Amazon RDS (global-bundle.pem). Si tiene valor, la conexión va cifrada (SSL)
+    // y se revisa que el servidor sea el de RDS. Vacío = sin SSL (MySQL de la computadora local).
+    certificadoSsl: leerTexto('DB_SSL_CA', '')
   },
   // Módulo 2 · Portal de Pedidos: usuario de MySQL aparte que SÍ puede guardar pedidos,
   // pero solo en las tablas que lo necesitan (ver sql/crear_usuario_pedidos.sql).

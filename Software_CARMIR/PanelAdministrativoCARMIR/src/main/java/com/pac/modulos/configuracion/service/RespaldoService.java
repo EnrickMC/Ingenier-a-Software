@@ -2,6 +2,7 @@ package com.pac.modulos.configuracion.service;
 
 import com.pac.dao.conexion.ConexionBD;
 import com.pac.util.ConfiguracionApp;
+import com.pac.util.ConfiguracionAws;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -182,6 +183,14 @@ public class RespaldoService {
             comando.add("--protocol=TCP");
             comando.add("--default-character-set=utf8mb4");
             comando.add("--single-transaction");
+            // Sin esto mysqldump pide el permiso PROCESS, que carmir_panel no tiene en RDS
+            comando.add("--no-tablespaces");
+            if (ConfiguracionAws.getInstancia().isActivo()) {
+                // RDS: conexión cifrada y sin la información de GTID del servidor
+                // (al restaurar, carmir_panel no puede cambiarla)
+                comando.add("--ssl-mode=REQUIRED");
+                comando.add("--set-gtid-purged=OFF");
+            }
             comando.add("--routines");
             comando.add("--triggers");
             comando.add("--result-file=" + destino.getAbsolutePath());
@@ -247,6 +256,7 @@ public class RespaldoService {
             return ResultadoConfiguracion.error(String.format(MSG_SIN_PROGRAMA, "mysql"), null);
         }
         File credenciales = null;
+        File sinDefiner = null;
         try {
             credenciales = crearArchivoCredenciales();
             List<String> comando = new ArrayList<String>();
@@ -257,10 +267,17 @@ public class RespaldoService {
             // Siempre por TCP, igual que la conexión del panel
             comando.add("--protocol=TCP");
             comando.add("--default-character-set=utf8mb4");
+            if (ConfiguracionAws.getInstancia().isActivo()) {
+                comando.add("--ssl-mode=REQUIRED");
+            }
+
+            // En RDS las vistas tienen DEFINER=`admin`; carmir_panel no puede crear vistas a nombre de otro
+            // usuario, así que se restaura una copia del archivo sin esa parte (quedan a nombre de carmir_panel)
+            sinDefiner = copiaSinDefiner(origen);
 
             // RF-73 · Paso 8: la conexión del panel se cierra para no chocar con la restauración
             ConexionBD.getInstancia().cerrar();
-            String salida = ejecutar(comando, origen);
+            String salida = ejecutar(comando, sinDefiner);
             if (salida != null) {
                 // RF-73 · Excepción paso 8: «No fue posible restaurar el respaldo» con el motivo.
                 return ResultadoConfiguracion.error(MSG_RESTAURAR_ERROR + ": " + salida, null);
@@ -272,7 +289,32 @@ public class RespaldoService {
             return ResultadoConfiguracion.error(MSG_RESTAURAR_ERROR + ": " + e.getMessage(), null);
         } finally {
             borrar(credenciales);
+            borrar(sinDefiner);
         }
+    }
+
+    // Copia temporal del respaldo sin las cláusulas DEFINER=`usuario`@`host` de vistas y rutinas.
+    // mysqldump las escribe dentro de comentarios /*!50013 DEFINER=... SQL SECURITY DEFINER */.
+    private File copiaSinDefiner(File origen) throws IOException {
+        File copia = File.createTempFile("carmir_restaurar", ".sql");
+        BufferedReader lector = new BufferedReader(
+                new InputStreamReader(new FileInputStream(origen), StandardCharsets.UTF_8));
+        FileWriter escritor = new FileWriter(copia, StandardCharsets.UTF_8);
+        try {
+            String linea = lector.readLine();
+            while (linea != null) {
+                if (linea.contains("DEFINER=")) {
+                    linea = linea.replaceAll("DEFINER=`[^`]*`@`[^`]*`", "");
+                }
+                escritor.write(linea);
+                escritor.write("\n");
+                linea = lector.readLine();
+            }
+        } finally {
+            lector.close();
+            escritor.close();
+        }
+        return copia;
     }
 
     // ===================== Apoyo =====================

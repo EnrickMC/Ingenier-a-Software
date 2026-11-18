@@ -11,6 +11,7 @@
  *  4. Ruta no encontrada y manejo de errores (siempre al final)
  */
 const express = require('express');
+const configuracion = require('./config/configuracion');
 const seguridad = require('./middlewares/seguridad');
 const manejoErrores = require('./middlewares/manejoErrores');
 const rutasSalud = require('./modulos/salud/salud.rutas');
@@ -23,6 +24,13 @@ function crearApp() {
 
   // No anunciar que el servidor usa Express
   app.disable('x-powered-by');
+
+  // En AWS las peticiones llegan a través de CloudFront. Con "trust proxy" Express toma la IP real
+  // del cliente del encabezado X-Forwarded-For; sin esto todos los clientes tendrían la IP de CloudFront
+  // y el límite de pedidos por hora sería uno solo para toda la tienda.
+  if (configuracion.servidor.proxiesConfiables > 0) {
+    app.set('trust proxy', configuracion.servidor.proxiesConfiables);
+  }
 
   app.use(seguridad.cabecerasSeguras);
   app.use(seguridad.cors);

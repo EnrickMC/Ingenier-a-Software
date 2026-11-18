@@ -9,7 +9,9 @@ import java.io.File;
  * Apoyo para las imágenes del catálogo.
  * Una imagen puede ser:
  *  - un enlace de internet (http:// o https://), o
- *  - una ruta de un archivo de esta computadora (por ejemplo C:\Imagenes\pastel.png).
+ *  - una ruta de un archivo de esta computadora (por ejemplo C:\Imagenes\pastel.png), o
+ *  - una foto ya subida a S3 (en AWS), guardada como ruta relativa /imagenes/postres/....
+ *    La página web la pide a su mismo dominio y el Panel la pide al dominio de CloudFront.
  *
  * elegir() abre el explorador de archivos para escoger la imagen y devuelve su ruta.
  * comoUrl() convierte la ruta en algo que JavaFX y el navegador pueden abrir (file:/...).
@@ -18,6 +20,9 @@ public class SelectorImagen {
 
     // Formatos de imagen que se pueden elegir
     public static final String[] EXTENSIONES = {".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"};
+
+    // Inicio de las rutas de las fotos que están en S3 (las sirve CloudFront en /imagenes/*)
+    public static final String PREFIJO_S3 = "/imagenes/";
 
     // Texto para mostrar en las ayudas y los mensajes
     public static final String FORMATOS_TEXTO = "PNG, JPG, JPEG, GIF, BMP o WEBP";
@@ -90,9 +95,20 @@ public class SelectorImagen {
         return limpio.startsWith("http://") || limpio.startsWith("https://");
     }
 
-    // true si el texto es la ruta de un archivo (no es un enlace de internet)
+    // true si es una foto que ya está en S3 (ruta relativa /imagenes/...)
+    public static boolean esRutaS3(String texto) {
+        if (texto == null) {
+            return false;
+        }
+        return texto.trim().startsWith(PREFIJO_S3);
+    }
+
+    // true si el texto es la ruta de un archivo de esta computadora (no es enlace ni foto de S3)
     public static boolean esRutaLocal(String texto) {
         if (texto == null || texto.isBlank()) {
+            return false;
+        }
+        if (esRutaS3(texto)) {
             return false;
         }
         return !esEnlace(texto);
@@ -134,6 +150,10 @@ public class SelectorImagen {
         String limpio = texto.trim();
         if (esEnlace(limpio)) {
             return limpio;
+        }
+        // Foto de S3: se pide a CloudFront (https://...cloudfront.net/imagenes/...)
+        if (esRutaS3(limpio)) {
+            return ConfiguracionAws.getInstancia().getDominioImagenes() + limpio;
         }
         return archivoDe(limpio).toURI().toString();
     }

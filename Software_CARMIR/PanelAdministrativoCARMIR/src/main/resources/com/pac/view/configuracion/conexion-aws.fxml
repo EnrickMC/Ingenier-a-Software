@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<!-- Conexión con AWS: muestra (solo lectura) la configuración que dejó 1_INSTALAR_PRIMERA_VEZ.bat.
+     Las claves secretas nunca se muestran. Va dentro de la pestaña "Respaldos y sistema" (respaldos.fxml). -->
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.pac.modulos.configuracion.controller.ConexionAwsController"
+      styleClass="tarjeta, seccion-config" spacing="10">
+
+    <Label styleClass="tarjeta-titulo" text="Conexión con AWS">
+        <graphic><FontIcon iconLiteral="bi-cloud-fill"/></graphic>
+    </Label>
+    <Label styleClass="texto-suave" wrapText="true" maxWidth="Infinity"
+           text="Estos datos se configuran con 1_INSTALAR_PRIMERA_VEZ.bat (opción AWS). Para cambiarlos vuelve a ejecutarlo y abre el Panel con INICIAR_CARMIR_AWS.bat."/>
+
+    <GridPane hgap="12" vgap="8">
+        <columnConstraints>
+            <ColumnConstraints minWidth="180"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label styleClass="texto-suave" text="Modo del Panel" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <Label fx:id="lblModo" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Archivo de configuración" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <Label fx:id="lblArchivo" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Perfil de AWS CLI" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <Label fx:id="lblPerfil" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Región" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <Label fx:id="lblRegion" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Access Key ID" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <Label fx:id="lblAccessKey" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Secret Access Key" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <Label fx:id="lblSecreta" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="AWS CLI" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <Label fx:id="lblCli" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Instancia EC2 (túnel)" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <Label fx:id="lblInstancia" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Servidor RDS" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <Label fx:id="lblServidorRds" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Túnel en esta PC" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <Label fx:id="lblTunel" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Base de datos" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
+        <Label fx:id="lblBaseAws" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Usuario de MySQL" GridPane.rowIndex="11" GridPane.columnIndex="0"/>
+        <Label fx:id="lblUsuarioAws" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Contraseña de MySQL" GridPane.rowIndex="12" GridPane.columnIndex="0"/>
+        <Label fx:id="lblContrasenaAws" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="12" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Bucket de fotos" GridPane.rowIndex="13" GridPane.columnIndex="0"/>
+        <Label fx:id="lblBucket" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="13" GridPane.columnIndex="1"/>
+        <Label styleClass="texto-suave" text="Dominio de las fotos" GridPane.rowIndex="14" GridPane.columnIndex="0"/>
+        <Label fx:id="lblDominio" styleClass="dato-sistema" wrapText="true" GridPane.rowIndex="14" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button fx:id="btnProbarAws" text="Probar credenciales" minWidth="-Infinity" styleClass="btn-azul" onAction="#onProbarCredenciales">
+            <graphic><FontIcon iconLiteral="bi-shield-lock-fill"/></graphic>
+        </Button>
+        <Button text="Volver a leer" minWidth="-Infinity" styleClass="btn-secundario" onAction="#onRecargar">
+            <graphic><FontIcon iconLiteral="bi-arrow-clockwise"/></graphic>
+        </Button>
+    </HBox>
+    <Label fx:id="lblResultadoAws" styleClass="aviso-amarillo" maxWidth="Infinity" wrapText="true"/>
+</VBox>

@@ -1,0 +1,24 @@
+# =====================================================================
+# Ejemplo de la configuracion de AWS del Panel (SOLO formato, sin datos reales).
+#
+# El archivo real NO se copia a mano: lo escribe 1_INSTALAR_PRIMERA_VEZ.bat (opcion 2 o 3)
+# en C:\Users\<tu usuario>\.carmir\aws.properties, fuera del repositorio (nunca se sube a Git).
+# Lo leen el Panel (modo AWS) e INICIAR_CARMIR_AWS.bat.
+#
+# Las llaves de acceso de AWS (Access Key ID y Secret) NO van aqui: quedan en el perfil
+# de AWS CLI (C:\Users\<tu usuario>\.aws\credentials).
+# Las diagonales \ se escriben dobles porque asi lo pide Java.
+# =====================================================================
+aws.perfil=nombre-del-perfil
+aws.region=region-de-aws
+aws.ec2.instancia=i-xxxxxxxxxxxxxxxxx
+aws.rds.servidor=nombre.xxxxxxxxxxxx.region.rds.amazonaws.com
+aws.rds.puerto=3306
+aws.tunel.puertoLocal=3307
+aws.bd.nombre=CARMIR_DB
+aws.bd.usuario=usuario_mysql_del_panel
+aws.bd.contrasena=escribe_aqui_la_contrasena
+aws.s3.bucketImagenes=nombre-del-bucket
+aws.imagenes.dominio=https://xxxxxxxxxxxxx.cloudfront.net
+aws.cli.carpeta=C:\\Program Files\\Amazon\\AWSCLIV2
+aws.ssm.pluginCarpeta=C:\\Program Files\\Amazon\\SessionManagerPlugin\\bin

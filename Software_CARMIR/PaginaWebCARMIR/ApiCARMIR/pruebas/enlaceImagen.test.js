@@ -29,3 +29,9 @@ prueba('Solo se aceptan rutas absolutas con formato de imagen', function () {
   assert.strictEqual(enlaceImagen.rutaArchivo('https://sitio.mx/pastel.jpg'), null);
   assert.strictEqual(enlaceImagen.rutaArchivo(path.resolve('notas.txt')), null);
 });
+
+prueba('Una foto de S3 (ruta /imagenes/...) se manda tal cual y no se busca en la computadora', function () {
+  assert.strictEqual(enlaceImagen.enlaceParaWeb('/imagenes/postres/3/pastel.jpg', 'postre', 3), '/imagenes/postres/3/pastel.jpg');
+  assert.strictEqual(enlaceImagen.enlaceParaWeb('/imagenes/opciones/8/fresa.png', 'opcion', 8), '/imagenes/opciones/8/fresa.png');
+  assert.strictEqual(enlaceImagen.rutaArchivo('/imagenes/postres/3/pastel.jpg'), null);
+});

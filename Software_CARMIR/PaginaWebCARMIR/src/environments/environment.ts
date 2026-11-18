@@ -3,4 +3,6 @@
 export const environment = {
   produccion: true,
   apiUrl: '/api',
+  // Las fotos /imagenes/... las sirve CloudFront en el mismo dominio de la página
+  dominioImagenes: '',
 };

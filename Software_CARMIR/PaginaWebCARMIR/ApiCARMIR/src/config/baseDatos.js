@@ -16,6 +16,7 @@
  *  - Todas las consultas usan "?" (consultas parametrizadas): nunca se pega texto del usuario en el SQL.
  *  - multipleStatements = false: no se pueden mandar dos sentencias en una sola consulta.
  */
+const fs = require('fs');
 const mysql = require('mysql2/promise');
 const configuracion = require('./configuracion');
 const ErrorApi = require('../utilidades/ErrorApi');
@@ -24,10 +25,32 @@ const ErrorApi = require('../utilidades/ErrorApi');
 let pool = null;
 let poolEscritura = null;
 
+// Certificado de RDS leído una sola vez
+let certificadoLeido = null;
+
+/*
+ * Opciones de SSL para la conexión.
+ *  - En la computadora local (DB_SSL_CA vacío) regresa undefined: sin SSL, como siempre.
+ *  - En AWS (DB_SSL_CA con la ruta de global-bundle.pem) la conexión va cifrada y se revisa
+ *    que el certificado del servidor sea de Amazon RDS. RDS rechaza conexiones sin SSL
+ *    porque el grupo de parámetros tiene require_secure_transport = 1.
+ */
+function opcionesSsl() {
+  const ruta = configuracion.baseDatos.certificadoSsl;
+  if (ruta === '') {
+    return undefined;
+  }
+  if (certificadoLeido === null) {
+    certificadoLeido = fs.readFileSync(ruta);
+  }
+  return { ca: certificadoLeido, rejectUnauthorized: true };
+}
+
 // Opciones comunes de los dos pools
 function opcionesPool(usuario, contrasena, conexionesMaximas) {
   const datos = configuracion.baseDatos;
   return {
+    ssl: opcionesSsl(),
     host: datos.host,
     port: datos.puerto,
     user: usuario,
@@ -196,6 +219,7 @@ module.exports = {
   conTransaccion: conTransaccion,
   ejecutar: ejecutar,
   escrituraConfigurada: escrituraConfigurada,
+  opcionesSsl: opcionesSsl,
   probarConexion: probarConexion,
   probarConexionEscritura: probarConexionEscritura,
   cerrar: cerrar

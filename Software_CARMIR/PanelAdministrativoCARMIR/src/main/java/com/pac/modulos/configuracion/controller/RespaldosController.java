@@ -8,6 +8,7 @@ import com.pac.modulos.configuracion.service.ResultadoConfiguracion;
 import com.pac.modulos.pedidos.notificacion.ConfiguracionNotificaciones;
 import com.pac.util.Alertas;
 import com.pac.util.ConfiguracionApp;
+import com.pac.util.ConfiguracionAws;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -43,6 +44,9 @@ public class RespaldosController {
     // Tarjeta "Notificaciones al cliente" (integraciones.fxml): JavaFX la inyecta como "<fx:id>Controller"
     @FXML private IntegracionesController integracionesController;
 
+    // Tarjeta "Conexión con AWS" (conexion-aws.fxml): solo muestra la configuración de AWS de esta PC
+    @FXML private ConexionAwsController conexionAwsController;
+
     private RespaldoService servicio = new RespaldoService();
 
     @FXML
@@ -63,6 +67,9 @@ public class RespaldosController {
         } else {
             lblOrigenParametros.setText("Se leen de config/app.properties (falta la migración o no hay conexión)");
         }
+
+        // Configuración de AWS de esta PC (aws.properties y perfil de AWS CLI)
+        conexionAwsController.cargar();
 
         // Datos de WhatsApp y correo (lee la tabla ConfiguracionNotificacion y llena la tarjeta)
         integracionesController.cargar();
@@ -101,7 +108,11 @@ public class RespaldosController {
         if (ConexionBD.getInstancia().probarConexion()) {
             lblEstadoConexion.setText("Conectado correctamente");
         } else {
-            lblEstadoConexion.setText("Sin conexión: revisa que MySQL esté encendido y los datos de db.properties");
+            if (ConfiguracionAws.getInstancia().isActivo()) {
+                lblEstadoConexion.setText("Sin conexión: revisa que el túnel esté abierto (tarjeta «Conexión con AWS»)");
+            } else {
+                lblEstadoConexion.setText("Sin conexión: revisa que MySQL esté encendido y los datos de db.properties");
+            }
         }
     }
 

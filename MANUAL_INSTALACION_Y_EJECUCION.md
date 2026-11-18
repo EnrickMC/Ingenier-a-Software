@@ -2,9 +2,10 @@
 
 El proyecto **Sistema CARMIR (Delicias de Postres)** está organizado de la siguiente manera:
 
-* `1_INSTALAR_PRIMERA_VEZ.bat` — Configurador e instalador automático inicial.
+* `1_INSTALAR_PRIMERA_VEZ.bat` — Configurador e instalador automático inicial. Pregunta qué preparar: **1** sistema local (como siempre), **2** solo el Panel conectado a AWS (instala AWS CLI v2 y pide las llaves y datos de AWS) o **3** ambos.
 * `2_INICIAR_SISTEMA.bat` — Lanzador automático de todo el sistema.
 * `3_RESTAURAR_BASE_DE_DATOS.bat` — *(Opcional)* Restaura la base de datos a su estado limpio de ejemplo (con confirmación de seguridad).
+* `INICIAR_CARMIR_AWS.bat` — Abre solo el Panel conectado a la base de AWS con los datos que guardó la opción 2 o 3 del instalador (ver `MIGRACION_AWS.md`).
 * `Software_CARMIR/` — Carpeta principal del código fuente:
   1. `DBCarmir/` — Scripts de Base de Datos (`CARMIR_DB`) en MySQL / MariaDB.
   2. `PaginaWebCARMIR/` — Tienda en Línea para Clientes (Angular + API REST `ApiCARMIR` en Node.js).

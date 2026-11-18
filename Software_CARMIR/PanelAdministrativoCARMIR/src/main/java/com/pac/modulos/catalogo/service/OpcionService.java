@@ -9,7 +9,9 @@ import com.pac.modulos.catalogo.model.Caracteristica;
 import com.pac.modulos.catalogo.model.Exclusion;
 import com.pac.modulos.catalogo.model.Opcion;
 
+import com.pac.util.AlmacenImagenesS3;
 import com.pac.util.SelectorImagen;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -334,6 +336,15 @@ public class OpcionService {
         }
         if (datos.getPuntosSeleccion() <= 0 || datos.getPuntosSeleccion() > MAX_PUNTOS) {
             return ResultadoCatalogo.error(MSG_PUNTOS_INVALIDOS, ResultadoCatalogo.CAMPO_PUNTOS);
+        }
+        // En AWS la imagen elegida de la computadora se sube a S3 y se guarda como /imagenes/opciones/...
+        if (!ValidacionCatalogo.estaVacio(datos.getLinkImagen())) {
+            try {
+                datos.setLinkImagen(AlmacenImagenesS3.subirSiHaceFalta(datos.getLinkImagen(),
+                        AlmacenImagenesS3.CARPETA_OPCIONES));
+            } catch (IOException e) {
+                return ResultadoCatalogo.error(e.getMessage(), ResultadoCatalogo.CAMPO_IMAGEN);
+            }
         }
         datos.setNombre(datos.getNombre().trim());
         return null;

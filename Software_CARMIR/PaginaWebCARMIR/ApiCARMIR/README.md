@@ -12,6 +12,22 @@ API REST de la página web de CARMIR (Node.js 22 + Express 5 + mysql2). Ver `../
 5. `npm test` (requiere la base con las semillas 3, 5 y 1)
 6. `npm run test:pedidos` guarda pedidos de prueba: **solo** contra una base de prueba.
 
+## En AWS (EC2 + RDS + CloudFront)
+
+La API corre en la EC2 `carmir-api` como servicio de systemd y se conecta a RDS con SSL.
+No usa `.env`: las variables están en `/opt/carmir/api.env` (solo en la EC2, `chmod 600`).
+
+1. Primera vez: crea `/opt/carmir/api.env` con el contenido de `despliegue/api.env.ejemplo`
+   y las contraseñas reales del paso 7.
+2. Trae el código a `/opt/carmir/repo` (`git clone` la primera vez, `git pull` después).
+3. `bash /opt/carmir/repo/Software_CARMIR/PaginaWebCARMIR/ApiCARMIR/despliegue/instalar_en_ec2.sh`
+   (descarga el certificado de RDS, instala dependencias, instala el servicio `carmir-api` y prueba la conexión).
+4. Revisa `https://d3vsfgax7m05ih.cloudfront.net/api/salud`.
+
+Variables nuevas para AWS: `DB_SSL_CA` (certificado de RDS), `PROXIES_CONFIABLES=1` (CloudFront) y
+`NODE_ENV=production`. Las fotos subidas a S3 se guardan como `/imagenes/...` y la API las manda tal cual.
+`npm test` sigue corriendo contra tu base local, nunca contra RDS.
+
 ## Si la página dice «No fue posible cargar el catálogo»
 
 - `npm run diagnostico`: revisa el `.env`, la conexión a MySQL, las tablas/vistas y cuántos

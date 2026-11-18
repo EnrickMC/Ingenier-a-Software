@@ -15,7 +15,9 @@ import com.pac.modulos.catalogo.model.Opcion;
 import com.pac.modulos.catalogo.model.OpcionElegida;
 import com.pac.modulos.catalogo.model.Producto;
 
+import com.pac.util.AlmacenImagenesS3;
 import com.pac.util.SelectorImagen;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -411,6 +413,15 @@ public class ProductoService {
             }
         } else if (datos.isMostrarEnTienda()) {
             return ResultadoCatalogo.error(MSG_FOTO_OBLIGATORIA, ResultadoCatalogo.CAMPO_FOTO);
+        }
+        // En AWS la foto elegida de la computadora se sube a S3 y se guarda como /imagenes/postres/...
+        if (datos.tieneFotografia()) {
+            try {
+                datos.setLinkFotografia(AlmacenImagenesS3.subirSiHaceFalta(datos.getLinkFotografia(),
+                        AlmacenImagenesS3.CARPETA_POSTRES));
+            } catch (IOException e) {
+                return ResultadoCatalogo.error(e.getMessage(), ResultadoCatalogo.CAMPO_FOTO);
+            }
         }
         datos.setNombre(datos.getNombre().trim());
         return null;

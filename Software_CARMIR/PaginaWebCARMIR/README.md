@@ -47,6 +47,22 @@ cd ApiCARMIR && npm test      # API (necesita la base con las semillas 3, 5 y 1)
 npm run test:pedidos          # (en ApiCARMIR) GUARDA pedidos de prueba: úsalo solo con una base de prueba
 ```
 
+## Publicar en AWS
+
+La página se publica en un bucket de S3 y la sirve CloudFront. En el mismo dominio CloudFront manda
+`/api/*` a la ApiCARMIR de la EC2 y `/imagenes/*` al bucket de fotos, por eso `environment.ts` usa
+`apiUrl: '/api'` y no hay ningún dato de AWS dentro del código.
+
+Doble clic en `despliegue/PUBLICAR_WEB.bat`. La primera vez pregunta el perfil de AWS CLI, la región,
+el bucket, el ID y el dominio de la distribución de CloudFront (los guarda en
+`C:\Users\<usuario>\.carmir\web.aws.properties`) y, si el perfil no tiene llaves, las pide. Después
+compila, pide confirmar, sube a S3 (`index.html` sin caché) y limpia la caché de CloudFront.
+El usuario IAM que publica necesita los permisos de la sección 3 de `MIGRACION_AWS.md`.
+
+Las fotos que el Panel sube a S3 se guardan como `/imagenes/...`. En producción se piden al mismo
+dominio. Con `ng serve` no se ven, salvo que escribas tu dominio de CloudFront en `dominioImagenes`
+de `environment.development.ts` (no lo subas a Git).
+
 ## Estructura
 
 Ver [ESTRUCTURA.md](ESTRUCTURA.md).

@@ -95,11 +95,15 @@ public class ValidacionCatalogo {
         return limpio.startsWith("http://") || limpio.startsWith("https://");
     }
 
-    // Imagen de un producto u opción: un enlace http/https o la ruta de un archivo de esta computadora.
+    // Imagen de un producto u opción: un enlace http/https, la ruta de un archivo de esta computadora
+    // o una foto ya subida a S3 (/imagenes/...).
     // Debe terminar en .png, .jpg, .jpeg, .gif, .bmp o .webp. Una ruta local debe existir.
     public static boolean imagenValida(String texto) {
         if (estaVacio(texto)) {
             return false;
+        }
+        if (SelectorImagen.esRutaS3(texto)) {
+            return !texto.contains(" ") && !texto.contains("..") && SelectorImagen.tieneFormatoPermitido(texto);
         }
         if (SelectorImagen.esEnlace(texto)) {
             return enlaceValido(texto) && SelectorImagen.tieneFormatoPermitido(texto);

@@ -62,14 +62,20 @@ function falla(texto, instrucciones) {
 
 function revisarEnv() {
   titulo('1. Archivo .env');
-  if (!fs.existsSync(RUTA_ENV)) {
+  // En la EC2 de AWS no hay .env: las variables vienen de /opt/carmir/api.env
+  // (ejecutar: set -a; source /opt/carmir/api.env; set +a; npm run diagnostico)
+  const variablesYaCargadas = process.env.DB_USUARIO !== undefined;
+  if (!fs.existsSync(RUTA_ENV) && variablesYaCargadas) {
+    bien('Sin archivo .env: se usan las variables de entorno ya cargadas (servidor de AWS)');
+  } else if (!fs.existsSync(RUTA_ENV)) {
     falla('No existe el archivo ' + RUTA_ENV, [
       'Copia el archivo .env.example y nómbralo .env (en la carpeta ApiCARMIR).',
       'Después escribe en él tu usuario y contraseña de MySQL.'
     ]);
     return null;
+  } else {
+    bien('Existe el archivo .env');
   }
-  bien('Existe el archivo .env');
 
   let configuracion = null;
   try {
@@ -83,6 +89,9 @@ function revisarEnv() {
 
   const bd = configuracion.baseDatos;
   bien('Base: ' + bd.nombre + ' en ' + bd.host + ':' + bd.puerto + ' con el usuario ' + bd.usuario);
+  if (bd.certificadoSsl !== '') {
+    bien('Conexión cifrada (SSL) con el certificado ' + bd.certificadoSsl);
+  }
   if (bd.contrasena === CONTRASENA_DE_EJEMPLO) {
     falla('DB_CONTRASENA todavía tiene el texto de ejemplo', [
       'Escribe la contraseña real de ' + bd.usuario + ' en el .env.'
@@ -93,7 +102,7 @@ function revisarEnv() {
   }
   bien('La API escuchará en http://' + configuracion.servidor.host + ':' + configuracion.servidor.puerto + '/api');
   bien('Páginas permitidas (CORS): ' + configuracion.servidor.origenesPermitidos.join(', '));
-  if (configuracion.servidor.origenesPermitidos.indexOf('http://localhost:4200') === -1) {
+  if (configuracion.entorno !== 'production' && configuracion.servidor.origenesPermitidos.indexOf('http://localhost:4200') === -1) {
     aviso('http://localhost:4200 no está en CORS_ORIGENES: la página de Angular no podrá usar la API.');
   }
   return configuracion;
@@ -134,6 +143,21 @@ function explicarErrorConexion(error, bd) {
       'Ejecuta como root: GRANT SELECT ON ' + bd.nombre + '.* TO \'' + bd.usuario + '\'@\'localhost\';'
     ];
   }
+  if (codigo === 'ER_SECURE_TRANSPORT_REQUIRED') {
+    return [
+      'El servidor (Amazon RDS) solo acepta conexiones cifradas (SSL).',
+      'Escribe en DB_SSL_CA la ruta del certificado global-bundle.pem de RDS (por ejemplo /opt/carmir/global-bundle.pem).'
+    ];
+  }
+  if (codigo === 'ENOENT') {
+    return ['No se encontró el certificado de DB_SSL_CA. Revisa que la ruta exista en este equipo.'];
+  }
+  if (codigo === 'HANDSHAKE_SSL_ERROR' || codigo === 'DEPTH_ZERO_SELF_SIGNED_CERT' || codigo === 'UNABLE_TO_VERIFY_LEAF_SIGNATURE' || codigo === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+    return [
+      'No se pudo verificar el certificado del servidor.',
+      'Usa el certificado global-bundle.pem de RDS y en DB_HOST el endpoint de RDS (no una IP).'
+    ];
+  }
   if (codigo === 'ER_NOT_SUPPORTED_AUTH_MODE') {
     return ['El método de autenticación del usuario no es compatible; usa sql/crear_usuario_lectura.sql para crear carmir_web.'];
   }
@@ -144,7 +168,10 @@ async function conectar(configuracion) {
   titulo('2. Conexión a MySQL');
   const bd = configuracion.baseDatos;
   try {
+    // Mismo SSL que usa la API (en AWS va cifrada con el certificado de RDS)
+    const baseDatos = require('./config/baseDatos');
     const conexion = await mysql.createConnection({
+      ssl: baseDatos.opcionesSsl(),
       host: bd.host,
       port: bd.puerto,
       user: bd.usuario,

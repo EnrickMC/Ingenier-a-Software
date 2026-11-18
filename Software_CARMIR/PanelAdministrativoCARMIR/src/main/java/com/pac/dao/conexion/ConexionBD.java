@@ -9,18 +9,26 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import com.pac.util.ConfiguracionAws;
+
 /**
  * PATRÓN SINGLETON.
  * Solo existe un objeto de esta clase en todo el programa y se encarga de la
  * conexión con la base de datos MySQL CARMIR_DB.
  * Los datos de conexión se leen del archivo config/db.properties y pueden
  * sobrescribirse localmente con db.local.properties sin afectar a otros equipos.
+ *
+ * En AWS (Panel abierto con INICIAR_CARMIR_AWS.bat, variable CARMIR_MODO=aws) los datos salen de
+ * C:\Users\<usuario>\.carmir\aws.properties (lo crea 1_INSTALAR_PRIMERA_VEZ.bat, fuera de Git):
+ * la base está en Amazon RDS y se llega por el túnel de SSM que abre INICIAR_CARMIR_AWS.bat.
  */
 public class ConexionBD {
 
     private static final String ARCHIVO_CONFIG = "/com/pac/config/db.properties";
     private static final String ARCHIVO_LOCAL = "db.local.properties";
     private static final String ARCHIVO_LOCAL_RAIZ = "Software_CARMIR/PanelAdministrativoCARMIR/db.local.properties";
+    // Segundos que se espera al revisar si la conexión sigue viva
+    private static final int SEGUNDOS_REVISION = 3;
     private static final int CODIGO_ACCESO_DENEGADO = 1045;
 
     // La única instancia de la clase
@@ -55,8 +63,20 @@ public class ConexionBD {
         }
     }
 
-    // Si existe db.local.properties en este equipo, sobrescribe los datos sin tocar Git
+    // Si existe db.local.properties en este equipo, sobrescribe los datos sin tocar Git.
+    // En modo AWS los datos salen de .carmir\aws.properties de la carpeta del usuario.
     private void cargarConfiguracionLocal(Properties propiedades) {
+        ConfiguracionAws aws = ConfiguracionAws.getInstancia();
+        if (aws.isActivo()) {
+            if (!aws.existeArchivo()) {
+                System.out.println("Falta " + aws.getArchivo().getPath() + " (ejecuta 1_INSTALAR_PRIMERA_VEZ.bat, opción AWS)");
+                return;
+            }
+            propiedades.setProperty("db.url", aws.getUrlJdbc());
+            propiedades.setProperty("db.usuario", aws.getUsuarioBD());
+            propiedades.setProperty("db.contrasena", aws.getContrasenaBD());
+            return;
+        }
         File archivoLocal = new File(ARCHIVO_LOCAL);
         if (!archivoLocal.isFile()) {
             archivoLocal = new File(ARCHIVO_LOCAL_RAIZ);
@@ -64,12 +84,17 @@ public class ConexionBD {
         if (!archivoLocal.isFile()) {
             return;
         }
+        leerArchivo(archivoLocal, propiedades);
+    }
+
+    // Carga un archivo .properties encima de los valores que ya había
+    private void leerArchivo(File archivo, Properties propiedades) {
         try {
-            FileInputStream flujoLocal = new FileInputStream(archivoLocal);
-            propiedades.load(flujoLocal);
-            flujoLocal.close();
+            FileInputStream flujo = new FileInputStream(archivo);
+            propiedades.load(flujo);
+            flujo.close();
         } catch (IOException e) {
-            System.out.println("No se pudo leer " + archivoLocal.getPath());
+            System.out.println("No se pudo leer " + archivo.getPath());
         }
     }
 
@@ -107,9 +132,16 @@ public class ConexionBD {
         return instancia;
     }
 
-    // Devuelve la conexión abierta; si no existe o se cerró, abre una nueva
+    // Devuelve la conexión abierta; si no existe, se cerró o se cayó, abre una nueva.
+    // En AWS el túnel de SSM corta las conexiones que pasan mucho tiempo sin usarse:
+    // isValid() lo detecta y se abre otra sin que el usuario tenga que reiniciar el Panel.
     public synchronized Connection getConexion() throws SQLException {
         if (conexion == null || conexion.isClosed()) {
+            conexion = abrirConexionMysql();
+            return conexion;
+        }
+        if (!conexion.isValid(SEGUNDOS_REVISION)) {
+            cerrar();
             conexion = abrirConexionMysql();
         }
         return conexion;

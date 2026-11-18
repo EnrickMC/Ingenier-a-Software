@@ -42,9 +42,12 @@
                 <graphic><FontIcon iconLiteral="bi-plug-fill"/></graphic>
             </Button>
             <Label styleClass="texto-ayuda" wrapText="true"
-                   text="Los datos de conexión están en config/db.properties. Las cuentas de WhatsApp y correo se escriben abajo, en «Notificaciones al cliente»."/>
+                   text="Con la base local los datos están en db.local.properties; en AWS, en .carmir\aws.properties (ver «Conexión con AWS»). Las cuentas de WhatsApp y correo se escriben abajo, en «Notificaciones al cliente»."/>
         </HBox>
     </VBox>
+
+    <!-- Conexión con AWS (solo lectura), con su propio controlador -->
+    <fx:include fx:id="conexionAws" source="conexion-aws.fxml"/>
 
     <!-- Notificaciones al cliente: datos de WhatsApp y correo (RF-47), con su propio controlador -->
     <fx:include fx:id="integraciones" source="integraciones.fxml"/>

@@ -1,0 +1,30 @@
+# =====================================================================
+# Servicio de systemd de ApiCARMIR en la EC2 (Amazon Linux 2023).
+# Lo instala instalar_en_ec2.sh en /etc/systemd/system/carmir-api.service.
+#  - Arranca solo al encender la EC2 y se reinicia si la API se cae.
+#  - Las variables (usuarios de MySQL, CORS, SSL) vienen de /opt/carmir/api.env,
+#    que solo existe en la EC2 (chmod 600) y nunca se sube a Git.
+# Comandos útiles:
+#   sudo systemctl status carmir-api      (¿está encendida?)
+#   sudo systemctl restart carmir-api     (después de actualizar el código)
+#   sudo journalctl -u carmir-api -n 50   (últimos mensajes de la API)
+# =====================================================================
+[Unit]
+Description=ApiCARMIR (API de la pagina web de CARMIR)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/carmir/ApiCARMIR
+EnvironmentFile=/opt/carmir/api.env
+ExecStart=/usr/bin/node src/servidor.js
+Restart=always
+RestartSec=5
+# La API no necesita escribir en el disco
+NoNewPrivileges=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target
