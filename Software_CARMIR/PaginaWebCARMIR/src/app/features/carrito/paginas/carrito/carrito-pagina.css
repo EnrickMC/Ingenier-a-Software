@@ -19,7 +19,7 @@ h1 {
 
 .articulo {
   display: grid;
-  grid-template-columns: 80px 1fr;
+  grid-template-columns: 80px minmax(0, 1fr);
   gap: 12px;
   padding: 12px;
 }
@@ -157,7 +157,7 @@ h1 {
 
 @media (min-width: 600px) {
   .articulo {
-    grid-template-columns: 100px 1fr auto;
+    grid-template-columns: 100px minmax(0, 1fr) auto;
   }
 
   .foto {

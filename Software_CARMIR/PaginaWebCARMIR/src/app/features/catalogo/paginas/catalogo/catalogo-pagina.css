@@ -123,7 +123,7 @@
 /* Cuadrícula: tantas columnas como quepan (1 en celular, 2 en tableta, 3 o 4 en escritorio) */
 .cuadricula {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 20px;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .esqueleto-foto {
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 3 / 4;
   background: var(--color-crema-claro);
 }
 

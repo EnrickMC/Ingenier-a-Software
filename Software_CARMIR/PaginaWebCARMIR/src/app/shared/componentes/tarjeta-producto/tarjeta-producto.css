@@ -1,5 +1,7 @@
 :host {
   display: block;
+  /* Sin esto la foto grande puede ensanchar la columna (Safari en iPhone) */
+  min-width: 0;
 }
 
 .tarjeta {
@@ -17,8 +19,17 @@
 
 .foto {
   display: block;
-  aspect-ratio: 4 / 3;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
   background: var(--color-crema-claro);
+}
+
+/* La foto llena el recuadro sin que su tamaño original cambie el ancho de la tarjeta */
+.foto app-imagen-postre {
+  position: absolute;
+  inset: 0;
 }
 
 .cuerpo {

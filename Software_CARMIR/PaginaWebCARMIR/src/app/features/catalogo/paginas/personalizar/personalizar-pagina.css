@@ -44,7 +44,7 @@
 /* Franja de la plantilla base: foto chica, nombre y botón de plantillas */
 .plantilla-base {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 72px minmax(0, 1fr);
   align-items: center;
   gap: 12px;
   padding: 12px;
@@ -93,7 +93,7 @@
 
 /* RF-5: sin vista 3D la franja no repite la foto (ya está grande a la izquierda) */
 .plantilla-base.sin-foto {
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /* RF-5: tarjeta de la plantilla (se ve cuando el producto no tiene la vista 3D activa) */
@@ -256,11 +256,11 @@
 
   /* La franja de la plantilla queda en una sola fila */
   .plantilla-base {
-    grid-template-columns: 72px 1fr auto;
+    grid-template-columns: 72px minmax(0, 1fr) auto;
   }
 
   .plantilla-base.sin-foto {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
   }
 
   .plantilla-base .boton-plantillas {

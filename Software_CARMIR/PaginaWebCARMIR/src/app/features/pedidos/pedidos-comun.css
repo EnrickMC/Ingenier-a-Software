@@ -36,7 +36,7 @@ h1 {
 /* Dos campos en la misma fila (solo en tableta y escritorio) */
 .fila-doble {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0 15px;
 }
 
@@ -116,7 +116,7 @@ h1 {
   }
 
   .fila-doble {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
   .barra-acciones {
@@ -132,7 +132,7 @@ h1 {
 @media (min-width: 1024px) {
   .diseno-pedido {
     display: grid;
-    grid-template-columns: 1fr 1.2fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     align-items: start;
     gap: 30px;
   }

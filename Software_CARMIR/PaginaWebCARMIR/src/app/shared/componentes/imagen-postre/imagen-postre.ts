@@ -30,6 +30,10 @@ const PREFIJO_S3 = '/imagenes/';
   styles: `
     :host {
       display: block;
+      /* Evita que una foto grande ensanche la página (Safari en iPhone) */
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
     }
 
     .imagen {

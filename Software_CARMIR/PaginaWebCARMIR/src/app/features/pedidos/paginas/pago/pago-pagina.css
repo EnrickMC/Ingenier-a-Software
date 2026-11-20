@@ -4,7 +4,7 @@
 
 .datos-entrega div {
   display: grid;
-  grid-template-columns: 70px 1fr;
+  grid-template-columns: 70px minmax(0, 1fr);
   gap: 8px;
   padding: 4px 0;
 }

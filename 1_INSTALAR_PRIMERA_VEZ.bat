@@ -442,9 +442,9 @@ echo.
 REM --- C. Perfil, region y llaves de acceso del usuario IAM del Panel ---
 echo --- Cuenta de AWS ---
 call :preguntar_aws CARMIR_AWS_PERFIL "Nombre del perfil de AWS CLI para el Panel"
-call :preguntar_aws CARMIR_AWS_REGION "Region de AWS donde esta CARMIR, por ejemplo us-east-2"
-
 :reintentar_llaves_aws
+REM La region es la de la cuenta (us-east-2), NO la zona de disponibilidad (us-east-2a)
+call :preguntar_aws CARMIR_AWS_REGION "Region de AWS donde esta CARMIR, por ejemplo us-east-2 - sin la letra de la zona"
 call :pedir_llaves_aws
 if errorlevel 1 exit /b 1
 "%AWS_EXE%" configure set region "%CARMIR_AWS_REGION%" --profile "%CARMIR_AWS_PERFIL%"
@@ -455,6 +455,7 @@ echo Verificando las llaves con AWS...
 if not errorlevel 1 goto :llaves_aws_correctas
 echo.
 echo [ATENCION] AWS no acepto las llaves o la region (arriba esta el mensaje de AWS).
+echo   Si dice "Could not connect to the endpoint URL", la region esta mal escrita: debe ser como us-east-2, sin letra al final.
 set "REINTENTAR_AWS=1"
 set /p "REINTENTAR_AWS=[1] Volver a escribirlas   [2] Continuar de todos modos  (Enter = 1): "
 if not "%REINTENTAR_AWS%"=="2" goto :reintentar_llaves_aws
