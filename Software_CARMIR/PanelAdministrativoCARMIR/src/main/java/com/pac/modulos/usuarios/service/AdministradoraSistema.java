@@ -22,7 +22,7 @@ public class AdministradoraSistema {
 
     // ===== Datos de acceso de la Administradora (editar aquí) =====
     private static final String USUARIO = "admin";
-    private static final String CONTRASENA = "admin";
+    private static final String CONTRASENA = "XBzFd1z2RkzpCXY1";
 
     private static final String NOMBRE_COMPLETO = "Administradora";
 
