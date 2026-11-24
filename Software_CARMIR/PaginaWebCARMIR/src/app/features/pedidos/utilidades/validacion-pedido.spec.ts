@@ -22,7 +22,8 @@ describe('validaciones del Portal de Pedidos', function () {
     expect(validarNombre('A1')).not.toBe('');
     expect(validarTelefono('4421234567')).toBe('');
     expect(validarTelefono('442 123 4567')).not.toBe('');
-    expect(validarCorreo('')).toBe('');
+    expect(validarCorreo('')).not.toBe('');
+    expect(validarCorreo('ana@correo.com')).toBe('');
     expect(validarCorreo('ana@correo')).not.toBe('');
   });
 

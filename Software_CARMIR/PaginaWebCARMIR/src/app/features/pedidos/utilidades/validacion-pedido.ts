@@ -31,11 +31,12 @@ export function validarTelefono(texto: string): string {
   return '';
 }
 
-// El correo es opcional
+// El correo es obligatorio para hacer un pedido
 export function validarCorreo(texto: string): string {
   const limpio = texto.trim();
   if (limpio === '') {
-    return '';
+    // RF-10 · Excepción paso 5: no escribió su correo.
+    return 'Escribe tu correo';
   }
   if (limpio.length > 100 || !PATRON_CORREO.test(limpio)) {
     return 'Escribe un correo válido, por ejemplo nombre@correo.com';

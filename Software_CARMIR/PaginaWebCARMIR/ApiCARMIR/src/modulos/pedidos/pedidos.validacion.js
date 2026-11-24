@@ -64,16 +64,15 @@ function leerCliente(datos) {
     throw errorDeCampo('nombre', 'Escribe tu nombre completo (solo letras y espacios)');
   }
   const telefono = leerTelefono(datos.telefono);
-  let correo = '';
-  if (datos.correo !== undefined && datos.correo !== null && datos.correo !== '') {
-    if (typeof datos.correo !== 'string') {
-      // RF-10 · Excepción paso 5: correo inválido.
-      throw errorDeCampo('correo', 'Escribe un correo válido, por ejemplo nombre@correo.com');
-    }
-    correo = datos.correo.trim();
-    if (correo.length > 100 || !PATRON_CORREO.test(correo)) {
-      throw errorDeCampo('correo', 'Escribe un correo válido, por ejemplo nombre@correo.com');
-    }
+  // El correo es obligatorio
+  if (typeof datos.correo !== 'string' || datos.correo.trim() === '') {
+    // RF-10 · Excepción paso 5: no escribió su correo.
+    throw errorDeCampo('correo', 'Escribe tu correo');
+  }
+  const correo = datos.correo.trim();
+  if (correo.length > 100 || !PATRON_CORREO.test(correo)) {
+    // RF-10 · Excepción paso 5: correo inválido.
+    throw errorDeCampo('correo', 'Escribe un correo válido, por ejemplo nombre@correo.com');
   }
   // Se guardan los espacios repetidos como uno solo
   return { nombre: nombre.replace(/\s+/g, ' '), telefono: telefono, correo: correo };

@@ -8,7 +8,8 @@ const validacion = require('../../utilidades/validacion');
 
 const ORDENES_PERMITIDOS = ['nombre', 'precio_asc', 'precio_desc'];
 const CANTIDAD_MAXIMA_PIEZAS = 20;
-const LARGO_MAXIMO_DEDICATORIA = 150;
+// Mensaje que se escribe sobre el postre: máximo 30 caracteres
+const LARGO_MAXIMO_DEDICATORIA = 30;
 const LARGO_MAXIMO_COMENTARIO = 255;
 const OPCIONES_MAXIMAS = 80;
 // Capas máximas de un pastel (PostreOpcion.NumeroCapa: 1 = Base)

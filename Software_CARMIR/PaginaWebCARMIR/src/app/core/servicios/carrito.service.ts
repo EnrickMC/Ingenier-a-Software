@@ -270,7 +270,6 @@ function sonIguales(articulo: ArticuloCarrito, nuevo: ArticuloNuevo): boolean {
   return (
     claveDeOpciones(articulo.opciones) === claveDeOpciones(nuevo.opciones) &&
     articulo.dedicatoria === nuevo.dedicatoria &&
-    articulo.mensajeEnTopper === nuevo.mensajeEnTopper &&
     articulo.comentario === nuevo.comentario
   );
 }

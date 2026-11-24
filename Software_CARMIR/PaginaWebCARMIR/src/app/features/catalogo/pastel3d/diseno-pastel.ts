@@ -713,9 +713,10 @@ function decoracionesVacias(): DecoracionesPastel {
   };
 }
 
-// Texto del topper: el nombre sin la palabra «topper» («Topper Feliz cumpleaños» → «Feliz cumpleaños»)
+// Texto del cartel (topper): el nombre sin la palabra «cartel» o «topper» («Cartel Feliz cumpleaños» → «Feliz cumpleaños»).
+// Los carteles ya vienen hechos: son opciones de Decoración que se dan de alta en el Panel.
 export function textoTopper(nombre: string): string {
-  let texto = nombre.replace(/cake\s*topper|topper|letrero/gi, ' ').replace(/\s+/g, ' ').trim();
+  let texto = nombre.replace(/cake\s*topper|topper|letrero|carteles|cartel/gi, ' ').replace(/\s+/g, ' ').trim();
   texto = texto.replace(/^(de|con)\s+/i, '').replace(/^[-:·]\s*/, '').trim();
   if (texto === '') {
     return '¡Felicidades!';
@@ -737,7 +738,7 @@ const PALABRAS_CHISPAS_TODO = ['cubierta de chispa', 'cubierto de chispa', 'cobe
 function agregarDecoracion(diseno: DisenoPastel, nombre: string, cantidad: number): void {
   const decoraciones = diseno.decoraciones;
   const texto = normalizar(nombre);
-  if (contieneAlguna(texto, ['topper', 'letrero'])) {
+  if (contieneAlguna(texto, ['topper', 'letrero', 'cartel'])) {
     diseno.topper = textoTopper(nombre);
   } else if (contieneAlguna(texto, ['vela'])) {
     decoraciones.velas = sumar(decoraciones.velas, cantidad);
@@ -781,13 +782,14 @@ function buscarOpcionEn(caracteristica: CaracteristicaPersonalizable, idOpcion: 
 // ===================== Capas (pasteles de 2 o más pisos) =====================
 
 /**
- * RF-5 · Paso 3: características que se eligen por separado en cada capa del pastel:
- * Sabor, Cobertura, Color de cobertura y Decoración. Las demás (Tamaño, Pisos, Forma, Relleno, Base)
- * son del pastel completo.
+ * RF-5 · Paso 3: características que se eligen por separado en cada capa del pastel: solo la Decoración.
+ * Las demás (Tamaño, Pisos, Forma, Relleno, Base, Sabor, Cobertura y Color de cobertura) son del pastel
+ * completo: el sabor y la cobertura se eligen una sola vez, porque si se eligieran en cada capa el precio
+ * se cobraría varias veces.
  */
 export function esPorCapa(caracteristica: CaracteristicaPersonalizable): boolean {
   const tipo = tipoDeCaracteristica(caracteristica.nombre);
-  return tipo === 'sabor' || tipo === 'cobertura' || tipo === 'color' || tipo === 'decoracion';
+  return tipo === 'decoracion';
 }
 
 // Capa de una opción elegida (las que no traen capa son de la Base)
@@ -979,7 +981,6 @@ export function disenoDesdeSeleccion(
   categoria: string,
   nombreProducto: string,
   dedicatoria: string,
-  mensajeEnTopper: boolean = false,
 ): DisenoPastel {
   const tipo = tipoDePostre(categoria, nombreProducto);
   const capas = capasDelPostre(caracteristicas, seleccion, categoria, nombreProducto);
@@ -998,13 +999,6 @@ export function disenoDesdeSeleccion(
   }
   if (diseno.porCapas) {
     diseno.decoraciones = sumarDecoraciones(diseno.capas);
-  }
-
-  // RF-5 · Excepción paso 4: el mensaje va en un topper (letrero de pie) si el cliente lo pidió o si el
-  // postre solo lo admite así
-  if (diseno.dedicatoria !== '' && mensajeVaEnTopper(tipo, mensajeEnTopper)) {
-    diseno.topper = diseno.dedicatoria;
-    diseno.dedicatoria = '';
   }
   return diseno;
 }
@@ -1139,28 +1133,6 @@ function aplicarSeleccion(diseno: DisenoPastel, caracteristicas: CaracteristicaP
   }
 }
 
-
-/**
- * RF-3 · Paso 3: dónde puede ir el mensaje de cada postre (casilla «Ponerlo en un topper»):
- * - 'elegir': escrito sobre el postre (o en una placa) o en un topper, como quiera el cliente
- *   (pasteles, pays, cheesecakes y roscas)
- * - 'topper': solo en un topper (gelatinas, porque no se puede escribir sobre ellas, y los postres
- *   chicos: cupcakes, galletas, brownies, donas y macarons)
- */
-export function lugarDelMensaje(tipo: TipoPostre3d): 'elegir' | 'topper' {
-  if (tipo === 'gelatina' || tipo === 'cupcake' || esPiezaChica(tipo)) {
-    return 'topper';
-  }
-  return 'elegir';
-}
-
-// ¿El mensaje se pone en un topper? (lo elegido por el cliente, si el postre deja elegir)
-export function mensajeVaEnTopper(tipo: TipoPostre3d, elegidoTopper: boolean): boolean {
-  if (lugarDelMensaje(tipo) === 'topper') {
-    return true;
-  }
-  return elegidoTopper;
-}
 
 // Base de cada postre si el cliente no elige una
 function baseNormal(tipo: TipoPostre3d): TipoBase {

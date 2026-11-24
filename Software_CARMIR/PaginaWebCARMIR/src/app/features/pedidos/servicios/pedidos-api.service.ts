@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ArticuloCarrito } from '../../../core/modelos/articulo-carrito';
-import { comentarioConTopper } from '../../catalogo/utilidades/reglas-configuracion';
 import { ContactoConsulta } from '../utilidades/validacion-pedido';
 import {
   ArticuloSolicitud,
@@ -81,8 +80,7 @@ export function articulosParaApi(articulos: ArticuloCarrito[]): ArticuloSolicitu
       opciones: opciones,
       cantidad: articulo.cantidad,
       dedicatoria: articulo.dedicatoria,
-      // Si el mensaje va en un topper se avisa en las indicaciones
-      comentario: comentarioConTopper(articulo.comentario, articulo.dedicatoria, articulo.mensajeEnTopper === true),
+      comentario: articulo.comentario.trim(),
       precioUnitario: articulo.precioUnitario,
     });
   }

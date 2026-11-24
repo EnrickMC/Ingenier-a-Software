@@ -1,5 +1,5 @@
 import { CaracteristicaPersonalizable, OpcionPersonalizable } from '../modelos/catalogo.models';
-import { aparienciaDeOpcion, baseDeOpcion, capasDelPostre, colorDeNombre, colorDeOpcion, disenoDesdeSeleccion, lugarDelMensaje, moldeDeOpcion, nombreCapa, textoTopper, tipoDePostre, tipoDeCaracteristica } from './diseno-pastel';
+import { aparienciaDeOpcion, baseDeOpcion, capasDelPostre, colorDeNombre, colorDeOpcion, disenoDesdeSeleccion, esPorCapa, moldeDeOpcion, nombreCapa, textoTopper, tipoDePostre, tipoDeCaracteristica } from './diseno-pastel';
 import { puntosForma, rutaSvgForma } from './formas-pastel';
 
 // Opción con los datos mínimos (el precio no importa para el 3D)
@@ -79,17 +79,11 @@ describe('Diseño del pastel 3D', function () {
     expect(diseno.topper).toBe('');
   });
 
-  it('el mensaje va en un topper si el cliente lo pide; en gelatinas y postres chicos siempre', function () {
-    const pastel = disenoDesdeSeleccion([], [], 'Pasteles', 'Pastel', 'Hola', true);
-    expect(pastel.topper).toBe('Hola');
-    expect(pastel.dedicatoria).toBe('');
-    const gelatina = disenoDesdeSeleccion([], [], 'Gelatinas', 'Gelatina', 'Hola', false);
-    expect(gelatina.topper).toBe('Hola');
-    const galletas = disenoDesdeSeleccion([], [], 'Galletas', 'Galletas', 'Hola', false);
-    expect(galletas.topper).toBe('Hola');
-    expect(galletas.dedicatoria).toBe('');
-    expect(lugarDelMensaje('cupcake')).toBe('topper');
-    expect(lugarDelMensaje('rosca')).toBe('elegir');
+  it('el mensaje se escribe sobre el postre; los carteles son decoraciones ya hechas', function () {
+    const pastel = disenoDesdeSeleccion([], [], 'Pasteles', 'Pastel', 'Hola');
+    expect(pastel.topper).toBe('');
+    expect(pastel.dedicatoria).toBe('Hola');
+    expect(textoTopper('Cartel Feliz cumpleaños')).toBe('Feliz cumpleaños');
   });
 
   it('cada unidad elegida de una decoración es una pieza en el 3D', function () {
@@ -306,24 +300,25 @@ describe('Diseño del pastel 3D', function () {
     expect(maximo).toBeLessThanOrEqual(15.01);
     expect(rutaSvgForma('corazon', 48).startsWith('M')).toBe(true);
   });
-  it('cada capa del pastel tiene su propio sabor, cobertura y decoración', function () {
+  it('cada capa del pastel tiene su decoración; el sabor y la cobertura son del pastel completo', function () {
+    expect(esPorCapa(sabor)).toBe(false);
+    expect(esPorCapa(cobertura)).toBe(false);
+    expect(esPorCapa(decoracion)).toBe(true);
     const seleccion = [
       { idOpcion: 13, cantidad: 1 },
-      // Base: chocolate con ganache y velas
-      { idOpcion: 5, cantidad: 1, capa: 1 }, { idOpcion: 15, cantidad: 1, capa: 1 }, { idOpcion: 8, cantidad: 2, capa: 1 },
-      // Capa 2: vainilla con fondant y flores
-      { idOpcion: 4, cantidad: 1, capa: 2 }, { idOpcion: 14, cantidad: 1, capa: 2 }, { idOpcion: 10, cantidad: 3, capa: 2 },
-      // Superior: vainilla con betún de la casa
-      { idOpcion: 4, cantidad: 1, capa: 3 }, { idOpcion: 16, cantidad: 1, capa: 3 },
+      // Todo el pastel: chocolate con ganache
+      { idOpcion: 5, cantidad: 1 }, { idOpcion: 15, cantidad: 1 },
+      // Base: velas; Capa 2: flores
+      { idOpcion: 8, cantidad: 2, capa: 1 }, { idOpcion: 10, cantidad: 3, capa: 2 },
     ];
     const diseno = disenoDesdeSeleccion(todas, seleccion, 'Pasteles', 'Pastel', '');
     expect(diseno.pisos).toBe(3);
     expect(diseno.porCapas).toBe(true);
     expect(diseno.capas.length).toBe(3);
     expect(diseno.capas[0].cobertura).toBe('ganache');
-    expect(diseno.capas[1].cobertura).toBe('lisa');
-    expect(diseno.capas[2].cobertura).toBe('betun');
-    expect(diseno.capas[0].colorBizcocho).not.toBe(diseno.capas[1].colorBizcocho);
+    expect(diseno.capas[1].cobertura).toBe('ganache');
+    expect(diseno.capas[2].cobertura).toBe('ganache');
+    expect(diseno.capas[0].colorBizcocho).toBe(diseno.capas[1].colorBizcocho);
     expect(diseno.capas[1].decoraciones.flores).toBe(3);
     expect(diseno.capas[2].decoraciones.flores).toBe(0);
     // Las velas se suman (siempre van hasta arriba)

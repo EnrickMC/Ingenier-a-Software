@@ -69,7 +69,7 @@
             </div>
 
             <div class="campo" [class.con-error]="errorDe('correo') !== ''">
-              <label for="correo">Correo (opcional)</label>
+              <label for="correo">Correo</label>
               <input
                 #campoCorreo
                 id="correo"
@@ -80,9 +80,10 @@
                 [value]="correo()"
                 (input)="cambiarCampo('correo', campoCorreo.value)"
                 [attr.aria-invalid]="errorDe('correo') !== ''"
-                aria-describedby="error-correo"
+                aria-describedby="ayuda-correo error-correo"
               />
-              <!-- RF-10 · Excepción paso 5: correo con formato inválido. -->
+              <span class="ayuda" id="ayuda-correo">Ahí te llega la confirmación de tu pedido. También sirve para consultarlo.</span>
+              <!-- RF-10 · Excepción paso 5: correo faltante o con formato inválido. -->
               @if (errorDe('correo') !== '') {
                 <span class="mensaje-error" id="error-correo">{{ errorDe('correo') }}</span>
               }

@@ -106,21 +106,13 @@
           }
 
           <!-- RF-3 · Pasos 3 y 4: una tarjeta por característica en su orden de muestra. En los pasteles de 2 o más
-               pisos, Sabor, Cobertura, Color de cobertura y Decoración se juntan en el editor de capas. -->
+               pisos, la Decoración se elige en el editor de capas. El sabor, la cobertura y su color se eligen una sola vez
+               para todo el pastel (si fueran por capa el precio se cobraría varias veces). -->
           @for (bloque of bloques(); track $index) {
             @if (bloque.esCapas) {
               <section class="editor-capas panel" aria-labelledby="titulo-capas">
                 <div class="encabezado-capas">
-                  <h2 id="titulo-capas" class="titulo-paso">Sabores y coberturas por capa</h2>
-                  <!-- RF-3 · Paso 4: copia el sabor, la cobertura y el color de esta capa a las demás. -->
-                  <button
-                    type="button"
-                    class="boton-texto aplicar-todas"
-                    title="Copia el sabor, la cobertura y el color de esta capa a las demás"
-                    (click)="aplicarATodas()"
-                  >
-                    Aplicar a todas
-                  </button>
+                  <h2 id="titulo-capas" class="titulo-paso">Decoración por capa</h2>
                 </div>
                 <!-- RF-3 · Paso 4: una pestaña por capa (de abajo hacia arriba). -->
                 <div class="pestanas-capas" role="tablist" aria-label="Capas del pastel">
@@ -139,7 +131,7 @@
                   }
                 </div>
                 <p class="ayuda-capas">
-                  Estás eligiendo la capa <strong>{{ textoCapa(capaActiva()) }}</strong>. Las velas y el topper siempre van
+                  Estás eligiendo la capa <strong>{{ textoCapa(capaActiva()) }}</strong>. Las velas y los carteles siempre van
                   hasta arriba.
                 </p>
                 @for (caracteristica of caracteristicasDeCapa(); track caracteristica.idCaracteristica) {
@@ -209,23 +201,7 @@
                 (input)="cambiarDedicatoria(campoDedicatoria.value)"
               ></textarea>
               <span class="ayuda">{{ dedicatoria().length }} de {{ largoDedicatoria }} caracteres. Sin emojis.</span>
-              <!-- RF-3 · Paso 3: dónde va el mensaje (casilla «Ponerlo en un topper»): el cliente elige, o el postre solo admite una forma -->
-              @if (lugarMensaje() === 'elegir') {
-                <label class="casilla-topper">
-                  <input
-                    #casillaTopper
-                    type="checkbox"
-                    [checked]="mensajeEnTopper()"
-                    (change)="cambiarMensajeEnTopper(casillaTopper.checked)"
-                  />
-                  <span>
-                    Ponerlo en un topper
-                    <small>Letrero dorado de pie. Si no lo marcas, el mensaje se escribe sobre el postre.</small>
-                  </span>
-                </label>
-              } @else if (lugarMensaje() === 'topper') {
-                <span class="ayuda">En este postre el mensaje va en un topper (letrero dorado de pie).</span>
-              }
+              <!-- RF-3 · Paso 3: el mensaje se escribe sobre el postre. Los carteles ya hechos se eligen en Decoración. -->
               <!-- RF-3 · Excepción paso 6: la dedicatoria no cumple el largo o los caracteres; se conserva el texto. -->
               @if (errorDedicatoria() !== '') {
                 <span class="mensaje-error">{{ errorDedicatoria() }}</span>

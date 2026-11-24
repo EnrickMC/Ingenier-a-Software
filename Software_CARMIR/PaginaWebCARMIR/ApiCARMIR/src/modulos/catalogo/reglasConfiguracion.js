@@ -11,9 +11,10 @@
  *                     multiplicadorPresupuesto, multiplicadorIngredientes, seEscala, precioReferencia }
  *    precioReferencia = CostoReceta × MultiplicadorCosto (precio de la opción sin escalar)
  *
- * Capas (PostreOpcion.NumeroCapa): en un pastel de varios pisos el Sabor, la Cobertura, el Color
- * y la Decoración se eligen por capa. Una característica es «por capas» si alguna de sus opciones
- * trae capa 2 o más. Así:
+ * Capas (PostreOpcion.NumeroCapa): en un pastel de varios pisos solo la Decoración se elige por capa.
+ * El Sabor, la Cobertura y su Color se eligen una sola vez para todo el pastel (si vinieran en varias
+ * capas el precio se cobraría de más), así que una opción de ellas en la capa 2 o más se rechaza.
+ * Una característica es «por capas» si alguna de sus opciones trae capa 2 o más. Así:
  *  - Cada capa revisa por separado la selección única, el presupuesto y las exclusiones.
  *  - Precio: en las de selección única cada capa paga su parte (1 / número de capas con esa
  *    característica); en las de selección múltiple se suma lo de cada capa.
@@ -30,6 +31,45 @@ function buscarCaracteristica(caracteristicas, idCaracteristica) {
     }
   }
   return null;
+}
+
+// Quita acentos y pasa a minúsculas («Decoración» → «decoracion»)
+function normalizar(texto) {
+  return String(texto).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function contieneAlguna(texto, palabras) {
+  for (let i = 0; i < palabras.length; i++) {
+    if (texto.indexOf(palabras[i]) >= 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/*
+ * ¿La característica se puede elegir en cada capa? Solo la Decoración (adornos, toppings, extras).
+ * Se reconoce por el nombre, en el mismo orden que la página (diseno-pastel.ts, tipoDeCaracteristica):
+ * pisos, tamaño, forma, relleno, color, base, frosting, sabor y cobertura van antes y NO son por capa.
+ */
+function sePuedeElegirPorCapa(nombre) {
+  const texto = normalizar(nombre);
+  if (contieneAlguna(texto, ['piso', 'nivel', 'tamano', 'porcion', 'personas', 'medida', 'pieza', 'cantidad'])) {
+    return false;
+  }
+  if (contieneAlguna(texto, ['forma', 'figura', 'molde', 'relleno', 'color'])) {
+    return false;
+  }
+  if (contieneAlguna(texto, ['base', 'plato', 'presentacion', 'charola', 'soporte', 'pedestal', 'stand'])) {
+    return false;
+  }
+  if (contieneAlguna(texto, ['frosting', 'copete', 'remolino', 'sabor', 'bizcocho', 'pan'])) {
+    return false;
+  }
+  if (contieneAlguna(texto, ['cobertura', 'betun', 'acabado', 'cubierta', 'glaseado', 'fondant', 'decorado exterior'])) {
+    return false;
+  }
+  return contieneAlguna(texto, ['decoracion', 'adorno', 'topping', 'extra']);
 }
 
 // Capa de una opción elegida (sin capa = 1, la Base)
@@ -188,6 +228,28 @@ function validar(caracteristicas, exclusiones, elegidas) {
     }
   }
 
+  // 1b. Solo la Decoración se elige por capa: el sabor, la cobertura y lo demás van una vez para todo el pastel
+  let erroresDeCapa = 0;
+  for (let i = 0; i < elegidas.length; i++) {
+    if (capaDe(elegidas[i]) <= 1) {
+      continue;
+    }
+    const deCapa = buscarCaracteristica(caracteristicas, elegidas[i].opcion.idCaracteristica);
+    if (deCapa !== null && !sePuedeElegirPorCapa(deCapa.nombre)) {
+      // RF-3 · Excepción paso 6: el sabor o la cobertura vienen en otra capa (inflaría el precio).
+      errores.push({
+        tipo: 'capa',
+        idCaracteristica: deCapa.idCaracteristica,
+        mensaje: '«' + deCapa.nombre + '» se elige una sola vez para todo el pastel, no por capa',
+        capa: capaDe(elegidas[i])
+      });
+      erroresDeCapa = erroresDeCapa + 1;
+    }
+  }
+  if (erroresDeCapa > 0) {
+    return errores;
+  }
+
   // 2. Reglas de cada característica (las que son por capas se revisan en cada capa)
   const porCapas = caracteristicasPorCapas(elegidas);
   const capas = capasElegidas(elegidas);
@@ -289,5 +351,6 @@ module.exports = {
   factorPresupuesto: factorPresupuesto,
   factorEscala: factorEscala,
   capaDe: capaDe,
+  sePuedeElegirPorCapa: sePuedeElegirPorCapa,
   redondear: redondear
 };

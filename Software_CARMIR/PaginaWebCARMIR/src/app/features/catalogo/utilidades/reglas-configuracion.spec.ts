@@ -1,8 +1,7 @@
 import { CaracteristicaPersonalizable, Exclusion, OpcionPersonalizable } from '../modelos/catalogo.models';
 import {
   calcularPrecio,
-  comentarioConTopper,
-  largoComentarioPermitido,
+  LARGO_DEDICATORIA,
   motivoExclusion,
   puntosTotales,
   validarCantidad,
@@ -83,13 +82,10 @@ describe('reglas de configuración', function () {
     expect(validarCantidad(3)).toBe('');
   });
 
-  it('si el mensaje va en un topper se avisa en las indicaciones', function () {
-    expect(comentarioConTopper(' Sin nuez ', 'Hola', true)).toBe('Mensaje en topper. Sin nuez');
-    expect(comentarioConTopper('', 'Hola', true)).toBe('Mensaje en topper.');
-    expect(comentarioConTopper('Sin nuez', '', true)).toBe('Sin nuez');
-    expect(comentarioConTopper('Sin nuez', 'Hola', false)).toBe('Sin nuez');
-    expect(largoComentarioPermitido('Hola', true)).toBe(255 - 19);
-    expect(largoComentarioPermitido('Hola', false)).toBe(255);
+  it('el mensaje en el postre admite hasta 30 caracteres', function () {
+    expect(LARGO_DEDICATORIA).toBe(30);
+    expect(validarTexto('a'.repeat(30), 'La dedicatoria', LARGO_DEDICATORIA)).toBe('');
+    expect(validarTexto('a'.repeat(31), 'La dedicatoria', LARGO_DEDICATORIA)).toContain('30');
   });
   it('por capas: cada capa paga su parte del sabor y suma sus decoraciones', function () {
     // Tres capas iguales cuestan lo mismo que una sola elección

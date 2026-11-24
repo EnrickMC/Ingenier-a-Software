@@ -118,44 +118,52 @@ prueba.test('por capas: cada capa paga su parte del sabor y la decoración se su
   assert.strictEqual(reglas.calcularPrecio(igual, caracteristicas), reglas.calcularPrecio([igual[0], igual[1]], caracteristicas));
 });
 
-prueba.test('por capas: selección única, presupuesto y exclusiones se revisan en cada capa', function () {
+prueba.test('por capas: el sabor no se elige por capa; la decoración sí (con sus exclusiones por capa)', function () {
   const chocolate = opcion(5, 2, 'Chocolate', 94.5, true, 1, 1, 1);
-  // Un sabor por capa es correcto
-  const bien = reglas.validar(caracteristicas, exclusiones, [
+  // Solo la decoración se puede elegir por capa
+  assert.strictEqual(reglas.sePuedeElegirPorCapa('Decoración'), true);
+  assert.strictEqual(reglas.sePuedeElegirPorCapa('Sabor'), false);
+  assert.strictEqual(reglas.sePuedeElegirPorCapa('Cobertura'), false);
+  assert.strictEqual(reglas.sePuedeElegirPorCapa('Color de cobertura'), false);
+  // Un sabor en la capa 2 se rechaza (el precio se cobraría de más)
+  const saborEnCapa = reglas.validar(caracteristicas, exclusiones, [
     { opcion: chico, cantidad: 1, capa: 1 },
     { opcion: vainilla, cantidad: 1, capa: 1 },
-    { opcion: tresLeches, cantidad: 1, capa: 2 }
-  ]);
-  assert.strictEqual(bien.length, 0, JSON.stringify(bien));
-  // Dos sabores en la capa 2 no
-  const dos = reglas.validar(caracteristicas, [], [
-    { opcion: chico, cantidad: 1, capa: 1 },
-    { opcion: vainilla, cantidad: 1, capa: 1 },
-    { opcion: vainilla, cantidad: 1, capa: 2 },
     { opcion: chocolate, cantidad: 1, capa: 2 }
   ]);
-  assert.strictEqual(dos.length, 1);
-  assert.strictEqual(dos[0].tipo, 'seleccionUnica');
-  assert.strictEqual(dos[0].capa, 2);
-  assert.match(dos[0].mensaje, /de la capa 2/);
-  // Tres leches y vainilla en la MISMA capa sí chocan
-  const chocan = reglas.validar(caracteristicas, exclusiones, [
-    { opcion: chico, cantidad: 1, capa: 1 },
-    { opcion: vainilla, cantidad: 1, capa: 1 },
-    { opcion: vainilla, cantidad: 1, capa: 2 },
-    { opcion: tresLeches, cantidad: 1, capa: 2 }
+  assert.strictEqual(saborEnCapa.length, 1);
+  assert.strictEqual(saborEnCapa[0].tipo, 'capa');
+  assert.strictEqual(saborEnCapa[0].idCaracteristica, 2);
+  assert.match(saborEnCapa[0].mensaje, /una sola vez/);
+  // Sabor para todo el pastel y una decoración en cada capa es correcto
+  const bien = reglas.validar(caracteristicas, exclusiones, [
+    { opcion: chico, cantidad: 1 },
+    { opcion: vainilla, cantidad: 1 },
+    { opcion: flores, cantidad: 1, capa: 1 },
+    { opcion: liston, cantidad: 1, capa: 2 }
   ]);
-  let hayExclusion = false;
-  for (let i = 0; i < chocan.length; i++) {
-    if (chocan[i].tipo === 'exclusion') {
-      hayExclusion = true;
-    }
-  }
-  assert.ok(hayExclusion);
+  assert.strictEqual(bien.length, 0, JSON.stringify(bien));
+  // Listón y flores se excluyen solo si están en la MISMA capa
+  const exclusionDecoracion = [{ idOpcion: 11, idOpcionExcluida: 12, nombreOpcion: 'Listón', nombreOpcionExcluida: 'Flores de azúcar', motivo: 'Prueba' }];
+  const separadas = reglas.validar(caracteristicas, exclusionDecoracion, [
+    { opcion: chico, cantidad: 1 },
+    { opcion: vainilla, cantidad: 1 },
+    { opcion: liston, cantidad: 1, capa: 1 },
+    { opcion: flores, cantidad: 1, capa: 2 }
+  ]);
+  assert.strictEqual(separadas.length, 0, JSON.stringify(separadas));
+  const juntas = reglas.validar(caracteristicas, exclusionDecoracion, [
+    { opcion: chico, cantidad: 1 },
+    { opcion: vainilla, cantidad: 1 },
+    { opcion: liston, cantidad: 1, capa: 2 },
+    { opcion: flores, cantidad: 1, capa: 2 }
+  ]);
+  assert.strictEqual(juntas.length, 1);
+  assert.strictEqual(juntas[0].tipo, 'exclusion');
   // El presupuesto de decoración es por capa: 2 listones en una capa (4 puntos) se pasa de 3
   const presupuesto = reglas.validar(caracteristicas, [], [
     { opcion: chico, cantidad: 1, capa: 1 },
-    { opcion: vainilla, cantidad: 1, capa: 1 },
+    { opcion: vainilla, cantidad: 1 },
     { opcion: liston, cantidad: 1, capa: 1 },
     { opcion: liston, cantidad: 2, capa: 2 }
   ]);

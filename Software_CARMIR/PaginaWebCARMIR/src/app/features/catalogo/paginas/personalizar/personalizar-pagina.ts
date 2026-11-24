@@ -17,11 +17,8 @@ import {
   disenoDesdeSeleccion,
   esGelatina,
   esPorCapa,
-  lugarDelMensaje,
-  mensajeVaEnTopper,
   nombreCapa,
   seleccionDeCapa,
-  tipoDePostre,
 } from '../../pastel3d/diseno-pastel';
 import { VisorPastel3d } from '../../pastel3d/visor-pastel3d/visor-pastel3d';
 import {
@@ -35,10 +32,9 @@ import {
 import { CatalogoApiService } from '../../servicios/catalogo-api.service';
 import {
   CANTIDAD_MAXIMA,
+  LARGO_COMENTARIO,
   LARGO_DEDICATORIA,
   buscarOpcion,
-  comentarioConTopper,
-  largoComentarioPermitido,
   calcularPrecio,
   puntosTotales,
   redondear,
@@ -97,8 +93,6 @@ export default class PersonalizarPagina implements OnInit {
   protected readonly seleccion = signal<OpcionElegida[]>([]);
   protected readonly cantidad = signal(1);
   protected readonly dedicatoria = signal('');
-  // RF-3 · Paso 3: casilla «Ponerlo en un topper» (solo cuenta en los postres que dejan elegir)
-  protected readonly mensajeEnTopper = signal(false);
   protected readonly comentario = signal('');
 
   // Errores y resultado
@@ -219,7 +213,6 @@ export default class PersonalizarPagina implements OnInit {
     this.seleccion.set(this.acomodarCapas(seleccion));
     this.cantidad.set(articulo.cantidad);
     this.dedicatoria.set(articulo.dedicatoria);
-    this.mensajeEnTopper.set(articulo.mensajeEnTopper === true);
     this.comentario.set(articulo.comentario);
     // Si algo ya no existe se marcan de una vez los errores para que el cliente lo corrija
     // RF-8 · Excepción paso 6: opciones que ya no están disponibles; se marcan para que el cliente las cambie.
@@ -254,34 +247,9 @@ export default class PersonalizarPagina implements OnInit {
     return esGelatina(datos.producto.nombreCategoria, datos.producto.nombre);
   }
 
-  // Dónde puede ir el mensaje de este postre: 'elegir' (casilla) o 'topper' (gelatinas y postres chicos)
-  lugarMensaje(): 'elegir' | 'topper' {
-    return lugarDelMensaje(this.tipoPostre());
-  }
-
-  // ¿El mensaje de este postre va en un topper? (lo elegido en la casilla o lo único que admite el postre)
-  mensajeVaEnTopper(): boolean {
-    return mensajeVaEnTopper(this.tipoPostre(), this.mensajeEnTopper());
-  }
-
-  private tipoPostre() {
-    const datos = this.datos();
-    if (datos === null) {
-      return tipoDePostre('', '');
-    }
-    return tipoDePostre(datos.producto.nombreCategoria, datos.producto.nombre);
-  }
-
-  // Lo que le queda al cliente para las indicaciones (el aviso del topper también ocupa lugar)
+  // Largo máximo de las indicaciones especiales
   largoComentario(): number {
-    return largoComentarioPermitido(this.dedicatoria(), this.mensajeVaEnTopper());
-  }
-
-  // RF-5 · Paso 5: el cliente marca o desmarca «Ponerlo en un topper»; el 3D se vuelve a armar.
-  cambiarMensajeEnTopper(marcada: boolean): void {
-    this.mensajeEnTopper.set(marcada);
-    // El largo permitido de las indicaciones cambia con la casilla
-    this.errorComentario.set(validarTexto(this.comentario(), 'El comentario', this.largoComentario()));
+    return LARGO_COMENTARIO;
   }
 
   // RF-3 · Paso 4 / RF-5 · Pasos 2 y 3: el modelo 3D refleja lo elegido (no cambia el precio ni las reglas).
@@ -293,7 +261,7 @@ export default class PersonalizarPagina implements OnInit {
       categoria = datos.producto.nombreCategoria;
       nombre = datos.producto.nombre;
     }
-    return disenoDesdeSeleccion(this.caracteristicas(), this.seleccion(), categoria, nombre, this.dedicatoria(), this.mensajeEnTopper());
+    return disenoDesdeSeleccion(this.caracteristicas(), this.seleccion(), categoria, nombre, this.dedicatoria());
   }
 
   // RF-3 · Paso 4: el precio se recalcula con cada cambio de la selección.
@@ -368,7 +336,7 @@ export default class PersonalizarPagina implements OnInit {
     return this.capas() > 1 && esPorCapa(caracteristica);
   }
 
-  // Características del editor de capas (Sabor, Cobertura, Color de cobertura, Decoración)
+  // Características del editor de capas (solo la Decoración; el sabor y la cobertura son del pastel completo)
   caracteristicasDeCapa(): CaracteristicaPersonalizable[] {
     const lista: CaracteristicaPersonalizable[] = [];
     for (const caracteristica of this.caracteristicas()) {
@@ -412,34 +380,6 @@ export default class PersonalizarPagina implements OnInit {
     this.capaActiva.set(capa);
   }
 
-  /**
-   * RF-3 · Paso 4: «Aplicar a todas»: el sabor, la cobertura y el color de la capa abierta se copian a las
-   * demás capas (las decoraciones de cada capa se quedan como están).
-   */
-  aplicarATodas(): void {
-    const activa = this.capaActiva();
-    const deLaActiva: OpcionElegida[] = [];
-    const nueva: OpcionElegida[] = [];
-    for (const elegida of this.seleccion()) {
-      const unica = this.esUnicaPorCapa(elegida);
-      if (unica && capaDe(elegida) === activa) {
-        deLaActiva.push(elegida);
-      }
-      if (!unica || capaDe(elegida) === activa) {
-        nueva.push(elegida);
-      }
-    }
-    for (let capa = 1; capa <= this.capas(); capa++) {
-      if (capa === activa) {
-        continue;
-      }
-      for (const elegida of deLaActiva) {
-        nueva.push({ idOpcion: elegida.idOpcion, cantidad: elegida.cantidad, capa: capa });
-      }
-    }
-    this.cambiarSeleccion(nueva);
-  }
-
   // Característica de una opción elegida (null si ya no existe)
   private caracteristicaDe(elegida: OpcionElegida): CaracteristicaPersonalizable | null {
     for (const caracteristica of this.caracteristicas()) {
@@ -452,7 +392,7 @@ export default class PersonalizarPagina implements OnInit {
     return null;
   }
 
-  // ¿La opción es de una característica por capa de selección única (sabor, cobertura, color)?
+  // ¿La opción es de una característica por capa de selección única (una decoración que se elige una vez por capa)?
   private esUnicaPorCapa(elegida: OpcionElegida): boolean {
     const caracteristica = this.caracteristicaDe(elegida);
     return caracteristica !== null && esPorCapa(caracteristica) && !caracteristica.seleccionMultiple;
@@ -462,7 +402,8 @@ export default class PersonalizarPagina implements OnInit {
    * Ordena las capas de una selección:
    *  - Si el postre no tiene varias capas, todo queda en la Base (sin número de capa).
    *  - Se quitan las opciones de capas que ya no existen (por ejemplo, de 3 pisos a 2).
-   *  - Una capa nueva empieza con el sabor, la cobertura y el color de la capa de abajo.
+   *  - Lo que ya no se elige por capa (sabor, cobertura, color) se queda solo en la Base, una vez.
+   *  - Una capa nueva empieza con la decoración de selección única de la capa de abajo.
    */
   private acomodarCapas(seleccion: OpcionElegida[]): OpcionElegida[] {
     const datos = this.datos();
@@ -719,7 +660,7 @@ export default class PersonalizarPagina implements OnInit {
         opciones: this.seleccion(),
         cantidad: this.cantidad(),
         dedicatoria: this.dedicatoria().trim(),
-        comentario: comentarioConTopper(this.comentario(), this.dedicatoria(), this.mensajeVaEnTopper()),
+        comentario: this.comentario().trim(),
         precioMostrado: this.precioUnitario(),
       });
       await this.revisarCotizacion(cotizacion);
@@ -787,7 +728,6 @@ export default class PersonalizarPagina implements OnInit {
       opciones: this.opcionesParaCarrito(),
       cantidad: this.cantidad(),
       dedicatoria: this.dedicatoria().trim(),
-      mensajeEnTopper: this.mensajeVaEnTopper(),
       comentario: this.comentario().trim(),
       precioUnitario: cotizacion.precioUnitario,
     };
